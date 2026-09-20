@@ -13,7 +13,7 @@ import math
 import json
 import time
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Sample MOIL Mining Locations & Coordinates
 MINING_LOCATIONS = [
@@ -26,12 +26,25 @@ MINING_LOCATIONS = [
 
 def fetch_open_meteo_telemetry(lat: float, lng: float):
     """Fetch live meteorological telemetry from Open-Meteo Satellite API."""
-    url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current=temperature_2m,relative_humidity_2m,precipitation&daily=precipitation_sum&past_days=14&hourly=soil_moisture_0_to_1cm"
+    # `past_days` alone still returns forecast days in `daily`, so the previous
+    # sum of the whole array was not a 14-day past total. Request both windows
+    # explicitly and split on today's date.
+    url = (
+        f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}"
+        f"&current=temperature_2m,relative_humidity_2m,precipitation"
+        f"&daily=precipitation_sum&past_days=14&forecast_days=1"
+        f"&hourly=soil_moisture_0_to_1cm&timezone=UTC"
+    )
     try:
         resp = requests.get(url, timeout=5)
         if resp.status_code == 200:
             data = resp.json()
-            daily_rain = [r or 0.0 for r in data.get("daily", {}).get("precipitation_sum", [])]
+            daily = data.get("daily", {})
+            days = daily.get("time", [])
+            sums = [r or 0.0 for r in daily.get("precipitation_sum", [])]
+            today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            split = next((i for i, t in enumerate(days) if t >= today), len(days))
+            daily_rain = sums[max(0, split - 14):split]
             rain_14d = round(sum(daily_rain), 1)
             soil_moist = round((data.get("hourly", {}).get("soil_moisture_0_to_1cm", [0.35])[0] or 0.35) * 100, 1)
             temp_c = data.get("current", {}).get("temperature_2m", 32.0)
@@ -53,8 +66,13 @@ def process_location_flood_risk(location: dict):
 
     rain_14d, soil_moist, temp_c, humidity, daily_rain = fetch_open_meteo_telemetry(lat, lng)
 
-    # Risk Classification Thresholds
-    is_critical = rain_14d > 95.0 or soil_moist > 40.0 or lat >= 21.5
+    # Risk classification thresholds.
+    #
+    # The condition previously included `or lat >= 21.5`, which forced CRITICAL
+    # for every location north of that parallel regardless of the weather —
+    # a geographic constant presented as a hydrological assessment. Risk is now
+    # a function of observed rainfall and soil moisture only.
+    is_critical = rain_14d > 95.0 or soil_moist > 40.0
     risk_level = "CRITICAL" if is_critical else ("MODERATE" if rain_14d > 50.0 else "NOMINAL")
     scada_status = "ENGAGED" if is_critical else "STANDBY"
 

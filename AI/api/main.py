@@ -2,9 +2,16 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import numpy as np
+import pandas as pd
 import joblib
 import json
 import os
+import sys
+
+# Single source of truth for the feature vector. This endpoint previously built
+# its own 6-element vector while the model expects 10, so every call 500'd.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "scripts"))
+from features import FEATURE_COLS, build_feature_row, bucket  # noqa: E402
 
 app = FastAPI(
     title="NAKSHATRA-X Prospectivity AI Engine",
@@ -83,33 +90,47 @@ def predict_single(coords: CoordinatesPayload):
     model = load_model()
     if model is None:
         raise HTTPException(status_code=503, detail="ML Model not yet trained.")
-    
+
     lat, lng = coords.lat, coords.lng
-    elev = 280 + 60 * np.sin(lat * 0.7) + 40 * np.cos(lng * 0.9)
-    slope = 4 + 3 * abs(np.sin(lat * 1.1)) + 2 * abs(np.cos(lng * 1.3))
-    iron = round(0.42 + 0.18 * np.sin(lat * 0.6) + 0.12 * np.cos(lng * 0.7), 4)
-    ferrous = round(0.31 + 0.14 * np.sin(lng * 0.8) + 0.10 * np.cos(lat * 0.5), 4)
-    
-    faults = [(21.9, 79.6), (21.4, 79.3), (22.0, 80.1), (20.9, 79.5)]
-    dist = round(min(np.sqrt((lat - f[0]) ** 2 + (lng - f[1]) ** 2) for f in faults) * 111, 3)
-    rain = round(float(abs(np.sin(lat * 1.5) * 1.8 + np.cos(lng * 1.2) * 1.2)), 2)
-    
-    feat_vector = np.array([[iron, ferrous, elev, slope, dist, rain]])
-    prob = float(model.predict_proba(feat_vector)[0][1])
-    
-    confidence = "high" if prob >= 0.75 else ("medium" if prob >= 0.45 else "low")
-    
+
+    # Terrain/climate inputs. These are deterministic analytical stand-ins for
+    # the NASA POWER values used during training; they are flagged as such in
+    # the response rather than presented as measurements.
+    elev = float(280 + 60 * np.sin(lat * 0.7) + 40 * np.cos(lng * 0.9))
+    soil_moisture = float(min(0.9, max(0.1, 0.45 + 0.15 * np.sin(lng * 1.1))))
+    temp_c = float(28 + 4 * np.sin(lat * 0.9))
+    rainfall_mm = float(abs(np.sin(lat * 1.5) * 1.8 + np.cos(lng * 1.2) * 1.2))
+
+    vector, feature_map = build_feature_row(
+        lat=lat, lng=lng, elevation_m=elev, soil_moisture=soil_moisture,
+        temp_c=temp_c, rainfall_mm=rainfall_mm,
+    )
+
+    # Predict from a named DataFrame so column order cannot silently drift from
+    # the order the model was fitted on.
+    X = pd.DataFrame([vector], columns=FEATURE_COLS)
+    prob = float(model.predict_proba(X)[0][1])
+    confidence = bucket(prob)
+
     return {
         "lat": lat,
         "lng": lng,
         "probability": round(prob, 4),
         "confidence": confidence,
-        "features": {
-            "iron_oxide_index": iron,
-            "ferrous_mineral_index": ferrous,
-            "elevation_m": round(elev, 2),
-            "slope_deg": round(slope, 2),
-            "dist_to_fault_km": dist,
-            "rainfall_mm": rain
-        }
+        "model": "random-forest-prospectivity-v1",
+        "features": {k: feature_map[k] for k in FEATURE_COLS},
+        "provenance": {
+            "is_synthetic": True,
+            "is_live": False,
+            "note": (
+                "Terrain and climate inputs are deterministic analytical stand-ins, "
+                "not measurements. Spectral features are proximity-derived proxies "
+                "affected by target leakage (see docs/INTEGRITY.md section 4); "
+                "the probability is not a calibrated geological estimate."
+            ),
+            "guardrail": (
+                "Surface indicators only. This does not detect subsurface ore and "
+                "is not a statutory reserve statement."
+            ),
+        },
     }
