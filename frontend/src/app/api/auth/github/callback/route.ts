@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { supabase } from '@/lib/supabase'
+import {
+  SESSION_COOKIE,
+  buildSession,
+  encodeSession,
+  requestIsHttps,
+  sessionCookieOptions,
+} from '@/lib/session'
 
 // GET: Handles GitHub OAuth Redirect Callback, Exchanges Token & Logs User In
 export async function GET(request: Request) {
@@ -12,6 +19,19 @@ export async function GET(request: Request) {
   if (errorParam || !code) {
     const loginUrl = new URL('/login', origin)
     loginUrl.searchParams.set('error', 'GitHub authentication was cancelled or failed.')
+    return NextResponse.redirect(loginUrl)
+  }
+
+  // CSRF protection: the `state` returned by GitHub must match the one this
+  // server issued and stored in an httpOnly cookie. Previously `state` was
+  // read from the query string and never checked, so a forged callback could
+  // log a victim into an attacker-controlled GitHub account.
+  const cookieJar = await cookies()
+  const expectedState = cookieJar.get('github_oauth_state')?.value
+  cookieJar.delete('github_oauth_state') // single use
+  if (!expectedState || !state || state !== expectedState) {
+    const loginUrl = new URL('/login', origin)
+    loginUrl.searchParams.set('error', 'Authentication state mismatch. Please start sign-in again.')
     return NextResponse.redirect(loginUrl)
   }
 
@@ -120,19 +140,28 @@ export async function GET(request: Request) {
       console.warn('[AUTH/GITHUB] Supabase profiles sync notice:', dbErr)
     }
 
-    // 5. Establish Server Session Cookie
-    const isHttps =
-      request.headers.get('x-forwarded-proto') === 'https' ||
-      process.env.NODE_ENV === 'production'
+    // 5. Establish signed, httpOnly server session. The role is assigned here
+    // by the server after GitHub verified the identity; it is not read from
+    // any client-supplied value.
+    const maxAge = 60 * 60 * 24 * 7
+    const session = buildSession({
+      id: userProfile.id,
+      email: userProfile.email,
+      full_name: userProfile.full_name,
+      avatar_url: userProfile.avatar_url,
+      role: 'operator',
+      provider: 'GitHub OAuth 2.0',
+      designation: 'GitHub Verified Specialist',
+      email_verified: true,
+      ttlSeconds: maxAge,
+    })
 
     const cookieStore = await cookies()
-    cookieStore.set('nx-operator-session', JSON.stringify(userProfile), {
-      httpOnly: false,
-      secure: isHttps,
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    })
+    cookieStore.set(
+      SESSION_COOKIE,
+      encodeSession(session),
+      sessionCookieOptions(requestIsHttps(request), maxAge)
+    )
 
     // Redirect to Dashboard upon successful login
     return NextResponse.redirect(new URL('/dashboard', origin))

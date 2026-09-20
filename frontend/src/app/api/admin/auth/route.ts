@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { supabase, supabaseAdmin } from '@/lib/supabase'
+import {
+  ADMIN_COOKIE,
+  buildAdmin,
+  encodeAdmin,
+  requestIsHttps,
+  sessionCookieOptions,
+} from '@/lib/session'
 
 // POST: Authenticate the Primary Administrator
 export async function POST(request: Request) {
@@ -42,34 +49,11 @@ export async function POST(request: Request) {
     })
 
     if (authError || !authData?.user) {
-      // Check emergency fallback code if needed
-      if (password === 'admin123' || password === 'goku@2006+W3lcom3@#8382') {
-        // Fallback authorization
-        const cookieStore = await cookies()
-        const isHttps =
-          request.headers.get('x-forwarded-proto') === 'https' ||
-          process.env.NODE_ENV === 'production'
-
-        cookieStore.set('admin_session', 'true', {
-          httpOnly: false,
-          secure: isHttps,
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 60 * 60 * 24 * 7,
-        })
-
-        return NextResponse.json({
-          success: true,
-          admin: {
-            email: targetEmail,
-            full_name: 'Chief Orbital Commander',
-            role: 'superadmin',
-          },
-        })
-      }
-
+      // No local password fallback. This block previously accepted two
+      // hardcoded passwords and granted superadmin without contacting Supabase,
+      // which was a complete authentication bypass.
       return NextResponse.json(
-        { error: authError?.message || 'Invalid administrator credentials.' },
+        { error: 'Invalid administrator credentials.' },
         { status: 401 }
       )
     }
@@ -86,37 +70,26 @@ export async function POST(request: Request) {
       )
     }
 
-    // 2. Set admin session cookies
+    // 2. Issue a signed administrator token. The `admin_session` cookie is a
+    // non-authoritative UI hint only — authorisation is decided solely by the
+    // signed token below (see lib/auth.ts).
+    const maxAge = 60 * 60 * 24 * 7
     const cookieStore = await cookies()
-    const isHttps =
-      request.headers.get('x-forwarded-proto') === 'https' ||
-      process.env.NODE_ENV === 'production'
+    const isHttps = requestIsHttps(request)
 
-    cookieStore.set('admin_session', 'true', {
-      httpOnly: false,
-      secure: isHttps,
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7,
-    })
-
+    cookieStore.set('admin_session', 'true', sessionCookieOptions(isHttps, maxAge))
     cookieStore.set(
-      'nx_admin_token',
-      JSON.stringify({
-        id: user.id,
-        email: user.email,
-        username: user.user_metadata?.username || 'commander',
-        full_name: user.user_metadata?.full_name || 'Chief Orbital Commander',
-        role: 'superadmin',
-        loginTime: Date.now(),
-      }),
-      {
-        httpOnly: true,
-        secure: isHttps,
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7,
-      }
+      ADMIN_COOKIE,
+      encodeAdmin(
+        buildAdmin({
+          id: user.id,
+          email: user.email || targetEmail,
+          username: user.user_metadata?.username,
+          full_name: user.user_metadata?.full_name || 'Administrator',
+          ttlSeconds: maxAge,
+        })
+      ),
+      sessionCookieOptions(isHttps, maxAge)
     )
 
     return NextResponse.json({
@@ -141,6 +114,6 @@ export async function POST(request: Request) {
 export async function DELETE() {
   const cookieStore = await cookies()
   cookieStore.delete('admin_session')
-  cookieStore.delete('nx_admin_token')
+  cookieStore.delete(ADMIN_COOKIE)
   return NextResponse.json({ success: true, message: 'Admin session terminated.' })
 }

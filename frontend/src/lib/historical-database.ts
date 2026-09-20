@@ -936,9 +936,16 @@ export function getCombinedHistoricalAndFutureData() {
       totalYearsRecorded: HISTORICAL_DATABASE_1977_2026.length, // Exactly 50 years (1977-2026)
       cumulativeProductionTonnes: cumulativeProduction,
       totalGsiCoreDrillLogs: totalDrillHoles,
-      currentReservesUNFC111: 58200000, // 58.2M Tonnes proved reserves 2026
-      targetReserves2040: 135800000,
-      historicalAccuracyPct: 99.4,
+      // Renamed from `currentReservesUNFC111`. Guardrail: Nakshatra-X does not
+      // produce statutory UNFC reserve figures, and presenting a number under
+      // a UNFC category implied a classification this project cannot make.
+      // This is an indicative resource-base figure for scale only.
+      indicativeResourceBaseTonnes: 58200000,
+      targetResourceBase2040Tonnes: 135800000,
+      // `historicalAccuracyPct: 99.4` removed: no backtest produced it. A real
+      // MAPE and interval coverage arrive with the Phase 4 rolling-origin
+      // backtest.
+      historicalAccuracyPct: null,
       recordAllTimeYear: 2023,
       recordProductionTonnes: 1756000,
       growthCagr15YearPct: 4.02,

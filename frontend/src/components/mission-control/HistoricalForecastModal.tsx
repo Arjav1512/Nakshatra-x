@@ -186,7 +186,7 @@ export default function HistoricalForecastModal() {
     setPredictionStep('Evaluating Exponential CAGR & Holt Trend Formula P(t) = P0 * (1+r)^t * M...')
     await new Promise((r) => setTimeout(r, 450))
 
-    setPredictionStep('Applying IMD Monsoon Rainfall Vulnerability & UNFC 111 Boundary Constraints...')
+    setPredictionStep('Applying rainfall vulnerability and resource-base boundary constraints...')
     await new Promise((r) => setTimeout(r, 400))
 
     const updated = computeDynamicPredictions({
@@ -442,9 +442,9 @@ export default function HistoricalForecastModal() {
                         <div className="text-[9px] font-mono text-slate-300">Exploratory Holes</div>
                       </div>
                       <div className="ios-glass-inset p-3 space-y-1 border border-white/10 rounded-2xl">
-                        <div className="text-[10px] font-mono text-slate-400 uppercase">UNFC 111 Reserves</div>
+                        <div className="text-[10px] font-mono text-slate-400 uppercase">Indicative Resource Base</div>
                         <div className="text-base font-bold text-[#00FF88] font-mono">
-                          {(summaryStats.currentReservesUNFC111 / 1000000).toFixed(1)}M T
+                          {(summaryStats.indicativeResourceBaseTonnes / 1000000).toFixed(1)}M T
                         </div>
                         <div className="text-[9px] font-mono text-[#00FF88]">Proved Balaghat Belt</div>
                       </div>
@@ -568,7 +568,7 @@ export default function HistoricalForecastModal() {
                           </div>
                         </div>
                         <div className="col-span-2">
-                          <span className="text-slate-400">UNFC 111 Proved Reserves:</span>
+                          <span className="text-slate-400">Indicative resource base:</span>
                           <div className="text-sm font-bold text-[#00FF88] mt-0.5">
                             {(selectedHistoryYear.unfc111ProvedReservesTonnes / 1000000).toFixed(2)} Million Tonnes
                           </div>
@@ -621,7 +621,7 @@ export default function HistoricalForecastModal() {
                       <div className="ios-glass-inset p-3 space-y-1 border border-white/10 rounded-2xl">
                         <div className="text-[10px] font-mono text-slate-400 uppercase">Target Reserves</div>
                         <div className="text-base font-bold text-[#FACC15] font-mono">135.8M T</div>
-                        <div className="text-[9px] font-mono text-slate-300">UNFC 111 Target</div>
+                        <div className="text-[9px] font-mono text-slate-300">Resource-base target</div>
                       </div>
                       <div className="ios-glass-inset p-3 space-y-1 border border-white/10 rounded-2xl">
                         <div className="text-[10px] font-mono text-slate-400 uppercase">Import Reliance</div>
@@ -806,7 +806,7 @@ export default function HistoricalForecastModal() {
                           </div>
                         </div>
                         <div>
-                          <span className="text-slate-400">UNFC 111 Reserves:</span>
+                          <span className="text-slate-400">Indicative resource base:</span>
                           <div className="text-sm font-bold text-[#00FF88] mt-0.5">
                             {(selectedFutureYear.projectedProvedReservesTonnes / 1000000).toFixed(1)}M Tonnes
                           </div>
@@ -948,12 +948,12 @@ export default function HistoricalForecastModal() {
                       </div>
                     </div>
 
-                    {/* UNFC Reserve Expansion Formula */}
+                    {/* Resource-base expansion formula */}
                     <div className="ios-glass-inset p-4 rounded-2xl border border-white/10 bg-[#0A1322] space-y-2">
                       <div className="flex items-center gap-2">
                         <BookOpen className="w-4 h-4 text-[#38BDF8]" />
                         <h5 className="text-xs font-mono font-bold text-white uppercase">
-                          UNFC 111 Proved Reserves Extension Formula
+                          Indicative Resource-Base Extension Formula
                         </h5>
                       </div>
                       <div className="p-2.5 rounded-xl bg-black/50 border border-white/10 text-center font-mono text-sm text-[#38BDF8]">

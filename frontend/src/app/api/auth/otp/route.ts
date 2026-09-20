@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import {
+  SESSION_COOKIE,
+  buildSession,
+  encodeSession,
+  requestIsHttps,
+  sessionCookieOptions,
+} from '@/lib/session'
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import { supabase, supabaseAdmin } from '@/lib/supabase'
@@ -154,7 +161,9 @@ export async function POST(request: Request) {
 
     // 1. ACTION: SEND VERIFICATION CODE
     if (action === 'send') {
-      const generatedCode = Math.floor(100000 + Math.random() * 900000).toString()
+      // Cryptographically secure: Math.random is predictable and must never
+      // generate an authentication credential.
+      const generatedCode = crypto.randomInt(100000, 1000000).toString()
       const expiresAt = Date.now() + 10 * 60 * 1000 // 10 minutes
 
       otpStore.set(normalizedEmail, {
@@ -217,7 +226,12 @@ export async function POST(request: Request) {
         }
       }
 
-      console.log(`[AUTH VERIFICATION] Code for ${normalizedEmail}: ${generatedCode} (delivered=${emailSent} via ${providerName})`)
+      if (process.env.NODE_ENV !== 'production') {
+        // Local development convenience only — never runs in a deployed build.
+        console.log(`[AUTH][dev] Code for ${normalizedEmail}: ${generatedCode}`)
+      } else {
+        console.log(`[AUTH] Code dispatched to ${normalizedEmail} (delivered=${emailSent} via ${providerName})`)
+      }
 
       return NextResponse.json({
         success: true,
@@ -226,8 +240,9 @@ export async function POST(request: Request) {
           : `Verification code generated for ${normalizedEmail}`,
         emailSent,
         provider: providerName,
-        // Always provide devCode as zero-lockout safety fallback
-        devCode: generatedCode,
+        // The verification code is never returned to the client. Returning it
+        // made the entire email-verification step bypassable by reading the
+        // HTTP response. It is delivered only over the email channel.
         expiresInSeconds: 600,
       })
     }
@@ -290,18 +305,27 @@ export async function POST(request: Request) {
         verified_at: new Date().toISOString(),
       }
 
-      const isHttps = request.headers.get('x-forwarded-proto') === 'https' ||
-                      process.env.NODE_ENV === 'production'
-
-      // Set cookie in Next.js cookie store
-      const cookieStore = await cookies()
-      cookieStore.set('nx-operator-session', JSON.stringify(userProfile), {
-        httpOnly: false,
-        secure: isHttps,
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7,
+      // Signed, httpOnly session. The role is assigned by the server after the
+      // emailed code was verified above; it is never taken from the request.
+      const maxAge = 60 * 60 * 24 * 7
+      const session = buildSession({
+        id: userProfile.id,
+        email: userProfile.email,
+        full_name: userProfile.full_name,
+        avatar_url: userProfile.avatar_url,
+        role: 'operator',
+        provider: 'Email Verification (Verified)',
+        designation: 'Mission Specialist',
+        email_verified: true,
+        ttlSeconds: maxAge,
       })
+
+      const cookieStore = await cookies()
+      cookieStore.set(
+        SESSION_COOKIE,
+        encodeSession(session),
+        sessionCookieOptions(requestIsHttps(request), maxAge)
+      )
 
       // Sync verified email user to Supabase Auth & profiles table
       try {

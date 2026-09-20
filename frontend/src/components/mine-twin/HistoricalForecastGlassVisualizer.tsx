@@ -295,9 +295,9 @@ export default function HistoricalForecastGlassVisualizer() {
         </div>
 
         <div className="p-4 rounded-2xl bg-[#081024]/80 border border-white/10 backdrop-blur-xl space-y-1 hover:border-[#A855F7]/40 transition-all">
-          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">UNFC 111 Reserves</span>
+          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Indicative Resource Base</span>
           <div className="text-lg font-black font-mono text-[#A855F7]">
-            {(summaryStats?.currentReservesUNFC111 / 1000000 || 58.2).toFixed(1)}M T
+            {((summaryStats?.indicativeResourceBaseTonnes ?? 58200000) / 1000000).toFixed(1)}M T
           </div>
           <span className="text-[9px] font-mono text-slate-400 block">&bull; Proved Ore Inventory</span>
         </div>
@@ -313,7 +313,7 @@ export default function HistoricalForecastGlassVisualizer() {
         <div className="p-4 rounded-2xl bg-[#081024]/80 border border-white/10 backdrop-blur-xl space-y-1 hover:border-cyan-400/40 transition-all">
           <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Model Precision</span>
           <div className="text-lg font-black font-mono text-cyan-300">
-            {summaryStats?.historicalAccuracyPct || 99.4}% Fit
+            {summaryStats?.historicalAccuracyPct != null ? `${summaryStats.historicalAccuracyPct}% Fit` : 'Not backtested'}
           </div>
           <span className="text-[9px] font-mono text-cyan-400 font-bold block">&bull; Audited IBM Variance</span>
         </div>
@@ -444,7 +444,7 @@ export default function HistoricalForecastGlassVisualizer() {
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
-                    <span className="text-[10px] font-mono text-slate-400 uppercase">UNFC 111 Reserves</span>
+                    <span className="text-[10px] font-mono text-slate-400 uppercase">Indicative Resource Base</span>
                     <div className="text-lg font-black font-mono text-[#A855F7]">
                       {(activeYearRecord.reservesTonnes / 1000000).toFixed(1)}M T
                     </div>
@@ -897,7 +897,7 @@ export default function HistoricalForecastGlassVisualizer() {
                   <th className="p-3">Year</th>
                   <th className="p-3">Type</th>
                   <th className="p-3">ROM Production (T)</th>
-                  <th className="p-3">Proved UNFC 111 (T)</th>
+                  <th className="p-3">Indicative resource base (T)</th>
                   <th className="p-3">Grade Spec</th>
                   <th className="p-3">Monsoon (mm)</th>
                   <th className="p-3">Milestone / Directive</th>

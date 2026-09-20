@@ -226,7 +226,7 @@ export const FEATURES_DATA: FeatureItem[] = [
     specifications: [
       { label: 'Dataset Span', value: '50 Years (1975 - 2025 Historical + 2026 - 2040 Forecast)' },
       { label: 'Data Granularity', value: 'Annual & Quarterly Production Statistics' },
-      { label: 'Forecasting Model', value: 'Prophet + ARIMA Vector Autoregression' },
+      { label: 'Forecasting Model', value: 'Deterministic additive drag model (nakshatra-drag-model-v1)' },
       { label: 'Historical Records', value: '1,200+ Verified MOIL & IBM Database Logs' },
     ],
     componentKey: 'historical-forecast',

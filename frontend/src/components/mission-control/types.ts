@@ -12,6 +12,10 @@ export type MineInfo = {
 }
 
 export type WeatherSignal = {
+  /** True only when fetched live from the upstream weather API this request. */
+  is_live?: boolean
+  /** True when the value came from the seeded synthetic generator. */
+  is_synthetic?: boolean
   rainfall_14d_mm: number
   soil_moisture_pct: number
   land_surface_temp_c: number
@@ -22,13 +26,16 @@ export type WeatherSignal = {
   live_precipitation_rate_mm_hr?: number
 }
 
+// `null` means "not available" — the UI must render an explicit absence
+// rather than a placeholder number. Several fields became nullable when
+// hardcoded grades, depths and confidence figures were removed.
 export type ReservePrediction = {
   model: string
-  confidence_score: number
-  category: 'PRIORITY_VALIDATION' | 'INVESTIGATE' | 'MONITOR'
+  confidence_score: number | null
+  category: 'PRIORITY_VALIDATION' | 'INVESTIGATE' | 'MONITOR' | 'DECISION_SUPPORT_ONLY'
   recommendation: string
-  estimated_ore_grade: string
-  prospect_depth_m: string
+  estimated_ore_grade: string | null
+  prospect_depth_m: string | null
   feature_contributions: Record<string, number>
   requires_drilling_validation: boolean
   spectral_reflectance_bands?: Array<{
@@ -74,7 +81,7 @@ export type RiskAnalysis = {
   rainfall_risk_score: number
   equipment_risk_score: number
   blasting_risk_score: number
-  stockpile_risk_score: number
+  stockpile_risk_score: number | null
   predicted_shortfall_tonnes: number
   live_downtime_hours: number
 }
@@ -101,11 +108,13 @@ export type ShapExplanation = {
 export type ActionOrder = {
   id: string
   title: string
-  type: 'DRAINAGE' | 'EQUIPMENT' | 'BLASTING' | 'DISPATCH' | 'MONITORING'
-  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'STANDARD'
+  type: 'DRAINAGE' | 'EQUIPMENT' | 'BLASTING' | 'DISPATCH' | 'MONITORING' | 'NONE'
+  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'STANDARD' | 'INFO'
   reason: string
   impact: string
-  status: 'PENDING_APPROVAL' | 'IN_PROGRESS' | 'DISPATCHED'
+  status: 'PENDING_APPROVAL' | 'IN_PROGRESS' | 'DISPATCHED' | 'PROPOSED' | 'INFO'
+  /** Why this action was proposed — rule, model term, or constraint check. */
+  basis?: string
   estimated_recovery_tonnes?: number
 }
 

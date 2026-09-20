@@ -60,9 +60,13 @@ CREATE TABLE IF NOT EXISTS public.db_users (
 -- 3. Configure Row Level Security (RLS)
 ALTER TABLE public.db_users ENABLE ROW LEVEL SECURITY;
 
+-- SELECT was previously `USING (true)`, which let any holder of the anon key
+-- read every row in db_users (emails, names, metadata). A user may now read
+-- only their own row; service-role keys bypass RLS for admin tooling.
 DROP POLICY IF EXISTS "Public profiles are viewable by authenticated users" ON public.db_users;
-CREATE POLICY "Public profiles are viewable by authenticated users" ON public.db_users
-  FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can view their own profile" ON public.db_users;
+CREATE POLICY "Users can view their own profile" ON public.db_users
+  FOR SELECT USING (auth.uid() = id);
 
 DROP POLICY IF EXISTS "Users can insert their own profile" ON public.db_users;
 CREATE POLICY "Users can insert their own profile" ON public.db_users
