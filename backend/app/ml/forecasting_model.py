@@ -1,7 +1,10 @@
 """
-Production Shortfall Forecasting Model (Prophet & XGBoost Hybrid).
-Forecasts 14-day and 30-day extraction trajectories, expected shortfalls,
-and disruption probabilities based on weather forecast and CMMS downtime.
+Production shortfall projection — bounded additive drag model.
+
+Deterministic arithmetic over rainfall, equipment downtime and blasting
+readiness. There is no Prophet or XGBoost model here and neither library is a
+dependency of this project; the module was previously named as though there
+were. Naming now matches what the code actually does.
 """
 from typing import Dict, Any, List
 import math
@@ -9,7 +12,7 @@ from datetime import datetime, timedelta
 
 class ProductionForecastingModel:
     def __init__(self):
-        self.model_name = "Prophet-XGBoost-Production-Forecaster-v1.8"
+        self.model_name = "nakshatra-drag-model-v1"
 
     def forecast_production(
         self,

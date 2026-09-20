@@ -142,7 +142,7 @@ export default function CausalMindMap({ mine, shap }: Props) {
             <span className="ios-badge ios-badge-copper">
               AI/ML MODULE 05
             </span>
-            <span className="text-xs font-mono text-[#8FA4B5]">TreeSHAP & Causal Dependency Graph</span>
+            <span className="text-xs font-mono text-[#8FA4B5]">Additive Driver Attribution & Dependency Graph</span>
           </div>
           <span className="text-xs font-mono text-[#E5C76B]">
             Primary Driver: {shap?.primary_driver || (isMP ? '14-Day Rainfall' : 'Blasting Lag')}
@@ -187,7 +187,7 @@ export default function CausalMindMap({ mine, shap }: Props) {
           <span className="text-[#E8F0F2] uppercase font-bold tracking-wider">
             SHAP Attribution Waterfall (Why AI Predicted Risk)
           </span>
-          <span className="text-[#8FA4B5]">TreeSHAP Values</span>
+          <span className="text-[#8FA4B5]">Driver Contributions (% of modelled drag)</span>
         </div>
 
         <div className="space-y-2.5">

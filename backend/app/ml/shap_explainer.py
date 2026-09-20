@@ -1,13 +1,16 @@
 """
-SHAP Explainability & Causal Root-Cause Attribution Model.
-Computes Shapley additive explanations for model decisions and formats
-causal dependencies across rainfall, road trafficability, cycle times, and shortfalls.
+Additive driver attribution for the drag model.
+
+Each term below is the model coefficient applied to its input, so the terms sum
+to the risk score exactly. This is an exact decomposition of a linear model —
+it is NOT a Shapley-value computation, and the `shap` library is not a
+dependency of this project. The class was previously named as though it were.
 """
 from typing import Dict, Any, List
 
 class ShapExplainer:
     def __init__(self):
-        self.model_name = "TreeSHAP-KernelExplainer-v1.4"
+        self.model_name = "additive-driver-attribution-v1"
 
     def compute_shap_breakdown(
         self,

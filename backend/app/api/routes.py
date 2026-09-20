@@ -44,12 +44,13 @@ def health():
         "competition": "Smart India Hackathon 2026",
         "problem_id": "26009",
         "organization": "MOIL Ltd. / Ministry of Steel",
+        # Names must match code that actually runs. Prophet, XGBoost and SHAP
+        # are not dependencies of this project and are not used anywhere.
         "models_active": [
-            "XGBoost Reserve Hotspot Classifier v2.1",
-            "Prophet-XGBoost Production Forecaster v1.8",
-            "Multi-Factor Shortfall Risk Scorer v1.4",
-            "Prescriptive Action Optimizer v2.0",
-            "TreeSHAP Explainability Kernel v1.4"
+            "random-forest-prospectivity-v1 (scikit-learn RandomForestClassifier)",
+            "nakshatra-drag-model-v1 (deterministic additive drag model)",
+            "additive-driver-attribution-v1 (exact linear decomposition)",
+            "scipy-linprog-blend-v1 (SciPy HiGHS linear program)"
         ],
         "telemetry_sources": ["Copernicus Sentinel-2 L2A", "NASA POWER Daily Meteorology", "USGS Landsat-8"]
     }

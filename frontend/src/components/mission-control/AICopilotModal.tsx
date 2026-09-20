@@ -199,7 +199,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
         {
           id: `act-confirm-${Date.now()}`,
           sender: 'assistant',
-          text: `✅ **Borehole Kriging Synced**: UNFC 111 3D block reserve locked in system memory.`,
+          text: `**Note**: this build does not compute kriged block models or UNFC reserve classes. Prospectivity output is decision-support only.`,
           timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
         },
       ])

@@ -84,7 +84,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['ai', 'models', 'random', 'forest', 'xgboost', 'accuracy', 'shap', 'explainability', 'kriging', 'prophet', 'algorithms'],
     question: 'Which AI and ML models power NAKSHATRA-X?',
     answer:
-      "Our 4-Engine AI Stack includes:\n1. 3D Ordinary Kriging: Spatial grade interpolation from 10.8k core drill logs with uncertainty variance bounds.\n2. Random Forest (200 trees): Surface spectral alteration classification with 98.7% accuracy (0.995 ROC-AUC).\n3. SciPy Simplex Solver: Real-time cost-optimal stockpile blending.\n4. XGBoost + Prophet + TreeSHAP: 50-year historical MOIL trend analysis and explainable 2040 production forecasts.",
+      "The methods actually implemented are:\n1. Random Forest (scikit-learn) for surface prospectivity scoring. Reported accuracy is under revision: the original training features were derived from distance to known mines, which leaks the label, so the previously quoted figure was not meaningful.\n2. SciPy linear programming (HiGHS) for cost-optimal stockpile blending — this is a genuine optimiser and returns infeasible when a spec cannot be met.\n3. A deterministic additive drag model for production shortfall, with an exact additive attribution of its drivers.\nThere is no Prophet, XGBoost, SHAP or kriging engine in this project, and no core drill log dataset.",
   },
   {
     id: 'k7',
@@ -128,7 +128,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['tech', 'stack', 'frontend', 'backend', 'database', 'languages', 'nextjs', 'fastapi', 'postgis'],
     question: 'What is the complete technology stack of NAKSHATRA-X?',
     answer:
-      "Architecture breakdown:\n• Frontend: Next.js 14, React 18, TailwindCSS, Three.js 3D Canvas, Web Speech API (Voice AI in Hindi/Marathi)\n• Backend: FastAPI (Python 3.10) for spatial math, Node.js API Gateway, Paho-MQTT & PyModbus for SCADA pump relays\n• Database: PostgreSQL + PostGIS (geospatial), TimescaleDB (sensor telemetry), SQLite (local edge cache), Redis\n• AI/ML: PyKrige, SciPy Optimize, Scikit-Learn, XGBoost, Prophet, GDAL/Rasterio.",
+      "Architecture breakdown:\n• Frontend: Next.js 14, React 18, TailwindCSS, Three.js 3D canvas\n• Backend: FastAPI (Python) plus Next.js route handlers\n• Database: SQLite for local development; Supabase/PostgreSQL for auth and profiles\n• AI/ML: scikit-learn and SciPy. There is no MQTT/Modbus SCADA integration, no TimescaleDB and no PostGIS in this codebase.",
   },
   {
     id: 'k12',
@@ -180,7 +180,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['ml studio', 'evaluator', 'training', 'xgboost', 'prophet', 'confusion matrix', 'roc auc'],
     question: 'What can I do in the ML Studio (Page 2 /evaluator)?',
     answer:
-      "The ML Studio allows geologists and engineers to inspect live model performance: Random Forest (98.7% accuracy, 0.995 ROC-AUC), XGBoost + Prophet 14-day production forecasts, TreeSHAP feature attribution (rainfall 34.2%, fault distance 28.1%), and confusion matrix validation against 10.8k core drill logs.",
+      "The ML Studio is a visualisation surface, not a live training console. Model metrics shown come from the stored evaluation artefacts of the prospectivity model; the 14-day production view comes from the deterministic drag model, and the driver breakdown is an exact additive decomposition of that model rather than a Shapley approximation.",
   },
   {
     id: 'k18',

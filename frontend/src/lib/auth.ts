@@ -1,4 +1,10 @@
 import { cookies } from 'next/headers'
+import {
+  ADMIN_COOKIE,
+  SESSION_COOKIE,
+  decodeAdmin,
+  decodeSession,
+} from '@/lib/session'
 
 export interface UserProfile {
   id: string
@@ -11,65 +17,49 @@ export interface UserProfile {
   email_verified?: boolean
 }
 
+/**
+ * Verify and decode a session cookie.
+ *
+ * This previously JSON-parsed whatever the browser sent and trusted the
+ * `role` field inside it, so a forged cookie granted any role. It now
+ * requires a valid HMAC signature produced by this server.
+ */
 export function parseSessionCookie(rawCookie: string | undefined): UserProfile | null {
-  if (!rawCookie) return null
-
-  const candidates = [rawCookie]
-  try {
-    const decodedOnce = decodeURIComponent(rawCookie)
-    candidates.push(decodedOnce)
-    try {
-      candidates.push(decodeURIComponent(decodedOnce))
-    } catch {
-      // Ignore double decode error
-    }
-  } catch {
-    // Ignore single decode error
+  const session = decodeSession(rawCookie)
+  if (!session) return null
+  return {
+    id: session.id,
+    email: session.email,
+    full_name: session.full_name,
+    avatar_url: session.avatar_url || '',
+    role: session.role,
+    provider: session.provider,
+    designation: session.designation,
+    email_verified: !!session.email_verified,
   }
-
-  for (const str of candidates) {
-    try {
-      const parsed = typeof str === 'string' ? JSON.parse(str) : str
-      if (parsed && typeof parsed === 'object' && (parsed.id || parsed.email)) {
-        return {
-          id: parsed.id || `usr_${Date.now()}`,
-          email: parsed.email || 'operator@nakshatra-x.space',
-          full_name: parsed.full_name || parsed.name || 'Orbital Operator',
-          avatar_url: parsed.avatar_url || '',
-          role: parsed.role || 'operator',
-          provider: parsed.provider || 'Session Auth',
-          designation: parsed.designation || 'Mission Specialist',
-          email_verified: !!parsed.email_verified,
-        }
-      }
-    } catch {
-      // Try next candidate
-    }
-  }
-
-  return null
 }
 
 export async function getCurrentUser(): Promise<UserProfile | null> {
   try {
     const cookieStore = await cookies()
 
-    // 1. Check for authenticated operator session cookie
-    const sessionCookie = cookieStore.get('nx-operator-session')?.value
-    const user = parseSessionCookie(sessionCookie)
+    // 1. Signed operator session.
+    const user = parseSessionCookie(cookieStore.get(SESSION_COOKIE)?.value)
     if (user) return user
 
-    // 2. Check for admin token or admin session fallback
-    const adminToken = cookieStore.get('nx_admin_token')?.value
-    const adminUser = parseSessionCookie(adminToken)
-    if (adminUser) return adminUser
-
-    const isAdminSession = cookieStore.get('admin_session')?.value
-    if (isAdminSession === 'true') {
+    // 2. Signed administrator token.
+    //
+    // The previous implementation also granted `superadmin` whenever a cookie
+    // literally named `admin_session` had the value "true". httpOnly prevents
+    // scripts reading a cookie but not writing one, so that check could be
+    // satisfied from the browser console. Admin identity now requires a token
+    // signed by this server.
+    const admin = decodeAdmin(cookieStore.get(ADMIN_COOKIE)?.value)
+    if (admin) {
       return {
-        id: 'admin_commander_root',
-        email: 'admin@nakshatra-x.space',
-        full_name: 'Chief Orbital Commander',
+        id: admin.id,
+        email: admin.email,
+        full_name: admin.full_name,
         avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=admin&backgroundColor=050b14',
         role: 'superadmin',
         provider: 'Master Administration',
@@ -82,4 +72,14 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
   }
 
   return null
+}
+
+/** True only for a verified administrator token. */
+export async function requireAdmin(): Promise<boolean> {
+  try {
+    const cookieStore = await cookies()
+    return decodeAdmin(cookieStore.get(ADMIN_COOKIE)?.value) !== null
+  } catch {
+    return false
+  }
 }

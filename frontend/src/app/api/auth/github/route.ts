@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import crypto from 'crypto'
 
 // GET: Initiates GitHub OAuth Authorization Flow
 export async function GET(request: Request) {
@@ -18,7 +19,8 @@ export async function GET(request: Request) {
 
     const { searchParams, origin } = new URL(request.url)
     const redirectUri = `${origin}/api/auth/github/callback`
-    const state = Math.random().toString(36).substring(2, 15)
+    // Cryptographically secure CSRF token (Math.random is predictable).
+    const state = crypto.randomBytes(32).toString('base64url')
 
     // Store state in CSRF security cookie
     const cookieStore = await cookies()

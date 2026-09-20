@@ -27,7 +27,6 @@ export function LoginForm() {
   const [fullName, setFullName] = useState('')
   const [digits, setDigits] = useState<string[]>(['', '', '', '', '', ''])
   const [codeSent, setCodeSent] = useState(false)
-  const [backupCode, setBackupCode] = useState<string | null>(null)
   const [showBackup, setShowBackup] = useState(false)
 
   // UI State
@@ -77,7 +76,6 @@ export function LoginForm() {
       if (data.success) {
         setCodeSent(true)
         setResendCooldown(30)
-        setBackupCode(data.devCode || null)
 
         if (data.emailSent) {
           setSuccessNotice(`6-digit code sent to ${targetEmail}! Check your inbox.`)
@@ -597,32 +595,6 @@ export function LoginForm() {
             </span>
           </button>
 
-          {/* Verification Code Fallback Banner (Ensures any email can log in immediately) */}
-          {backupCode && (
-            <div className="pt-2">
-              <div className="p-3 rounded-2xl bg-gradient-to-r from-[#00FF88]/15 to-[#38BDF8]/15 border border-[#00FF88]/40 flex items-center justify-between text-xs font-mono shadow-[0_0_15px_rgba(0,255,136,0.15)]">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
-                    Instant Access Code:
-                  </span>
-                  <span className="text-white font-bold text-sm tracking-[0.25em] text-[#00FF88]">
-                    {backupCode}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const split = backupCode.split('')
-                    setDigits(split)
-                    executeVerification(backupCode)
-                  }}
-                  className="px-3 py-1.5 rounded-xl bg-[#00FF88] hover:bg-[#00FF88]/80 text-black font-bold text-[11px] font-mono transition-all cursor-pointer shadow-[0_0_10px_#00FF88]"
-                >
-                  Auto-Fill &amp; Log In ↵
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Divider */}

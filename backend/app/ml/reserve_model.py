@@ -1,14 +1,21 @@
 """
-XGBoost / Random Forest Reserve Hotspot Classifier for MOIL Manganese Exploration.
-Fuses multi-spectral surface indicators (NDVI, soil moisture, LST, SWIR band ratios)
-with historical lithology and borehole data to classify manganese reserve prospectivity.
+Heuristic surface-indicator prospectivity score.
+
+This is a hand-written weighted scoring function over surface indicators, not a
+trained classifier: the module imports only `math`. It was previously named
+"XGBoost / Random Forest Reserve Hotspot Classifier", which no code here
+supports. The trained scikit-learn model lives in AI/ and is the one to use for
+real predictions.
+
+Guardrail: surface indicators carry no subsurface information. Output is
+decision-support prioritisation for where to drill, never a reserve statement.
 """
 from typing import Dict, Any, List
 import math
 
 class ReserveHotspotModel:
     def __init__(self):
-        self.model_name = "XGBoost-Manganese-Reserve-Classifier-v2.1"
+        self.model_name = "heuristic-surface-indicator-score-v1"
         self.features = ["ndvi", "soil_moisture", "land_surface_temp", "swir_anomaly", "geological_prior"]
 
     def predict_reserve_hotspot(

@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 /**
  * NAKSHATRA-X Enterprise Security Suite
  * Comprehensive mitigation for the 7 Top Vulnerabilities of Vibe-Coded Apps:
@@ -160,7 +161,7 @@ const NONCE_WINDOW_MS = 5 * 60 * 1000 // 5-minute replay window
 
 export function generateSecurityNonce(): string {
   const timestamp = Date.now()
-  const randomStr = Math.random().toString(36).substring(2, 15)
+  const randomStr = crypto.randomBytes(16).toString('base64url')
   return `${timestamp}-${randomStr}`
 }
 
