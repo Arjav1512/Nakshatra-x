@@ -374,7 +374,15 @@ async def export_compliance_report(mine_id: int, db: Session = Depends(get_db)):
             "14d_rainfall_mm": weather["rainfall_14d_mm"],
             "reserve_prospectivity_confidence_pct": pred["confidence_score"],
             "estimated_ore_grade": pred["estimated_ore_grade"],
-            "unfc_reserve_category": "UNFC 111 (Proved Mineral Reserve)",
+            # Guardrail: this project does not produce statutory reserve
+            # classifications. The hardcoded "UNFC 111 (Proved Mineral Reserve)"
+            # here was a fabricated regulatory claim.
+            "reserve_classification": None,
+            "reserve_classification_note": (
+                "Not assigned. Decision-support output only; a UNFC class "
+                "requires a competent person's assessment, which this system "
+                "does not perform."
+            ),
         },
         "shortfall_reconciliation": {
             "planned_tonnes_14d": fc["total_planned_tonnes"],
