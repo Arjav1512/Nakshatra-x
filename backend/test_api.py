@@ -50,6 +50,31 @@ def test_full_pipeline():
     assert blend_res["success"] is True
     print(f"✓ Ore Blending Optimizer: Achieved {blend_res['blended_mn_grade_pct']}% Mn @ ₹{blend_res['avg_cost_per_tonne_inr']}/T")
 
+    # 6b. Blending optimiser must report INFEASIBLE honestly.
+    #
+    # No combination of the stockpiles below can reach 50% Mn — the richest is
+    # 46.2%, and a blend cannot exceed its best input. A solver that returns
+    # "success" here would be inventing a plan that cannot be executed, which
+    # is precisely the failure mode this test exists to catch.
+    infeasible_payload = {
+        "required_tonnes": 5000.0,
+        "target_mn_min": 50.0,          # unreachable
+        "target_p_max": 0.15,
+        "target_sio2_max": 6.5,
+        "stockpiles": [
+            {"name": "SP-1", "available_tonnes": 3200.0, "mn_grade_pct": 46.2, "p_pct": 0.11, "sio2_pct": 4.8, "cost_per_tonne_inr": 8200.0},
+            {"name": "SP-2", "available_tonnes": 4500.0, "mn_grade_pct": 37.5, "p_pct": 0.16, "sio2_pct": 7.2, "cost_per_tonne_inr": 5400.0},
+        ]
+    }
+    res = client.post("/api/v1/optimize-blending", json=infeasible_payload)
+    assert res.status_code == 200, f"Infeasible blend request errored: {res.text}"
+    infeasible_res = res.json()
+    assert infeasible_res["success"] is False, (
+        "Optimiser claimed success for an unsatisfiable spec "
+        f"(50% Mn from a 46.2% max input): {infeasible_res}"
+    )
+    print(f"✓ Blend Infeasibility Honesty: correctly reported infeasible — {infeasible_res.get('message')}")
+
     # 7. Real Case 2: Core Drill Borehole 3D Spatial Estimation
     borehole_payload = {
         "mine_id": 1,
@@ -61,7 +86,10 @@ def test_full_pipeline():
     res = client.post("/api/v1/analyze-borehole-drill", json=borehole_payload)
     assert res.status_code == 200, f"Borehole analysis failed: {res.text}"
     borehole_res = res.json()
-    print(f"✓ Core Drill Spatial Kriging: {borehole_res['total_estimated_in_situ_tonnes']} Tonnes @ {borehole_res['weighted_avg_mn_pct']}% Mn ({borehole_res['unfc_classification']})")
+    print(f"✓ Core Drill Spatial Kriging: {borehole_res['total_estimated_in_situ_tonnes']} Tonnes @ {borehole_res['weighted_avg_mn_pct']}% Mn ({borehole_res['grade_band']})")
+    # Guardrail: no statutory reserve class may be emitted.
+    assert "unfc_classification" not in borehole_res, "Statutory UNFC class must not be returned"
+    assert borehole_res.get("classification_note"), "Grade band must carry its non-statutory note"
 
     # 8. Real Case 3: Operational Alert Dispatcher
     alert_payload = {

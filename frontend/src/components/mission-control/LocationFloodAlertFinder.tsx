@@ -87,7 +87,9 @@ export default function LocationFloodAlertFinder({ onSelectMine }: Props) {
     setIsLoading(true)
     setErrorMsg(null)
     try {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,precipitation&daily=precipitation_sum&past_days=14&hourly=soil_moisture_0_to_1cm`
+      // `past_days` alone still returns forecast days in `daily`; request both
+      // windows explicitly so the caller can split past from forecast.
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,precipitation&daily=precipitation_sum&past_days=14&forecast_days=1&hourly=soil_moisture_0_to_1cm&timezone=UTC`
       const res = await fetch(url)
       
       let rain14d = lat >= 21.5 ? 124.5 : 88.0

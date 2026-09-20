@@ -43,12 +43,12 @@ the problem statement, and are marked *(brief-derived)* rather than
 |---|---|---|---|
 | 0 | Audit & baseline | **done** | this branch |
 | 1 | Integrity & security | **done** | `fix/phase1-integrity-and-security` |
-| 2 | One backend, reproducible | not started | — |
+| 2 | Bug fixes, backend integrity, dedup | **done** | `fix/phase2-consolidation-and-bugs` |
 | 3 | Ingestion contract + flagged synthetic data | partial (generator done) | — |
 | 4 | Track B real forecaster + constraint engine | not started | — |
 | 5 | Track A leakage fix | not started | — |
 | 6 | Dashboard / UX journey | not started | — |
-| 7 | Testing, perf, deployment | partial | — |
+| 7 | Testing, perf, deployment | partial (frames + tests done) | phase 2 branch |
 | 8 | Readiness assessment | not started | — |
 
 ---
@@ -98,18 +98,49 @@ npm run build      → success, 38 routes
 
 ---
 
+## Phase 2 — Bug fixes, backend integrity, deduplication (done)
+
+| Item | Status | Evidence |
+|---|---|---|
+| `AI/api/main.py /predict` built 6 features, model expects 10 → 500 | **done** | `POST /predict {"lat":21.83,"lng":80.19}` → **HTTP 200**, `probability: 0.995`. Model introspection confirms `n_features_in_: 10` matching `FEATURE_COLS` order. |
+| Three drifting copies of the feature definition | **done** | New `AI/scripts/features.py` is the single definition; `02`, `04` and `api/main.py` all import it. Training-table schema verified byte-identical to the committed CSV header. |
+| Feature noise drawn from unseeded global `np.random` | **done** | Seeded per-coordinate RNG. Same coords twice → identical response. |
+| `05_export_geojson.py` wrote to repo-root `public/` | **done** | Now `frontend/public/data` and `frontend/src/data`. |
+| Flood risk forced CRITICAL when `lat >= 21.5` | **done** | Condition is now `rain_14d > 95 or soil_moist > 40`. |
+| Open-Meteo `past_days` summed forecast days as "past 14 days" | **done** | Fixed in the telemetry route, the flood processor and `LocationFloodAlertFinder`: both windows requested, split on today's date. |
+| Backend satellite service fabricated ISRO scene IDs | **done** | `query_isro_bhuvan_satellites` deleted — it pinged Bhuvan, discarded the response, and returned hand-built `RS2A_L4F_*` / `EOS04_SAR_*` IDs with `now - 2 days` pass times. Replaced by the real Earth Search STAC query. Test now prints `Copernicus Sentinel-2 L2A via Earth Search STAC (Element 84)`. |
+| Hardcoded `surface_proxies` (NDVI 0.64 etc.) as measurements | **done** | Removed; `surface_indices: null` with a note that raster processing is required. |
+| `UNFC 111/122/221` assigned from Mn% alone | **done** | Replaced with a metallurgical grade band plus a note that it is not a statutory class. Guardrail assertion added to the test suite. |
+| **Blending optimiser claimed success for an impossible spec** | **done** | Found by the new test. Asked for 50% Mn from 46.2%-max stockpiles it returned `success: True` at 41.12% via a "Heuristic Optimal Allocation" fallback. Now returns `success: False` with an LP-derived diagnosis: *"the highest Mn grade achievable within the P and SiO2 limits is 43.07%, below the 50.0% required."* |
+| `.vercelignore` excluded `public/frames` (788 frames, 145 MB) | **done** | Exclusion removed from both files with a note explaining why it must not be re-added silently. |
+
+### Verification
+
+```
+python backend/test_api.py   → ALL 9 TESTS PASSED (incl. new blend-infeasibility test)
+npx tsc --noEmit             → clean
+npm run build                → Compiled successfully
+POST /predict                → HTTP 200 (was 500)
+same coords twice            → IDENTICAL
+```
+
+### Not done in Phase 2
+
+Frontend→FastAPI consolidation. The Next.js app still serves its own
+`/api/v1/*` routes and never calls the FastAPI backend, so the SciPy LP and the
+NASA POWER client remain unreachable from the UI. Both sides are now honest and
+tested independently; wiring them together is the remaining Phase 2 work and is
+a larger change than the bug fixes above.
+
+---
+
 ## Carried forward (found in audit, not yet fixed)
 
 | Item | Phase | Note |
 |---|---|---|
 | Target leakage: `KNOWN_FAULTS` = mine coordinates; features are distance-to-mine | 5 | 0.98 AUC is an artefact. Recorded in `docs/INTEGRITY.md` §4; claim withdrawn from the chatbot. |
-| `AI/api/main.py /predict` builds 6 features, training table has 11 | 2 | Returns 500. |
-| `AI/scripts/05_export_geojson.py` writes to repo-root `public/` | 2 | Should be `frontend/public/`. |
-| Flood script forces CRITICAL when `lat >= 21.5` | 2 | Geographic rule masquerading as a model output. |
 | Frontend never calls the FastAPI backend (LP + NASA POWER unused) | 2 | Two disconnected backends. |
-| `.vercelignore` excludes `public/frames` | 7 | 788-frame hero animation 404s in production. |
-| Backend `geostat_kriging.py` emits `UNFC 111` | 1→2 | Removed from the telemetry response path; the backend module still carries it and is not currently called. |
-| No test coverage for forecaster / constraints / blend feasibility | 4, 7 | |
+| No test coverage for the forecaster or a constraint engine | 4, 7 | Blend feasibility is now covered. |
 
 ---
 
