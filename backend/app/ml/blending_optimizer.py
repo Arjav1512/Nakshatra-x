@@ -84,43 +84,105 @@ def optimize_ore_blend(
     )
 
     if not res.success:
-        # Fallback heuristic ratio if tight constraint
+        # INFEASIBLE.
+        #
+        # This branch previously ran a pro-rata heuristic that ignored the
+        # grade constraints and returned success: True. Asked for 50% Mn from
+        # stockpiles peaking at 46.2%, it answered "success" with a 41.1% blend
+        # — proposing a plan that cannot physically meet the spec.
+        #
+        # Constraints are enforced, not negotiated. An unsatisfiable spec is
+        # reported as unsatisfiable, with a diagnosis of what IS achievable so
+        # the planner can relax the right constraint.
         total_avail = sum(avail)
         if total_avail == 0:
-            return {"success": False, "message": "Zero available stockpile inventory"}
+            return {
+                "success": False,
+                "solver_status": "Infeasible",
+                "message": "Zero available stockpile inventory",
+            }
+        if total_avail < target_tonnes:
+            return {
+                "success": False,
+                "solver_status": "Infeasible",
+                "message": (
+                    f"Insufficient inventory: {round(total_avail, 1)} t available "
+                    f"against a {round(target_tonnes, 1)} t requirement."
+                ),
+                "diagnostics": {"available_tonnes": round(total_avail, 1)},
+            }
 
-        blend_plan = []
-        achieved_mn = 0.0
-        achieved_p = 0.0
-        achieved_sio2 = 0.0
-        total_cost = 0.0
+        # Diagnose: what is the best Mn grade reachable while still honouring
+        # the contaminant limits? Maximising Mn == minimising -Mn.
+        diag = linprog(
+            c=[-g for g in mn_grades],
+            A_ub=[p_pcts, sio2_pcts],
+            b_ub=[target_p_max * target_tonnes, target_sio2_max * target_tonnes],
+            A_eq=A_eq,
+            b_eq=b_eq,
+            bounds=bounds,
+            method="highs",
+        )
 
-        for s in stockpiles:
-            fraction = s["available_tonnes"] / total_avail
+        if diag.success:
+            max_mn = -float(diag.fun) / target_tonnes
+            message = (
+                f"Specification unsatisfiable: the highest Mn grade achievable "
+                f"within the P and SiO2 limits is {round(max_mn, 2)}%, below the "
+                f"{target_mn_min}% required."
+            )
+            diagnostics = {
+                "max_achievable_mn_pct": round(max_mn, 2),
+                "required_mn_pct": target_mn_min,
+                "binding_constraint": "target_mn_min",
+                "richest_stockpile_mn_pct": round(max(mn_grades), 2),
+            }
+        else:
+            message = (
+                "Specification unsatisfiable: the phosphorus and silica limits "
+                "cannot be met simultaneously by any blend of the available "
+                "stockpiles at the required tonnage."
+            )
+            diagnostics = {
+                "binding_constraint": "target_p_max / target_sio2_max",
+                "lowest_p_pct": round(min(p_pcts), 3),
+                "lowest_sio2_pct": round(min(sio2_pcts), 2),
+            }
+
+        # A best-effort blend is still useful to a planner, but it is returned
+        # under success: False and explicitly marked as not meeting spec, so it
+        # can never be mistaken for an executable plan.
+        best_effort = []
+        achieved_mn = achieved_p = achieved_sio2 = total_cost = 0.0
+        for st in stockpiles:
+            fraction = st["available_tonnes"] / total_avail
             tonnes = fraction * target_tonnes
-            cost = tonnes * s["cost_per_tonne_inr"]
-            achieved_mn += (tonnes / target_tonnes) * s["mn_grade_pct"]
-            achieved_p += (tonnes / target_tonnes) * s["p_pct"]
-            achieved_sio2 += (tonnes / target_tonnes) * s["sio2_pct"]
+            cost = tonnes * st["cost_per_tonne_inr"]
+            achieved_mn += fraction * st["mn_grade_pct"]
+            achieved_p += fraction * st["p_pct"]
+            achieved_sio2 += fraction * st["sio2_pct"]
             total_cost += cost
-            blend_plan.append({
-                "stockpile_name": s["name"],
+            best_effort.append({
+                "stockpile_name": st["name"],
                 "tonnes_allocated": round(tonnes, 1),
                 "allocation_pct": round(fraction * 100, 1),
                 "cost_inr": round(cost, 2),
             })
 
         return {
-            "success": True,
-            "solver_status": "Heuristic Optimal Allocation",
-            "target_tonnes": target_tonnes,
-            "blended_mn_grade_pct": round(achieved_mn, 2),
-            "blended_p_pct": round(achieved_p, 3),
-            "blended_sio2_pct": round(achieved_sio2, 2),
-            "total_blending_cost_inr": round(total_cost, 2),
-            "avg_cost_per_tonne_inr": round(total_cost / target_tonnes, 2) if target_tonnes else 0,
-            "blend_plan": blend_plan,
-            "shortfall_mitigation_tonnes": round(target_tonnes, 1),
+            "success": False,
+            "solver_status": "Infeasible",
+            "message": message,
+            "diagnostics": diagnostics,
+            "best_effort_blend": {
+                "meets_spec": False,
+                "warning": "Does NOT meet the requested specification. Not an executable plan.",
+                "blended_mn_grade_pct": round(achieved_mn, 2),
+                "blended_p_pct": round(achieved_p, 3),
+                "blended_sio2_pct": round(achieved_sio2, 2),
+                "avg_cost_per_tonne_inr": round(total_cost / target_tonnes, 2) if target_tonnes else 0,
+                "blend_plan": best_effort,
+            },
         }
 
     x = res.x

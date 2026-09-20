@@ -3,5 +3,10 @@ node_modules
 .git
 frontend/node_modules
 frontend/.next
-frontend/public/frames
-public/frames
+
+# NOTE: public/frames is intentionally NOT excluded.
+# Excluding it made the 788-frame hero animation 404 in production while
+# working locally. The frames are ~145 MB of static assets served from the CDN
+# (the 100 MB limit applies to serverless function bundles, not public/).
+# If deployment size becomes a problem, host the sequence externally or encode
+# it as a video rather than re-adding the exclusion silently.

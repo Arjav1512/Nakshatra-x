@@ -1,7 +1,7 @@
 """
 Geostatistical Core Drill Borehole Analysis & 3D Spatial Grade Estimation
 Inverse Distance Weighting (IDW) and Nearest-Neighbor interpolation for
-reserve tonnage and UNFC reserve classification.
+in-situ tonnage and a metallurgical grade band (not a statutory reserve class).
 """
 
 from typing import List, Dict, Any
@@ -53,16 +53,23 @@ def compute_borehole_spatial_model(
     avg_fe = sum(h["fe_pct"] * h["tonnes_proxy"] for h in valid_holes) / total_tonnes if total_tonnes else 0
     avg_sio2 = sum(h["sio2_pct"] * h["tonnes_proxy"] for h in valid_holes) / total_tonnes if total_tonnes else 0
 
-    # UNFC Classification (United Nations Framework Classification)
+    # Grade band, NOT a statutory classification.
+    #
+    # This previously emitted "UNFC 111 (Proved Mineral Reserve)" and similar,
+    # assigned purely from average Mn%. UNFC categories encode economic
+    # viability, feasibility-study status and geological confidence (the E-F-G
+    # axes) — they are not a function of ore grade, and this system has none of
+    # the inputs required to assign one. Emitting a statutory class here was a
+    # fabricated regulatory claim. Only the metallurgical grade band remains.
     if avg_mn >= 44.0:
         ore_type = "Ferro-Manganese Grade (High Value)"
-        unfc_code = "UNFC 111 (Proved Mineral Reserve)"
+        grade_band = "High grade (Mn >= 44%)"
     elif avg_mn >= 35.0:
         ore_type = "Silico-Manganese Grade (Medium Value)"
-        unfc_code = "UNFC 122 (Probable Mineral Reserve)"
+        grade_band = "Medium grade (35% <= Mn < 44%)"
     else:
         ore_type = "Blast Furnace Grade (Low/Blend Value)"
-        unfc_code = "UNFC 221 (Pre-Feasibility Mineral Resource)"
+        grade_band = "Low / blending grade (Mn < 35%)"
 
     # Confidence based on borehole spacing and recovery
     avg_recovery = sum(h["recovery_pct"] for h in valid_holes) / len(valid_holes)
@@ -76,7 +83,11 @@ def compute_borehole_spatial_model(
         "weighted_avg_fe_pct": round(avg_fe, 2),
         "weighted_avg_sio2_pct": round(avg_sio2, 2),
         "average_seam_thickness_m": round(avg_thickness, 2),
-        "unfc_classification": unfc_code,
+        "grade_band": grade_band,
+        "classification_note": (
+            "Metallurgical grade band only. This is NOT a UNFC or statutory "
+            "reserve classification, and must not be reported as one."
+        ),
         "economic_ore_category": ore_type,
         "geostatistical_confidence_pct": drill_confidence,
         "borehole_assay_breakdown": [
