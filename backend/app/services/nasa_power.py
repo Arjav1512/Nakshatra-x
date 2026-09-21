@@ -1,8 +1,18 @@
+"""
+NASA POWER daily meteorology client.
+
+PRD B-4: ingest rainfall, soil moisture, LST and NDVI, observed and forecast.
+This client covers the observed rainfall/temperature/humidity half.
+"""
 from datetime import date, timedelta
 import httpx
 from app.core.config import settings
+from app.core.synthetic import mine_stream, rnd
 
-async def fetch_weather_signal(latitude: float, longitude: float) -> dict:
+
+async def fetch_weather_signal(
+    latitude: float, longitude: float, mine_id: str = "unknown"
+) -> dict:
     end_date = date.today() - timedelta(days=2)
     start_date = end_date - timedelta(days=13)
     params = {
@@ -31,20 +41,35 @@ async def fetch_weather_signal(latitude: float, longitude: float) -> dict:
             temp_valid = [v for v in temperatures if v >= -50]
             hum_valid = [v for v in humidity if v >= 0]
 
+            # If the response carried no usable values there is nothing
+            # measured to report; fall through to the synthetic path rather
+            # than mixing invented constants into a "live" payload.
+            if not rain_valid and not temp_valid and not hum_valid:
+                raise ValueError("NASA POWER returned no valid values for this point")
+
             return {
-                "rainfall_14d_mm": round(sum(rain_valid), 2) if rain_valid else 14.2,
-                "avg_temperature_c": round(sum(temp_valid) / max(1, len(temp_valid)), 2) if temp_valid else 32.5,
-                "avg_humidity_pct": round(sum(hum_valid) / max(1, len(hum_valid)), 2) if hum_valid else 48.0,
+                "rainfall_14d_mm": round(sum(rain_valid), 2),
+                "avg_temperature_c": round(sum(temp_valid) / len(temp_valid), 2) if temp_valid else None,
+                "avg_humidity_pct": round(sum(hum_valid) / len(hum_valid), 2) if hum_valid else None,
                 "source": "NASA POWER Analysis-Ready API",
                 "is_live": True,
+                "is_synthetic": False,
+                "window_start": start_date.isoformat(),
+                "window_end": end_date.isoformat(),
             }
     except Exception as e:
-        # Fallback to high-confidence meteorological interpolation for MOIL Central/Western belt
+        # Degraded path. These values were previously fixed constants labelled
+        # "NASA POWER (Cached/Interpolated)" — nothing was cached and nothing
+        # was interpolated; they were invented. They are now a seeded draw,
+        # reproducible for a given mine and day, and labelled synthetic.
+        # PRD N-6: state staleness, never silently extrapolate.
+        s = mine_stream(mine_id, "nasa-power-fallback")
         return {
-            "rainfall_14d_mm": 18.5,
-            "avg_temperature_c": 33.2,
-            "avg_humidity_pct": 52.0,
-            "source": "NASA POWER (Cached/Interpolated)",
+            "rainfall_14d_mm": rnd(s.bounded_normal(70.0, 25.0, 0.0, 320.0), 2),
+            "avg_temperature_c": rnd(s.bounded_normal(31.0, 3.0, 12.0, 48.0), 2),
+            "avg_humidity_pct": rnd(s.bounded_normal(62.0, 12.0, 10.0, 100.0), 2),
+            "source": "SYNTHETIC FALLBACK — NASA POWER unreachable. Not observed data.",
             "is_live": False,
-            "note": str(e),
+            "is_synthetic": True,
+            "degraded_reason": str(e),
         }
