@@ -6,6 +6,7 @@ from app.schemas.mine import MineCreate, MineResponse
 from app.services.nasa_power import fetch_weather_signal
 from app.services.satellite import query_sentinel_stac
 from app.api.track_b import backtest_mine, forecast_mine, recommend_actions
+from app.api.telemetry import build_mine_telemetry
 from app.services.recommendations import generate_action_recommendations
 from app.ml.risk_model import calculate_shortfall_risk
 from app.ml.reserve_model import reserve_model
@@ -81,6 +82,21 @@ async def mine_environment(mine_id: int, db: Session = Depends(get_db)):
     if not mine:
         raise HTTPException(status_code=404, detail="Mine not found")
     return await fetch_weather_signal(mine.latitude, mine.longitude)
+
+@router.get("/mines/{mine_id}/telemetry")
+async def mine_telemetry(mine_id: int, db: Session = Depends(get_db)):
+    """
+    Consolidated dashboard telemetry (PRD D-1..D-4).
+
+    This is the authoritative source for the dashboard's headline numbers. The
+    Next.js route of the same path proxies here and holds no computation.
+    """
+    ensure_seed_mines(db)
+    mine = db.get(MineSite, mine_id)
+    if not mine:
+        raise HTTPException(status_code=404, detail="Mine not found")
+    return await build_mine_telemetry(mine)
+
 
 @router.get("/mines/{mine_id}/forecast")
 def track_b_forecast(mine_id: int, horizon_days: int = Query(14, ge=1, le=60),
