@@ -134,6 +134,25 @@ a larger change than the bug fixes above.
 
 ---
 
+## Phase 2.5 — UI wired to the FastAPI service layer (done)
+
+Architecture L4: FastAPI is the API/service layer. Before this, the Next.js
+routes computed headline numbers independently, so the real SciPy LP and NASA
+POWER client were unreachable from the UI.
+
+| Item | Status | Evidence |
+|---|---|---|
+| Telemetry computation consolidated into FastAPI | **done** | `backend/app/api/telemetry.py`; `GET /api/v1/mines/{id}/telemetry`. Next.js route is a 45-line proxy. |
+| Frontend blend heuristic replaced by the real LP | **done** | The Next.js route reported `solver_status: 'Simplex Optimal Solution Converged'` with no solver, always `success: true`, and clamped the achieved grade with `Math.max(targetMn, avgMn)`. Now proxies to SciPy HiGHS. |
+| End-to-end trace (PRD D-2/B-4) | **done** | 91.79 mm identical at UI → FastAPI → `/environment` → NASA POWER queried directly. |
+| Reproducibility (N-4) | **done** | All `provenance[*].value` and all forecast/risk scalars identical across calls; only timestamps differ. |
+| Python↔TS generator parity (N-4) | **done** | `backend/test_provenance_parity.py` — mulberry32 and FNV-1a match bit-for-bit. |
+| Graceful degradation (N-6) | **done** | Backend down → `served_by: nextjs-degraded-fallback`, synthetic flagged, 0 scenes, no recommendation issued; blend returns 503 `Unavailable` rather than a fake solve. |
+| NASA POWER fallback fabrication | **done** | Fixed constants labelled "NASA POWER (Cached/Interpolated)" replaced with a seeded, flagged draw. |
+| Third copy of the drag model | **done** | `data.ts` fallback delegates to the shared degraded builder; 237 → 83 lines. |
+
+---
+
 ## Carried forward (found in audit, not yet fixed)
 
 | Item | Phase | Note |
