@@ -1,0 +1,106 @@
+{
+  "model_version": "track-a-gbt-lomo-v1",
+  "validation": "leave-one-mine-out",
+  "lomo": {
+    "auc": 0.85,
+    "average_precision": 0.574,
+    "base_rate": 0.2,
+    "n_out_of_fold": 50,
+    "per_fold": [
+      {
+        "held_out_mine": "Balaghat",
+        "mine_score": 0.7928,
+        "n_negatives_in_fold": 4,
+        "percentile_vs_negatives": 1.0
+      },
+      {
+        "held_out_mine": "Bharweli",
+        "mine_score": 0.9225,
+        "n_negatives_in_fold": 4,
+        "percentile_vs_negatives": 1.0
+      },
+      {
+        "held_out_mine": "Ukwa",
+        "mine_score": 0.8325,
+        "n_negatives_in_fold": 4,
+        "percentile_vs_negatives": 1.0
+      },
+      {
+        "held_out_mine": "Tirodi",
+        "mine_score": 0.0181,
+        "n_negatives_in_fold": 4,
+        "percentile_vs_negatives": 0.5
+      },
+      {
+        "held_out_mine": "Dongri Buzurg",
+        "mine_score": 0.3306,
+        "n_negatives_in_fold": 4,
+        "percentile_vs_negatives": 1.0
+      },
+      {
+        "held_out_mine": "Chikla",
+        "mine_score": 0.3225,
+        "n_negatives_in_fold": 4,
+        "percentile_vs_negatives": 0.75
+      },
+      {
+        "held_out_mine": "Mansar",
+        "mine_score": 0.0228,
+        "n_negatives_in_fold": 4,
+        "percentile_vs_negatives": 0.75
+      },
+      {
+        "held_out_mine": "Kandri",
+        "mine_score": 0.1822,
+        "n_negatives_in_fold": 4,
+        "percentile_vs_negatives": 0.75
+      },
+      {
+        "held_out_mine": "Gumgaon",
+        "mine_score": 0.3884,
+        "n_negatives_in_fold": 4,
+        "percentile_vs_negatives": 1.0
+      },
+      {
+        "held_out_mine": "Beldongri",
+        "mine_score": 0.8268,
+        "n_negatives_in_fold": 4,
+        "percentile_vs_negatives": 0.75
+      }
+    ],
+    "auc_ci95": [
+      0.723,
+      0.95
+    ]
+  },
+  "ablation_lomo_auc": {
+    "all_features": 0.85,
+    "spectral_only": 0.6025,
+    "terrain_only": 0.665,
+    "slope_only": 0.5112
+  },
+  "random_split_auc_for_contrast": 0.8225,
+  "ablation_note": "Spectral indices alone reach only ~0.60 LOMO AUC, and slope alone is chance. Neither family carries the result on its own; the model is using combinations. With 10 positives the interval is wide, so the point estimate should not be quoted without it.",
+  "feature_importance": {
+    "elevation_m": 0.4057,
+    "iron_oxide_ratio": 0.1951,
+    "ndvi": 0.132,
+    "ferrous_ratio": 0.1023,
+    "clay_alteration_ratio": 0.0762,
+    "swir_ratio_norm": 0.0699,
+    "slope_deg": 0.0187
+  },
+  "features": [
+    "iron_oxide_ratio",
+    "ferrous_ratio",
+    "clay_alteration_ratio",
+    "ndvi",
+    "elevation_m",
+    "slope_deg",
+    "swir_ratio_norm"
+  ],
+  "n_samples": 50,
+  "honest_note": "LOMO AUC is the figure to quote. The previous pipeline reported ~0.98 from a random split over features derived from distance to the mine coordinates, which are the positive labels; that number measured leakage, not geology.",
+  "guardrail": "Surface indicators only. This does not detect subsurface ore and is not a reserve statement (PRD 2.2, 2.4).",
+  "lithology_note": "GSI lithology unavailable (bhukosh.gsi.gov.in unreachable); omitted rather than substituted."
+}

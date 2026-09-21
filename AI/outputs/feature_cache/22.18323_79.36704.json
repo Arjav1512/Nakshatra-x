@@ -1,0 +1,24 @@
+{
+  "lat": 22.18323,
+  "lng": 79.36704,
+  "iron_oxide_ratio": 1.2587,
+  "ferrous_ratio": 1.1078,
+  "clay_alteration_ratio": 1.2861,
+  "ndvi": 0.2609,
+  "swir_ratio_norm": 0.1251,
+  "elevation_m": 621.0,
+  "slope_deg": 0.947,
+  "reflectance": {
+    "B02": 0.15792,
+    "B04": 0.19877,
+    "B08": 0.33907,
+    "B11": 0.37562,
+    "B12": 0.29206
+  },
+  "scene_id": "S2C_MSIL2A_20260407T050651_R019_T44QLK_20260407T103956",
+  "scene_datetime": "2026-04-07T05:06:51.025000Z",
+  "cloud_cover_pct": 0.08,
+  "source": "Sentinel-2 L2A via Microsoft Planetary Computer; SRTM 30m via OpenTopoData",
+  "is_synthetic": false,
+  "is_live": true
+}

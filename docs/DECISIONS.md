@@ -61,3 +61,36 @@ retrofit a name.
 Note on the attribution rename: the output is an **exact** additive
 decomposition of a linear model. That is a stronger statement than a Shapley
 approximation, so the honest name is not a downgrade.
+
+## D-015 — rasterio added to read real Sentinel-2 pixels
+**Phase 5.** Track A's central defect was that its "spectral" features were a
+formula over distance to the mine coordinates. Fixing it requires reading actual
+surface reflectance, which requires a raster library; `rasterio` does windowed
+reads directly over HTTP so a 5×5 pixel sample costs a range request rather than
+a scene download. This is the one heavy dependency added in the whole effort,
+and it exists to replace fabricated data with measured data.
+
+## D-016 — Sentinel-2 via Microsoft Planetary Computer, not Earth Search
+**Phase 5.** Earth Search (already used for scene metadata) is reachable, but
+its raster host `sentinel-cogs.s3.us-west-2.amazonaws.com` is not reachable from
+this environment — a range request times out. Planetary Computer serves the same
+Sentinel-2 L2A COGs and is reachable. Its per-asset signing endpoint rate-limits
+at 429 after ~10 requests, so the collection-level token endpoint is used
+instead: one token covers every asset for about an hour.
+
+## D-017 — GSI lithology omitted, not substituted
+**Phase 5.** PRD §8.3 names GSI Bhukosh for regional geology and boreholes. Both
+`bhukosh.gsi.gov.in` and `geoportal.gsi.gov.in` are unreachable from this
+environment. Lithology is therefore **not a feature**, rather than being filled
+with a plausible-looking stand-in. It is the single most valuable addition to
+this feature set when the portal is reachable, and the spectral-only ablation
+(LOMO AUC 0.60) suggests why the geological signal currently looks weak.
+
+## D-018 — Guarded suppression of a spurious BLAS warning
+**Phase 5.** `matmul` in the kriging solve emitted divide-by-zero and overflow
+warnings, but only inside FastAPI's thread pool and never on the main thread;
+the kriging system is well conditioned (condition number ~285) and every value
+was verified finite. This is macOS Accelerate setting FP status flags from its
+vectorised inner loops. Rather than suppress blindly, the inputs and outputs are
+asserted finite around a narrowly scoped `np.errstate`, so a genuine numerical
+fault still raises.

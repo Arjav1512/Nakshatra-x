@@ -15,3 +15,5 @@ numpy==2.2.0
 celery==5.4.0
 redis==5.2.1
 python-multipart>=0.0.9
+# Track A reads Sentinel-2 COG pixels over HTTP (windowed reads, no full download).
+rasterio==1.5.1
