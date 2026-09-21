@@ -11,19 +11,24 @@ export type MineInfo = {
   currentProduction: number
 }
 
+// `null` means "not supplied by the active source" and must render as an
+// explicit absence, never as 0 or a placeholder (PRD N-6). NASA POWER daily
+// point data carries no soil moisture, NDVI or forecast rainfall, so those
+// fields are null until the Phase 5 raster pipeline supplies them.
 export type WeatherSignal = {
   /** True only when fetched live from the upstream weather API this request. */
   is_live?: boolean
   /** True when the value came from the seeded synthetic generator. */
   is_synthetic?: boolean
   rainfall_14d_mm: number
-  soil_moisture_pct: number
-  land_surface_temp_c: number
-  humidity_pct?: number
-  forecast_rain_next_3d_mm?: number
+  soil_moisture_pct: number | null
+  land_surface_temp_c: number | null
+  humidity_pct?: number | null
+  forecast_rain_next_3d_mm?: number | null
   updated_at?: string
   source?: string
-  live_precipitation_rate_mm_hr?: number
+  live_precipitation_rate_mm_hr?: number | null
+  note?: string
 }
 
 // `null` means "not available" — the UI must render an explicit absence
