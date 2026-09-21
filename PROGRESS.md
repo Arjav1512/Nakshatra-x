@@ -46,7 +46,7 @@ the problem statement, and are marked *(brief-derived)* rather than
 | 2 | Bug fixes, backend integrity, dedup | **done** | `fix/phase2-consolidation-and-bugs` |
 | 3 | Ingestion contract + flagged synthetic data | partial (generator done) | — |
 | 4 | Track B real forecaster + constraint engine | not started | — |
-| 5 | Track A leakage fix | not started | — |
+| 5 | Track A made honest | **done** | `feat/phase5-track-a-honest` |
 | 6 | Dashboard / UX journey | not started | — |
 | 7 | Testing, perf, deployment | partial (frames + tests done) | phase 2 branch |
 | 8 | Readiness assessment | not started | — |
