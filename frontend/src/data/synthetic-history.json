@@ -1,0 +1,521 @@
+{
+  "contract_version": "1.0.0",
+  "generator": "nakshatra-synthetic-v1",
+  "seed": 20260921,
+  "is_synthetic": true,
+  "notice": "Synthetic illustrative series. Generated from a model anchored to MOIL's published annual production scale (~1.1-1.3 Mt/yr). It is NOT taken from MOIL Annual Reports, the IBM Indian Minerals Yearbook, GSI Bhukosh or IMD, and must not be presented as such. `indicativeResourceBaseTonnes` is not a UNFC or statutory reserve figure (PRD 2.4).",
+  "mines_modelled": [
+    "Balaghat",
+    "Bharweli",
+    "Ukwa",
+    "Tirodi",
+    "Dongri Buzurg",
+    "Chikla",
+    "Mansar",
+    "Kandri",
+    "Gumgaon",
+    "Beldongri"
+  ],
+  "records": [
+    {
+      "year": 1977,
+      "totalProductionTonnes": 509455,
+      "avgMnGradePct": 42.84,
+      "syntheticBoreholeCount": 197,
+      "monsoonRainfallMm": 1290,
+      "indicativeResourceBaseTonnes": 48470105,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1978,
+      "totalProductionTonnes": 538619,
+      "avgMnGradePct": 42.79,
+      "syntheticBoreholeCount": 165,
+      "monsoonRainfallMm": 1022,
+      "indicativeResourceBaseTonnes": 48056726,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1979,
+      "totalProductionTonnes": 551716,
+      "avgMnGradePct": 43.51,
+      "syntheticBoreholeCount": 149,
+      "monsoonRainfallMm": 1357,
+      "indicativeResourceBaseTonnes": 49635767,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1980,
+      "totalProductionTonnes": 556655,
+      "avgMnGradePct": 42.16,
+      "syntheticBoreholeCount": 242,
+      "monsoonRainfallMm": 1277,
+      "indicativeResourceBaseTonnes": 50337151,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1981,
+      "totalProductionTonnes": 551888,
+      "avgMnGradePct": 43.76,
+      "syntheticBoreholeCount": 202,
+      "monsoonRainfallMm": 1300,
+      "indicativeResourceBaseTonnes": 46998725,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1982,
+      "totalProductionTonnes": 570372,
+      "avgMnGradePct": 43.3,
+      "syntheticBoreholeCount": 178,
+      "monsoonRainfallMm": 1159,
+      "indicativeResourceBaseTonnes": 51587852,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1983,
+      "totalProductionTonnes": 587197,
+      "avgMnGradePct": 43.88,
+      "syntheticBoreholeCount": 269,
+      "monsoonRainfallMm": 1441,
+      "indicativeResourceBaseTonnes": 51545969,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1984,
+      "totalProductionTonnes": 587851,
+      "avgMnGradePct": 43.14,
+      "syntheticBoreholeCount": 184,
+      "monsoonRainfallMm": 983,
+      "indicativeResourceBaseTonnes": 51685498,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1985,
+      "totalProductionTonnes": 578224,
+      "avgMnGradePct": 42.65,
+      "syntheticBoreholeCount": 242,
+      "monsoonRainfallMm": 1608,
+      "indicativeResourceBaseTonnes": 48035173,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1986,
+      "totalProductionTonnes": 655434,
+      "avgMnGradePct": 42.96,
+      "syntheticBoreholeCount": 196,
+      "monsoonRainfallMm": 1393,
+      "indicativeResourceBaseTonnes": 51627686,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1987,
+      "totalProductionTonnes": 569979,
+      "avgMnGradePct": 43.42,
+      "syntheticBoreholeCount": 213,
+      "monsoonRainfallMm": 1432,
+      "indicativeResourceBaseTonnes": 53787956,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1988,
+      "totalProductionTonnes": 644265,
+      "avgMnGradePct": 42.63,
+      "syntheticBoreholeCount": 251,
+      "monsoonRainfallMm": 1231,
+      "indicativeResourceBaseTonnes": 53775484,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1989,
+      "totalProductionTonnes": 728300,
+      "avgMnGradePct": 43.7,
+      "syntheticBoreholeCount": 279,
+      "monsoonRainfallMm": 1028,
+      "indicativeResourceBaseTonnes": 50743885,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1990,
+      "totalProductionTonnes": 675292,
+      "avgMnGradePct": 43.84,
+      "syntheticBoreholeCount": 184,
+      "monsoonRainfallMm": 1332,
+      "indicativeResourceBaseTonnes": 50938260,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1991,
+      "totalProductionTonnes": 726474,
+      "avgMnGradePct": 43.25,
+      "syntheticBoreholeCount": 177,
+      "monsoonRainfallMm": 957,
+      "indicativeResourceBaseTonnes": 54848132,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1992,
+      "totalProductionTonnes": 594652,
+      "avgMnGradePct": 42.48,
+      "syntheticBoreholeCount": 168,
+      "monsoonRainfallMm": 1119,
+      "indicativeResourceBaseTonnes": 52708832,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1993,
+      "totalProductionTonnes": 684569,
+      "avgMnGradePct": 43.07,
+      "syntheticBoreholeCount": 190,
+      "monsoonRainfallMm": 875,
+      "indicativeResourceBaseTonnes": 54999251,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1994,
+      "totalProductionTonnes": 687328,
+      "avgMnGradePct": 42.22,
+      "syntheticBoreholeCount": 240,
+      "monsoonRainfallMm": 1174,
+      "indicativeResourceBaseTonnes": 54676527,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1995,
+      "totalProductionTonnes": 685636,
+      "avgMnGradePct": 43.35,
+      "syntheticBoreholeCount": 223,
+      "monsoonRainfallMm": 1230,
+      "indicativeResourceBaseTonnes": 54962607,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1996,
+      "totalProductionTonnes": 711575,
+      "avgMnGradePct": 43.74,
+      "syntheticBoreholeCount": 198,
+      "monsoonRainfallMm": 1146,
+      "indicativeResourceBaseTonnes": 55531819,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1997,
+      "totalProductionTonnes": 750057,
+      "avgMnGradePct": 43.01,
+      "syntheticBoreholeCount": 189,
+      "monsoonRainfallMm": 1251,
+      "indicativeResourceBaseTonnes": 54032779,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1998,
+      "totalProductionTonnes": 726218,
+      "avgMnGradePct": 42.24,
+      "syntheticBoreholeCount": 179,
+      "monsoonRainfallMm": 1198,
+      "indicativeResourceBaseTonnes": 59034466,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 1999,
+      "totalProductionTonnes": 752892,
+      "avgMnGradePct": 43.02,
+      "syntheticBoreholeCount": 244,
+      "monsoonRainfallMm": 1122,
+      "indicativeResourceBaseTonnes": 57807618,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2000,
+      "totalProductionTonnes": 796576,
+      "avgMnGradePct": 42.24,
+      "syntheticBoreholeCount": 278,
+      "monsoonRainfallMm": 1233,
+      "indicativeResourceBaseTonnes": 59964520,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2001,
+      "totalProductionTonnes": 770262,
+      "avgMnGradePct": 43.07,
+      "syntheticBoreholeCount": 238,
+      "monsoonRainfallMm": 1099,
+      "indicativeResourceBaseTonnes": 58787560,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2002,
+      "totalProductionTonnes": 666943,
+      "avgMnGradePct": 42.56,
+      "syntheticBoreholeCount": 224,
+      "monsoonRainfallMm": 1279,
+      "indicativeResourceBaseTonnes": 54555344,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2003,
+      "totalProductionTonnes": 814234,
+      "avgMnGradePct": 42.28,
+      "syntheticBoreholeCount": 241,
+      "monsoonRainfallMm": 1311,
+      "indicativeResourceBaseTonnes": 57772426,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2004,
+      "totalProductionTonnes": 843174,
+      "avgMnGradePct": 42.76,
+      "syntheticBoreholeCount": 244,
+      "monsoonRainfallMm": 1444,
+      "indicativeResourceBaseTonnes": 58095488,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2005,
+      "totalProductionTonnes": 809223,
+      "avgMnGradePct": 42.71,
+      "syntheticBoreholeCount": 223,
+      "monsoonRainfallMm": 942,
+      "indicativeResourceBaseTonnes": 60038357,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2006,
+      "totalProductionTonnes": 897540,
+      "avgMnGradePct": 42.75,
+      "syntheticBoreholeCount": 259,
+      "monsoonRainfallMm": 1129,
+      "indicativeResourceBaseTonnes": 57140171,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2007,
+      "totalProductionTonnes": 943751,
+      "avgMnGradePct": 41.91,
+      "syntheticBoreholeCount": 256,
+      "monsoonRainfallMm": 1088,
+      "indicativeResourceBaseTonnes": 62124137,
+      "gradeType": "Silico-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2008,
+      "totalProductionTonnes": 833921,
+      "avgMnGradePct": 42.08,
+      "syntheticBoreholeCount": 231,
+      "monsoonRainfallMm": 1341,
+      "indicativeResourceBaseTonnes": 59337969,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2009,
+      "totalProductionTonnes": 900411,
+      "avgMnGradePct": 42.7,
+      "syntheticBoreholeCount": 249,
+      "monsoonRainfallMm": 1237,
+      "indicativeResourceBaseTonnes": 61131519,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2010,
+      "totalProductionTonnes": 955009,
+      "avgMnGradePct": 41.85,
+      "syntheticBoreholeCount": 266,
+      "monsoonRainfallMm": 1153,
+      "indicativeResourceBaseTonnes": 60276702,
+      "gradeType": "Silico-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2011,
+      "totalProductionTonnes": 1010684,
+      "avgMnGradePct": 42.81,
+      "syntheticBoreholeCount": 255,
+      "monsoonRainfallMm": 1012,
+      "indicativeResourceBaseTonnes": 58888606,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2012,
+      "totalProductionTonnes": 1014110,
+      "avgMnGradePct": 41.45,
+      "syntheticBoreholeCount": 222,
+      "monsoonRainfallMm": 898,
+      "indicativeResourceBaseTonnes": 65335238,
+      "gradeType": "Silico-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2013,
+      "totalProductionTonnes": 1094949,
+      "avgMnGradePct": 42.67,
+      "syntheticBoreholeCount": 252,
+      "monsoonRainfallMm": 1283,
+      "indicativeResourceBaseTonnes": 66276423,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2014,
+      "totalProductionTonnes": 1030856,
+      "avgMnGradePct": 41.51,
+      "syntheticBoreholeCount": 279,
+      "monsoonRainfallMm": 1416,
+      "indicativeResourceBaseTonnes": 62458240,
+      "gradeType": "Silico-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2015,
+      "totalProductionTonnes": 1017482,
+      "avgMnGradePct": 42.3,
+      "syntheticBoreholeCount": 262,
+      "monsoonRainfallMm": 1310,
+      "indicativeResourceBaseTonnes": 64372207,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2016,
+      "totalProductionTonnes": 963542,
+      "avgMnGradePct": 42.53,
+      "syntheticBoreholeCount": 267,
+      "monsoonRainfallMm": 1323,
+      "indicativeResourceBaseTonnes": 62891542,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2017,
+      "totalProductionTonnes": 945849,
+      "avgMnGradePct": 41.94,
+      "syntheticBoreholeCount": 331,
+      "monsoonRainfallMm": 1053,
+      "indicativeResourceBaseTonnes": 59764549,
+      "gradeType": "Silico-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2018,
+      "totalProductionTonnes": 1062555,
+      "avgMnGradePct": 42.08,
+      "syntheticBoreholeCount": 282,
+      "monsoonRainfallMm": 1216,
+      "indicativeResourceBaseTonnes": 67490071,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2019,
+      "totalProductionTonnes": 1174387,
+      "avgMnGradePct": 41.6,
+      "syntheticBoreholeCount": 285,
+      "monsoonRainfallMm": 1116,
+      "indicativeResourceBaseTonnes": 65022376,
+      "gradeType": "Silico-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2020,
+      "totalProductionTonnes": 1102692,
+      "avgMnGradePct": 42.1,
+      "syntheticBoreholeCount": 272,
+      "monsoonRainfallMm": 1284,
+      "indicativeResourceBaseTonnes": 66091149,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2021,
+      "totalProductionTonnes": 1067973,
+      "avgMnGradePct": 42.4,
+      "syntheticBoreholeCount": 276,
+      "monsoonRainfallMm": 1033,
+      "indicativeResourceBaseTonnes": 61272972,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2022,
+      "totalProductionTonnes": 1190747,
+      "avgMnGradePct": 42.35,
+      "syntheticBoreholeCount": 286,
+      "monsoonRainfallMm": 1234,
+      "indicativeResourceBaseTonnes": 65389220,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2023,
+      "totalProductionTonnes": 1051009,
+      "avgMnGradePct": 41.02,
+      "syntheticBoreholeCount": 320,
+      "monsoonRainfallMm": 1574,
+      "indicativeResourceBaseTonnes": 68233089,
+      "gradeType": "Silico-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2024,
+      "totalProductionTonnes": 1165406,
+      "avgMnGradePct": 42.07,
+      "syntheticBoreholeCount": 276,
+      "monsoonRainfallMm": 1170,
+      "indicativeResourceBaseTonnes": 63493546,
+      "gradeType": "Ferro-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2025,
+      "totalProductionTonnes": 1297753,
+      "avgMnGradePct": 41.29,
+      "syntheticBoreholeCount": 280,
+      "monsoonRainfallMm": 1411,
+      "indicativeResourceBaseTonnes": 67823972,
+      "gradeType": "Silico-manganese dominant",
+      "is_synthetic": true
+    },
+    {
+      "year": 2026,
+      "totalProductionTonnes": 1255015,
+      "avgMnGradePct": 41.93,
+      "syntheticBoreholeCount": 298,
+      "monsoonRainfallMm": 1053,
+      "indicativeResourceBaseTonnes": 69172939,
+      "gradeType": "Silico-manganese dominant",
+      "is_synthetic": true
+    }
+  ]
+}
