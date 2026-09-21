@@ -4,36 +4,47 @@ SIH 2026, problem statement SIH26009 (Ministry of Steel / MOIL).
 Living document. Status values: **done** / **partial** / **missing** /
 **broken** / **fabricated** / **blocked**.
 
-Last updated: 2026-09-20.
+Last updated: 2026-09-21.
 
 ---
 
-## ⚠️ Blocker: the PRD is not in the repository
+## PRD received — traceability matrix is now authoritative
 
-The brief names `SIH26009-01-PRD.md` and `SIH26009-Architecture.excalidraw` as
-the single source of truth. **Neither file exists** — not in
-`Arjav1512/Nakshatra-x` at `main` (25c7caa), and not anywhere on this machine:
+`SIH26009-01-PRD.md` and `SIH26009-Architecture.excalidraw` are committed at the
+repo root (`34b9e5d`). The earlier blocker is cleared.
 
-```
-$ gh api repos/Arjav1512/Nakshatra-x/git/trees/main --jq '.tree[].path'
-.gitignore .vercelignore AGENTS.md AI CLAUDE.md README.md backend database
-frontend nakshatra_x_*.pdf netlify.toml package.json vercel.json
+**`docs/TRACEABILITY.md` is now the authoritative status document.** It maps
+every PRD requirement (A-1..A-10, B-1..B-10, C-1..C-7, D-1..D-9, N-1..N-8) to a
+status and evidence, resolves the architecture diagram's `[PS …]` / `[D]` / `[P]`
+tags against requirement IDs, and records where the PRD overrides the
+engineering brief. This file tracks phase execution; the matrix tracks
+requirement coverage.
 
-$ find ~/Downloads ~/Desktop ~/Documents -iname "*SIH26009*" -o -iname "*PRD*"
-# → only SatQuery-03-PRD.md and PrepPilot/docs/PRD.md — different projects
-```
+### Deltas the PRD introduced (full detail in TRACEABILITY.md §7–8)
 
-**What this blocks:** the requirement-by-requirement traceability table below
-cannot be authoritative, and the Phase 8 "PRD coverage" score cannot be
-computed. **What it does not block:** everything specified directly in the
-engineering brief — integrity, security, consolidation, the forecaster, the
-constraint engine — which is the bulk of the work. Those proceed.
+- **Ventilation is a PRD non-goal** (§4 non-goal 6) but appears in the diagram's
+  constraint engine. PRD wins — ventilation is not built.
+- **Drill targets by expected information gain is [P], not a requirement.**
+  A-5 requires ranking *with evidence*; EIG is a diagram "★ differentiator".
+- **B-5 is grade-aware at P0** — "forecast production per mine **per grade**".
+  The brief omitted grade entirely.
+- **Track A pilot should be opencast** (Dongri Buzurg), not Balaghat — surface
+  spectral work needs exposed ground. Balaghat remains the Track B pilot.
+- **PRD §8.4 forbids computing area/tonnage in degrees.** Current code uses
+  `degrees × 111.0`; a real violation, fixed in Phase 5.
+- **N-7 audit log** is a Required non-functional the brief never mentioned.
+- Phase 1/2 work maps cleanly onto N-3, N-4, N-6 and §2.4 — nothing the PRD
+  contradicts.
 
-**To unblock:** add the PRD to the repo, or provide the file.
+### Requirement coverage at the start of this session
 
-The requirement rows below are therefore derived from the engineering brief and
-the problem statement, and are marked *(brief-derived)* rather than
-*(PRD-traced)*.
+| Group | P0 | fully | partial | missing/broken/fabricated |
+|---|---|---|---|---|
+| Track A | 5 | 0 | 5 | 5 |
+| Track B | 7 | 1 | 4 | 5 |
+| Corrective | 5 | 0 | 4 | 3 |
+| Dashboard | 6 | 0 | 6 | 3 |
+| Non-functional | — | 2 | 3 | 3 |
 
 ---
 
@@ -43,7 +54,9 @@ the problem statement, and are marked *(brief-derived)* rather than
 |---|---|---|---|
 | 0 | Audit & baseline | **done** | this branch |
 | 1 | Integrity & security | **done** | `fix/phase1-integrity-and-security` |
-| 2 | Bug fixes, backend integrity, dedup | **done** | `fix/phase2-consolidation-and-bugs` |
+| 2 | Bug fixes, backend integrity, dedup | **done** | #2, recovered to `main` via #3 |
+| — | PRD traceability matrix | **done** | `docs/prd-traceability-matrix` |
+| 2.5 | Wire UI to the real FastAPI backend | in progress | — |
 | 3 | Ingestion contract + flagged synthetic data | partial (generator done) | — |
 | 4 | Track B real forecaster + constraint engine | not started | — |
 | 5 | Track A leakage fix | not started | — |
