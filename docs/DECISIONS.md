@@ -61,3 +61,33 @@ retrofit a name.
 Note on the attribution rename: the output is an **exact** additive
 decomposition of a linear model. That is a stronger statement than a Shapley
 approximation, so the honest name is not a downgrade.
+
+## D-012 — Conformal intervals calibrated on recent history, not a random split
+**Phase 4.** Raw quantile-GBT intervals were badly overconfident: 0.58 empirical
+coverage against 0.80 nominal. Conformalising with a random calibration split
+only reached 0.66, because conformal prediction assumes exchangeability and time
+series violate it — the evaluation window spans the monsoon, when output spread
+genuinely widens. Calibrating on the most recent slice of history instead
+reached 0.812.
+
+*Trade-off:* MAPE worsens from 10.75% to 11.67%, because the temporal split
+removes the most recent 25% of samples from the fit. Accepted: an interval that
+claims 80% and delivers 66% is worse than useless to a planner sizing a risk,
+while 0.9 points of MAPE is not decision-changing. No new dependency —
+scikit-learn's `HistGradientBoostingRegressor` with quantile loss, plus about
+twenty lines of conformal correction.
+
+## D-013 — One model per mine, with grade as a feature
+**Phase 4.** PRD B-5 requires per-mine per-grade forecasts. Fitting a separate
+model per (mine, grade) would leave the smaller grades — dioxide is ~4% of
+output — with too few rows to fit. Fitting one model per mine with `grade_code`
+as a feature keeps forecasts grade-specific while sharing strength across
+grades. A test asserts the grades genuinely produce different forecasts rather
+than one number relabelled four times.
+
+## D-014 — Plan targets are generated 90 days beyond the actuals
+**Phase 4.** A forecast horizon necessarily extends past the last observed day.
+With plan targets stopping at the data end, the tail of every horizon had no
+target to be measured against and P(shortfall) came out trivially zero — the
+forecast looked riskless. Targets now run 90 days forward, which also matches
+how a mine plan is actually set: in advance.
