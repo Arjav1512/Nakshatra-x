@@ -44,7 +44,7 @@ the problem statement, and are marked *(brief-derived)* rather than
 | 0 | Audit & baseline | **done** | this branch |
 | 1 | Integrity & security | **done** | `fix/phase1-integrity-and-security` |
 | 2 | Bug fixes, backend integrity, dedup | **done** | `fix/phase2-consolidation-and-bugs` |
-| 3 | Ingestion contract + flagged synthetic data | partial (generator done) | — |
+| 3 | Ingestion contract + flagged synthetic data | **done** | `feat/phase3-ingestion-contract` |
 | 4 | Track B real forecaster + constraint engine | not started | — |
 | 5 | Track A leakage fix | not started | — |
 | 6 | Dashboard / UX journey | not started | — |
@@ -131,6 +131,27 @@ Frontend→FastAPI consolidation. The Next.js app still serves its own
 NASA POWER client remain unreachable from the UI. Both sides are now honest and
 tested independently; wiring them together is the remaining Phase 2 work and is
 a larger change than the bug fixes above.
+
+---
+
+## Phase 3 — Ingestion contract + flagged synthetic data (done)
+
+PRD §8.2: *"The contract is a deliverable in its own right."* See
+`docs/INGESTION_CONTRACT.md`.
+
+| Item | Status | Evidence |
+|---|---|---|
+| Seven versioned schemas | **done** | `backend/app/ingestion/schemas.py`, contract `1.0.0`; JSON Schema published under `docs/schemas/`. `is_synthetic` is required with no default on every entity. |
+| Schemas actually reject bad data | **done** | Test rejects inverted depth intervals, assays summing >100%, inverted periods, and rows omitting `is_synthetic`. |
+| Deterministic seeded generator | **done** | 58,083 rows byte-identical for seed `20260921`; a different seed differs. |
+| Calibrated to MOIL public totals | **done** | 2024 = 1,098,143 t; 2025 = 1,122,772 t — inside the published ~1.1–1.3 Mt/yr range. Test guards the range. |
+| Every row flagged synthetic | **done** | All 58,083 rows carry `is_synthetic=True`, a `source` and a `contract_version`. |
+| Grade-aware (B-5 P0, B-9) | **done** | Production and plan targets keyed by (mine × grade × period) for all 10 mines. |
+| Covariates genuinely drive the target | **done** | Removing rainfall lifts total production 5.3% — the Phase 4 baseline comparison will be meaningful rather than rigged. |
+| Hardcoded "authentic MOIL" series removed | **done** | 554 lines of hand-written 1977–2026 records deleted; header claiming MOIL/IBM/GSI/IMD as sources replaced. Series now generated and flagged. |
+| Statutory field names removed | **done** | `unfc111ProvedReservesTonnes` → `indicativeResourceBaseTonnes`; `gsiCoreDrillHoles` → `syntheticBoreholeCount`. |
+| False verification claim | **done** | `OFFICIAL_DATA_SOURCES.verifiedParameters` → `parametersAvailable`; relabelled as *planned* ingestion targets (PRD §8.3), not provenance. |
+| Fabricated method claim | **done** | Comment claiming "Holt-Winters / ARIMA + XGBoost residual estimation" removed — none exist in the codebase. |
 
 ---
 
