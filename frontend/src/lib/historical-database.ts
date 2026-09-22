@@ -386,7 +386,7 @@ export function computeDynamicPredictions(
 
   return FUTURE_FORECASTS_2026_2040.map((item, idx) => {
     const yearOffset = idx // 0 to 14
-    const compoundedFactor = Math.pow(1 + growthRate, yearOffset) * aiMultiplier * monsoonImpact
+    const compoundedFactor = (1 + growthRate) ** yearOffset * aiMultiplier * monsoonImpact
     const baseline2026 = 2150000
     const dynamicTonnes = Math.round((baseline2026 * compoundedFactor) / 10000) * 10000
     const margin = dynamicTonnes * (0.04 + idx * 0.003)

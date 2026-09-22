@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { MineInfo } from './types'
+import { useRef, useEffect } from 'react'
+import type { MineInfo } from './types'
 import { MOIL_MINES } from './data'
-import { Globe, Layers, Eye, Compass, Maximize2, Sparkles, MapPin } from 'lucide-react'
+import { Layers, MapPin } from 'lucide-react'
 
 interface Props {
   selectedMine: MineInfo
@@ -163,7 +163,7 @@ export default function IndiaCommandGlobe({
         {/* Time Horizon Selector */}
         <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-black/50 border border-white/10">
           {horizons.map((h) => (
-            <button
+            <button type="button"
               key={h.key}
               onClick={() => onChangeTimeHorizon(h.key)}
               className={`px-3 py-1 rounded-lg text-[10px] font-mono font-semibold transition-all cursor-pointer ${
@@ -189,7 +189,7 @@ export default function IndiaCommandGlobe({
             Multi-Spectral Layer:
           </span>
           {layers.map((l) => (
-            <button
+            <button type="button"
               key={l.key}
               onClick={() => onChangeLayer(l.key)}
               className={`px-3 py-1.5 rounded-xl text-left text-xs font-mono transition-all flex items-center justify-between gap-3 cursor-pointer ${
@@ -235,7 +235,7 @@ export default function IndiaCommandGlobe({
         {/* Mine Quick Switcher Strip (Bottom) */}
         <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2 overflow-x-auto pb-1">
           {MOIL_MINES.map((m) => (
-            <button
+            <button type="button"
               key={m.id}
               onClick={() => onSelectMine(m)}
               className={`px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${

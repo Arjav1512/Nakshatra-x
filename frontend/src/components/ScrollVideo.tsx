@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useCallback } from 'react'
-import { Radio, Orbit, ChevronDown, Sparkles } from 'lucide-react'
-import { TextEffect } from '@/components/ui/text-effect'
+import { Radio, Orbit, ChevronDown, } from 'lucide-react'
 
 const TOTAL_FRAMES = 788
 

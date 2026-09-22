@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 import SolarCyberLogo from './SolarCyberLogo'
 import TopNavMenu from './TopNavMenu'
 import { UserNav } from '@/components/auth/UserNav'

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import {
   HISTORICAL_DATABASE_1977_2026,
@@ -8,9 +8,9 @@ import {
   OFFICIAL_DATA_SOURCES,
   getCombinedHistoricalAndFutureData,
   computeDynamicPredictions,
-  HistoricalYearRecord,
-  FutureForecastRecord,
-  PredictionScenarioOptions,
+  type HistoricalYearRecord,
+  type FutureForecastRecord,
+  type PredictionScenarioOptions,
 } from '@/lib/historical-database'
 import {
   ResponsiveContainer,
@@ -156,7 +156,7 @@ export default function HistoricalForecastModal() {
     const aiMultiplier = aiBoost ? 1.035 : 1.0
     const monsoonMultiplier = Math.max(0.92, Math.min(1.04, 1.0 - (monsoonRisk - 1.0) * 0.05))
 
-    const compoundedBase = Math.round(baseProduction * Math.pow(1 + cagrRate, deltaYears))
+    const compoundedBase = Math.round(baseProduction * (1 + cagrRate) ** deltaYears)
     const withAi = Math.round(compoundedBase * aiMultiplier)
     const finalPredicted = selectedFutureYear.predictedProductionTonnes
 
@@ -928,7 +928,7 @@ export default function HistoricalForecastModal() {
 
                         <div className="flex items-center justify-between p-2 rounded-lg bg-black/40 border border-white/5">
                           <span className="text-slate-400">Step 3: Growth Factor (1 + {formulaBreakdown.cagrPercent}%)<sup>{formulaBreakdown.deltaYears}</sup>:</span>
-                          <span className="font-bold text-[#FACC15]">&times; {Math.pow(1 + formulaBreakdown.cagrRate, formulaBreakdown.deltaYears).toFixed(4)}</span>
+                          <span className="font-bold text-[#FACC15]">&times; {((1 + formulaBreakdown.cagrRate) ** formulaBreakdown.deltaYears).toFixed(4)}</span>
                         </div>
 
                         <div className="flex items-center justify-between p-2 rounded-lg bg-black/40 border border-white/5">

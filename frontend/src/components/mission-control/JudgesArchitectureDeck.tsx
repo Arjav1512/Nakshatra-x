@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles, Brain, Cpu, Layers, GitBranch, Terminal, ShieldAlert, Award, FileText, CheckCircle2 } from 'lucide-react'
+import { Sparkles, Brain, Layers, GitBranch, Terminal, ShieldAlert, Award, } from 'lucide-react'
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 
 export default function JudgesArchitectureDeck() {
@@ -42,7 +42,7 @@ export default function JudgesArchitectureDeck() {
 
         {/* Tab Controls */}
         <div className="flex items-center gap-1.5 bg-white/5 p-1 rounded-xl border border-white/10">
-          <button
+          <button type="button"
             onClick={() => setActiveTab('pipeline')}
             className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
               activeTab === 'pipeline'
@@ -52,7 +52,7 @@ export default function JudgesArchitectureDeck() {
           >
             Pipeline Flow
           </button>
-          <button
+          <button type="button"
             onClick={() => setActiveTab('hyperparameters')}
             className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
               activeTab === 'hyperparameters'
@@ -62,7 +62,7 @@ export default function JudgesArchitectureDeck() {
           >
             Model Specs
           </button>
-          <button
+          <button type="button"
             onClick={() => setActiveTab('shap')}
             className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
               activeTab === 'shap'

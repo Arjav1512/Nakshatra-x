@@ -1,10 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { MineInfo } from './types'
+import type { MineInfo } from './types'
 import { MOIL_MINES } from './data'
 import {
-  Satellite,
   Layers,
   MapPin,
   Maximize2,
@@ -15,17 +14,9 @@ import {
   Globe2,
   Radio,
   Search,
-  Crosshair,
   X,
-  TrendingUp,
-  CheckCircle2,
-  ShieldCheck,
   Cpu,
-  Database,
-  Target,
-  Zap,
   Activity,
-  Flame,
   Loader2,
   AlertCircle,
 } from 'lucide-react'
@@ -286,7 +277,7 @@ export default function IndiaSatelliteMap({
 
           let color = '#38BDF8'
           let popupContent = ''
-          let fillOpacity = 0.45
+          const fillOpacity = 0.45
 
           if (activeLayer === 'isro-bhuvan') {
             color = distFromCenter < 2.2 ? '#FF3366' : distFromCenter < 3.8 ? '#38BDF8' : '#00FF88'
@@ -894,6 +885,7 @@ export default function IndiaSatelliteMap({
         {/* Action Controls */}
         <div className="flex items-center gap-2 flex-wrap">
           <button
+            type="button"
             onClick={() => setRadarSweepActive(!radarSweepActive)}
             className={`ios-glass-button px-3.5 py-1.5 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer ${
               radarSweepActive ? 'border-[#EF4444] text-[#EF4444]' : 'text-[#94A3B8]'
@@ -904,6 +896,7 @@ export default function IndiaSatelliteMap({
           </button>
 
           <button
+            type="button"
             onClick={zoomToNational}
             className="ios-glass-button px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-[#FFFFFF] flex items-center gap-1.5 cursor-pointer"
           >
@@ -912,6 +905,7 @@ export default function IndiaSatelliteMap({
           </button>
 
           <button
+            type="button"
             onClick={zoomToIndia}
             className="ios-glass-button px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-[#FFFFFF] flex items-center gap-1.5 cursor-pointer"
           >
@@ -920,6 +914,7 @@ export default function IndiaSatelliteMap({
           </button>
 
           <button
+            type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
             className="ios-glass-button p-2 rounded-full text-[#FFFFFF] hover:text-[#00FF88] transition-all cursor-pointer"
           >
@@ -1012,6 +1007,7 @@ export default function IndiaSatelliteMap({
             const loc = INDIAN_MINING_LOCATIONS[key] || { lat: 21.1458, lng: 79.0882, name: key.toUpperCase() }
             return (
               <button
+                type="button"
                 key={key}
                 onClick={() => {
                   setSearchQuery(loc.name)
@@ -1034,7 +1030,7 @@ export default function IndiaSatelliteMap({
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{searchError}</span>
           </div>
-          <button onClick={() => setSearchError(null)} className="hover:text-white">
+          <button type="button" onClick={() => setSearchError(null)} className="hover:text-white">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -1080,6 +1076,7 @@ export default function IndiaSatelliteMap({
             </span>
             {layers.map((l) => (
               <button
+                type="button"
                 key={l.key}
                 onClick={() => onChangeLayer(l.key)}
                 className={`px-3 py-1 rounded-xl text-left text-xs font-mono transition-all flex items-center justify-between gap-3 cursor-pointer ${
@@ -1170,6 +1167,7 @@ export default function IndiaSatelliteMap({
               </div>
 
               <button
+                type="button"
                 onClick={() => setActivePrediction(null)}
                 className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Close Report"
@@ -1200,7 +1198,12 @@ export default function IndiaSatelliteMap({
                   {activePrediction.historical_success_ratio_pct}%
                 </div>
                 <span className="text-[9px] text-slate-400">
-                  {activePrediction.model_accuracy_pct || 98.7}% GSI/MOIL Accuracy
+                  {/* The 98.7% fallback here was invented and attributed to
+                      GSI/MOIL. Honest validation is LOMO AUC with its CI,
+                      served by /api/v1/prospectivity/metrics. */}
+                  {activePrediction.model_accuracy_pct
+                    ? `${activePrediction.model_accuracy_pct}% model accuracy`
+                    : 'accuracy: see validation panel'}
                 </span>
               </div>
             </div>
@@ -1273,6 +1276,7 @@ export default function IndiaSatelliteMap({
           </span>
           {HOTSPOT_TELEMETRY.map((m) => (
             <button
+              type="button"
               key={m.id}
               onClick={() => {
                 const orig = MOIL_MINES.find((item) => item.id === m.id) || selectedMine

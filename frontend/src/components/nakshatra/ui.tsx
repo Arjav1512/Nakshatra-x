@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import type React from 'react'
 import { clsx } from 'clsx'
 
 export interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -50,7 +50,7 @@ export function GlassButton({
   }
 
   return (
-    <button className={clsx(baseStyles, variants[variant], className)} {...props}>
+    <button type="button" className={clsx(baseStyles, variants[variant], className)} {...props}>
       {children}
     </button>
   )

@@ -19,7 +19,7 @@ function fmtVintage(iso?: string | null): string {
   if (!iso) return 'unknown'
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return String(iso)
-  return d.toISOString().replace('T', ' ').slice(0, 16) + ' UTC'
+  return `${d.toISOString().replace('T', ' ').slice(0, 16)} UTC`
 }
 
 function ageLabel(iso?: string | null): string | null {

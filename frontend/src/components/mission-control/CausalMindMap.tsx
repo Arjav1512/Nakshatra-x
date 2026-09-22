@@ -1,9 +1,9 @@
 'use client'
 
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, } from 'react'
 import ReactFlow, {
-  Node,
-  Edge,
+  type Node,
+  type Edge,
   Controls,
   Background,
   useNodesState,
@@ -14,8 +14,7 @@ import ReactFlow, {
   type NodeProps,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
-import { MineInfo, ShapExplanation } from './types'
-import { Brain, HelpCircle, ArrowRight, Activity, GitBranch } from 'lucide-react'
+import type { MineInfo, ShapExplanation } from './types'
 
 type NodeData = {
   label: string

@@ -77,13 +77,18 @@ def get_metrics():
     if os.path.exists(METRICS_PATH):
         with open(METRICS_PATH) as f:
             return json.load(f)
-    return {
-        "accuracy": 0.9875,
-        "roc_auc": 0.9950,
-        "n_estimators": 200,
-        "max_depth": 12,
-        "model_type": "RandomForestClassifier"
-    }
+    # No fallback metrics. These were previously hardcoded as
+    # accuracy 0.9875 / roc_auc 0.9950 and served as though measured; they
+    # were also the leaked pipeline's figures (see docs/INTEGRITY.md 4).
+    # An absent artefact is reported as absent.
+    raise HTTPException(
+        status_code=503,
+        detail=(
+            "No model metrics artefact. Run AI/scripts/08_train_honest_model.py; "
+            "the honest leave-one-mine-out metrics are served by the FastAPI "
+            "endpoint /api/v1/prospectivity/metrics."
+        ),
+    )
 
 @app.post("/predict")
 def predict_single(coords: CoordinatesPayload):

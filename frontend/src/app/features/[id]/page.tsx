@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState, use } from 'react'
+import type React from 'react'
+import { use } from 'react'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
-import { FEATURES_DATA, FeatureItem } from '@/data/featuresData'
-import { FALLBACK_MINES, fetchLiveMineTelemetry } from '@/components/mission-control/data'
+import { useRouter } from 'next/navigation'
+import { FEATURES_DATA, type FeatureItem } from '@/data/featuresData'
+import { FALLBACK_MINES, } from '@/components/mission-control/data'
 import IndiaSatelliteMap from '@/components/mission-control/IndiaSatelliteMap'
 import RealtimeMLTrainingStudio from '@/components/mission-control/RealtimeMLTrainingStudio'
 import MineTwinPanel from '@/components/mine-twin/MineTwinPanel'
@@ -21,12 +22,9 @@ import {
   ShieldCheck,
   ArrowLeft,
   ArrowRight,
-  Sparkles,
   CheckCircle2,
   Cpu,
-  Layers as LayersIcon,
   Bot,
-  BarChart3,
   Zap,
 } from 'lucide-react'
 

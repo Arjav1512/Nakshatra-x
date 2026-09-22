@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Orbit, LogOut, Users, Shield, Mail, Calendar, ArrowLeft, RefreshCw } from 'lucide-react'
+import { Orbit, LogOut, Users, Shield, ArrowLeft, RefreshCw } from 'lucide-react'
 import { CyberRobotAvatar } from '@/components/auth/CyberRobotAvatar'
 
 
@@ -69,19 +69,19 @@ export default function AdminProfilePage() {
             </div>
           </div>
           <div className="flex gap-4">
-            <button
+            <button type="button"
               onClick={fetchUsers}
               className="flex items-center gap-2 bg-[#38BDF8]/20 text-[#38BDF8] px-4 py-2 rounded border border-[#38BDF8]/30 hover:bg-[#38BDF8]/30 transition-colors"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
             </button>
-            <button
+            <button type="button"
               onClick={() => router.push('/admin')}
               className="flex items-center gap-2 bg-white/5 text-white px-4 py-2 rounded border border-white/10 hover:bg-white/10 transition-colors"
             >
               <ArrowLeft className="h-4 w-4" /> Back
             </button>
-            <button
+            <button type="button"
               onClick={handleLogout}
               className="flex items-center gap-2 bg-white/5 text-white px-4 py-2 rounded border border-white/10 hover:bg-white/10 transition-colors"
             >

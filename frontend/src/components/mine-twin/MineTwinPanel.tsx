@@ -1,34 +1,20 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { MineInfo } from '@/components/mission-control/types'
+import { useState, useEffect } from 'react'
+import type { MineInfo } from '@/components/mission-control/types'
 import {
   HISTORICAL_DATABASE_1977_2026,
   FUTURE_FORECASTS_2026_2040,
-  getCombinedHistoricalAndFutureData,
 } from '@/lib/historical-database'
 import {
-  Cpu,
-  Layers,
   Sparkles,
-  Zap,
   TrendingUp,
-  ShieldCheck,
-  Clock,
   Play,
-  RotateCcw,
-  CheckCircle2,
-  AlertTriangle,
-  ArrowRight,
   Activity,
-  Maximize2,
-  FileText,
   Sliders,
-  Award,
   BarChart3,
   Box,
   Database,
-  Calendar,
 } from 'lucide-react'
 
 export type Scenario = {

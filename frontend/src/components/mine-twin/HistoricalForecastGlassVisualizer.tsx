@@ -1,8 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
-  TrendingUp,
   Calendar,
   Sparkles,
   Database,
@@ -11,22 +10,18 @@ import {
   BarChart3,
   Sliders,
   CheckCircle2,
-  AlertTriangle,
   Info,
   ExternalLink,
   ShieldCheck,
   Zap,
   Activity,
   FileSpreadsheet,
-  ArrowRight,
-  ArrowUpRight,
-  Filter,
   Search,
 } from 'lucide-react'
 import {
-  HistoricalYearRecord,
-  FutureForecastRecord,
-  DataSourceCitation,
+  type HistoricalYearRecord,
+  type FutureForecastRecord,
+  type DataSourceCitation,
   OFFICIAL_DATA_SOURCES,
   HISTORICAL_DATABASE_1977_2026,
   FUTURE_FORECASTS_2026_2040,
@@ -251,7 +246,7 @@ export default function HistoricalForecastGlassVisualizer() {
           ].map((tab) => {
             const Icon = tab.icon
             return (
-              <button
+              <button type="button"
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
@@ -378,7 +373,7 @@ export default function HistoricalForecastGlassVisualizer() {
             <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10">
               <span className="text-xs font-mono text-slate-400 font-bold mr-2">Quick Year Jump:</span>
               {[1977, 1985, 1995, 2007, 2010, 2020, 2023, 2025, 2026, 2030, 2035, 2040].map((y) => (
-                <button
+                <button type="button"
                   key={y}
                   onClick={() => {
                     setSelectedYear(y)
@@ -479,7 +474,7 @@ export default function HistoricalForecastGlassVisualizer() {
                   </div>
 
                   {yearTargetOverride !== null && (
-                    <button
+                    <button type="button"
                       onClick={() => setYearTargetOverride(null)}
                       className="text-[10px] font-mono text-amber-300 hover:underline cursor-pointer pt-1"
                     >
@@ -592,7 +587,7 @@ export default function HistoricalForecastGlassVisualizer() {
                   { key: 'grade', label: 'Average Grade (% Mn)', color: '#38BDF8' },
                   { key: 'monsoon', label: 'Monsoon Rain (mm)', color: '#FACC15' },
                 ].map((m) => (
-                  <button
+                  <button type="button"
                     key={m.key}
                     onClick={() => setSelectedMetric(m.key as any)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer border ${
@@ -617,7 +612,7 @@ export default function HistoricalForecastGlassVisualizer() {
                   { key: '1977-2000', label: '1975–2000' },
                   { key: '2001-2025', label: '2001–2025' },
                 ].map((r) => (
-                  <button
+                  <button type="button"
                     key={r.key}
                     onClick={() => setSelectedRange(r.key as any)}
                     className={`px-3 py-1 rounded-lg text-xs font-mono transition-all cursor-pointer border ${
@@ -805,7 +800,7 @@ export default function HistoricalForecastGlassVisualizer() {
                     { key: 'accelerated', label: 'Accelerated Deep Shaft (+5.8%)', desc: 'Aggressive mechanized underground shaft expansion.' },
                     { key: 'conservative', label: 'Conservative Baseline (+2.8%)', desc: 'Lower capex with extended environmental clearance.' },
                   ].map((s) => (
-                    <button
+                    <button type="button"
                       key={s.key}
                       onClick={() => handleScenarioChange(s.key as any, monsoonRiskFactor, aiEfficiencyBoost)}
                       className={`w-full p-3 rounded-xl text-left font-mono transition-all cursor-pointer border ${
@@ -850,7 +845,7 @@ export default function HistoricalForecastGlassVisualizer() {
                   <Zap size={14} className="text-[#38BDF8]" />
                   <span>SciPy Simplex Blending Boost:</span>
                 </label>
-                <button
+                <button type="button"
                   onClick={() => handleScenarioChange(scenario, monsoonRiskFactor, !aiEfficiencyBoost)}
                   className={`w-full py-3.5 px-4 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer border flex items-center justify-between ${
                     aiEfficiencyBoost
@@ -942,7 +937,7 @@ export default function HistoricalForecastGlassVisualizer() {
                         {(row.milestone ?? '')}
                       </td>
                       <td className="p-3 text-right">
-                        <button
+                        <button type="button"
                           onClick={() => {
                             setSelectedYear(row.year)
                             setActiveTab('year-picker')

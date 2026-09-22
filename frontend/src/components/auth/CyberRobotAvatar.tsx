@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 
 export interface CyberRobotAvatarProps {
   size?: 'sm' | 'md' | 'lg'

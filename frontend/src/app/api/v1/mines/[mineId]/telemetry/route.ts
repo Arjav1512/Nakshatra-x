@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { MineIdParamSchema, validateReplayNonce } from '@/lib/security'
 import { backendUrl, fetchFromBackend } from '@/lib/backend'
 import { degradedTelemetry } from '@/lib/degraded-telemetry'

@@ -6,7 +6,7 @@
  * user. The cookie is now HMAC-signed server-side and verified on every read,
  * and the role is assigned by the server — never taken from client input.
  */
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 
 export const SESSION_COOKIE = 'nx-operator-session'
 
@@ -87,7 +87,6 @@ export function decodeSession(raw: string | undefined | null): SessionProfile | 
       if (!ISSUABLE_ROLES.includes(parsed.role)) continue
       return parsed as SessionProfile
     } catch {
-      continue
     }
   }
 
@@ -210,7 +209,6 @@ export function decodeAdmin(raw: string | undefined | null): AdminProfile | null
       if (typeof parsed.exp !== 'number' || parsed.exp < Math.floor(Date.now() / 1000)) continue
       return parsed as AdminProfile
     } catch {
-      continue
     }
   }
   return null

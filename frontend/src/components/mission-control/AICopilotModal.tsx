@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { MineInfo } from './types'
+import type { MineInfo } from './types'
 import {
-  askNakshatra,
   getAIXAutoSuggestions,
   queryAIXKnowledgeBase
 } from '@/lib/aix-knowledge-engine'
@@ -16,8 +15,6 @@ import {
   Cpu,
   Zap,
   Search,
-  CheckCircle2,
-  Heart,
 } from 'lucide-react'
 
 interface Message {
@@ -244,7 +241,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
                 </div>
               </div>
 
-              <button
+              <button type="button"
                 onClick={() => setIsOpen(false)}
                 className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all cursor-pointer"
                 title="Close AI-X Assistant"
@@ -256,7 +253,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
             {/* Quick Starter Chips Bar */}
             <div className="px-4 py-2 bg-black/40 border-b border-white/5 flex flex-wrap gap-2 shrink-0">
               {STARTER_QUESTIONS.map((q, idx) => (
-                <button
+                <button type="button"
                   key={idx}
                   onClick={() => handleSelectSuggestion(q)}
                   className="px-3 py-1.5 rounded-full bg-white/5 hover:bg-[#00FF88]/20 border border-white/10 hover:border-[#00FF88]/40 text-[10px] font-mono text-slate-300 hover:text-[#00FF88] transition-all cursor-pointer shrink-0"
@@ -298,7 +295,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
                       {m.suggestions && m.suggestions.length > 0 && (
                         <div className="mt-2.5 pt-2 border-t border-white/10 flex flex-wrap gap-1.5">
                           {m.suggestions.map((s, idx) => (
-                            <button
+                            <button type="button"
                               key={idx}
                               onClick={() => handleSelectSuggestion(s)}
                               className="px-2 py-1 rounded-full bg-white/5 hover:bg-[#00FF88]/20 border border-white/10 text-[9px] font-mono text-slate-300 hover:text-[#00FF88] transition-all cursor-pointer"
@@ -320,7 +317,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
 
                     {/* Action Button inside message */}
                     {m.actionButton && (
-                      <button
+                      <button type="button"
                         onClick={() => triggerAction(m.actionButton!)}
                         className="w-full p-2.5 rounded-xl bg-[#00FF88]/20 hover:bg-[#00FF88]/35 border border-[#00FF88]/50 text-[#00FF88] font-mono text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all shadow-[0_0_12px_rgba(0,255,136,0.3)]"
                       >
@@ -362,7 +359,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
                 </div>
                 <div className="space-y-1 max-h-48 overflow-y-auto">
                   {suggestions.map((item, idx) => (
-                    <button
+                    <button type="button"
                       key={idx}
                       onClick={() => handleSelectSuggestion(item)}
                       className="w-full text-left px-3 py-2 rounded-xl text-xs font-mono text-slate-200 hover:text-white hover:bg-[#00FF88]/20 transition-all flex items-center gap-2 cursor-pointer border border-transparent hover:border-[#00FF88]/30"
@@ -390,7 +387,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
                 placeholder={`Ask anything about NAKSHATRA-X…`}
                 className="flex-1 p-3 rounded-2xl bg-white/10 border border-white/20 text-xs font-sans text-white placeholder-slate-400 focus:outline-none focus:border-[#00FF88] transition-colors"
               />
-              <button
+              <button type="button"
                 onClick={() => handleSend()}
                 disabled={!input.trim() || isTyping}
                 className="p-3 rounded-2xl bg-[#00FF88] hover:bg-[#00FF88]/80 text-black font-bold disabled:opacity-50 transition-all cursor-pointer shadow-[0_0_12px_#00FF88]"

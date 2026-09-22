@@ -209,13 +209,13 @@ export function TrackAPanel() {
             <input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} className="accent-emerald-500" />
             fetch live Sentinel-2 (slower)
           </label>
-          <button
+          <button type="button"
             onClick={runProbe} disabled={pLoading}
             className="rounded-md border border-emerald-400/40 bg-emerald-500/10 px-3 py-1.5 text-[11px] text-emerald-200 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
           >
             {pLoading ? 'Scoring…' : 'Score'}
           </button>
-          <button
+          <button type="button"
             onClick={() => { setLat(String(OPENCAST_PILOT.lat)); setLng(String(OPENCAST_PILOT.lng)) }}
             className="rounded-md border border-white/15 px-3 py-1.5 text-[11px] text-slate-300 transition-colors hover:border-white/30"
           >

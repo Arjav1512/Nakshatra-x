@@ -1,7 +1,7 @@
 'use client'
 
-import { MineInfo, WeatherSignal, RiskAnalysis } from './types'
-import { CloudRain, Wrench, Flame, Box, AlertOctagon, ShieldAlert, ArrowUpRight, Gauge } from 'lucide-react'
+import type { MineInfo, WeatherSignal, RiskAnalysis } from './types'
+import { CloudRain, Wrench, Flame, Box, Gauge } from 'lucide-react'
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 
 interface Props {

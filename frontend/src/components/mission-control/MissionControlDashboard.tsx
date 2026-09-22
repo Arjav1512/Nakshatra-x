@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { FALLBACK_MINES, fetchLiveMineTelemetry, fetchMines } from './data'
-import {
+import type {
   MineInfo,
   WeatherSignal,
   ProductionForecast,
@@ -11,29 +11,20 @@ import {
   AuditRecord,
   STACScene,
 } from './types'
-import IndiaSatelliteMap, { LayerType } from './IndiaSatelliteMap'
-import JudgesArchitectureDeck from './JudgesArchitectureDeck'
-import RealtimeMLTrainingStudio from './RealtimeMLTrainingStudio'
-import ProductionSentinel from './ProductionSentinel'
+import IndiaSatelliteMap, { type LayerType } from './IndiaSatelliteMap'
 import SpaceDustParticles from './SpaceDustParticles'
 import AICopilotModal from './AICopilotModal'
 import { TextEffect } from '@/components/ui/text-effect'
 import {
-  Satellite,
   ShieldCheck,
   MapPin,
   RefreshCw,
   Sparkles,
   Orbit,
   Radio,
-  Zap,
-  Clock,
   Cpu,
   Layers,
   Activity,
-  FileCheck,
-  Scale,
-  Compass,
   Lock,
   History,
   Box,
@@ -199,7 +190,7 @@ export default function MissionControlDashboard() {
                 10 Active MOIL Sites
               </div>
               <div className="h-4 w-px bg-white/20" />
-              <button
+              <button type="button"
                 onClick={() => loadMineData(selectedMine)}
                 className="p-1.5 px-2.5 rounded-lg bg-white/10 hover:bg-[#FF2E63]/20 border border-white/20 hover:border-[#FF2E63]/50 text-[#38BDF8] hover:text-[#FF2E63] hover:scale-105 transition-all shadow-md cursor-pointer flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase"
                 title="Force Immediate Orbital Sync"

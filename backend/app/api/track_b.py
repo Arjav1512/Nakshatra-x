@@ -9,8 +9,10 @@ stands in for the batch until a scheduler exists, and `refresh` forces a re-run.
 """
 from __future__ import annotations
 
+import json
 import threading
-from datetime import date, datetime, timedelta
+from pathlib import Path
+from datetime import date, datetime, timedelta, timezone
 
 from app.core.provenance import data_integrity, derived, reference, synthetic
 from app.ingestion.generator import MINES, generate_all
@@ -183,27 +185,93 @@ def forecast_mine(mine_code: str, horizon_days: int = 14, grade: str | None = No
     }
 
 
-def backtest_mine(mine_code: str, span_days: int = 150, step_days: int = 14) -> dict:
-    """
-    Rolling-origin backtest (PRD B-10, surfaced in the UI per N-8).
+BACKTEST_CACHE_DIR = Path(__file__).resolve().parents[2] / "artifacts" / "backtests"
 
-    Cached per process — a full run refits the model at every origin and takes
-    minutes.
+
+def _backtest_cache_path(mine_code: str, span_days: int, step_days: int) -> Path:
+    return BACKTEST_CACHE_DIR / f"{mine_code}_{span_days}d_{step_days}step.json"
+
+
+def compute_backtest(mine_code: str, span_days: int = 150, step_days: int = 14) -> dict:
+    """
+    Run the rolling-origin backtest and persist it.
+
+    This is the expensive path: the model is refitted at every origin, which
+    takes minutes. PRD N-2 anticipates exactly this shape — "nightly batch;
+    on-demand re-run available" — so it is a batch job, not a request path.
+    Invoke it from `python -m app.api.batch backtest`.
+    """
+    st = _state()
+    end = st["end"]
+    res = rolling_origin_backtest(
+        st["series"], st["cov"], mine_code,
+        test_start=end - timedelta(days=span_days), test_end=end,
+        horizons=(1, 3, 7, 14), origin_step_days=step_days,
+        opencast=st["opencast"],
+    ).to_dict()
+    res["note"] = SYNTHETIC_NOTE
+    res["computed_at"] = datetime.now(timezone.utc).isoformat()
+    res["data_window_end"] = end.isoformat()
+    res["served_from"] = "computed"
+
+    BACKTEST_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    _backtest_cache_path(mine_code, span_days, step_days).write_text(json.dumps(res, indent=2))
+    return res
+
+
+def backtest_mine(mine_code: str, span_days: int = 150, step_days: int = 14,
+                  allow_compute: bool = True) -> dict:
+    """
+    Serve the backtest (PRD B-10, surfaced in the UI per N-8).
+
+    Read order: process memory -> persisted artifact -> compute.
+
+    PRD N-1 is "< 2 s p95 **on cached results**". A full run cannot meet that
+    and pretending otherwise would be dishonest, so the result is precomputed
+    by the batch job and served from disk; the response carries `served_from`
+    and `computed_at` so the UI can state how old it is rather than implying it
+    was just calculated.
+
+    `allow_compute=False` makes the endpoint return 503 instead of blocking for
+    minutes when no artifact exists — a miss is reported, not hidden behind a
+    long spinner.
     """
     st = _state()
     key = (mine_code, span_days, step_days)
-    if key not in st["backtests"]:
-        end = st["end"]
-        res = rolling_origin_backtest(
-            st["series"], st["cov"], mine_code,
-            test_start=end - timedelta(days=span_days), test_end=end,
-            horizons=(1, 3, 7, 14), origin_step_days=step_days,
-            opencast=st["opencast"],
-        ).to_dict()
-        res["note"] = SYNTHETIC_NOTE
-        res["computed_at"] = datetime.utcnow().isoformat()
+    if key in st["backtests"]:
+        cached = dict(st["backtests"][key])
+        cached["served_from"] = "memory"
+        return cached
+
+    path = _backtest_cache_path(mine_code, span_days, step_days)
+    if path.exists():
+        res = json.loads(path.read_text())
+        res["served_from"] = "artifact"
+        age_h = None
+        try:
+            computed = datetime.fromisoformat(res["computed_at"])
+            if computed.tzinfo is None:
+                computed = computed.replace(tzinfo=timezone.utc)
+            age_h = round((datetime.now(timezone.utc) - computed).total_seconds() / 3600, 1)
+        except Exception:
+            pass
+        res["artifact_age_hours"] = age_h
+        # PRD N-6: state staleness rather than letting it pass silently.
+        res["staleness_note"] = (
+            f"Precomputed {age_h} h ago by the batch job." if age_h is not None
+            else "Precomputed; age unknown."
+        )
         st["backtests"][key] = res
-    return st["backtests"][key]
+        return res
+
+    if not allow_compute:
+        raise ValueError(
+            "No precomputed backtest for this mine. Run "
+            "`python -m app.api.batch backtest` (PRD N-2 nightly batch)."
+        )
+    res = compute_backtest(mine_code, span_days=span_days, step_days=step_days)
+    st["backtests"][key] = res
+    return res
 
 
 def recommend_actions(mine_code: str, horizon_days: int = 14) -> dict:

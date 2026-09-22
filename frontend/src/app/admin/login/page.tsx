@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import type React from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
-  Orbit,
   KeyRound,
   Shield,
   Lock,
@@ -12,7 +12,6 @@ import {
   AlertCircle,
   Loader2,
   Sparkles,
-  ArrowRight,
   Eye,
   EyeOff,
   Radio,

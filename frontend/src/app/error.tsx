@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { AlertTriangle, RefreshCw, ShieldCheck } from 'lucide-react'
 
 export default function GlobalErrorBoundary({
@@ -35,7 +35,7 @@ export default function GlobalErrorBoundary({
           </p>
         </div>
 
-        <button
+        <button type="button"
           onClick={() => reset()}
           className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#38BDF8] to-[#00FF88] text-[#050914] font-mono font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#00FF88]/20"
         >

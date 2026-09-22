@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, } from 'react';
 import { exportOfflineData } from '@/lib/offline/db';
 
 interface BackupManagerProps {
@@ -56,7 +56,7 @@ export default function BackupManager({ role }: BackupManagerProps) {
         As a judge, you have access to manually export the encrypted offline IndexedDB state for evaluation purposes. This simulates a physical data extraction in a zero-connectivity zone.
       </p>
       
-      <button 
+      <button type="button" 
         onClick={handleExport}
         disabled={exporting}
         className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-md font-semibold transition-colors disabled:opacity-50"

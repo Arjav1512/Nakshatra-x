@@ -1,0 +1,94 @@
+{
+  "base": "http://127.0.0.1:8000",
+  "warm_samples": 12,
+  "results": [
+    {
+      "endpoint": "GET /mines",
+      "status": 200,
+      "bytes": 1567,
+      "cold_s": 0.016,
+      "warm_p95_s": 0.001,
+      "warm_median_s": 0.001,
+      "budget_s": 2.0,
+      "meets_n1_warm": true,
+      "meets_n1_cold": true
+    },
+    {
+      "endpoint": "GET /mines/1/telemetry",
+      "status": 200,
+      "bytes": 10262,
+      "cold_s": 1.692,
+      "warm_p95_s": 0.003,
+      "warm_median_s": 0.002,
+      "budget_s": 2.0,
+      "meets_n1_warm": true,
+      "meets_n1_cold": true
+    },
+    {
+      "endpoint": "GET /mines/1/forecast",
+      "status": 200,
+      "bytes": 11053,
+      "cold_s": 96.505,
+      "warm_p95_s": 0.246,
+      "warm_median_s": 0.217,
+      "budget_s": 2.0,
+      "meets_n1_warm": true,
+      "meets_n1_cold": false
+    },
+    {
+      "endpoint": "GET /mines/1/recommendations",
+      "status": 200,
+      "bytes": 2762,
+      "cold_s": 0.204,
+      "warm_p95_s": 0.213,
+      "warm_median_s": 0.193,
+      "budget_s": 2.0,
+      "meets_n1_warm": true,
+      "meets_n1_cold": true
+    },
+    {
+      "endpoint": "GET /mines/1/backtest",
+      "status": 200,
+      "bytes": 1677,
+      "cold_s": 0.004,
+      "warm_p95_s": 0.002,
+      "warm_median_s": 0.002,
+      "budget_s": 2.0,
+      "meets_n1_warm": true,
+      "meets_n1_cold": true
+    },
+    {
+      "endpoint": "GET /prospectivity/metrics",
+      "status": 200,
+      "bytes": 2426,
+      "cold_s": 0.024,
+      "warm_p95_s": 0.001,
+      "warm_median_s": 0.001,
+      "budget_s": 2.0,
+      "meets_n1_warm": true,
+      "meets_n1_cold": true
+    },
+    {
+      "endpoint": "GET /prospectivity/drill-targets",
+      "status": 200,
+      "bytes": 4805,
+      "cold_s": 0.01,
+      "warm_p95_s": 0.009,
+      "warm_median_s": 0.009,
+      "budget_s": 2.0,
+      "meets_n1_warm": true,
+      "meets_n1_cold": true
+    },
+    {
+      "endpoint": "GET /prospectivity/predict",
+      "status": 200,
+      "bytes": 777,
+      "cold_s": 0.001,
+      "warm_p95_s": 0.001,
+      "warm_median_s": 0.001,
+      "budget_s": 2.0,
+      "meets_n1_warm": true,
+      "meets_n1_cold": true
+    }
+  ]
+}

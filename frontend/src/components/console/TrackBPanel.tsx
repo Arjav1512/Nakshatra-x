@@ -173,7 +173,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 const on = (grade ?? grades[0]?.grade) === g.grade
                 const risk = g.shortfall.p_shortfall
                 return (
-                  <button
+                  <button type="button"
                     key={g.grade}
                     onClick={() => setGrade(g.grade)}
                     aria-pressed={on}
@@ -250,7 +250,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             Backtest — held-out accuracy (PRD B-10, N-8)
           </p>
           {!backtest && !btLoading ? (
-            <button
+            <button type="button"
               onClick={runBacktest}
               className="rounded-md border border-sky-400/40 bg-sky-500/10 px-3 py-1 text-[11px] text-sky-200 transition-colors hover:bg-sky-500/20"
             >
@@ -352,7 +352,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 </p>
                 {a.expected_effect?.assumptions?.length ? (
                   <ul className="mt-1 list-disc pl-4 text-[10px] leading-snug text-slate-500">
-                    {a.expected_effect.assumptions.map((s, i) => <li key={i}>{s}</li>)}
+                    {a.expected_effect.assumptions.map((s) => <li key={s}>{s}</li>)}
                   </ul>
                 ) : null}
               </div>

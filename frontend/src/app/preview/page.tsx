@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
 import { Starfield } from '@/components/nakshatra/sections'
 import { GlassCard } from '@/components/nakshatra/ui'
@@ -18,7 +18,6 @@ import {
   ExternalLink,
   Cpu,
   Activity,
-  Server,
   Lock,
 } from 'lucide-react'
 
@@ -195,7 +194,7 @@ export default function PreviewPage() {
             <span className="flex items-center gap-2">
               <CheckCircle2 size={14} /> {statusMessage}
             </span>
-            <button
+            <button type="button"
               onClick={() => setStatusMessage(null)}
               className="text-slate-400 hover:text-white text-[10px] uppercase font-bold"
             >
@@ -230,7 +229,7 @@ export default function PreviewPage() {
                 <span className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
                   <Compass size={14} className="text-[#38BDF8]" /> Quick Guest Mode Demo
                 </span>
-                <button
+                <button type="button"
                   onClick={fetchSession}
                   disabled={loading}
                   className="text-[10px] font-mono text-slate-400 hover:text-[#38BDF8] flex items-center gap-1 transition-colors"
@@ -244,7 +243,7 @@ export default function PreviewPage() {
                 Test the platform immediately without entering an email address. Guest mode grants observer clearance and opens the full dashboard.
               </p>
 
-              <button
+              <button type="button"
                 onClick={handleQuickGuest}
                 disabled={actionLoading !== null}
                 className="w-full p-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 hover:border-[#38BDF8]/60 text-white text-left font-mono text-xs font-bold transition-all flex items-center justify-between cursor-pointer"
@@ -266,7 +265,7 @@ export default function PreviewPage() {
                   <span className="text-[11px] font-mono text-[#00FF88] flex items-center gap-1">
                     <CheckCircle2 size={12} /> Active session established
                   </span>
-                  <button
+                  <button type="button"
                     onClick={handleSignOut}
                     disabled={actionLoading === 'signout'}
                     className="text-[11px] font-mono text-[#FF2E63] hover:underline flex items-center gap-1 cursor-pointer"

@@ -6,7 +6,8 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "biome lint src",
+    "lint:fix": "biome lint src --write"
   },
   "dependencies": {
     "@reactflow/background": "^11.3.14",
@@ -39,6 +40,7 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.14",
     "@types/node": "26.4.0",
     "@types/nodemailer": "^8.0.1",
     "@types/react": "^19.2.18",

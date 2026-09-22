@@ -1,0 +1,78 @@
+{
+  "model_version": "nakshatra-gbt-cqr-v1",
+  "baseline_version": "seasonal-naive-365-v1",
+  "n_origins": 10,
+  "n_predictions": 160,
+  "horizons": [
+    1,
+    3,
+    7,
+    14
+  ],
+  "model": {
+    "mape_pct": 11.67,
+    "smape_pct": 11.36,
+    "mae_tonnes": 20.68,
+    "rmse_tonnes": 29.29,
+    "n": 160,
+    "coverage_80": 0.812,
+    "coverage_gap": 0.012,
+    "mean_interval_width_tonnes": 60.61
+  },
+  "baseline": {
+    "mape_pct": 14.81,
+    "smape_pct": 15.39,
+    "mae_tonnes": 27.0,
+    "rmse_tonnes": 39.73,
+    "n": 160
+  },
+  "by_horizon": [
+    {
+      "horizon_days": 1,
+      "n": 40,
+      "model_mape_pct": 13.37,
+      "baseline_mape_pct": 15.6,
+      "model_mae_tonnes": 24.8,
+      "baseline_mae_tonnes": 29.22,
+      "coverage_80": 0.675
+    },
+    {
+      "horizon_days": 3,
+      "n": 40,
+      "model_mape_pct": 12.86,
+      "baseline_mape_pct": 14.71,
+      "model_mae_tonnes": 21.29,
+      "baseline_mae_tonnes": 24.47,
+      "coverage_80": 0.85
+    },
+    {
+      "horizon_days": 7,
+      "n": 40,
+      "model_mape_pct": 10.37,
+      "baseline_mape_pct": 11.06,
+      "model_mae_tonnes": 16.48,
+      "baseline_mae_tonnes": 19.54,
+      "coverage_80": 0.95
+    },
+    {
+      "horizon_days": 14,
+      "n": 40,
+      "model_mape_pct": 10.07,
+      "baseline_mape_pct": 17.86,
+      "model_mae_tonnes": 20.17,
+      "baseline_mae_tonnes": 34.77,
+      "coverage_80": 0.775
+    }
+  ],
+  "window": {
+    "test_start": "2026-04-23",
+    "test_end": "2026-09-20",
+    "origin_step_days": 14
+  },
+  "verdict": "GBT beats the seasonal-naive baseline: MAPE 11.67% vs 14.81% (+21.2% relative).",
+  "nominal_coverage": 0.8,
+  "note": "Trained on synthetic operational data generated to the published ingestion contract (docs/INGESTION_CONTRACT.md). MOIL's real production, equipment and blasting records are proprietary (PRD 8.2). Metrics describe the model's behaviour on this dataset, not MOIL's operations.",
+  "computed_at": "2026-09-22T09:38:30.326112+00:00",
+  "data_window_end": "2026-09-20",
+  "served_from": "computed"
+}

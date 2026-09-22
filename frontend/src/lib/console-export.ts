@@ -45,7 +45,7 @@ export function buildCsv(rows: ExportRow[], header: Record<string, string>): str
 
 export function downloadCsv(filename: string, csv: string): void {
   // Prepend a BOM so Excel reads UTF-8 (the ₹ and × in these extracts) correctly.
-  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
+  const blob = new Blob([`﻿${csv}`], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url

@@ -185,3 +185,37 @@ narrative needs one uninterrupted journey wired to the real endpoints, so Phase
 6 adds `/console` and leaves the existing screens untouched — targeted change
 over a risky rewrite. `/console` has no mock path: every panel calls the service
 layer and renders "unavailable" with a reason when it cannot.
+
+## D-023 — Biome replaces ESLint, because ESLint cannot run on TypeScript 7
+**Phase 7.** The project had **no working lint command**: `npm run lint` invoked
+`next lint`, removed in Next 16, which parsed "lint" as a directory and failed.
+ESLint is not a usable replacement here — `eslint-config-next` requires
+typescript-eslint, which refuses TypeScript 7 ("typescript-eslint does not
+support TS 7.0"), and `@typescript-eslint/parser` will not install against it
+either. Downgrading TypeScript to satisfy a linter is the wrong trade. Biome
+parses TypeScript natively with no `typescript` dependency and runs the whole
+`src` tree in ~50 ms. `tsc --noEmit` stays in the gate and is the stricter type
+check.
+
+## D-024 — The backtest is precomputed, not excluded from N-1
+**Phase 7.** A rolling-origin backtest refits the model at every origin: 421 s
+for the pilot mine. It cannot meet N-1's 2 s, and quietly excluding it from the
+latency table would have hidden the miss. PRD N-2 already prescribes the answer
+— "nightly batch; on-demand re-run available" — so `python -m app.api.batch
+backtest` computes it and writes `backend/artifacts/backtests/*.json`, and the
+endpoint serves that artifact. Measured: **421 s of compute → 2 ms served**. The
+response carries `served_from` and `artifact_age_hours` so the UI states the
+figure's age rather than implying it was just calculated, and a missing artifact
+returns 503 with instructions instead of blocking for minutes.
+
+## D-025 — Upstream weather and STAC responses are cached for an hour
+**Phase 7.** `/telemetry` measured **4.0 s warm**, missing N-1, because it
+re-queried NASA POWER and Earth Search on every request — there were no cached
+results for N-1 to apply to. An hourly TTL is correct on the data's own terms,
+not a latency trick: NASA POWER daily data changes once a day (and the client
+already requests a window ending two days ago), and a Sentinel-2 revisit is
+about five days, so the TTL cannot conceal a change that has happened. The
+cached payload keeps its original `vintage`, so reported freshness remains the
+observation's age, not the cache entry's. Failures are cached for 60 s so an
+outage does not make every request pay a full timeout. Result: **4.003 s →
+0.003 s warm**.
