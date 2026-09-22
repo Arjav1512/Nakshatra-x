@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { FALLBACK_MINES } from '@/components/mission-control/data'
 import LocationFloodAlertFinder from '@/components/mission-control/LocationFloodAlertFinder'

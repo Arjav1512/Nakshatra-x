@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Satellite, Activity, ChevronRight, RefreshCw, ArrowLeft, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { Starfield } from '@/components/nakshatra/sections'

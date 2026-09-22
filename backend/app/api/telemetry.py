@@ -28,6 +28,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from app.core.provenance import data_integrity, derived, measured, reference, synthetic
+from app.core.ttl_cache import cached
 from app.core.synthetic import SYNTHETIC_CALIBRATION, mine_stream, operating_day, rnd
 from app.services.nasa_power import fetch_weather_signal
 from app.services.satellite import query_sentinel_stac
@@ -60,7 +61,15 @@ async def build_mine_telemetry(mine) -> dict:
     day = operating_day()
 
     # ---- Measured: weather (PRD B-4) -------------------------------------
-    wx = await fetch_weather_signal(mine.latitude, mine.longitude, mine_id=mine_key)
+    # Cached: NASA POWER daily data changes once a day, so re-fetching per
+    # request bought nothing and cost 4 s warm against N-1's 2 s budget.
+    # The cached payload keeps its own `window_end`, so reported vintage stays
+    # the observation's age, not the cache entry's.
+    wx = await cached(
+        f"nasa-power:{mine.latitude:.4f},{mine.longitude:.4f}",
+        lambda: fetch_weather_signal(mine.latitude, mine.longitude, mine_id=mine_key),
+        is_failure=lambda v: not v.get("is_live"),
+    )
     live = bool(wx.get("is_live"))
     wrap = measured if live else synthetic
     wx_source = wx.get("source", "unknown")
@@ -113,7 +122,13 @@ async def build_mine_telemetry(mine) -> dict:
     risk_score = rnd(min(98.0, total_drag * 160 + 8), 1)
 
     # ---- Real STAC query (PRD A-2 context; surface only) ------------------
-    stac = await query_sentinel_stac(mine.latitude, mine.longitude)
+    # Cached: a Sentinel-2 revisit is about five days, so an hourly TTL cannot
+    # conceal a new scene.
+    stac = await cached(
+        f"stac:{mine.latitude:.4f},{mine.longitude:.4f}",
+        lambda: query_sentinel_stac(mine.latitude, mine.longitude),
+        is_failure=lambda v: not v.get("is_live"),
+    )
 
     weather = {
         "rainfall_14d_mm": rainfall_14d,

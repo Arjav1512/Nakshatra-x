@@ -1,4 +1,4 @@
-import {
+import type {
   MineInfo,
   WeatherSignal,
   ReservePrediction,

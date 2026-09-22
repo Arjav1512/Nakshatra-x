@@ -1,34 +1,27 @@
 'use client'
 
-import React, { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   Orbit,
   LogOut,
   Users,
-  Shield,
   ShieldCheck,
   Lock,
   Search,
   RefreshCw,
   Download,
   Mail,
-  Calendar,
-  Sparkles,
-  Layers,
   Activity,
-  CheckCircle2,
   ExternalLink,
   Copy,
   Check,
   Filter,
   Save,
-  Trash2,
-  Plus,
   Pickaxe,
 } from 'lucide-react'
-import { MineInfo } from '@/components/mission-control/types'
+import type { MineInfo } from '@/components/mission-control/types'
 import { CyberRobotAvatar } from '@/components/auth/CyberRobotAvatar'
 
 
@@ -239,7 +232,7 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
+            <button type="button"
               onClick={() => {
                 fetchUserData()
                 fetchMines()
@@ -258,7 +251,7 @@ export default function AdminDashboard() {
               <span>Live Site</span>
             </Link>
 
-            <button
+            <button type="button"
               onClick={handleLogout}
               className="flex items-center gap-1.5 bg-[#FF2E63]/10 hover:bg-[#FF2E63]/20 text-[#FF2E63] px-4 py-2 rounded-xl border border-[#FF2E63]/30 hover:border-[#FF2E63] text-xs transition-all cursor-pointer shadow-sm"
             >
@@ -332,7 +325,7 @@ export default function AdminDashboard() {
 
         {/* ================= NAVIGATION TABS ================= */}
         <div className="flex items-center gap-2 border-b border-white/10 pb-4 mb-6">
-          <button
+          <button type="button"
             onClick={() => setActiveTab('users')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === 'users'
@@ -344,7 +337,7 @@ export default function AdminDashboard() {
             <span>User Sign-In Database ({users.length})</span>
           </button>
 
-          <button
+          <button type="button"
             onClick={() => setActiveTab('operations')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === 'operations'
@@ -385,7 +378,7 @@ export default function AdminDashboard() {
                   { id: 'email', label: `Email (${emailCount})` },
                   { id: 'admin', label: `Admin (${adminCount})` },
                 ].map((f) => (
-                  <button
+                  <button type="button"
                     key={f.id}
                     onClick={() => setSelectedProvider(f.id)}
                     className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase transition-colors cursor-pointer whitespace-nowrap ${
@@ -401,7 +394,7 @@ export default function AdminDashboard() {
 
 
               {/* Export Button */}
-              <button
+              <button type="button"
                 onClick={exportUsersCSV}
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#00FF88]/15 hover:bg-[#00FF88]/25 border border-[#00FF88]/40 text-[#00FF88] text-xs font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap"
               >
@@ -492,7 +485,7 @@ export default function AdminDashboard() {
 
                             {/* User ID & Copy */}
                             <td className="px-5 py-3.5 text-slate-400 font-mono text-[10px]">
-                              <button
+                              <button type="button"
                                 onClick={() => copyToClipboard(u.id)}
                                 title="Click to copy ID"
                                 className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer group"
@@ -546,7 +539,7 @@ export default function AdminDashboard() {
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
                 <Pickaxe className="text-[#38BDF8]" size={18} /> Active Mining Operations Management
               </h2>
-              <button
+              <button type="button"
                 onClick={handleSaveMines}
                 disabled={savingMines}
                 className="flex items-center gap-2 bg-[#00FF88]/20 hover:bg-[#00FF88]/30 text-[#00FF88] px-4 py-2 rounded-xl border border-[#00FF88]/40 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-[0_0_20px_rgba(0,255,136,0.2)]"

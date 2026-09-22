@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, } from 'react'
 
 type MineData = {
   id: string
@@ -213,7 +213,7 @@ export default function MissionControl() {
         {/* Tab Bar */}
         <div className="mb-6 flex gap-1.5 overflow-x-auto pb-1">
           {tabs.map(tab => (
-            <button
+            <button type="button"
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`whitespace-nowrap rounded-[10px] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.12em] transition-all duration-200 ${
@@ -243,7 +243,7 @@ export default function MissionControl() {
                         <div className="mb-3 text-[10px] font-medium uppercase tracking-[0.22em] text-[#8FA4B5]">3D INDIA COMMAND GLOBE</div>
                         <div className="grid grid-cols-3 gap-3 px-8">
                           {mines.slice(0, 6).map(m => (
-                            <button
+                            <button type="button"
                               key={m.id}
                               onClick={() => setSelectedMineId(m.id)}
                               className={`liquid-inset cursor-pointer p-3 text-left transition-all ${

@@ -102,7 +102,7 @@ export function mineStream(
 
 /** Rounding helper that keeps outputs presentable without hiding the model. */
 export function round(value: number, dp = 1): number {
-  const f = Math.pow(10, dp)
+  const f = 10 ** dp
   return Math.round(value * f) / f
 }
 

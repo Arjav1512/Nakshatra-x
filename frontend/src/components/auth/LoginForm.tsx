@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import type React from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { GlassCard } from '@/components/nakshatra/ui'
 import {
   ShieldCheck,
@@ -9,16 +10,12 @@ import {
   Mail,
   KeyRound,
   CheckCircle2,
-  RefreshCw,
   Compass,
-  ArrowRight,
-  Eye,
-  EyeOff,
   Send,
   Lock,
 } from 'lucide-react'
 import Link from 'next/link'
-import { signInWithSupabaseGoogle, supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { signInWithGooglePopup } from '@/firebase'
 
 export function LoginForm() {

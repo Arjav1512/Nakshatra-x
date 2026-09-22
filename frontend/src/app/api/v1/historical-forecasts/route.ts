@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import {
   getCombinedHistoricalAndFutureData,
   computeDynamicPredictions,
-  PredictionScenarioOptions,
+  type PredictionScenarioOptions,
   OFFICIAL_DATA_SOURCES,
 } from '@/lib/historical-database'
 

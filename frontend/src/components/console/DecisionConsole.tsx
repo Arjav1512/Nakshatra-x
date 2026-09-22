@@ -149,7 +149,7 @@ export function DecisionConsole() {
       {/* --- breadcrumb: portfolio -> mine -> face (D-6) --- */}
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#060b13]/95 backdrop-blur no-print">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-2 gap-y-1 px-4 py-3 text-xs">
-          <button
+          <button type="button"
             onClick={() => { setLevel('portfolio'); setSelected(null) }}
             className={`transition-colors ${level === 'portfolio' ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`}
           >
@@ -164,10 +164,10 @@ export function DecisionConsole() {
             </>
           ) : null}
           <div className="ml-auto flex items-center gap-2">
-            <button onClick={doExportCsv} className="rounded border border-white/15 px-2.5 py-1 text-[11px] text-slate-300 transition-colors hover:border-white/30">
+            <button type="button" onClick={doExportCsv} className="rounded border border-white/15 px-2.5 py-1 text-[11px] text-slate-300 transition-colors hover:border-white/30">
               Export CSV
             </button>
-            <button onClick={exportPdf} className="rounded border border-white/15 px-2.5 py-1 text-[11px] text-slate-300 transition-colors hover:border-white/30">
+            <button type="button" onClick={exportPdf} className="rounded border border-white/15 px-2.5 py-1 text-[11px] text-slate-300 transition-colors hover:border-white/30">
               Export PDF
             </button>
           </div>
@@ -207,7 +207,7 @@ export function DecisionConsole() {
                   const v = portfolio[m.id]
                   const isPilot = m.mine_code === PILOT_CODE
                   return (
-                    <button
+                    <button type="button"
                       key={m.id}
                       onClick={() => openMine(m)}
                       className={`rounded-lg border p-3 text-left transition-colors ${
@@ -257,7 +257,7 @@ export function DecisionConsole() {
           <>
             <nav className="flex gap-2 no-print">
               {(['B', 'A'] as const).map((t) => (
-                <button
+                <button type="button"
                   key={t}
                   onClick={() => setTrack(t)}
                   aria-pressed={track === t}

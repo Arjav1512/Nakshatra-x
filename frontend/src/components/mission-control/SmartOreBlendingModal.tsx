@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { MineInfo } from './types'
-import { Sliders, Sparkles, Scale, CheckCircle2, TrendingUp, DollarSign, Layers, ArrowRight } from 'lucide-react'
+import type { MineInfo } from './types'
+import { Sparkles, Scale, } from 'lucide-react'
 
 interface Props {
   mine: MineInfo
@@ -120,7 +120,7 @@ export default function SmartOreBlendingModal({ mine }: Props) {
       </div>
 
       {/* Solve Button */}
-      <button
+      <button type="button"
         onClick={handleRunOptimizer}
         disabled={isSolving}
         className="ios-glass-button w-full py-3 rounded-2xl text-xs font-mono font-bold text-[#00FF88] flex items-center justify-center gap-2 cursor-pointer"

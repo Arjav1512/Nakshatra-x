@@ -1,24 +1,16 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, } from 'react'
 import {
   Search,
   CloudRain,
   Radio,
-  Zap,
   ShieldCheck,
   AlertTriangle,
   Sparkles,
   MapPin,
   Loader2,
-  CheckCircle2,
-  Globe2,
-  TrendingUp,
   BarChart2,
-  Droplets,
-  Activity,
-  Clock,
-  ArrowRight,
 } from 'lucide-react'
 import {
   ResponsiveContainer,
@@ -32,7 +24,7 @@ import {
   BarChart,
   Bar,
 } from 'recharts'
-import { MineInfo } from './types'
+import type { MineInfo } from './types'
 import { FALLBACK_MINES } from './data'
 
 interface LocationFloodData {

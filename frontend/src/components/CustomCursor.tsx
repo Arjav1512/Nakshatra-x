@@ -18,8 +18,8 @@ export default function CustomCursor() {
     mouseRef.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
     ringPosRef.current = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
 
-    let ringEl: HTMLDivElement = ring
-    let dotEl: HTMLDivElement = dot
+    const ringEl: HTMLDivElement = ring
+    const dotEl: HTMLDivElement = dot
 
     function triggerActive() {
       ringEl.classList.add('active')

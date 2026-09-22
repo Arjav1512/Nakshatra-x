@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import type React from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ShieldAlert,
   ShieldCheck,
   Lock,
-  UserCheck,
   KeyRound,
   Mail,
   User,
@@ -331,6 +331,7 @@ export default function AdminSetupPage() {
             </div>
 
             <button
+              type="button"
               onClick={() => router.push('/admin/login')}
               className="w-full py-3 px-4 rounded-xl bg-[#38BDF8] hover:bg-[#38BDF8]/90 text-black font-bold text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(56,189,248,0.3)]"
             >

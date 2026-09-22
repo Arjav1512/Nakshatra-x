@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { sanitizeNoSqlObject, validateReplayNonce } from '@/lib/security'
 import { backendUrl, fetchFromBackend } from '@/lib/backend'
 import { z } from 'zod'

@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react'
 import { motion, useInView, animate } from 'framer-motion'
-import { MINES, TOTAL_MONTHLY_TARGET, ZONES } from '@/app/lib/mines'
+import { MINES, TOTAL_MONTHLY_TARGET, } from '@/app/lib/mines'
 
 const STATS = [
   { label: 'Active Mines', value: MINES.length, suffix: '' },

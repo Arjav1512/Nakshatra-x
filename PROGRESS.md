@@ -61,7 +61,7 @@ requirement coverage.
 | 4 | Track B forecaster + constraint engine | **done** | #7, merged |
 | 5 | Track A made honest | **done** | #8 `feat/phase5-track-a-honest` |
 | 6 | Dashboard, UX & end-to-end journey | **done** | #9 `feat/phase6-dashboard-ux` |
-| 7 | Testing, perf, deployment | partial (frames + tests done) | phase 2 branch |
+| 7 | Testing, performance, deployment | **done** | #10 `feat/phase7-testing-perf-deploy` |
 | 8 | Readiness assessment | not started | — |
 
 ---
@@ -244,6 +244,76 @@ Degraded:       4/4 endpoints 503, numeric fields returned: none, /console 200
 Suites:         api 9/9 · ingestion 8/8 · parity 4/4 · track_a 5/5 · track_b 9/9
 Frontend:       tsc --noEmit clean · next build ✓ · /console registered
 ```
+
+---
+
+## Phase 7 — Testing, performance, deployment (done)
+
+See `docs/DEPLOYMENT.md`, `docs/FABRICATION_SWEEP.md`.
+
+| Item | Status | Evidence |
+|---|---|---|
+| All backend suites green | **done** | 6 suites: api 9/9, ingestion 8/8, parity 4/4, track_a 5/5, track_b 9/9, perf_contract 4/4 |
+| `tsc --noEmit`, `npm run build` | **done** | clean / compiles, `/console` registered |
+| Lint | **done** | The project had **no working lint**: `npm run lint` called `next lint`, removed in Next 16. ESLint is unusable here (typescript-eslint refuses TS 7). Switched to Biome. |
+| Lint errors fixed | **done** | 119 → 54. All 9 in new code fixed; 92 `type="button"` added repo-wide (untyped buttons default to `submit`); 42 files of unused imports removed. Owned code is lint-clean. |
+| New tests for load-bearing logic | **done** | `test_perf_contract.py` pins artifact-served backtest and TTL-cache behaviour. Forecaster-beats-baseline, coverage, constraint rejections and blend-infeasibility were already covered. |
+| p95 latency measured (N-1) | **done** | `backend/measure_latency.py`, cold and warm separately. See the table below. |
+| Backtest meets N-1 | **done** | Precomputed by batch (N-2): **421 s compute → 2 ms served**. |
+| Telemetry meets N-1 | **done** | Was 4.003 s warm — no upstream caching. TTL cache → **0.003 s**. |
+| Hero animation in production build | **done** | `next start`: frames 0001/0394/0788 all HTTP 200 with correct `image/jpeg`; 9999 correctly 404s; landing preloads frame 1. |
+| Secrets hygiene | **done** | No committed `.env`; placeholders only; `SESSION_SECRET` env-only and throws in production; no hardcoded credentials. |
+| Fabrication sweep | **done** | **4 more found and fixed** — see below. |
+
+### Latency (PRD N-1: < 2 s p95 **on cached results**)
+
+Measured with `backend/measure_latency.py` against a freshly started service
+layer; 12 warm samples per endpoint, nearest-rank p95.
+
+| Endpoint | Cold | Warm p95 | Budget | N-1 (warm) |
+|---|---|---|---|---|
+| `GET /mines` | 0.016 s | **0.001 s** | 2 s | ✅ pass |
+| `GET /mines/1/telemetry` | 1.692 s | **0.003 s** | 2 s | ✅ pass |
+| `GET /mines/1/forecast` | 96.505 s | **0.246 s** | 2 s | ✅ pass |
+| `GET /mines/1/recommendations` | 0.204 s | **0.213 s** | 2 s | ✅ pass |
+| `GET /mines/1/backtest` | 0.004 s | **0.002 s** | 2 s | ✅ pass |
+| `GET /prospectivity/metrics` | 0.024 s | **0.001 s** | 2 s | ✅ pass |
+| `GET /prospectivity/drill-targets` | 0.010 s | **0.009 s** | 2 s | ✅ pass |
+| `GET /prospectivity/predict` | 0.001 s | **0.001 s** | 2 s | ✅ pass |
+
+**8/8 endpoints meet N-1 warm.**
+
+Two of these required real fixes rather than an excuse:
+
+* **Backtest** — 421 s to compute. Precomputed by the batch job (PRD N-2) and
+  served from `artifacts/backtests/*.json`: **421 s → 2 ms**. The response
+  carries `served_from` and `artifact_age_hours` so the UI states the figure's
+  age; a missing artifact returns 503 with instructions rather than blocking.
+* **Telemetry** — measured **4.003 s warm** because it re-queried NASA POWER and
+  Earth Search on *every* request, so there were no cached results for N-1 to
+  apply to. An hourly TTL (justified by the data's own cadence — daily weather,
+  ~5-day satellite revisit) brought it to **0.003 s**.
+
+**Cold starts are reported, not hidden.** `/forecast` costs **96.5 s** on the
+first call in a fresh process: it generates the dataset and fits a model per
+mine. N-1 governs cached results, so this is outside its scope, but it is a real
+cost and the deploy script should warm it (see `docs/DEPLOYMENT.md`). Once warm
+it is 0.246 s.
+
+### Fabrication sweep — four survivors found
+
+1. **`RealtimeMLTrainingStudio.tsx`** — a simulated training run live in three
+   pages. `setTimeout` + `Math.random()` produced a loss curve converging on a
+   hardcoded `accuracy: 98.7, rocAuc: 0.995`. Listed "Fault Line Proximity" as a
+   feature and claimed GSI/MOIL core drill logs. Replaced with a model card
+   reading real LOMO metrics.
+2. **`HotspotEvidence.tsx`** — invented Sentinel/Landsat scene IDs plus constant
+   NDVI/spectral/drill-support values; **any mine other than two silently showed
+   Balaghat's evidence under its own name**. Now reads real telemetry.
+3. **`AI/api/main.py` `/metrics`** — fallback `accuracy: 0.9875, roc_auc: 0.9950`.
+   Now 503 with instructions.
+4. **`IndiaSatelliteMap.tsx`** — `98.7% GSI/MOIL Accuracy` fallback attributed to
+   two government bodies by name. Removed.
 
 ---
 

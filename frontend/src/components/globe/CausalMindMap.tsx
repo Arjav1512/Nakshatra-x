@@ -2,8 +2,8 @@
 
 import { useCallback, useMemo, useState } from 'react'
 import ReactFlow, {
-  Node,
-  Edge,
+  type Node,
+  type Edge,
   Controls,
   Background,
   useNodesState,

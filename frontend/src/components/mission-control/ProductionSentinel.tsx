@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, useMemo, useRef } from 'react'
-import { MineInfo, ProductionForecast, RiskAnalysis, WeatherSignal } from './types'
+import { useState, useEffect, useMemo, } from 'react'
+import type { MineInfo, ProductionForecast, RiskAnalysis, WeatherSignal } from './types'
 import {
   BarChart,
   Bar,
@@ -12,28 +12,14 @@ import {
   CartesianGrid,
   AreaChart,
   Area,
-  ReferenceLine,
 } from 'recharts'
 import {
-  TrendingDown,
-  TrendingUp,
   Sliders,
-  AlertTriangle,
-  CheckCircle2,
   ShieldCheck,
-  Zap,
   Activity,
-  Gauge,
   Clock,
   Radio,
-  Truck,
-  Play,
   Pause,
-  RefreshCw,
-  Layers,
-  ArrowUpRight,
-  Sparkles,
-  CloudRain,
 } from 'lucide-react'
 
 interface Props {

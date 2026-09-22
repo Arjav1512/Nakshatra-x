@@ -1,7 +1,6 @@
 'use client'
 
-import React, { useEffect, useState, useRef } from 'react'
-import Link from 'next/link'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { CyberRobotAvatar } from '@/components/auth/CyberRobotAvatar'
 import {
@@ -11,8 +10,6 @@ import {
   LayoutDashboard,
   Loader2,
   Mail,
-  Lock,
-  Sparkles,
 } from 'lucide-react'
 
 interface UserData {

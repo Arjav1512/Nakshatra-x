@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { FALLBACK_MINES, fetchLiveMineTelemetry } from '@/components/mission-control/data'
-import { WeatherSignal, RiskAnalysis } from '@/components/mission-control/types'
+import type { WeatherSignal, RiskAnalysis } from '@/components/mission-control/types'
 import SmartOreBlendingModal from '@/components/mission-control/SmartOreBlendingModal'
 import RiskCockpit from '@/components/mission-control/RiskCockpit'
 import SpaceDustParticles from '@/components/mission-control/SpaceDustParticles'
-import { Layers, ArrowLeft, ArrowRight, MapPin, Sparkles, Home, ShieldAlert } from 'lucide-react'
+import { Layers, ArrowLeft, MapPin, Sparkles, Home, } from 'lucide-react'
 
 export default function BlendingPage() {
   const [selectedMine, setSelectedMine] = useState(FALLBACK_MINES[0])

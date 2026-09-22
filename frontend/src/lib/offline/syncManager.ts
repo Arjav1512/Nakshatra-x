@@ -1,4 +1,4 @@
-import { getSyncQueue, clearSyncQueue, removeFromSyncQueue } from './db';
+import { getSyncQueue, removeFromSyncQueue } from './db';
 
 // This is a mock API call for demonstration purposes
 const syncMutationToServer = async (action: string, payload: any) => {

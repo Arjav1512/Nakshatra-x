@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { FALLBACK_MINES, fetchLiveMineTelemetry } from '@/components/mission-control/data'
-import { WeatherSignal, ProductionForecast, RiskAnalysis } from '@/components/mission-control/types'
+import type { WeatherSignal, ProductionForecast, RiskAnalysis } from '@/components/mission-control/types'
 import ProductionSentinel from '@/components/mission-control/ProductionSentinel'
 import SpaceDustParticles from '@/components/mission-control/SpaceDustParticles'
 import { Activity, ArrowLeft, ArrowRight, MapPin, Sparkles, Home } from 'lucide-react'

@@ -116,14 +116,24 @@ def track_b_forecast(mine_id: int, horizon_days: int = Query(14, ge=1, le=60),
 @router.get("/mines/{mine_id}/backtest")
 def track_b_backtest(mine_id: int, span_days: int = Query(150, ge=60, le=400),
                      step_days: int = Query(14, ge=7, le=60),
+                     compute: bool = Query(False),
                      db: Session = Depends(get_db)):
-    """Rolling-origin backtest: MAPE and interval coverage vs baseline. PRD B-10, N-8."""
+    """
+    Rolling-origin backtest: MAPE and interval coverage vs baseline.
+    PRD B-10, N-8.
+
+    Served from the precomputed artifact so the request meets N-1
+    ("< 2 s p95 on cached results"). A full run takes minutes and belongs in the
+    nightly batch (N-2): `python -m app.api.batch backtest`. Pass
+    `?compute=true` to force an on-demand re-run, which N-2 also calls for.
+    """
     ensure_seed_mines(db)
     mine = db.get(MineSite, mine_id)
     if not mine:
         raise HTTPException(status_code=404, detail="Mine not found")
     try:
-        return backtest_mine(mine.mine_code, span_days=span_days, step_days=step_days)
+        return backtest_mine(mine.mine_code, span_days=span_days,
+                             step_days=step_days, allow_compute=compute)
     except ValueError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
 
