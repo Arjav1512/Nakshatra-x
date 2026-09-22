@@ -152,3 +152,36 @@ was verified finite. This is macOS Accelerate setting FP status flags from its
 vectorised inner loops. Rather than suppress blindly, the inputs and outputs are
 asserted finite around a narrowly scoped `np.errstate`, so a genuine numerical
 fault still raises.
+
+## D-019 — Exports are CSV + browser print-to-PDF, no spreadsheet library
+**Phase 6.** PRD D-8 asks for "export to PDF/Excel for planning meetings". A
+real `.xlsx` writer means a spreadsheet dependency for what is a flat tabular
+extract; CSV opens directly in Excel (UTF-8 BOM prepended so ₹ and × survive),
+and the browser's own print-to-PDF against a print stylesheet produces a genuine
+PDF. No new dependency for either. Every exported row carries `source`,
+`source_kind`, `vintage`, `model_version`, `uncertainty` and `is_synthetic`, so
+a figure pasted into a deck still states its origin (N-3).
+
+## D-020 — A number cannot be rendered without provenance
+**Phase 6.** N-3 sets 100% provenance coverage, which is an invariant, not a
+review checklist. The console's `Metric` component is therefore the only way it
+renders a number: given no envelope it prints "unavailable", and given a value
+with no envelope it prints a visible "PRD N-3 violation" marker. The portfolio
+risk strip renders numbers outside a tile, so it carries an inline source badge
+for the same reason. This makes an unprovenanced figure hard to ship by
+accident rather than relying on discipline.
+
+## D-021 — The face/section level shows grades, not an invented face register
+**Phase 6.** D-6 asks for portfolio → mine → face/section drill-down. The
+ingestion contract's production grain is (mine × grade × period); there is no
+face-level key, and MOIL has not supplied one. Rather than invent a face
+register to satisfy the wording, the third level presents the grades actually
+being worked plus measured site conditions. When MOIL supplies face-level rows
+the contract gains a key and this level deepens without a redesign.
+
+## D-022 — A new console route rather than refactoring mission-control
+**Phase 6.** The existing mission-control surface is large and works. The demo
+narrative needs one uninterrupted journey wired to the real endpoints, so Phase
+6 adds `/console` and leaves the existing screens untouched — targeted change
+over a risky rewrite. `/console` has no mock path: every panel calls the service
+layer and renders "unavailable" with a reason when it cannot.

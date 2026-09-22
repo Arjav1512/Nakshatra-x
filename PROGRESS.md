@@ -60,7 +60,7 @@ requirement coverage.
 | 3 | Ingestion contract + flagged synthetic data | **done** | #6, merged |
 | 4 | Track B forecaster + constraint engine | **done** | #7, merged |
 | 5 | Track A made honest | **done** | #8 `feat/phase5-track-a-honest` |
-| 6 | Dashboard / UX journey | not started | — |
+| 6 | Dashboard, UX & end-to-end journey | **done** | #9 `feat/phase6-dashboard-ux` |
 | 7 | Testing, perf, deployment | partial (frames + tests done) | phase 2 branch |
 | 8 | Readiness assessment | not started | — |
 
@@ -207,6 +207,43 @@ PRD §10: *"Lead with Track B. It is the spine."* See `docs/BACKTEST.md`.
 **Calibration took four attempts** (0.581 → 0.656 → 0.662 → 0.812); the working fix was a recency-based conformal calibration split, at the cost of 0.9 points of MAPE. Documented in `docs/BACKTEST.md`.
 
 **Bug found and fixed:** plan targets stopped at the data end, so the tail of every forecast horizon had no target and P(shortfall) was trivially 0. Targets now run 90 days forward.
+
+---
+
+## Phase 6 — Dashboard, UX & end-to-end journey (done)
+
+New `/console` route carrying the full demo narrative. See `docs/DEMO.md`.
+
+| Req | Item | Status | Evidence |
+|---|---|---|---|
+| D-7, N-3 | Evidence panel on every number | **done** | `Metric` is the only number-rendering component and refuses a value without an envelope; 14 tiles plus an inline badge on the portfolio strip. Expanding `+ evidence` shows source, vintage, model version, uncertainty, method. |
+| D-6 | Portfolio → mine → face drill-down | **done** | Breadcrumb navigation; portfolio risk strip → mine conditions → grade level. Face grain is the contract's (mine × grade × period) — no invented face register (D-021). |
+| D-2, D-3 | Production trends and shortfall risk | **done** | Per-grade trajectory chart with the 80% prediction interval and the seasonal-naive baseline overlaid. |
+| D-4, C-1..C-5 | Corrective steps | **done** | Approved actions with expected effect, ΔP(shortfall) and assumptions; **rejected** actions shown with the rule each broke. |
+| N-8, B-10 | Backtest visible in the UI | **done** | On-demand rolling-origin run: model vs baseline MAPE, coverage vs nominal, per-horizon table. |
+| D-1, A-3..A-7 | Track A prospectivity | **done** | LOMO AUC **with its CI**, spectral-only and slope-only ablations, ranked drill targets with kriging uncertainty and evidence, live point scoring. |
+| D-8 | Export PDF/Excel | **done** | CSV (Excel-readable, provenance columns) + print-to-PDF; no new dependency (D-019). |
+| N-6 | Degrade gracefully | **done** | Backend down → every endpoint 503 with a reason, **zero numeric fields**, `/console` still HTTP 200. |
+
+### Fabrication removed in passing
+
+`/api/v1/prospectivity/metrics` read a local file and, when absent, returned a
+hardcoded fallback: `accuracy: 0.9512, roc_auc: 0.8875` with `dist_to_fault_km`
+as the top feature — the leaked pipeline's numbers, served as though measured.
+It now proxies the real endpoint and returns nothing at all when unavailable.
+
+### Verification
+
+```
+Track B traced: UI /forecast (served_by fastapi) 640 t → FastAPI 640.0 t
+                → plan_target 12,688.6 t, provenance synthetic
+Track A traced: UI /metrics (served_by fastapi) LOMO AUC 0.85 CI [0.723,0.95]
+                → FastAPI 0.85 → training_table_honest.csv, 50 rows,
+                  all is_synthetic=False, scene S2C_MSIL2A_...T44QMK cloud 0.88%
+Degraded:       4/4 endpoints 503, numeric fields returned: none, /console 200
+Suites:         api 9/9 · ingestion 8/8 · parity 4/4 · track_a 5/5 · track_b 9/9
+Frontend:       tsc --noEmit clean · next build ✓ · /console registered
+```
 
 ---
 
