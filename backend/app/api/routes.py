@@ -6,6 +6,7 @@ from app.schemas.mine import MineCreate, MineResponse
 from app.services.nasa_power import fetch_weather_signal
 from app.services.satellite import query_sentinel_stac
 from app.api.track_b import backtest_mine, forecast_mine, recommend_actions
+from app.ml.prospectivity import model_metrics, predict_point, rank_drill_targets
 from app.api.telemetry import build_mine_telemetry
 from app.services.recommendations import generate_action_recommendations
 from app.ml.risk_model import calculate_shortfall_risk
@@ -138,6 +139,35 @@ def track_b_recommendations(mine_id: int, horizon_days: int = Query(14, ge=1, le
     try:
         return recommend_actions(mine.mine_code, horizon_days=horizon_days)
     except ValueError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+
+
+@router.get("/prospectivity/predict")
+def prospectivity_predict(lat: float = Query(..., ge=-90, le=90),
+                          lng: float = Query(..., ge=-180, le=180),
+                          live: bool = Query(True)):
+    """Track A point prediction with uncertainty and evidence. PRD A-3, A-4, A-7."""
+    try:
+        return predict_point(lat, lng, fetch_live=live)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+
+
+@router.get("/prospectivity/drill-targets")
+def prospectivity_targets(top_n: int = Query(10, ge=1, le=50)):
+    """Ranked drill targets with the evidence behind each. PRD A-5."""
+    try:
+        return rank_drill_targets(top_n=top_n)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+
+
+@router.get("/prospectivity/metrics")
+def prospectivity_metrics():
+    """Leave-one-mine-out validation metrics. PRD A-8, D-7."""
+    try:
+        return model_metrics()
+    except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
 
 

@@ -58,8 +58,8 @@ requirement coverage.
 | — | PRD traceability matrix | **done** | #4, merged |
 | 2.5 | Wire UI to the real FastAPI backend | **done** | #5, merged |
 | 3 | Ingestion contract + flagged synthetic data | **done** | #6, merged |
-| 4 | Track B forecaster + constraint engine | **done** | #7 `feat/phase4-track-b-forecaster` |
-| 5 | Track A leakage fix | not started | — |
+| 4 | Track B forecaster + constraint engine | **done** | #7, merged |
+| 5 | Track A made honest | **done** | #8 `feat/phase5-track-a-honest` |
 | 6 | Dashboard / UX journey | not started | — |
 | 7 | Testing, perf, deployment | partial (frames + tests done) | phase 2 branch |
 | 8 | Readiness assessment | not started | — |

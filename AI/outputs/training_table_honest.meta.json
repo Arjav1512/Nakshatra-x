@@ -1,0 +1,21 @@
+{
+  "n_points": 50,
+  "n_positive": 10,
+  "n_negative": 40,
+  "skipped": [],
+  "feature_cols": [
+    "iron_oxide_ratio",
+    "ferrous_ratio",
+    "clay_alteration_ratio",
+    "ndvi",
+    "elevation_m",
+    "slope_deg",
+    "swir_ratio_norm"
+  ],
+  "leakage_note": "No feature is a function of distance to a known mine, and lat/lng are excluded from the feature set. The previous pipeline derived every spectral value from proximity to the mine coordinates, which are the positive labels.",
+  "lithology_note": "GSI lithology is NOT included: bhukosh.gsi.gov.in and geoportal.gsi.gov.in were unreachable. Omitted rather than substituted with an invented value.",
+  "sources": [
+    "Sentinel-2 L2A surface reflectance via Microsoft Planetary Computer",
+    "SRTM 30 m elevation via OpenTopoData"
+  ]
+}
