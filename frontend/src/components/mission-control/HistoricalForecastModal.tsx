@@ -236,7 +236,7 @@ export default function HistoricalForecastModal() {
                   </div>
                   <div>
                     <h3 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2 font-space">
-                      50-Yr Real MOIL Database & 2040 Predictions
+                      50-Yr Synthetic Series & Illustrative 2040 Trajectory
                       <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-[#00FF88]/20 text-[#00FF88] border border-[#00FF88]/40 shadow-[0_0_8px_rgba(0,255,136,0.3)]">
                         1977 - 2040
                       </span>
@@ -871,7 +871,7 @@ export default function HistoricalForecastModal() {
                         <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
                           <div className="text-[#00FF88] font-bold">2. r = Compound Annual Growth Rate (CAGR)</div>
                           <p className="text-slate-300 text-[11px] font-sans">
-                            Derived directly from 50 years of IBM historical data:
+                            Derived from the 50-year synthetic series (not IBM data):
                             <span className="block mt-1 font-mono text-[#00FF88] text-[11px]">
                               r = (P<sub>2024</sub> / P<sub>2014</sub>)<sup>1/10</sup> - 1 = (1,840,000 / 1,135,000)<sup>0.10</sup> - 1 = +4.95%/yr (Baseline: +4.40%)
                             </span>

@@ -298,7 +298,7 @@ export default function IndiaSatelliteMap({
               <div style="font-family: monospace; font-size: 10px; color: #FFFFFF; background: #080A0D; padding: 7px; border-radius: 8px; border: 1px solid rgba(0,229,255,0.4); min-width: 170px;">
                 <strong style="color: #00E5FF; font-size: 11px;">ISRO EOS-04 / RISAT-1A SAR 🇮🇳</strong><br/>
                 <span style="color: #94A3B8;">Sensor:</span> C-Band Synthetic Aperture Radar<br/>
-                <span style="color: #94A3B8;">Cloud Penetration:</span> 100% Operational<br/>
+                <span style="color: #94A3B8;">Scene cloud filter:</span> applied at query time<br/>
                 <span style="color: #94A3B8;">Backscatter:</span> <strong style="color: #00E5FF;">${db} dB</strong><br/>
                 <span style="color: #00FF88;">Haul Road Slip Risk: Minimal</span>
               </div>

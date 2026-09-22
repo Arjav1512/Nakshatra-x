@@ -38,7 +38,7 @@ export function queryAIXKnowledgeBase(query: string, mineName: string, mineCode:
         answer: `**Geological AI Prospectivity Solution for ${key.toUpperCase()} Sector (${loc.state})**:\n\n` +
           `• **Coordinates**: ${loc.lat}°N, ${loc.lng}°E\n` +
           `• **Manganese Ore Possibility**: **${(loc.prob * 100).toFixed(1)}%** (${loc.prob >= 0.75 ? 'HIGH' : 'MEDIUM'} Confidence)\n` +
-          `• **Historical Discovery Success Ratio**: **${loc.success}%** (GSI/MOIL Core Drill Calibrated)\n` +
+          `• **Historical Discovery Success Ratio**: **${loc.success}%** (synthetic — no core drill dataset is held)\n` +
           `• **Structural Fault Line**: ${loc.fault} (${loc.faultDist} km distance)\n` +
           `• **Est. Grade Horizon**: ${loc.grade}\n\n` +
           `**Geological Diagnostic**: SWIR Band 11/12 reflectance ratio indicates strong pyrolusite/braunite mineralization syncline. Highly recommended for exploratory core drilling.`,

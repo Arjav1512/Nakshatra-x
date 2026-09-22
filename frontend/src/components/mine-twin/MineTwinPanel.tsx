@@ -212,7 +212,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
             MINE TWIN &bull; <span className="text-[#38BDF8]">Live Digital Twin & What-If Operational Simulator</span>
           </h3>
           <p className="text-xs font-mono text-slate-300 mt-1 max-w-3xl leading-relaxed">
-            Real-time virtual copy of <span className="text-[#00FF88] font-bold">{selectedMine.name} Mine ({selectedMine.code})</span>. Calibrated with continuous 50-year statutory disclosures (1975–2025) & Holt-Winters/XGBoost 2040 trajectory model.
+            Real-time virtual copy of <span className="text-[#00FF88] font-bold">{selectedMine.name} Mine ({selectedMine.code})</span>. Driven by a synthetic 50-year series generated to the published ingestion contract, with an illustrative forward trajectory. Not statutory disclosures, and not a fitted trajectory model.
           </p>
         </div>
 

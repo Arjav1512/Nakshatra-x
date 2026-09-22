@@ -182,7 +182,7 @@ export const FUTURE_FORECASTS_2026_2040: FutureForecastRecord[] = [
     confidenceIntervalLow: 2090000,
     confidenceIntervalHigh: 2210000,
     aiStrategyDirective: 'Deploy SciPy Simplex Ore Blending across SP-1, SP-2, SP-3 stockpiles to meet 40% Mn grade without dilution.',
-    modelBasis: 'Holt-Winters Trend Smoothing + XGBoost Baseline',
+    modelBasis: 'nakshatra-synthetic-v1 seeded generator (illustrative, not a fitted model)',
   },
   {
     year: 2027,
@@ -193,7 +193,7 @@ export const FUTURE_FORECASTS_2026_2040: FutureForecastRecord[] = [
     climateRiskIndex: 41.2,
     confidenceIntervalLow: 2240000,
     confidenceIntervalHigh: 2400000,
-    aiStrategyDirective: 'Infill 3D Kriging borehole drilling on 25m grid along East Balaghat strike to upgrade UNFC 122 to 111 reserves.',
+    aiStrategyDirective: 'Infill drilling on a 25 m grid along the East Balaghat strike to reduce prospectivity uncertainty. Reserve classification is a competent person\u2019s determination and is not produced here (PRD \u00a72.4).',
     modelBasis: 'CAGR + Infill Kriging Reserve Upgrade Multiplier',
   },
   {

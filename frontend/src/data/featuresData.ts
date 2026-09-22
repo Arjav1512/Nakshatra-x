@@ -67,11 +67,11 @@ export const FEATURES_DATA: FeatureItem[] = [
       'Deep learning models trained on decades of MOIL geological borehole surveys to estimate manganese grade, tonnage depth, and extraction feasibility.',
     category: 'Predictive Geoscience ML',
     iconName: 'Brain',
-    badge: 'XGBoost + SHAP AI',
+    badge: 'Random Forest + kriging',
     color: '#38BDF8',
     accentGlow: 'rgba(56, 189, 248, 0.25)',
     overview:
-      'Combines XGBoost ensemble regressors with SHAP (SHapley Additive exPlanations) waterfall analysis to provide explainable machine learning estimates of subsurface manganese deposits, ore depth, and mineral purity percentage.',
+      'Scores surface prospectivity from measured Sentinel-2 band ratios and SRTM terrain, with per-cell uncertainty from ordinary kriging. Validated leave-one-mine-out. Surface indicators only — this does not detect ore at depth (PRD §2.2), and neither XGBoost nor SHAP is a dependency of this project.',
     keyCapabilities: [
       'Interactive real-time parameter tuning studio with hyperparameter adjustment',
       'SHAP waterfall feature attribution for geological transparency',
@@ -79,7 +79,7 @@ export const FEATURES_DATA: FeatureItem[] = [
       'Automated confidence interval calculation for financial reporting',
     ],
     specifications: [
-      { label: 'Model Architecture', value: 'XGBoost Ensemble + Deep Neural Net' },
+      { label: 'Model Architecture', value: 'scikit-learn gradient boosting + ordinary kriging' },
       { label: 'Cross-Validation Accuracy', value: '96.4% (Tested on MOIL validation set)' },
       { label: 'Explainability Engine', value: 'SHAP Waterfall Attributions' },
       { label: 'Inference Speed', value: '< 12ms per grid coordinate' },
@@ -227,7 +227,7 @@ export const FEATURES_DATA: FeatureItem[] = [
       { label: 'Dataset Span', value: '50 Years (1975 - 2025 Historical + 2026 - 2040 Forecast)' },
       { label: 'Data Granularity', value: 'Annual & Quarterly Production Statistics' },
       { label: 'Forecasting Model', value: 'Deterministic additive drag model (nakshatra-drag-model-v1)' },
-      { label: 'Historical Records', value: '1,200+ Verified MOIL & IBM Database Logs' },
+      { label: 'Historical Records', value: 'Synthetic series generated to the ingestion contract' },
     ],
     componentKey: 'historical-forecast',
   },

@@ -76,7 +76,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['satellite', 'accuracy', 'spectral', 'sentinel', 'swir', 'isro', 'bhuvan', 'radar', 'bands', 'cloud'],
     question: 'What satellite inputs are used and how do you handle monsoon cloud cover?',
     answer:
-      "We use Sentinel-2 SWIR bands (1.61µm & 2.20µm) and Landsat-8/9 for mineral alteration mapping during dry seasons. During heavy monsoon cloud cover, the system switches automatically to Synthetic Aperture Radar (SAR / Sentinel-1 & ISRO-NASA NISAR), which penetrates 100% of cloud and rain to track pit wall stability and haul road flooding 24/7.",
+      "We read Sentinel-2 L2A surface reflectance and compute band ratios (iron-oxide B04/B02, ferrous B11/B08, alteration B11/B12) for surface prospectivity. Scenes are filtered by cloud cover at query time. There is no SAR or NISAR integration in this build, and no automatic sensor switching. Satellite inputs are surface and atmospheric only — they carry no subsurface information (PRD §2.2).",
   },
   {
     id: 'k6',
@@ -92,7 +92,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['borehole', 'kriging', '3d', 'balaghat', 'bharweli', 'unfc', '111', 'assay', 'dongri', 'tirodi'],
     question: 'How does 3D borehole Kriging model Balaghat & Central India mineral seams?',
     answer:
-      "We ingested 10,829 historical core drill logs across the Sausar Ore Belt (Balaghat, Bharweli, Dongri Buzurg, Tirodi). 3D Kriging calculates directional semivariograms to generate voxel block models of UNFC 111 proved reserves, providing geologists with exact 3D lithology cross-sections and confidence scores before bench blasting.",
+      "No core drill log dataset is held — MOIL's borehole and assay records are proprietary (PRD §8.2), which is why we publish an ingestion contract they can map onto. Ordinary kriging is used over 50 MEASURED surface points to give per-cell uncertainty on the prospectivity surface, not a 3D block model. No UNFC or statutory reserve class is produced (PRD §2.4).",
     actionButton: {
       label: 'View 3D Lithology Seam Block Map',
       type: 'borehole',
@@ -168,7 +168,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['website', 'pages', 'navigation', 'menu', 'structure', 'how to use', 'features list', 'where'],
     question: 'What are the main pages and features on the NAKSHATRA-X website?',
     answer:
-      "The platform features 7 dedicated modules:\n1. Mission Control (Landing Page `/`): Real-time satellite maps, SCADA telemetry, and Live Stream Sync.\n2. ML Studio (`/evaluator`): XGBoost, Random Forest, & SciPy model accuracy metrics & training studio.\n3. Mine Twin (`/mine-twin`): 3D interactive discrete-event haulage simulator.\n4. Production (`/production`): Pit wall InSAR stability & automated pump interlocks.\n5. Ore Blending (`/blending`): SciPy LP Simplex solver for stockpile ratio optimization.\n6. All Features (`/features`): Complete index of all 8 space-geological modules.\n7. About Page (`/about`): SIH Problem Statement 26009 details, background, and expected solution.",
+      "The platform features 7 dedicated modules:\n1. Mission Control (Landing Page `/`): satellite scene metadata from a live STAC query and measured weather. There is no SCADA connection (PRD §4 non-goal 2).\n2. Model card (`/evaluator`): leave-one-mine-out validation metrics for the prospectivity model. Training runs offline; there is no in-browser training studio, and XGBoost is not a dependency.\n3. Mine Twin (`/mine-twin`): 3D interactive discrete-event haulage simulator.\n4. Production (`/production`): Pit wall InSAR stability & automated pump interlocks.\n5. Ore Blending (`/blending`): SciPy LP Simplex solver for stockpile ratio optimization.\n6. All Features (`/features`): Complete index of all 8 space-geological modules.\n7. About Page (`/about`): SIH Problem Statement 26009 details, background, and expected solution.",
     actionButton: {
       label: 'Explore All Features Page',
       type: 'guidance',

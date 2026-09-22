@@ -231,7 +231,7 @@ export default function HistoricalForecastGlassVisualizer() {
             <span>MOIL Manganese Ore Timeline &bull; <span className="text-[#FACC15]">1975–2040</span></span>
           </h2>
           <p className="text-xs sm:text-sm font-mono text-slate-300 mt-1 max-w-3xl leading-relaxed">
-            Select any year from 1977 to 2040 to inspect real statutory disclosures, run instant custom target overrides, and predict future manganese ore yield trajectories.
+            Select any year from 1977 to 2040 to inspect the synthetic production series, run target overrides and view the illustrative forward trajectory. These are generated figures, not statutory disclosures.
           </p>
         </div>
 
@@ -523,8 +523,8 @@ export default function HistoricalForecastGlassVisualizer() {
 
                   <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
                     <div>
-                      <span className="text-[10px] font-mono text-slate-400 uppercase block">Exploratory Core Drill Logs</span>
-                      <span className="text-sm font-bold font-mono text-white">GSI Diamond Boreholes</span>
+                      <span className="text-[10px] font-mono text-slate-400 uppercase block">Synthetic borehole count</span>
+                      <span className="text-sm font-bold font-mono text-white">Generated, not GSI data</span>
                     </div>
                     <span className="text-xs font-mono font-bold text-amber-300 bg-amber-400/10 px-2.5 py-1 rounded-full border border-amber-400/30">
                       {activeYearRecord.drillHoles} Drill Holes
@@ -634,7 +634,7 @@ export default function HistoricalForecastGlassVisualizer() {
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <span className="w-4 h-1 rounded bg-[#00FF88] inline-block shadow-[0_0_8px_#00FF88]" />
-                  <span className="text-[#00FF88] font-bold">1975–2025 Authentic History (MOIL/IBM Data)</span>
+                  <span className="text-[#00FF88] font-bold">1977–2026 synthetic series (generated, not MOIL/IBM data)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-4 h-1 rounded bg-[#FACC15] border-dashed border-t-2 border-[#FACC15] inline-block" />

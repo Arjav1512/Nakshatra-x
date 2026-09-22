@@ -61,8 +61,14 @@ f1 = f1_score(y_test, pred, zero_division=0)
 
 try:
     auc = roc_auc_score(y_test, probs)
-except Exception:
-    auc = 1.0
+except Exception as exc:
+    # Previously `auc = 1.0` -- a failure to compute was reported as a PERFECT
+    # score, and printed as "Test ROC-AUC: 1.0000". roc_auc_score raises when
+    # the test split holds a single class, so the one case where the metric is
+    # undefined was the case that produced the most flattering number.
+    # An undefined metric is now reported as undefined.
+    auc = float("nan")
+    print(f"[WARN] ROC-AUC undefined for this split ({exc}); reporting NaN, not 1.0")
 
 # 5-Fold Stratified Cross Validation
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -77,7 +83,7 @@ print(f"Test Accuracy:          {acc * 100:.2f}%")
 print(f"Test Precision:         {prec * 100:.2f}%")
 print(f"Test Recall:            {rec * 100:.2f}%")
 print(f"Test F1-Score:          {f1 * 100:.2f}%")
-print(f"Test ROC-AUC:           {auc:.4f}")
+print(f"Test ROC-AUC:           {'undefined' if auc != auc else f'{auc:.4f}'}")
 print(f"5-Fold Mean Accuracy:   {cv_acc_scores.mean() * 100:.2f}% (±{cv_acc_scores.std() * 100:.2f}%)")
 print(f"5-Fold Mean ROC-AUC:    {cv_auc_scores.mean():.4f}")
 print("\nClassification Report:")
@@ -97,6 +103,18 @@ print(f"\n[OK] Saved ML Model: {model_path}")
 # Export comprehensive model metadata
 metrics_path = os.path.join(OUTPUT_DIR, "model_metrics.json")
 metrics_payload = {
+    # Self-labelling: this script trains the LEGACY pipeline, whose features are
+    # derived from distance to the known mine coordinates -- which are the
+    # positive labels. Any score here measures that leakage, not geology
+    # (docs/INTEGRITY.md section 4). The honest figures come from
+    # 08_train_honest_model.py -> model_metrics_honest.json, and are what the
+    # API serves. A previously shipped copy of this file reported roc_auc
+    # 0.9858 with dist_to_fault_km as the top feature.
+    "VALIDITY_WARNING": (
+        "Leakage-affected. Features derive from distance to the labelled mines. "
+        "Do not quote. Use model_metrics_honest.json (leave-one-mine-out)."
+    ),
+    "superseded_by": "model_metrics_honest.json",
     "model_type": "RandomForestClassifier",
     "n_estimators": 200,
     "max_depth": 10,
@@ -104,7 +122,9 @@ metrics_payload = {
     "precision": round(float(prec), 4),
     "recall": round(float(rec), 4),
     "f1_score": round(float(f1), 4),
-    "roc_auc": round(float(auc), 4),
+    # NaN is not valid JSON; an undefined metric serialises as null so a
+    # consumer sees "absent", never a number that was never computed.
+    "roc_auc": None if auc != auc else round(float(auc), 4),
     "cv_accuracy_mean": round(float(cv_acc_scores.mean()), 4),
     "cv_roc_auc_mean": round(float(cv_auc_scores.mean()), 4),
     "dataset_size": len(df),

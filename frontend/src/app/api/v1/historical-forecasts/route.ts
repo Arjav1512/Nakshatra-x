@@ -12,7 +12,11 @@ export async function GET() {
     success: true,
     ...data,
     query_timestamp: new Date().toISOString(),
-    engine: 'NAKSHATRA-X Real MOIL & IBM Historical Database + Holt-Winters/XGBoost 2040 Forecast Kernel',
+    // Neither Holt-Winters nor XGBoost is a dependency of this project, and the
+// series is generated rather than taken from MOIL or IBM publications.
+engine: 'nakshatra-synthetic-v1 (seeded generator; illustrative forward trajectory)',
+    engine_note:
+      'Synthetic series generated to the published ingestion contract. Not MOIL or IBM data, and not a fitted time-series model. The validated forecaster is nakshatra-gbt-cqr-v1, served by /api/v1/mines/{id}/forecast with a published backtest.',
     provenance: {
       primaryCPSE: 'MOIL Limited (Ministry of Steel, Govt of India)',
       statutoryRegistry: 'Indian Bureau of Mines (IBM) Indian Minerals Yearbook',
