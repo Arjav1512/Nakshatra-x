@@ -62,6 +62,35 @@ Note on the attribution rename: the output is an **exact** additive
 decomposition of a linear model. That is a stronger statement than a Shapley
 approximation, so the honest name is not a downgrade.
 
+## D-008 — Ventilation excluded from the constraint engine (PRD overrides the diagram)
+**Traceability.** `SIH26009-Architecture.excalidraw` lists the constraint engine
+as "shifts · blasting windows · equipment compatibility · relocation ·
+**ventilation**". `SIH26009-01-PRD.md` §4 non-goal 6 makes "mine safety and
+ventilation management" an explicit **non-goal**. Per the standing rule that the
+PRD wins, ventilation is not implemented as a constraint dimension. The engine
+covers shifts, blasting windows, equipment compatibility and relocation
+feasibility. Recorded because the omission is deliberate, not an oversight.
+
+## D-009 — A-5 ranks by evidence; expected information gain is optional
+**Traceability.** EIG appears only in the diagram's LEGEND as a "★
+differentiator" — a [P] proposal. PRD A-5 [D] P0 requires "rank candidate drill
+targets **with the evidence that drove each ranking**". Building EIG in place of
+evidence-backed ranking would miss the requirement, so ranking + evidence ships
+first and EIG is attempted only if Phase 5 has room.
+
+## D-010 — Track A adopts GBT + ordinary kriging, driven by A-4 not by the name
+**Traceability.** The PRD names no algorithm for A-3. The diagram specifies
+gradient-boosted trees plus a variogram + ordinary kriging resource model, and
+PRD §12 describes the work as "mostly gradient boosting, classical
+geostatistics". The deciding factor is **A-4** (per-cell uncertainty): kriging
+variance yields it directly, whereas the current RandomForest emits only a
+probability and a bucket label. Adopted for that reason.
+
+## D-011 — Track A pilot AOI is opencast (Dongri Buzurg), not Balaghat
+**Traceability.** PRD §13 Q4 recommends Balaghat for Track B and "an opencast
+mine such as Dongri Buzurg" for Track A, because surface spectral work needs
+exposed ground — Balaghat works at roughly 383 m depth. Balaghat remains the
+Track B pilot per the roadmap; Phase 5 uses Dongri Buzurg.
 ## D-012 — Conformal intervals calibrated on recent history, not a random split
 **Phase 4.** Raw quantile-GBT intervals were badly overconfident: 0.58 empirical
 coverage against 0.80 nominal. Conformalising with a random calibration split

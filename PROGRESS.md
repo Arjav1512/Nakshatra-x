@@ -4,36 +4,47 @@ SIH 2026, problem statement SIH26009 (Ministry of Steel / MOIL).
 Living document. Status values: **done** / **partial** / **missing** /
 **broken** / **fabricated** / **blocked**.
 
-Last updated: 2026-09-20.
+Last updated: 2026-09-21.
 
 ---
 
-## ⚠️ Blocker: the PRD is not in the repository
+## PRD received — traceability matrix is now authoritative
 
-The brief names `SIH26009-01-PRD.md` and `SIH26009-Architecture.excalidraw` as
-the single source of truth. **Neither file exists** — not in
-`Arjav1512/Nakshatra-x` at `main` (25c7caa), and not anywhere on this machine:
+`SIH26009-01-PRD.md` and `SIH26009-Architecture.excalidraw` are committed at the
+repo root (`34b9e5d`). The earlier blocker is cleared.
 
-```
-$ gh api repos/Arjav1512/Nakshatra-x/git/trees/main --jq '.tree[].path'
-.gitignore .vercelignore AGENTS.md AI CLAUDE.md README.md backend database
-frontend nakshatra_x_*.pdf netlify.toml package.json vercel.json
+**`docs/TRACEABILITY.md` is now the authoritative status document.** It maps
+every PRD requirement (A-1..A-10, B-1..B-10, C-1..C-7, D-1..D-9, N-1..N-8) to a
+status and evidence, resolves the architecture diagram's `[PS …]` / `[D]` / `[P]`
+tags against requirement IDs, and records where the PRD overrides the
+engineering brief. This file tracks phase execution; the matrix tracks
+requirement coverage.
 
-$ find ~/Downloads ~/Desktop ~/Documents -iname "*SIH26009*" -o -iname "*PRD*"
-# → only SatQuery-03-PRD.md and PrepPilot/docs/PRD.md — different projects
-```
+### Deltas the PRD introduced (full detail in TRACEABILITY.md §7–8)
 
-**What this blocks:** the requirement-by-requirement traceability table below
-cannot be authoritative, and the Phase 8 "PRD coverage" score cannot be
-computed. **What it does not block:** everything specified directly in the
-engineering brief — integrity, security, consolidation, the forecaster, the
-constraint engine — which is the bulk of the work. Those proceed.
+- **Ventilation is a PRD non-goal** (§4 non-goal 6) but appears in the diagram's
+  constraint engine. PRD wins — ventilation is not built.
+- **Drill targets by expected information gain is [P], not a requirement.**
+  A-5 requires ranking *with evidence*; EIG is a diagram "★ differentiator".
+- **B-5 is grade-aware at P0** — "forecast production per mine **per grade**".
+  The brief omitted grade entirely.
+- **Track A pilot should be opencast** (Dongri Buzurg), not Balaghat — surface
+  spectral work needs exposed ground. Balaghat remains the Track B pilot.
+- **PRD §8.4 forbids computing area/tonnage in degrees.** Current code uses
+  `degrees × 111.0`; a real violation, fixed in Phase 5.
+- **N-7 audit log** is a Required non-functional the brief never mentioned.
+- Phase 1/2 work maps cleanly onto N-3, N-4, N-6 and §2.4 — nothing the PRD
+  contradicts.
 
-**To unblock:** add the PRD to the repo, or provide the file.
+### Requirement coverage at the start of this session
 
-The requirement rows below are therefore derived from the engineering brief and
-the problem statement, and are marked *(brief-derived)* rather than
-*(PRD-traced)*.
+| Group | P0 | fully | partial | missing/broken/fabricated |
+|---|---|---|---|---|
+| Track A | 5 | 0 | 5 | 5 |
+| Track B | 7 | 1 | 4 | 5 |
+| Corrective | 5 | 0 | 4 | 3 |
+| Dashboard | 6 | 0 | 6 | 3 |
+| Non-functional | — | 2 | 3 | 3 |
 
 ---
 
@@ -43,9 +54,11 @@ the problem statement, and are marked *(brief-derived)* rather than
 |---|---|---|---|
 | 0 | Audit & baseline | **done** | this branch |
 | 1 | Integrity & security | **done** | `fix/phase1-integrity-and-security` |
-| 2 | Bug fixes, backend integrity, dedup | **done** | `fix/phase2-consolidation-and-bugs` |
-| 3 | Ingestion contract + flagged synthetic data | **done** | `feat/phase3-ingestion-contract` |
-| 4 | Track B forecaster + constraint engine | **done** | `feat/phase4-track-b-forecaster` |
+| 2 | Bug fixes, backend integrity, dedup | **done** | #2, recovered to `main` via #3 |
+| — | PRD traceability matrix | **done** | #4, merged |
+| 2.5 | Wire UI to the real FastAPI backend | **done** | #5, merged |
+| 3 | Ingestion contract + flagged synthetic data | **done** | #6, merged |
+| 4 | Track B forecaster + constraint engine | **done** | #7 `feat/phase4-track-b-forecaster` |
 | 5 | Track A leakage fix | not started | — |
 | 6 | Dashboard / UX journey | not started | — |
 | 7 | Testing, perf, deployment | partial (frames + tests done) | phase 2 branch |
@@ -134,6 +147,25 @@ a larger change than the bug fixes above.
 
 ---
 
+## Phase 2.5 — UI wired to the FastAPI service layer (done)
+
+Architecture L4: FastAPI is the API/service layer. Before this, the Next.js
+routes computed headline numbers independently, so the real SciPy LP and NASA
+POWER client were unreachable from the UI.
+
+| Item | Status | Evidence |
+|---|---|---|
+| Telemetry computation consolidated into FastAPI | **done** | `backend/app/api/telemetry.py`; `GET /api/v1/mines/{id}/telemetry`. Next.js route is a 45-line proxy. |
+| Frontend blend heuristic replaced by the real LP | **done** | The Next.js route reported `solver_status: 'Simplex Optimal Solution Converged'` with no solver, always `success: true`, and clamped the achieved grade with `Math.max(targetMn, avgMn)`. Now proxies to SciPy HiGHS. |
+| End-to-end trace (PRD D-2/B-4) | **done** | 91.79 mm identical at UI → FastAPI → `/environment` → NASA POWER queried directly. |
+| Reproducibility (N-4) | **done** | All `provenance[*].value` and all forecast/risk scalars identical across calls; only timestamps differ. |
+| Python↔TS generator parity (N-4) | **done** | `backend/test_provenance_parity.py` — mulberry32 and FNV-1a match bit-for-bit. |
+| Graceful degradation (N-6) | **done** | Backend down → `served_by: nextjs-degraded-fallback`, synthetic flagged, 0 scenes, no recommendation issued; blend returns 503 `Unavailable` rather than a fake solve. |
+| NASA POWER fallback fabrication | **done** | Fixed constants labelled "NASA POWER (Cached/Interpolated)" replaced with a seeded, flagged draw. |
+| Third copy of the drag model | **done** | `data.ts` fallback delegates to the shared degraded builder; 237 → 83 lines. |
+
+---
+
 ## Phase 3 — Ingestion contract + flagged synthetic data (done)
 
 PRD §8.2: *"The contract is a deliverable in its own right."* See
@@ -152,22 +184,6 @@ PRD §8.2: *"The contract is a deliverable in its own right."* See
 | Statutory field names removed | **done** | `unfc111ProvedReservesTonnes` → `indicativeResourceBaseTonnes`; `gsiCoreDrillHoles` → `syntheticBoreholeCount`. |
 | False verification claim | **done** | `OFFICIAL_DATA_SOURCES.verifiedParameters` → `parametersAvailable`; relabelled as *planned* ingestion targets (PRD §8.3), not provenance. |
 | Fabricated method claim | **done** | Comment claiming "Holt-Winters / ARIMA + XGBoost residual estimation" removed — none exist in the codebase. |
-## Phase 2.5 — UI wired to the FastAPI service layer (done)
-
-Architecture L4: FastAPI is the API/service layer. Before this, the Next.js
-routes computed headline numbers independently, so the real SciPy LP and NASA
-POWER client were unreachable from the UI.
-
-| Item | Status | Evidence |
-|---|---|---|
-| Telemetry computation consolidated into FastAPI | **done** | `backend/app/api/telemetry.py`; `GET /api/v1/mines/{id}/telemetry`. Next.js route is a 45-line proxy. |
-| Frontend blend heuristic replaced by the real LP | **done** | The Next.js route reported `solver_status: 'Simplex Optimal Solution Converged'` with no solver, always `success: true`, and clamped the achieved grade with `Math.max(targetMn, avgMn)`. Now proxies to SciPy HiGHS. |
-| End-to-end trace (PRD D-2/B-4) | **done** | 91.79 mm identical at UI → FastAPI → `/environment` → NASA POWER queried directly. |
-| Reproducibility (N-4) | **done** | All `provenance[*].value` and all forecast/risk scalars identical across calls; only timestamps differ. |
-| Python↔TS generator parity (N-4) | **done** | `backend/test_provenance_parity.py` — mulberry32 and FNV-1a match bit-for-bit. |
-| Graceful degradation (N-6) | **done** | Backend down → `served_by: nextjs-degraded-fallback`, synthetic flagged, 0 scenes, no recommendation issued; blend returns 503 `Unavailable` rather than a fake solve. |
-| NASA POWER fallback fabrication | **done** | Fixed constants labelled "NASA POWER (Cached/Interpolated)" replaced with a seeded, flagged draw. |
-| Third copy of the drag model | **done** | `data.ts` fallback delegates to the shared degraded builder; 237 → 83 lines. |
 
 ---
 
