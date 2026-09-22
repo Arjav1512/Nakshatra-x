@@ -62,6 +62,64 @@ Note on the attribution rename: the output is an **exact** additive
 decomposition of a linear model. That is a stronger statement than a Shapley
 approximation, so the honest name is not a downgrade.
 
+## D-008 — Ventilation excluded from the constraint engine (PRD overrides the diagram)
+**Traceability.** `SIH26009-Architecture.excalidraw` lists the constraint engine
+as "shifts · blasting windows · equipment compatibility · relocation ·
+**ventilation**". `SIH26009-01-PRD.md` §4 non-goal 6 makes "mine safety and
+ventilation management" an explicit **non-goal**. Per the standing rule that the
+PRD wins, ventilation is not implemented as a constraint dimension. The engine
+covers shifts, blasting windows, equipment compatibility and relocation
+feasibility. Recorded because the omission is deliberate, not an oversight.
+
+## D-009 — A-5 ranks by evidence; expected information gain is optional
+**Traceability.** EIG appears only in the diagram's LEGEND as a "★
+differentiator" — a [P] proposal. PRD A-5 [D] P0 requires "rank candidate drill
+targets **with the evidence that drove each ranking**". Building EIG in place of
+evidence-backed ranking would miss the requirement, so ranking + evidence ships
+first and EIG is attempted only if Phase 5 has room.
+
+## D-010 — Track A adopts GBT + ordinary kriging, driven by A-4 not by the name
+**Traceability.** The PRD names no algorithm for A-3. The diagram specifies
+gradient-boosted trees plus a variogram + ordinary kriging resource model, and
+PRD §12 describes the work as "mostly gradient boosting, classical
+geostatistics". The deciding factor is **A-4** (per-cell uncertainty): kriging
+variance yields it directly, whereas the current RandomForest emits only a
+probability and a bucket label. Adopted for that reason.
+
+## D-011 — Track A pilot AOI is opencast (Dongri Buzurg), not Balaghat
+**Traceability.** PRD §13 Q4 recommends Balaghat for Track B and "an opencast
+mine such as Dongri Buzurg" for Track A, because surface spectral work needs
+exposed ground — Balaghat works at roughly 383 m depth. Balaghat remains the
+Track B pilot per the roadmap; Phase 5 uses Dongri Buzurg.
+## D-012 — Conformal intervals calibrated on recent history, not a random split
+**Phase 4.** Raw quantile-GBT intervals were badly overconfident: 0.58 empirical
+coverage against 0.80 nominal. Conformalising with a random calibration split
+only reached 0.66, because conformal prediction assumes exchangeability and time
+series violate it — the evaluation window spans the monsoon, when output spread
+genuinely widens. Calibrating on the most recent slice of history instead
+reached 0.812.
+
+*Trade-off:* MAPE worsens from 10.75% to 11.67%, because the temporal split
+removes the most recent 25% of samples from the fit. Accepted: an interval that
+claims 80% and delivers 66% is worse than useless to a planner sizing a risk,
+while 0.9 points of MAPE is not decision-changing. No new dependency —
+scikit-learn's `HistGradientBoostingRegressor` with quantile loss, plus about
+twenty lines of conformal correction.
+
+## D-013 — One model per mine, with grade as a feature
+**Phase 4.** PRD B-5 requires per-mine per-grade forecasts. Fitting a separate
+model per (mine, grade) would leave the smaller grades — dioxide is ~4% of
+output — with too few rows to fit. Fitting one model per mine with `grade_code`
+as a feature keeps forecasts grade-specific while sharing strength across
+grades. A test asserts the grades genuinely produce different forecasts rather
+than one number relabelled four times.
+
+## D-014 — Plan targets are generated 90 days beyond the actuals
+**Phase 4.** A forecast horizon necessarily extends past the last observed day.
+With plan targets stopping at the data end, the tail of every horizon had no
+target to be measured against and P(shortfall) came out trivially zero — the
+forecast looked riskless. Targets now run 90 days forward, which also matches
+how a mine plan is actually set: in advance.
 ## D-015 — rasterio added to read real Sentinel-2 pixels
 **Phase 5.** Track A's central defect was that its "spectral" features were a
 formula over distance to the mine coordinates. Fixing it requires reading actual

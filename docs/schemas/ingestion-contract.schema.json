@@ -1,0 +1,865 @@
+{
+  "contract_version": "1.0.0",
+  "working_crs": "EPSG:32644",
+  "geographic_crs": "EPSG:4326",
+  "entities": {
+    "borehole": {
+      "description": "A drill collar. One row per hole.",
+      "properties": {
+        "contract_version": {
+          "default": "1.0.0",
+          "description": "Schema version this row was written under.",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "is_synthetic": {
+          "description": "True for generator output, False for data supplied by MOIL. Required \u2014 there is no default, so a producer must state it.",
+          "title": "Is Synthetic",
+          "type": "boolean"
+        },
+        "source": {
+          "description": "Where the row came from, e.g. 'nakshatra-synthetic-v1' or 'MOIL CMMS export 2026-03'.",
+          "title": "Source",
+          "type": "string"
+        },
+        "ingested_at": {
+          "format": "date-time",
+          "title": "Ingested At",
+          "type": "string"
+        },
+        "borehole_id": {
+          "maxLength": 64,
+          "title": "Borehole Id",
+          "type": "string"
+        },
+        "mine_code": {
+          "description": "e.g. MOIL-BAL-01",
+          "maxLength": 32,
+          "title": "Mine Code",
+          "type": "string"
+        },
+        "latitude": {
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Latitude",
+          "type": "number"
+        },
+        "longitude": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Longitude",
+          "type": "number"
+        },
+        "easting_m": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Northing/easting in EPSG:32644.",
+          "title": "Easting M"
+        },
+        "northing_m": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Northing M"
+        },
+        "collar_elevation_m": {
+          "maximum": 9000,
+          "minimum": -500,
+          "title": "Collar Elevation M",
+          "type": "number"
+        },
+        "total_depth_m": {
+          "exclusiveMinimum": 0,
+          "maximum": 2000,
+          "title": "Total Depth M",
+          "type": "number"
+        },
+        "azimuth_deg": {
+          "anyOf": [
+            {
+              "exclusiveMaximum": 360,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Azimuth Deg"
+        },
+        "dip_deg": {
+          "anyOf": [
+            {
+              "maximum": 90,
+              "minimum": -90,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dip Deg"
+        },
+        "drilled_on": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Drilled On"
+        }
+      },
+      "required": [
+        "is_synthetic",
+        "source",
+        "borehole_id",
+        "mine_code",
+        "latitude",
+        "longitude",
+        "collar_elevation_m",
+        "total_depth_m"
+      ],
+      "title": "Borehole",
+      "type": "object"
+    },
+    "assay": {
+      "description": "A downhole assay interval. Many rows per borehole.",
+      "properties": {
+        "contract_version": {
+          "default": "1.0.0",
+          "description": "Schema version this row was written under.",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "is_synthetic": {
+          "description": "True for generator output, False for data supplied by MOIL. Required \u2014 there is no default, so a producer must state it.",
+          "title": "Is Synthetic",
+          "type": "boolean"
+        },
+        "source": {
+          "description": "Where the row came from, e.g. 'nakshatra-synthetic-v1' or 'MOIL CMMS export 2026-03'.",
+          "title": "Source",
+          "type": "string"
+        },
+        "ingested_at": {
+          "format": "date-time",
+          "title": "Ingested At",
+          "type": "string"
+        },
+        "borehole_id": {
+          "maxLength": 64,
+          "title": "Borehole Id",
+          "type": "string"
+        },
+        "from_depth_m": {
+          "maximum": 2000,
+          "minimum": 0,
+          "title": "From Depth M",
+          "type": "number"
+        },
+        "to_depth_m": {
+          "exclusiveMinimum": 0,
+          "maximum": 2000,
+          "title": "To Depth M",
+          "type": "number"
+        },
+        "mn_pct": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Mn Pct",
+          "type": "number"
+        },
+        "fe_pct": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fe Pct"
+        },
+        "sio2_pct": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sio2 Pct"
+        },
+        "p_pct": {
+          "anyOf": [
+            {
+              "maximum": 20,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "P Pct"
+        },
+        "al2o3_pct": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Al2O3 Pct"
+        },
+        "recovery_pct": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Recovery Pct"
+        },
+        "assay_method": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assay Method"
+        }
+      },
+      "required": [
+        "is_synthetic",
+        "source",
+        "borehole_id",
+        "from_depth_m",
+        "to_depth_m",
+        "mn_pct"
+      ],
+      "title": "Assay",
+      "type": "object"
+    },
+    "lithology": {
+      "description": "A logged lithological interval.",
+      "properties": {
+        "contract_version": {
+          "default": "1.0.0",
+          "description": "Schema version this row was written under.",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "is_synthetic": {
+          "description": "True for generator output, False for data supplied by MOIL. Required \u2014 there is no default, so a producer must state it.",
+          "title": "Is Synthetic",
+          "type": "boolean"
+        },
+        "source": {
+          "description": "Where the row came from, e.g. 'nakshatra-synthetic-v1' or 'MOIL CMMS export 2026-03'.",
+          "title": "Source",
+          "type": "string"
+        },
+        "ingested_at": {
+          "format": "date-time",
+          "title": "Ingested At",
+          "type": "string"
+        },
+        "borehole_id": {
+          "maxLength": 64,
+          "title": "Borehole Id",
+          "type": "string"
+        },
+        "from_depth_m": {
+          "maximum": 2000,
+          "minimum": 0,
+          "title": "From Depth M",
+          "type": "number"
+        },
+        "to_depth_m": {
+          "exclusiveMinimum": 0,
+          "maximum": 2000,
+          "title": "To Depth M",
+          "type": "number"
+        },
+        "rock_type": {
+          "description": "e.g. gondite, quartzite, mica-schist",
+          "maxLength": 64,
+          "title": "Rock Type",
+          "type": "string"
+        },
+        "formation": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "e.g. Sausar Group / Mansar Formation",
+          "title": "Formation"
+        },
+        "weathering": {
+          "anyOf": [
+            {
+              "enum": [
+                "fresh",
+                "slightly",
+                "moderately",
+                "highly",
+                "completely"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Weathering"
+        }
+      },
+      "required": [
+        "is_synthetic",
+        "source",
+        "borehole_id",
+        "from_depth_m",
+        "to_depth_m",
+        "rock_type"
+      ],
+      "title": "Lithology",
+      "type": "object"
+    },
+    "production_by_mine_grade_period": {
+      "$defs": {
+        "MineType": {
+          "enum": [
+            "underground",
+            "opencast"
+          ],
+          "title": "MineType",
+          "type": "string"
+        },
+        "OreGrade": {
+          "description": "MOIL sells ore by grade, and PRD \u00a73 is explicit that a shortfall in one\ngrade is not fungible with a surplus in another. Forecasting is therefore\ngrade-aware (PRD B-5 [PS] P0, B-9 [D] P1).",
+          "enum": [
+            "ferro_manganese",
+            "silico_manganese",
+            "blast_furnace",
+            "dioxide"
+          ],
+          "title": "OreGrade",
+          "type": "string"
+        }
+      },
+      "description": "Production actuals. The grain is (mine, grade, period) \u2014 PRD B-1 names all\nthree, and grade-awareness is required at P0 by B-5.",
+      "properties": {
+        "contract_version": {
+          "default": "1.0.0",
+          "description": "Schema version this row was written under.",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "is_synthetic": {
+          "description": "True for generator output, False for data supplied by MOIL. Required \u2014 there is no default, so a producer must state it.",
+          "title": "Is Synthetic",
+          "type": "boolean"
+        },
+        "source": {
+          "description": "Where the row came from, e.g. 'nakshatra-synthetic-v1' or 'MOIL CMMS export 2026-03'.",
+          "title": "Source",
+          "type": "string"
+        },
+        "ingested_at": {
+          "format": "date-time",
+          "title": "Ingested At",
+          "type": "string"
+        },
+        "mine_code": {
+          "maxLength": 32,
+          "title": "Mine Code",
+          "type": "string"
+        },
+        "grade": {
+          "$ref": "#/$defs/OreGrade"
+        },
+        "period_start": {
+          "format": "date",
+          "title": "Period Start",
+          "type": "string"
+        },
+        "period_end": {
+          "format": "date",
+          "title": "Period End",
+          "type": "string"
+        },
+        "tonnes": {
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Tonnes",
+          "type": "number"
+        },
+        "mine_type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MineType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "period_grain": {
+          "default": "daily",
+          "enum": [
+            "daily",
+            "weekly",
+            "monthly"
+          ],
+          "title": "Period Grain",
+          "type": "string"
+        },
+        "operating_hours": {
+          "anyOf": [
+            {
+              "maximum": 744,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operating Hours"
+        }
+      },
+      "required": [
+        "is_synthetic",
+        "source",
+        "mine_code",
+        "grade",
+        "period_start",
+        "period_end",
+        "tonnes"
+      ],
+      "title": "ProductionByMineGradePeriod",
+      "type": "object"
+    },
+    "equipment_event": {
+      "description": "HEMM availability and downtime (PRD B-2). One row per event, not a daily\nroll-up, so MTBF/MTTR are derivable.",
+      "properties": {
+        "contract_version": {
+          "default": "1.0.0",
+          "description": "Schema version this row was written under.",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "is_synthetic": {
+          "description": "True for generator output, False for data supplied by MOIL. Required \u2014 there is no default, so a producer must state it.",
+          "title": "Is Synthetic",
+          "type": "boolean"
+        },
+        "source": {
+          "description": "Where the row came from, e.g. 'nakshatra-synthetic-v1' or 'MOIL CMMS export 2026-03'.",
+          "title": "Source",
+          "type": "string"
+        },
+        "ingested_at": {
+          "format": "date-time",
+          "title": "Ingested At",
+          "type": "string"
+        },
+        "mine_code": {
+          "maxLength": 32,
+          "title": "Mine Code",
+          "type": "string"
+        },
+        "equipment_id": {
+          "maxLength": 64,
+          "title": "Equipment Id",
+          "type": "string"
+        },
+        "equipment_type": {
+          "enum": [
+            "shovel",
+            "excavator",
+            "dumper",
+            "loader",
+            "drill",
+            "crusher",
+            "conveyor",
+            "pump",
+            "other"
+          ],
+          "title": "Equipment Type",
+          "type": "string"
+        },
+        "event_type": {
+          "enum": [
+            "breakdown",
+            "scheduled_maintenance",
+            "idle",
+            "operating"
+          ],
+          "title": "Event Type",
+          "type": "string"
+        },
+        "started_at": {
+          "format": "date-time",
+          "title": "Started At",
+          "type": "string"
+        },
+        "ended_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ended At"
+        },
+        "downtime_hours": {
+          "anyOf": [
+            {
+              "maximum": 8760,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Downtime Hours"
+        },
+        "failure_mode": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Failure Mode"
+        }
+      },
+      "required": [
+        "is_synthetic",
+        "source",
+        "mine_code",
+        "equipment_id",
+        "equipment_type",
+        "event_type",
+        "started_at"
+      ],
+      "title": "EquipmentEvent",
+      "type": "object"
+    },
+    "blast_record": {
+      "description": "Blasting schedule, delays and outcome (PRD B-3).",
+      "properties": {
+        "contract_version": {
+          "default": "1.0.0",
+          "description": "Schema version this row was written under.",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "is_synthetic": {
+          "description": "True for generator output, False for data supplied by MOIL. Required \u2014 there is no default, so a producer must state it.",
+          "title": "Is Synthetic",
+          "type": "boolean"
+        },
+        "source": {
+          "description": "Where the row came from, e.g. 'nakshatra-synthetic-v1' or 'MOIL CMMS export 2026-03'.",
+          "title": "Source",
+          "type": "string"
+        },
+        "ingested_at": {
+          "format": "date-time",
+          "title": "Ingested At",
+          "type": "string"
+        },
+        "mine_code": {
+          "maxLength": 32,
+          "title": "Mine Code",
+          "type": "string"
+        },
+        "blast_id": {
+          "maxLength": 64,
+          "title": "Blast Id",
+          "type": "string"
+        },
+        "planned_at": {
+          "format": "date-time",
+          "title": "Planned At",
+          "type": "string"
+        },
+        "executed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Executed At"
+        },
+        "delay_hours": {
+          "anyOf": [
+            {
+              "maximum": 8760,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Delay Hours"
+        },
+        "bench_or_level": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bench Or Level"
+        },
+        "holes_charged": {
+          "anyOf": [
+            {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Holes Charged"
+        },
+        "explosive_kg": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Explosive Kg"
+        },
+        "tonnes_broken": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tonnes Broken"
+        },
+        "mean_fragmentation_cm": {
+          "anyOf": [
+            {
+              "maximum": 500,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "P50 fragment size.",
+          "title": "Mean Fragmentation Cm"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "enum": [
+                "success",
+                "partial",
+                "misfire",
+                "cancelled"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outcome"
+        }
+      },
+      "required": [
+        "is_synthetic",
+        "source",
+        "mine_code",
+        "blast_id",
+        "planned_at"
+      ],
+      "title": "BlastRecord",
+      "type": "object"
+    },
+    "plan_target": {
+      "$defs": {
+        "OreGrade": {
+          "description": "MOIL sells ore by grade, and PRD \u00a73 is explicit that a shortfall in one\ngrade is not fungible with a surplus in another. Forecasting is therefore\ngrade-aware (PRD B-5 [PS] P0, B-9 [D] P1).",
+          "enum": [
+            "ferro_manganese",
+            "silico_manganese",
+            "blast_furnace",
+            "dioxide"
+          ],
+          "title": "OreGrade",
+          "type": "string"
+        }
+      },
+      "description": "The planned target a shortfall is measured against (PRD B-6:\n\"Compute shortfall risk against the planned target\").",
+      "properties": {
+        "contract_version": {
+          "default": "1.0.0",
+          "description": "Schema version this row was written under.",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "is_synthetic": {
+          "description": "True for generator output, False for data supplied by MOIL. Required \u2014 there is no default, so a producer must state it.",
+          "title": "Is Synthetic",
+          "type": "boolean"
+        },
+        "source": {
+          "description": "Where the row came from, e.g. 'nakshatra-synthetic-v1' or 'MOIL CMMS export 2026-03'.",
+          "title": "Source",
+          "type": "string"
+        },
+        "ingested_at": {
+          "format": "date-time",
+          "title": "Ingested At",
+          "type": "string"
+        },
+        "mine_code": {
+          "maxLength": 32,
+          "title": "Mine Code",
+          "type": "string"
+        },
+        "grade": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OreGrade"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Null means the target is across all grades."
+        },
+        "period_start": {
+          "format": "date",
+          "title": "Period Start",
+          "type": "string"
+        },
+        "period_end": {
+          "format": "date",
+          "title": "Period End",
+          "type": "string"
+        },
+        "target_tonnes": {
+          "exclusiveMinimum": 0,
+          "maximum": 10000000,
+          "title": "Target Tonnes",
+          "type": "number"
+        },
+        "plan_version": {
+          "default": "v1",
+          "maxLength": 32,
+          "title": "Plan Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "is_synthetic",
+        "source",
+        "mine_code",
+        "period_start",
+        "period_end",
+        "target_tonnes"
+      ],
+      "title": "PlanTarget",
+      "type": "object"
+    }
+  }
+}

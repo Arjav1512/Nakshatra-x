@@ -4,36 +4,47 @@ SIH 2026, problem statement SIH26009 (Ministry of Steel / MOIL).
 Living document. Status values: **done** / **partial** / **missing** /
 **broken** / **fabricated** / **blocked**.
 
-Last updated: 2026-09-20.
+Last updated: 2026-09-21.
 
 ---
 
-## ⚠️ Blocker: the PRD is not in the repository
+## PRD received — traceability matrix is now authoritative
 
-The brief names `SIH26009-01-PRD.md` and `SIH26009-Architecture.excalidraw` as
-the single source of truth. **Neither file exists** — not in
-`Arjav1512/Nakshatra-x` at `main` (25c7caa), and not anywhere on this machine:
+`SIH26009-01-PRD.md` and `SIH26009-Architecture.excalidraw` are committed at the
+repo root (`34b9e5d`). The earlier blocker is cleared.
 
-```
-$ gh api repos/Arjav1512/Nakshatra-x/git/trees/main --jq '.tree[].path'
-.gitignore .vercelignore AGENTS.md AI CLAUDE.md README.md backend database
-frontend nakshatra_x_*.pdf netlify.toml package.json vercel.json
+**`docs/TRACEABILITY.md` is now the authoritative status document.** It maps
+every PRD requirement (A-1..A-10, B-1..B-10, C-1..C-7, D-1..D-9, N-1..N-8) to a
+status and evidence, resolves the architecture diagram's `[PS …]` / `[D]` / `[P]`
+tags against requirement IDs, and records where the PRD overrides the
+engineering brief. This file tracks phase execution; the matrix tracks
+requirement coverage.
 
-$ find ~/Downloads ~/Desktop ~/Documents -iname "*SIH26009*" -o -iname "*PRD*"
-# → only SatQuery-03-PRD.md and PrepPilot/docs/PRD.md — different projects
-```
+### Deltas the PRD introduced (full detail in TRACEABILITY.md §7–8)
 
-**What this blocks:** the requirement-by-requirement traceability table below
-cannot be authoritative, and the Phase 8 "PRD coverage" score cannot be
-computed. **What it does not block:** everything specified directly in the
-engineering brief — integrity, security, consolidation, the forecaster, the
-constraint engine — which is the bulk of the work. Those proceed.
+- **Ventilation is a PRD non-goal** (§4 non-goal 6) but appears in the diagram's
+  constraint engine. PRD wins — ventilation is not built.
+- **Drill targets by expected information gain is [P], not a requirement.**
+  A-5 requires ranking *with evidence*; EIG is a diagram "★ differentiator".
+- **B-5 is grade-aware at P0** — "forecast production per mine **per grade**".
+  The brief omitted grade entirely.
+- **Track A pilot should be opencast** (Dongri Buzurg), not Balaghat — surface
+  spectral work needs exposed ground. Balaghat remains the Track B pilot.
+- **PRD §8.4 forbids computing area/tonnage in degrees.** Current code uses
+  `degrees × 111.0`; a real violation, fixed in Phase 5.
+- **N-7 audit log** is a Required non-functional the brief never mentioned.
+- Phase 1/2 work maps cleanly onto N-3, N-4, N-6 and §2.4 — nothing the PRD
+  contradicts.
 
-**To unblock:** add the PRD to the repo, or provide the file.
+### Requirement coverage at the start of this session
 
-The requirement rows below are therefore derived from the engineering brief and
-the problem statement, and are marked *(brief-derived)* rather than
-*(PRD-traced)*.
+| Group | P0 | fully | partial | missing/broken/fabricated |
+|---|---|---|---|---|
+| Track A | 5 | 0 | 5 | 5 |
+| Track B | 7 | 1 | 4 | 5 |
+| Corrective | 5 | 0 | 4 | 3 |
+| Dashboard | 6 | 0 | 6 | 3 |
+| Non-functional | — | 2 | 3 | 3 |
 
 ---
 
@@ -43,10 +54,12 @@ the problem statement, and are marked *(brief-derived)* rather than
 |---|---|---|---|
 | 0 | Audit & baseline | **done** | this branch |
 | 1 | Integrity & security | **done** | `fix/phase1-integrity-and-security` |
-| 2 | Bug fixes, backend integrity, dedup | **done** | `fix/phase2-consolidation-and-bugs` |
-| 3 | Ingestion contract + flagged synthetic data | partial (generator done) | — |
-| 4 | Track B real forecaster + constraint engine | not started | — |
-| 5 | Track A made honest | **done** | `feat/phase5-track-a-honest` |
+| 2 | Bug fixes, backend integrity, dedup | **done** | #2, recovered to `main` via #3 |
+| — | PRD traceability matrix | **done** | #4, merged |
+| 2.5 | Wire UI to the real FastAPI backend | **done** | #5, merged |
+| 3 | Ingestion contract + flagged synthetic data | **done** | #6, merged |
+| 4 | Track B forecaster + constraint engine | **done** | #7, merged |
+| 5 | Track A made honest | **done** | #8 `feat/phase5-track-a-honest` |
 | 6 | Dashboard / UX journey | not started | — |
 | 7 | Testing, perf, deployment | partial (frames + tests done) | phase 2 branch |
 | 8 | Readiness assessment | not started | — |
@@ -150,6 +163,50 @@ POWER client were unreachable from the UI.
 | Graceful degradation (N-6) | **done** | Backend down → `served_by: nextjs-degraded-fallback`, synthetic flagged, 0 scenes, no recommendation issued; blend returns 503 `Unavailable` rather than a fake solve. |
 | NASA POWER fallback fabrication | **done** | Fixed constants labelled "NASA POWER (Cached/Interpolated)" replaced with a seeded, flagged draw. |
 | Third copy of the drag model | **done** | `data.ts` fallback delegates to the shared degraded builder; 237 → 83 lines. |
+
+---
+
+## Phase 3 — Ingestion contract + flagged synthetic data (done)
+
+PRD §8.2: *"The contract is a deliverable in its own right."* See
+`docs/INGESTION_CONTRACT.md`.
+
+| Item | Status | Evidence |
+|---|---|---|
+| Seven versioned schemas | **done** | `backend/app/ingestion/schemas.py`, contract `1.0.0`; JSON Schema published under `docs/schemas/`. `is_synthetic` is required with no default on every entity. |
+| Schemas actually reject bad data | **done** | Test rejects inverted depth intervals, assays summing >100%, inverted periods, and rows omitting `is_synthetic`. |
+| Deterministic seeded generator | **done** | 58,083 rows byte-identical for seed `20260921`; a different seed differs. |
+| Calibrated to MOIL public totals | **done** | 2024 = 1,098,143 t; 2025 = 1,122,772 t — inside the published ~1.1–1.3 Mt/yr range. Test guards the range. |
+| Every row flagged synthetic | **done** | All 58,083 rows carry `is_synthetic=True`, a `source` and a `contract_version`. |
+| Grade-aware (B-5 P0, B-9) | **done** | Production and plan targets keyed by (mine × grade × period) for all 10 mines. |
+| Covariates genuinely drive the target | **done** | Removing rainfall lifts total production 5.3% — the Phase 4 baseline comparison will be meaningful rather than rigged. |
+| Hardcoded "authentic MOIL" series removed | **done** | 554 lines of hand-written 1977–2026 records deleted; header claiming MOIL/IBM/GSI/IMD as sources replaced. Series now generated and flagged. |
+| Statutory field names removed | **done** | `unfc111ProvedReservesTonnes` → `indicativeResourceBaseTonnes`; `gsiCoreDrillHoles` → `syntheticBoreholeCount`. |
+| False verification claim | **done** | `OFFICIAL_DATA_SOURCES.verifiedParameters` → `parametersAvailable`; relabelled as *planned* ingestion targets (PRD §8.3), not provenance. |
+| Fabricated method claim | **done** | Comment claiming "Holt-Winters / ARIMA + XGBoost residual estimation" removed — none exist in the codebase. |
+
+---
+
+## Phase 4 — Track B made real (done)
+
+PRD §10: *"Lead with Track B. It is the spine."* See `docs/BACKTEST.md`.
+
+| Req | Item | Status | Evidence |
+|---|---|---|---|
+| B-5 | Per-mine **per-grade** forecast, configurable horizon | **done** | 4 grades forecast separately for Balaghat; grade is a model feature. Test asserts the forecasts differ. |
+| B-6 | P(cumulative < target) with a band | **done** | Monte Carlo over per-day lognormal predictives. Balaghat: P(short) 0.63–0.99 by grade, target 12,689 t vs E[cum] 12,049 t. |
+| B-7 | Attribution to weather/equipment/blasting | **done** | Exact additive decomposition, honestly named (not SHAP). |
+| B-10 | Rolling-origin backtest | **done** | MAPE 11.67% vs baseline 14.81% (+21.2%); coverage 0.812 vs nominal 0.80. |
+| C-1..C-3 | Schedule / blasting / equipment actions | **done** | 3 candidate types generated from forecast drivers. |
+| C-4 | Expected effect + assumptions | **done** | Each approved action carries recovery tonnes, ΔP(shortfall) and stated assumptions. |
+| C-5 | **Hard constraint engine** | **done** | Both failures the PRD names by name are rejected: night blasting, and a 128 km overnight relocation. Infeasible actions are *removed*, not downgraded. |
+| N-8 | Backtest visible via API | **done** | `GET /mines/{id}/backtest`. UI surfacing is Phase 6. |
+
+**No leakage:** a test corrupts every post-origin actual by 10× and asserts the forecast is bit-identical.
+
+**Calibration took four attempts** (0.581 → 0.656 → 0.662 → 0.812); the working fix was a recency-based conformal calibration split, at the cost of 0.9 points of MAPE. Documented in `docs/BACKTEST.md`.
+
+**Bug found and fixed:** plan targets stopped at the data end, so the tail of every forecast horizon had no target and P(shortfall) was trivially 0. Targets now run 90 days forward.
 
 ---
 

@@ -106,9 +106,9 @@ export default function HistoricalForecastModal() {
     return HISTORICAL_DATABASE_1977_2026.filter(
       (item) =>
         item.year.toString().includes(q) ||
-        item.majorMilestone.toLowerCase().includes(q) ||
+        (item.majorMilestone ?? '').toLowerCase().includes(q) ||
         item.gradeType.toLowerCase().includes(q) ||
-        item.primarySource.toLowerCase().includes(q)
+        (item.primarySource ?? 'nakshatra-synthetic-v1').toLowerCase().includes(q)
     )
   }, [searchQuery])
 
@@ -558,7 +558,7 @@ export default function HistoricalForecastModal() {
                         <div>
                           <span className="text-slate-400">GSI Core Drill Holes:</span>
                           <div className="text-sm font-bold text-[#FACC15] mt-0.5">
-                            {selectedHistoryYear.gsiCoreDrillHoles} Drill Logs
+                            {selectedHistoryYear.syntheticBoreholeCount} Drill Logs
                           </div>
                         </div>
                         <div>
@@ -570,7 +570,7 @@ export default function HistoricalForecastModal() {
                         <div className="col-span-2">
                           <span className="text-slate-400">Indicative resource base:</span>
                           <div className="text-sm font-bold text-[#00FF88] mt-0.5">
-                            {(selectedHistoryYear.unfc111ProvedReservesTonnes / 1000000).toFixed(2)} Million Tonnes
+                            {(selectedHistoryYear.indicativeResourceBaseTonnes / 1000000).toFixed(2)} Million Tonnes
                           </div>
                         </div>
                       </div>
@@ -1011,7 +1011,7 @@ export default function HistoricalForecastModal() {
                           <div>
                             <span className="text-[10px] font-mono text-slate-400 uppercase">Verified Parameters:</span>
                             <ul className="mt-1 space-y-1">
-                              {source.verifiedParameters.map((param, i) => (
+                              {source.parametersAvailable.map((param, i) => (
                                 <li key={i} className="text-[11px] text-slate-300 font-mono flex items-start gap-1.5">
                                   <span className="text-[#00FF88] mt-0.5">&bull;</span>
                                   <span>{param}</span>

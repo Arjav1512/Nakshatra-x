@@ -136,16 +136,16 @@ export default function HistoricalForecastGlassVisualizer() {
         selectedMetric === 'production'
           ? d.totalProductionTonnes
           : selectedMetric === 'reserves'
-          ? d.unfc111ProvedReservesTonnes
+          ? d.indicativeResourceBaseTonnes
           : selectedMetric === 'grade'
           ? d.avgMnGradePct
           : d.monsoonRainfallMm,
       productionTonnes: d.totalProductionTonnes,
       targetTonnes: d.totalProductionTonnes,
-      reservesTonnes: d.unfc111ProvedReservesTonnes,
+      reservesTonnes: d.indicativeResourceBaseTonnes,
       gradePct: d.avgMnGradePct,
       monsoonMm: d.monsoonRainfallMm,
-      drillHoles: d.gsiCoreDrillHoles,
+      drillHoles: d.syntheticBoreholeCount,
       shortfallPct: 0,
       climateRisk: Math.round((d.monsoonRainfallMm / 1500) * 100),
       confidenceLow: Math.round(d.totalProductionTonnes * 0.98),
@@ -910,7 +910,7 @@ export default function HistoricalForecastGlassVisualizer() {
                     tableSearch === ''
                       ? true
                       : row.year.toString().includes(tableSearch) ||
-                        row.milestone.toLowerCase().includes(tableSearch.toLowerCase()) ||
+                        (row.milestone ?? '').toLowerCase().includes(tableSearch.toLowerCase()) ||
                         row.grade.toLowerCase().includes(tableSearch.toLowerCase())
                   )
                   .map((row) => (
@@ -938,8 +938,8 @@ export default function HistoricalForecastGlassVisualizer() {
                       </td>
                       <td className="p-3 text-slate-300">{row.grade}</td>
                       <td className="p-3 text-cyan-300">{row.monsoonMm} mm</td>
-                      <td className="p-3 text-slate-200 max-w-md truncate" title={row.milestone}>
-                        {row.milestone}
+                      <td className="p-3 text-slate-200 max-w-md truncate" title={(row.milestone ?? '')}>
+                        {(row.milestone ?? '')}
                       </td>
                       <td className="p-3 text-right">
                         <button
@@ -996,7 +996,7 @@ export default function HistoricalForecastGlassVisualizer() {
                 <div className="space-y-1 pt-2 border-t border-white/10">
                   <span className="text-[10px] font-mono text-slate-400 uppercase font-bold">Verified Metrics:</span>
                   <ul className="space-y-1">
-                    {src.verifiedParameters.map((p, idx) => (
+                    {src.parametersAvailable.map((p, idx) => (
                       <li key={idx} className="text-xs font-mono text-slate-300 flex items-start gap-1.5">
                         <span className="text-[#00FF88]">&bull;</span>
                         <span>{p}</span>
