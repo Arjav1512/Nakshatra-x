@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, } from 'react'
+import { mineStream, round } from '@/lib/synthetic'
 import type { MineInfo, ProductionForecast, RiskAnalysis, WeatherSignal } from './types'
 import {
   BarChart,
@@ -61,7 +62,7 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
   const [gradeVariance, setGradeVariance] = useState<number>(0)
   const [chartView, setChartView] = useState<'daily' | 'cumulative'>('daily')
 
-  // SCADA Auto-Pumps & Early Flood Warning State
+  // Simulated pump/flood-warning state (no SCADA link -- PRD §4 non-goal 2)
   const [isScadaPumpActive, setIsScadaPumpActive] = useState<boolean>(true)
   const [radarCloudburstAlert, setRadarCloudburstAlert] = useState<boolean>(false)
 
@@ -114,34 +115,39 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
     }
   }, [currentTime, mine.targetTonnes])
 
-  // Real-time live data stream simulator: changes extraction numbers, trucks, and logs every 2.5 seconds
+  // SIMULATED activity feed. This is NOT a SCADA connection: PRD §4 non-goal 2
+  // excludes real-time equipment control and SCADA integration, and no plant
+  // link exists. Values are produced by the seeded generator so the same mine
+  // and tick yield the same numbers -- previously they came from Math.random(),
+  // which meant a "live telemetry" panel invented a different plant state on
+  // every render.
   useEffect(() => {
     if (!isLiveStreaming) return
 
     const interval = setInterval(() => {
-      // Dynamic tonnage increment per skip/truck dump
-      const randomTonnes = Math.round((1.2 + Math.random() * 2.8) * 10) / 10
-      const currentRate = Math.round((mine.targetTonnes / 220 + (Math.random() - 0.5) * 18) * 10) / 10
+      const tick = mineStream(mine.id, `sentinel-tick-${activeSkipCycle}`)
+      const randomTonnes = round(1.2 + tick.uniform() * 2.8, 1)
+      const currentRate = round(mine.targetTonnes / 220 + (tick.uniform() - 0.5) * 18, 1)
 
       setLiveShiftExtracted((prev) => Math.round((prev + randomTonnes) * 10) / 10)
       setLiveHourlyRate(Math.max(40, currentRate))
       setActiveSkipCycle((prev) => prev + 1)
 
       // Randomly trigger truck weighbridge completion
-      if (Math.random() > 0.45) {
+      if (tick.uniform() > 0.45) {
         setTrucksDispatched((prev) => prev + 1)
       }
 
-      // Generate realistic SCADA telemetry log entry
+      // Simulated activity entry (not SCADA-sourced).
       const nowStr = new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false })
       const logTypes: Array<ScadaLogEvent['type']> = ['haul', 'winder', 'crush', 'pump']
-      const chosenType = logTypes[Math.floor(Math.random() * logTypes.length)]
+      const chosenType = logTypes[Math.floor(tick.uniform() * logTypes.length)]
 
       let msg = ''
       if (chosenType === 'winder') {
         msg = `Winder Hoist #${(activeSkipCycle % 2) + 1} completed cycle from -340m RL (Skip Load: ${randomTonnes} T)`
       } else if (chosenType === 'haul') {
-        msg = `Weighbridge #1: Dumper MP-50-GA-${1000 + (trucksDispatched % 50)} logged ${(18 + Math.random() * 8).toFixed(1)} T Run-of-Mine Braunite`
+        msg = `Weighbridge #1: dumper #${(trucksDispatched % 50) + 1} logged ${round(18 + tick.uniform() * 8, 1)} T run-of-mine (simulated)`
       } else if (chosenType === 'crush') {
         msg = `Primary Jaw Crusher line active: throughput ${currentRate} T/hr (Vibration: Normal 1.2 mm/s)`
       } else {
@@ -167,7 +173,7 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
     const timeNow = new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false })
     setScadaLogs([
       { id: '1', timestamp: timeNow, message: `Balaghat Deep Vertical Winder #1 online: hoisting speed 8.2 m/s`, type: 'winder' },
-      { id: '2', timestamp: timeNow, message: `Weighbridge #2 calibrated with SCADA load cell array: zero drift`, type: 'haul' },
+      { id: '2', timestamp: timeNow, message: `Weighbridge #2 calibration check (simulated)`, type: 'haul' },
       { id: '3', timestamp: timeNow, message: `Open-Meteo telemetry stream connected: precipitation index synced`, type: 'pump' },
     ])
   }, [mine.code])
@@ -227,7 +233,7 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
 
   return (
     <div className="ios-glass-card p-5 sm:p-6 flex flex-col justify-between gap-6 shadow-2xl border border-[#38BDF8]/30">
-      {/* Header with Live Ticking Clock & SCADA Stream Status */}
+      {/* Header with clock and simulated-feed status */}
       <div>
         <div className="flex items-center justify-between gap-4 mb-2 flex-wrap">
           <div className="flex items-center gap-2">
@@ -258,7 +264,7 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
                   : 'bg-white/10 border border-white/20 text-slate-400'
               }`}
               type="button"
-              title={isLiveStreaming ? 'Pause live SCADA feed simulation' : 'Resume live SCADA feed simulation'}
+              title={isLiveStreaming ? 'Pause the simulated activity feed' : 'Resume the simulated activity feed'}
             >
               {isLiveStreaming ? (
                 <>
@@ -288,7 +294,7 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
               </span>
             </h3>
             <p className="text-xs text-slate-300 mt-0.5 leading-relaxed font-sans">
-              Continuous 14-day extraction forecasting factoring real Open-Meteo rainfall saturation, live SCADA winder hoists, and CMMS machinery downtime.
+              14-day extraction outlook using measured Open-Meteo rainfall together with simulated hoist and downtime activity. There is no SCADA or CMMS connection (PRD §4 non-goal 2).
             </p>
           </div>
         </div>
@@ -356,11 +362,11 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
           </div>
         </div>
 
-        {/* Live Rolling SCADA Event Ticker */}
+        {/* Rolling simulated-activity ticker (no SCADA link) */}
         <div className="pt-1">
           <div className="flex items-center gap-2 mb-1 text-[10px] font-mono text-slate-400 uppercase font-bold">
             <Activity className="w-3 h-3 text-[#38BDF8]" />
-            <span>Latest SCADA Conveyor &amp; Hoist Telemetry:</span>
+            <span>Simulated conveyor &amp; hoist activity (not a SCADA feed):</span>
           </div>
           <div className="space-y-1 max-h-20 overflow-y-auto custom-scrollbar pr-1">
             {scadaLogs.map((log) => (

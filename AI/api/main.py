@@ -15,7 +15,12 @@ from features import FEATURE_COLS, build_feature_row, bucket  # noqa: E402
 
 app = FastAPI(
     title="NAKSHATRA-X Prospectivity AI Engine",
-    description="Sub-surface Manganese Deposit Discovery & Geochemical Prospectivity Inference Engine",
+    description=(
+        "Surface prospectivity scoring from satellite surface indicators and terrain. "
+        "Guardrail (PRD 2.2): these inputs carry no subsurface information and this "
+        "does not discover deposits at depth. Output is decision support for a "
+        "qualified person, never a reserve statement (PRD 2.4)."
+    ),
     version="1.0.0"
 )
 

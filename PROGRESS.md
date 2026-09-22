@@ -62,7 +62,7 @@ requirement coverage.
 | 5 | Track A made honest | **done** | #8 `feat/phase5-track-a-honest` |
 | 6 | Dashboard, UX & end-to-end journey | **done** | #9 `feat/phase6-dashboard-ux` |
 | 7 | Testing, performance, deployment | **done** | #10 `feat/phase7-testing-perf-deploy` |
-| 8 | Readiness assessment | not started | — |
+| 8 | Final readiness assessment | **done** | #11 `feat/phase8-readiness` |
 
 ---
 
@@ -314,6 +314,60 @@ it is 0.246 s.
    Now 503 with instructions.
 4. **`IndiaSatelliteMap.tsx`** — `98.7% GSI/MOIL Accuracy` fallback attributed to
    two government bodies by name. Removed.
+
+---
+
+## Phase 8 — Final readiness assessment (done)
+
+Full re-traceability, a fresh sweep, and an honest score. See `docs/READINESS.md`.
+
+**Score (target, not a claim): 73/100** — PRD coverage 17/25, functional
+correctness 19/25, architecture 16/20, code quality 10/15, testing & demo 11/15.
+
+**Requirement coverage: 25 fully / 14 partial / 5 missing (44 total).** Four of
+the five missing are explicitly deferred past Phase 1 by PRD §10 (A-9 InSAR,
+C-6 scenarios, D-9 role views, C-7). Only **N-7 (audit log)** is a Required
+non-functional genuinely absent.
+
+| Group | Fully | Partial | Missing |
+|---|---|---|---|
+| Track A | 5 | 4 | 1 |
+| Track B | 8 | 2 | 0 |
+| Corrective | 2 | 3 | 2 |
+| Dashboard | 5 | 3 | 1 |
+| Non-functional | 5 | 2 | 1 |
+
+### Fabrication sweep — six more clusters found and fixed
+
+The sweep assumed a tenth fabrication existed. It found six clusters:
+
+1. **`03_train_model.py`: `except Exception: auc = 1.0`** — a failure to compute
+   AUC was reported as a *perfect* score and written to `model_metrics.json`.
+   The one case where the metric is undefined produced the most flattering
+   number. Now NaN → `null`.
+2. **Three shipped `model_metrics.json` copies** carrying the leaked pipeline's
+   `roc_auc 0.9858` with `dist_to_fault_km` as top feature — and
+   `frontend/public/` is **publicly served**. Deleted; the legacy trainer now
+   stamps a `VALIDITY_WARNING`.
+3. **`ProductionSentinel.tsx`** — a live simulated "SCADA telemetry" feed
+   inventing tonnages, rates and dumper registration numbers every 2.5 s, while
+   PRD §4 non-goal 2 excludes SCADA. Seeded, relabelled, plates removed.
+4. **`MissionControl.tsx` + `globe/Charts.tsx`** — dead components with
+   `jitter()` on NDVI/production and `freshness: Math.random() > 0.7`. Deleted.
+5. **Eight live claims of libraries absent from both dependency trees** —
+   ARIMA, Holt-Winters, XGBoost, SHAP. All renamed to the code that runs.
+6. **Six UI provenance claims** Phase 3 missed ("Authentic History (MOIL/IBM
+   Data)", "GSI/MOIL Core Drill Calibrated", …) plus **guardrail violations**
+   (subsurface-discovery wording, "UNFC 122 → 111 reserves", a chatbot claim of
+   10,829 core drill logs). All fixed.
+
+Post-sweep: 0 live fabrications across all nine grep categories.
+
+### Verification
+
+```
+6 backend suites PASS · tsc clean · build ✓ · lint runs (52 legacy errors, 0 owned)
+```
 
 ---
 

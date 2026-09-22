@@ -346,7 +346,7 @@ export default function MissionControlDashboard() {
                   ML Pipeline &amp; Studio
                 </h4>
                 <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed mb-6 font-normal">
-                  Judges architecture flow, XGBoost ensemble model metrics, and real-time hyperparameter training studio.
+                  Architecture flow and the prospectivity model card — leave-one-mine-out validation with its confidence interval. Training runs offline; there is no in-browser training.
                 </p>
               </div>
               <Link

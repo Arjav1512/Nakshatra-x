@@ -106,7 +106,7 @@ export default function CausalMindMap({ mine, shap }: Props) {
       data: {
         label: 'Shortfall Attributed',
         value: isMP ? '-3,155 T / 14-Day' : '-940 T / 14-Day',
-        source: 'XGBoost Causal Model',
+        source: 'additive-driver-attribution-v1 (exact linear decomposition)',
         timestamp: 'Aug 29, 10:00 IST',
         color: isMP ? '#D9584A' : '#E5C76B',
       },

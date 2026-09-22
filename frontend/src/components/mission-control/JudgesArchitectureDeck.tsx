@@ -36,7 +36,7 @@ export default function JudgesArchitectureDeck() {
             Mineral Prospectivity Pipeline & Explainability
           </h3>
           <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
-            Real Random Forest model trained locally with balanced class weights to map sub-surface manganese prospectivity across Central India.
+            Gradient-boosting model over measured Sentinel-2 band ratios and SRTM terrain, validated leave-one-mine-out (AUC 0.85, 95% CI 0.72–0.95). Maps SURFACE prospectivity only — satellite inputs carry no subsurface information (PRD §2.2).
           </p>
         </div>
 

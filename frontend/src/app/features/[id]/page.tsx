@@ -253,7 +253,7 @@ export default function SingleFeaturePage({ params }: { params: Promise<{ id: st
                 </div>
                 <h3 className="text-2xl font-bold font-space text-white">50-Year Historical Database & 2040 Forecast Engine</h3>
                 <p className="text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
-                  Access 50 years of verified MOIL production statistics (1975–2025) and deep ARIMA vector forecasting through year 2040.
+                  Explore a synthetic 50-year production series generated to the published ingestion contract, with an illustrative forward trajectory. Not MOIL's reported figures, and not an ARIMA model — no such library is a dependency.
                 </p>
                 <button
                   onClick={() => window.dispatchEvent(new CustomEvent('open-historical-forecast-modal'))}
