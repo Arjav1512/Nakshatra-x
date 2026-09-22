@@ -1,10 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
-import {
-  sanitizeNoSqlObject,
-  sanitizeTemplateString,
-  validateReplayNonce,
-} from '@/lib/security'
+import { sanitizeNoSqlObject, validateReplayNonce } from '@/lib/security'
+import { backendUrl, fetchFromBackend } from '@/lib/backend'
 import { z } from 'zod'
+
+/**
+ * Ore blending optimisation — proxy onto the FastAPI service layer.
+ *
+ * This handler previously contained a hand-rolled three-bucket ratio heuristic
+ * that:
+ *   - reported `solver_status: 'Simplex Optimal Solution Converged'` although
+ *     no solver ran;
+ *   - always returned `success: true`; and
+ *   - reported the achieved grade as `Math.max(targetMn, avgMn)`, clamping the
+ *     number up to the target so an out-of-spec blend still displayed as
+ *     meeting it.
+ *
+ * The real optimiser is a SciPy HiGHS linear program
+ * (`backend/app/ml/blending_optimizer.py`). It minimises cost subject to the
+ * grade and contaminant constraints and returns `success: false` with a
+ * diagnosis when a specification is unsatisfiable — PRD C-5, never propose the
+ * physically impossible. That solver was unreachable from the UI until now.
+ */
 
 const StockpileSchema = z.object({
   name: z.string().max(128),
@@ -24,87 +40,64 @@ const BlendRequestSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  const nonceCheck = validateReplayNonce(request.headers.get('x-security-nonce'))
+  if (!nonceCheck.valid) {
+    return NextResponse.json({ error: nonceCheck.reason }, { status: 400 })
+  }
+
+  let cleanBody: unknown
   try {
-    const nonceCheck = validateReplayNonce(request.headers.get('x-security-nonce'))
-    if (!nonceCheck.valid) {
-      return NextResponse.json({ error: nonceCheck.reason }, { status: 400 })
-    }
+    cleanBody = sanitizeNoSqlObject(await request.json())
+  } catch {
+    return NextResponse.json({ error: 'Malformed JSON body' }, { status: 400 })
+  }
 
-    const rawBody = await request.json()
-    const cleanBody = sanitizeNoSqlObject(rawBody)
-
-    const parsed = BlendRequestSchema.safeParse(cleanBody)
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Invalid ore blending schema', details: parsed.error.format() },
-        { status: 400 }
-      )
-    }
-
-    const targetTonnes = parsed.data.target_tonnes || 5000
-    const targetMn = parsed.data.target_mn_min || 41.0
-    const stockpiles = parsed.data.stockpiles || []
-
-    // Linear blending optimization logic
-    const highGrade = stockpiles.find((s) => s.mn_grade_pct >= 44.0) || stockpiles[0]
-    const medGrade = stockpiles.find((s) => s.mn_grade_pct >= 36.0 && s.mn_grade_pct < 44.0) || stockpiles[1]
-    const silicoGrade = stockpiles.find((s) => s.mn_grade_pct < 36.0) || stockpiles[2]
-
-    const highRatio = Math.min(0.65, Math.max(0.35, (targetMn - 35) / 15))
-    const medRatio = Math.min(0.50, Math.max(0.20, (1 - highRatio) * 0.75))
-    const lowRatio = Math.max(0.05, 1 - highRatio - medRatio)
-
-    const highTonnes = Math.round(targetTonnes * highRatio)
-    const medTonnes = Math.round(targetTonnes * medRatio)
-    const lowTonnes = targetTonnes - highTonnes - medTonnes
-
-    const blendPlan = [
-      {
-        stockpile_name: sanitizeTemplateString(highGrade?.name || 'High-Grade Stockpile SP-1 (46.2% Mn)'),
-        tonnes_allocated: highTonnes,
-        allocation_pct: Math.round((highTonnes / targetTonnes) * 1000) / 10,
-        cost_inr: highTonnes * (highGrade?.cost_per_tonne_inr || 8200),
-      },
-      {
-        stockpile_name: sanitizeTemplateString(medGrade?.name || 'Medium-Grade Stockpile SP-2 (37.5% Mn)'),
-        tonnes_allocated: medTonnes,
-        allocation_pct: Math.round((medTonnes / targetTonnes) * 1000) / 10,
-        cost_inr: medTonnes * (medGrade?.cost_per_tonne_inr || 5400),
-      },
-      {
-        stockpile_name: sanitizeTemplateString(silicoGrade?.name || 'Silico-Mn Stockpile SP-3 (34.0% Mn)'),
-        tonnes_allocated: lowTonnes,
-        allocation_pct: Math.round((lowTonnes / targetTonnes) * 1000) / 10,
-        cost_inr: lowTonnes * (silicoGrade?.cost_per_tonne_inr || 4100),
-      },
-    ]
-
-    const totalCost = blendPlan.reduce((acc, p) => acc + p.cost_inr, 0)
-    const avgMn = Math.round(
-      ((highTonnes * (highGrade?.mn_grade_pct || 46.2) +
-        medTonnes * (medGrade?.mn_grade_pct || 37.5) +
-        lowTonnes * (silicoGrade?.mn_grade_pct || 34.0)) /
-        targetTonnes) *
-        10
-    ) / 10
-
-    return NextResponse.json({
-      success: true,
-      solver_status: 'Simplex Optimal Solution Converged',
-      target_tonnes: targetTonnes,
-      blended_mn_grade_pct: Math.max(targetMn, avgMn),
-      blended_p_pct: 0.132,
-      blended_sio2_pct: 5.75,
-      total_blending_cost_inr: totalCost,
-      avg_cost_per_tonne_inr: Math.round(totalCost / targetTonnes),
-      blend_plan: blendPlan,
-      shortfall_mitigation_tonnes: targetTonnes,
-      optimization_timestamp: new Date().toISOString(),
-    })
-  } catch (err: any) {
+  const parsed = BlendRequestSchema.safeParse(cleanBody)
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: sanitizeTemplateString(err?.message || 'Blending optimization failed') },
+      { error: 'Invalid ore blending schema', details: parsed.error.format() },
       { status: 400 }
     )
   }
+
+  const payload = {
+    required_tonnes: parsed.data.target_tonnes ?? 5000,
+    target_mn_min: parsed.data.target_mn_min ?? 41.0,
+    target_p_max: parsed.data.target_p_max ?? 0.15,
+    target_sio2_max: parsed.data.target_sio2_max ?? 6.5,
+    stockpiles: (parsed.data.stockpiles ?? []).map((s) => ({
+      name: s.name,
+      available_tonnes: s.available_tonnes,
+      mn_grade_pct: s.mn_grade_pct,
+      p_pct: s.p_pct ?? 0.12,
+      sio2_pct: s.sio2_pct ?? 5.0,
+      cost_per_tonne_inr: s.cost_per_tonne_inr ?? 6000,
+    })),
+  }
+
+  const result = await fetchFromBackend('/api/v1/optimize-blending', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    timeoutMs: 15000,
+  })
+
+  if (result.ok) {
+    return NextResponse.json({ ...result.data, served_by: 'fastapi', proxied_from: backendUrl() })
+  }
+
+  // No local fallback. Substituting a heuristic for a solver is what produced
+  // the fabricated "Simplex Optimal Solution Converged" above; an unavailable
+  // optimiser is reported as unavailable (PRD N-6).
+  return NextResponse.json(
+    {
+      success: false,
+      solver_status: 'Unavailable',
+      message:
+        'The blending optimiser is unavailable: the FastAPI service layer could not be reached. No blend plan is produced, because an unsolved blend must not be presented as an optimised one.',
+      error: result.error,
+      served_by: 'nextjs-degraded',
+    },
+    { status: 503 }
+  )
 }
