@@ -5,6 +5,7 @@ from app.models.mine import MineSite
 from app.schemas.mine import MineCreate, MineResponse
 from app.services.nasa_power import fetch_weather_signal
 from app.services.satellite import query_sentinel_stac
+from app.api.track_b import backtest_mine, forecast_mine, recommend_actions
 from app.api.telemetry import build_mine_telemetry
 from app.services.recommendations import generate_action_recommendations
 from app.ml.risk_model import calculate_shortfall_risk
@@ -95,6 +96,49 @@ async def mine_telemetry(mine_id: int, db: Session = Depends(get_db)):
     if not mine:
         raise HTTPException(status_code=404, detail="Mine not found")
     return await build_mine_telemetry(mine)
+
+
+@router.get("/mines/{mine_id}/forecast")
+def track_b_forecast(mine_id: int, horizon_days: int = Query(14, ge=1, le=60),
+                     grade: str | None = None, db: Session = Depends(get_db)):
+    """Per-mine per-grade forecast with intervals and P(cumulative < target). PRD B-5, B-6."""
+    ensure_seed_mines(db)
+    mine = db.get(MineSite, mine_id)
+    if not mine:
+        raise HTTPException(status_code=404, detail="Mine not found")
+    try:
+        return forecast_mine(mine.mine_code, horizon_days=horizon_days, grade=grade)
+    except ValueError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+
+
+@router.get("/mines/{mine_id}/backtest")
+def track_b_backtest(mine_id: int, span_days: int = Query(150, ge=60, le=400),
+                     step_days: int = Query(14, ge=7, le=60),
+                     db: Session = Depends(get_db)):
+    """Rolling-origin backtest: MAPE and interval coverage vs baseline. PRD B-10, N-8."""
+    ensure_seed_mines(db)
+    mine = db.get(MineSite, mine_id)
+    if not mine:
+        raise HTTPException(status_code=404, detail="Mine not found")
+    try:
+        return backtest_mine(mine.mine_code, span_days=span_days, step_days=step_days)
+    except ValueError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+
+
+@router.get("/mines/{mine_id}/recommendations")
+def track_b_recommendations(mine_id: int, horizon_days: int = Query(14, ge=1, le=60),
+                            db: Session = Depends(get_db)):
+    """Constraint-gated corrective actions. PRD C-1..C-5."""
+    ensure_seed_mines(db)
+    mine = db.get(MineSite, mine_id)
+    if not mine:
+        raise HTTPException(status_code=404, detail="Mine not found")
+    try:
+        return recommend_actions(mine.mine_code, horizon_days=horizon_days)
+    except ValueError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
 
 
 @router.get("/mines/{mine_id}/satellite")

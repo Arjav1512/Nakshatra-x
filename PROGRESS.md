@@ -57,8 +57,8 @@ requirement coverage.
 | 2 | Bug fixes, backend integrity, dedup | **done** | #2, recovered to `main` via #3 |
 | — | PRD traceability matrix | **done** | #4, merged |
 | 2.5 | Wire UI to the real FastAPI backend | **done** | #5, merged |
-| 3 | Ingestion contract + flagged synthetic data | **done** | #6 `feat/phase3-ingestion-contract` |
-| 4 | Track B real forecaster + constraint engine | not started | — |
+| 3 | Ingestion contract + flagged synthetic data | **done** | #6, merged |
+| 4 | Track B forecaster + constraint engine | **done** | #7 `feat/phase4-track-b-forecaster` |
 | 5 | Track A leakage fix | not started | — |
 | 6 | Dashboard / UX journey | not started | — |
 | 7 | Testing, perf, deployment | partial (frames + tests done) | phase 2 branch |
@@ -184,6 +184,29 @@ PRD §8.2: *"The contract is a deliverable in its own right."* See
 | Statutory field names removed | **done** | `unfc111ProvedReservesTonnes` → `indicativeResourceBaseTonnes`; `gsiCoreDrillHoles` → `syntheticBoreholeCount`. |
 | False verification claim | **done** | `OFFICIAL_DATA_SOURCES.verifiedParameters` → `parametersAvailable`; relabelled as *planned* ingestion targets (PRD §8.3), not provenance. |
 | Fabricated method claim | **done** | Comment claiming "Holt-Winters / ARIMA + XGBoost residual estimation" removed — none exist in the codebase. |
+
+---
+
+## Phase 4 — Track B made real (done)
+
+PRD §10: *"Lead with Track B. It is the spine."* See `docs/BACKTEST.md`.
+
+| Req | Item | Status | Evidence |
+|---|---|---|---|
+| B-5 | Per-mine **per-grade** forecast, configurable horizon | **done** | 4 grades forecast separately for Balaghat; grade is a model feature. Test asserts the forecasts differ. |
+| B-6 | P(cumulative < target) with a band | **done** | Monte Carlo over per-day lognormal predictives. Balaghat: P(short) 0.63–0.99 by grade, target 12,689 t vs E[cum] 12,049 t. |
+| B-7 | Attribution to weather/equipment/blasting | **done** | Exact additive decomposition, honestly named (not SHAP). |
+| B-10 | Rolling-origin backtest | **done** | MAPE 11.67% vs baseline 14.81% (+21.2%); coverage 0.812 vs nominal 0.80. |
+| C-1..C-3 | Schedule / blasting / equipment actions | **done** | 3 candidate types generated from forecast drivers. |
+| C-4 | Expected effect + assumptions | **done** | Each approved action carries recovery tonnes, ΔP(shortfall) and stated assumptions. |
+| C-5 | **Hard constraint engine** | **done** | Both failures the PRD names by name are rejected: night blasting, and a 128 km overnight relocation. Infeasible actions are *removed*, not downgraded. |
+| N-8 | Backtest visible via API | **done** | `GET /mines/{id}/backtest`. UI surfacing is Phase 6. |
+
+**No leakage:** a test corrupts every post-origin actual by 10× and asserts the forecast is bit-identical.
+
+**Calibration took four attempts** (0.581 → 0.656 → 0.662 → 0.812); the working fix was a recency-based conformal calibration split, at the cost of 0.9 points of MAPE. Documented in `docs/BACKTEST.md`.
+
+**Bug found and fixed:** plan targets stopped at the data end, so the tail of every forecast horizon had no target and P(shortfall) was trivially 0. Targets now run 90 days forward.
 
 ---
 

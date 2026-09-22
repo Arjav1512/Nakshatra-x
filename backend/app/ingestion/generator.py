@@ -312,19 +312,30 @@ class SyntheticDataset:
                 d += timedelta(days=1)
         return rows
 
-    def plan_targets(self, production: list[ProductionByMineGradePeriod] | None = None) -> list[PlanTarget]:
+    def plan_targets(
+        self,
+        production: list[ProductionByMineGradePeriod] | None = None,
+        forward_days: int = 90,
+    ) -> list[PlanTarget]:
         """
         Monthly plan targets per mine per grade. Targets are set from a smoothed
         expectation, not from the realised actuals, so a plan can genuinely be
         missed -- which is the whole point of B-6.
+
+        Targets run `forward_days` past the end of the actuals, because a
+        forecast horizon necessarily extends beyond the last observed day and a
+        plan is set in advance. Without this the tail of the horizon had no
+        target to be measured against, and shortfall probability came out
+        trivially zero.
         """
         rng = np.random.default_rng(self.seed + 505)
         rows: list[PlanTarget] = []
         base_year = self.start.year
         for mine in MINES:
             annual = ANNUAL_TOTAL_TONNES * mine.production_share
+            plan_end = self.end + timedelta(days=forward_days)
             d = date(self.start.year, self.start.month, 1)
-            while d <= self.end:
+            while d <= plan_end:
                 nxt = date(d.year + (d.month // 12), (d.month % 12) + 1, 1)
                 last = nxt - timedelta(days=1)
                 days = (last - d).days + 1
