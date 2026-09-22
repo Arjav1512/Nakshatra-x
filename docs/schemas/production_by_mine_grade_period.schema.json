@@ -1,0 +1,117 @@
+{
+  "$defs": {
+    "MineType": {
+      "enum": [
+        "underground",
+        "opencast"
+      ],
+      "title": "MineType",
+      "type": "string"
+    },
+    "OreGrade": {
+      "description": "MOIL sells ore by grade, and PRD \u00a73 is explicit that a shortfall in one\ngrade is not fungible with a surplus in another. Forecasting is therefore\ngrade-aware (PRD B-5 [PS] P0, B-9 [D] P1).",
+      "enum": [
+        "ferro_manganese",
+        "silico_manganese",
+        "blast_furnace",
+        "dioxide"
+      ],
+      "title": "OreGrade",
+      "type": "string"
+    }
+  },
+  "description": "Production actuals. The grain is (mine, grade, period) \u2014 PRD B-1 names all\nthree, and grade-awareness is required at P0 by B-5.",
+  "properties": {
+    "contract_version": {
+      "default": "1.0.0",
+      "description": "Schema version this row was written under.",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "is_synthetic": {
+      "description": "True for generator output, False for data supplied by MOIL. Required \u2014 there is no default, so a producer must state it.",
+      "title": "Is Synthetic",
+      "type": "boolean"
+    },
+    "source": {
+      "description": "Where the row came from, e.g. 'nakshatra-synthetic-v1' or 'MOIL CMMS export 2026-03'.",
+      "title": "Source",
+      "type": "string"
+    },
+    "ingested_at": {
+      "format": "date-time",
+      "title": "Ingested At",
+      "type": "string"
+    },
+    "mine_code": {
+      "maxLength": 32,
+      "title": "Mine Code",
+      "type": "string"
+    },
+    "grade": {
+      "$ref": "#/$defs/OreGrade"
+    },
+    "period_start": {
+      "format": "date",
+      "title": "Period Start",
+      "type": "string"
+    },
+    "period_end": {
+      "format": "date",
+      "title": "Period End",
+      "type": "string"
+    },
+    "tonnes": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "title": "Tonnes",
+      "type": "number"
+    },
+    "mine_type": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MineType"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "period_grain": {
+      "default": "daily",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly"
+      ],
+      "title": "Period Grain",
+      "type": "string"
+    },
+    "operating_hours": {
+      "anyOf": [
+        {
+          "maximum": 744,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Operating Hours"
+    }
+  },
+  "required": [
+    "is_synthetic",
+    "source",
+    "mine_code",
+    "grade",
+    "period_start",
+    "period_end",
+    "tonnes"
+  ],
+  "title": "ProductionByMineGradePeriod",
+  "type": "object"
+}

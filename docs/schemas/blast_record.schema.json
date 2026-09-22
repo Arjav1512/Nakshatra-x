@@ -1,0 +1,163 @@
+{
+  "description": "Blasting schedule, delays and outcome (PRD B-3).",
+  "properties": {
+    "contract_version": {
+      "default": "1.0.0",
+      "description": "Schema version this row was written under.",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "is_synthetic": {
+      "description": "True for generator output, False for data supplied by MOIL. Required \u2014 there is no default, so a producer must state it.",
+      "title": "Is Synthetic",
+      "type": "boolean"
+    },
+    "source": {
+      "description": "Where the row came from, e.g. 'nakshatra-synthetic-v1' or 'MOIL CMMS export 2026-03'.",
+      "title": "Source",
+      "type": "string"
+    },
+    "ingested_at": {
+      "format": "date-time",
+      "title": "Ingested At",
+      "type": "string"
+    },
+    "mine_code": {
+      "maxLength": 32,
+      "title": "Mine Code",
+      "type": "string"
+    },
+    "blast_id": {
+      "maxLength": 64,
+      "title": "Blast Id",
+      "type": "string"
+    },
+    "planned_at": {
+      "format": "date-time",
+      "title": "Planned At",
+      "type": "string"
+    },
+    "executed_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Executed At"
+    },
+    "delay_hours": {
+      "anyOf": [
+        {
+          "maximum": 8760,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Delay Hours"
+    },
+    "bench_or_level": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Bench Or Level"
+    },
+    "holes_charged": {
+      "anyOf": [
+        {
+          "maximum": 10000,
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Holes Charged"
+    },
+    "explosive_kg": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Explosive Kg"
+    },
+    "tonnes_broken": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Tonnes Broken"
+    },
+    "mean_fragmentation_cm": {
+      "anyOf": [
+        {
+          "maximum": 500,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "P50 fragment size.",
+      "title": "Mean Fragmentation Cm"
+    },
+    "outcome": {
+      "anyOf": [
+        {
+          "enum": [
+            "success",
+            "partial",
+            "misfire",
+            "cancelled"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Outcome"
+    }
+  },
+  "required": [
+    "is_synthetic",
+    "source",
+    "mine_code",
+    "blast_id",
+    "planned_at"
+  ],
+  "title": "BlastRecord",
+  "type": "object"
+}

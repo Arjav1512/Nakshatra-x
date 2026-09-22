@@ -99,10 +99,10 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
         chartMetric === 'production'
           ? d.totalProductionTonnes
           : chartMetric === 'reserves'
-          ? d.unfc111ProvedReservesTonnes
+          ? d.indicativeResourceBaseTonnes
           : d.avgMnGradePct,
       productionTonnes: d.totalProductionTonnes,
-      reservesTonnes: d.unfc111ProvedReservesTonnes,
+      reservesTonnes: d.indicativeResourceBaseTonnes,
       gradePct: d.avgMnGradePct,
       isForecast: false,
       milestone: d.majorMilestone,

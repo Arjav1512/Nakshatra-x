@@ -1,0 +1,501 @@
+contract_version,is_synthetic,source,ingested_at,borehole_id,from_depth_m,to_depth_m,rock_type,formation,weathering
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680714,MOIL-BAL-01-BH-001,0.0,21.15,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680731,MOIL-BAL-01-BH-001,21.15,42.19,calc-granulite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680741,MOIL-BAL-01-BH-001,42.19,54.02,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680750,MOIL-BAL-01-BH-001,54.02,65.91,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680758,MOIL-BAL-01-BH-001,65.91,99.48,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680765,MOIL-BAL-01-BH-001,99.48,117.09,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680773,MOIL-BAL-01-BH-001,117.09,118.4,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680781,MOIL-BAL-01-BH-002,0.0,5.03,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680788,MOIL-BAL-01-BH-002,5.03,18.87,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680796,MOIL-BAL-01-BH-002,18.87,30.72,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680803,MOIL-BAL-01-BH-002,30.72,45.47,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680811,MOIL-BAL-01-BH-002,45.47,66.23,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680818,MOIL-BAL-01-BH-002,66.23,73.49,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680825,MOIL-BAL-01-BH-002,73.49,85.14,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680834,MOIL-BAL-01-BH-002,85.14,112.42,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680841,MOIL-BAL-01-BH-002,112.42,133.1,manganese ore,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680848,MOIL-BAL-01-BH-003,0.0,30.87,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680856,MOIL-BAL-01-BH-003,30.87,46.46,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680863,MOIL-BAL-01-BH-003,46.46,67.11,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680870,MOIL-BAL-01-BH-003,67.11,93.48,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680877,MOIL-BAL-01-BH-003,93.48,124.93,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680884,MOIL-BAL-01-BH-003,124.93,131.7,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680891,MOIL-BAL-01-BH-003,131.7,147.5,manganese ore,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680898,MOIL-BAL-01-BH-003,147.5,174.53,mica-schist,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680905,MOIL-BAL-01-BH-003,174.53,193.02,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680914,MOIL-BAL-01-BH-003,193.02,215.6,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680922,MOIL-BAL-01-BH-004,0.0,42.0,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680928,MOIL-BAL-01-BH-004,42.0,76.62,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680935,MOIL-BAL-01-BH-004,76.62,83.72,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680941,MOIL-BAL-01-BH-004,83.72,101.91,quartzite,Sausar Group / Mansar Formation,completely
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680948,MOIL-BAL-01-BH-004,101.91,123.2,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680954,MOIL-BAL-01-BH-004,123.2,132.8,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680960,MOIL-BAL-01-BH-004,132.8,146.05,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680967,MOIL-BAL-01-BH-004,146.05,192.77,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680973,MOIL-BAL-01-BH-004,192.77,205.23,mica-schist,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680979,MOIL-BAL-01-BH-004,205.23,206.2,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680986,MOIL-BAL-01-BH-005,0.0,40.62,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.680993,MOIL-BAL-01-BH-005,40.62,56.77,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681000,MOIL-BAL-01-BH-005,56.77,87.6,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681007,MOIL-BAL-01-BH-006,0.0,22.03,manganese ore,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681014,MOIL-BAL-01-BH-006,22.03,44.96,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681021,MOIL-BAL-01-BH-006,44.96,63.1,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681028,MOIL-BAL-01-BH-006,63.1,86.77,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681035,MOIL-BAL-01-BH-006,86.77,101.2,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681043,MOIL-BAL-01-BH-007,0.0,10.18,quartzite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681051,MOIL-BAL-01-BH-007,10.18,18.33,gondite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681058,MOIL-BAL-01-BH-007,18.33,60.58,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681065,MOIL-BAL-01-BH-007,60.58,65.63,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681074,MOIL-BAL-01-BH-007,65.63,87.77,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681081,MOIL-BAL-01-BH-007,87.77,103.5,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681088,MOIL-BAL-01-BH-007,103.5,143.56,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681095,MOIL-BAL-01-BH-007,143.56,154.8,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681102,MOIL-BAL-01-BH-007,154.8,165.98,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681110,MOIL-BAL-01-BH-007,165.98,199.36,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681122,MOIL-BAL-01-BH-007,199.36,213.41,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681129,MOIL-BAL-01-BH-007,213.41,238.99,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681137,MOIL-BAL-01-BH-007,238.99,258.09,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681144,MOIL-BAL-01-BH-007,258.09,264.6,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681151,MOIL-BAL-01-BH-008,0.0,21.55,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681158,MOIL-BAL-01-BH-008,21.55,33.35,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681165,MOIL-BAL-01-BH-008,33.35,34.74,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681172,MOIL-BAL-01-BH-008,34.74,54.9,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681179,MOIL-BAL-01-BH-008,54.9,72.17,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681186,MOIL-BAL-01-BH-008,72.17,109.63,phyllite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681193,MOIL-BAL-01-BH-008,109.63,120.07,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681200,MOIL-BAL-01-BH-008,120.07,129.48,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681207,MOIL-BAL-01-BH-008,129.48,131.79,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681214,MOIL-BAL-01-BH-008,131.79,143.02,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681221,MOIL-BAL-01-BH-008,143.02,162.83,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681228,MOIL-BAL-01-BH-008,162.83,180.31,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681235,MOIL-BAL-01-BH-008,180.31,198.8,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681242,MOIL-BAL-01-BH-008,198.8,205.74,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681249,MOIL-BAL-01-BH-008,205.74,208.99,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681256,MOIL-BAL-01-BH-008,208.99,229.1,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681263,MOIL-BAL-01-BH-009,0.0,21.68,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681270,MOIL-BAL-01-BH-009,21.68,52.53,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681278,MOIL-BAL-01-BH-009,52.53,61.86,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681286,MOIL-BAL-01-BH-009,61.86,85.86,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681293,MOIL-BAL-01-BH-009,85.86,108.23,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681300,MOIL-BAL-01-BH-009,108.23,127.74,calc-granulite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681309,MOIL-BAL-01-BH-009,127.74,137.16,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681316,MOIL-BAL-01-BH-009,137.16,147.08,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681323,MOIL-BAL-01-BH-009,147.08,153.75,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681330,MOIL-BAL-01-BH-009,153.75,165.48,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681337,MOIL-BAL-01-BH-009,165.48,197.55,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681344,MOIL-BAL-01-BH-009,197.55,222.77,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681352,MOIL-BAL-01-BH-009,222.77,223.9,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681359,MOIL-BAL-01-BH-010,0.0,23.65,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681366,MOIL-BAL-01-BH-010,23.65,49.57,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681373,MOIL-BAL-01-BH-010,49.57,59.11,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681380,MOIL-BAL-01-BH-010,59.11,65.59,manganese ore,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681387,MOIL-BAL-01-BH-010,65.59,91.44,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681394,MOIL-BAL-01-BH-010,91.44,123.99,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681401,MOIL-BAL-01-BH-010,123.99,140.72,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681408,MOIL-BAL-01-BH-010,140.72,147.01,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681415,MOIL-BAL-01-BH-010,147.01,156.19,manganese ore,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681422,MOIL-BAL-01-BH-010,156.19,180.17,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681429,MOIL-BAL-01-BH-010,180.17,199.45,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681436,MOIL-BAL-01-BH-010,199.45,209.18,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681443,MOIL-BAL-01-BH-010,209.18,219.32,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681450,MOIL-BAL-01-BH-010,219.32,221.1,manganese ore,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681457,MOIL-BAL-01-BH-011,0.0,9.78,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681464,MOIL-BAL-01-BH-011,9.78,16.44,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681471,MOIL-BAL-01-BH-011,16.44,20.6,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681478,MOIL-BAL-01-BH-011,20.6,55.27,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681485,MOIL-BAL-01-BH-011,55.27,67.33,manganese ore,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681492,MOIL-BAL-01-BH-011,67.33,72.04,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681500,MOIL-BAL-01-BH-011,72.04,84.54,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681507,MOIL-BAL-01-BH-011,84.54,93.12,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681515,MOIL-BAL-01-BH-011,93.12,103.19,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681522,MOIL-BAL-01-BH-011,103.19,122.93,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681529,MOIL-BAL-01-BH-011,122.93,136.68,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681536,MOIL-BAL-01-BH-011,136.68,145.68,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681543,MOIL-BAL-01-BH-011,145.68,146.68,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681549,MOIL-BAL-01-BH-011,146.68,157.52,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681557,MOIL-BAL-01-BH-011,157.52,164.18,phyllite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681564,MOIL-BAL-01-BH-011,164.18,167.47,quartzite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681571,MOIL-BAL-01-BH-011,167.47,176.66,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681578,MOIL-BAL-01-BH-011,176.66,203.87,phyllite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681585,MOIL-BAL-01-BH-011,203.87,213.54,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681592,MOIL-BAL-01-BH-011,213.54,215.4,phyllite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681599,MOIL-BAL-01-BH-012,0.0,10.76,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681606,MOIL-BAL-01-BH-012,10.76,25.51,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681613,MOIL-BAL-01-BH-012,25.51,55.76,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681620,MOIL-BAL-01-BH-012,55.76,65.2,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681627,MOIL-BHR-02-BH-001,0.0,14.92,quartzite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681637,MOIL-BHR-02-BH-001,14.92,33.98,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681644,MOIL-BHR-02-BH-001,33.98,52.48,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681651,MOIL-BHR-02-BH-001,52.48,64.86,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681659,MOIL-BHR-02-BH-001,64.86,78.38,phyllite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681666,MOIL-BHR-02-BH-001,78.38,97.37,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681673,MOIL-BHR-02-BH-001,97.37,101.31,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681680,MOIL-BHR-02-BH-001,101.31,115.77,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681687,MOIL-BHR-02-BH-001,115.77,128.77,phyllite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681694,MOIL-BHR-02-BH-001,128.77,141.36,calc-granulite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681701,MOIL-BHR-02-BH-001,141.36,166.02,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681708,MOIL-BHR-02-BH-001,166.02,187.09,phyllite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681715,MOIL-BHR-02-BH-001,187.09,205.44,manganese ore,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681723,MOIL-BHR-02-BH-001,205.44,219.09,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681730,MOIL-BHR-02-BH-001,219.09,228.35,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681737,MOIL-BHR-02-BH-001,228.35,237.09,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681744,MOIL-BHR-02-BH-001,237.09,254.06,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681751,MOIL-BHR-02-BH-001,254.06,264.59,quartzite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681758,MOIL-BHR-02-BH-001,264.59,307.84,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681765,MOIL-BHR-02-BH-001,307.84,311.78,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681771,MOIL-BHR-02-BH-001,311.78,329.63,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681778,MOIL-BHR-02-BH-001,329.63,372.4,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681785,MOIL-BHR-02-BH-001,372.4,379.3,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681792,MOIL-BHR-02-BH-002,0.0,2.98,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681800,MOIL-BHR-02-BH-002,2.98,8.7,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681807,MOIL-BHR-02-BH-002,8.7,20.8,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681814,MOIL-BHR-02-BH-002,20.8,29.14,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681821,MOIL-BHR-02-BH-002,29.14,38.51,quartzite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681828,MOIL-BHR-02-BH-002,38.51,56.38,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681834,MOIL-BHR-02-BH-002,56.38,65.44,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681841,MOIL-BHR-02-BH-002,65.44,70.5,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681848,MOIL-BHR-02-BH-003,0.0,25.37,phyllite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681855,MOIL-BHR-02-BH-003,25.37,49.66,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681862,MOIL-BHR-02-BH-003,49.66,54.89,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681869,MOIL-BHR-02-BH-003,54.89,64.96,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681876,MOIL-BHR-02-BH-003,64.96,86.9,manganese ore,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681883,MOIL-BHR-02-BH-004,0.0,33.77,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681890,MOIL-BHR-02-BH-004,33.77,40.61,mica-schist,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681897,MOIL-BHR-02-BH-004,40.61,49.98,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681904,MOIL-BHR-02-BH-004,49.98,70.72,manganese ore,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681913,MOIL-BHR-02-BH-004,70.72,106.99,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681920,MOIL-BHR-02-BH-004,106.99,113.49,gondite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681928,MOIL-BHR-02-BH-004,113.49,138.39,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681935,MOIL-BHR-02-BH-004,138.39,155.33,quartzite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681943,MOIL-BHR-02-BH-004,155.33,159.64,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681950,MOIL-BHR-02-BH-004,159.64,183.8,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681957,MOIL-BHR-02-BH-005,0.0,22.27,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681964,MOIL-BHR-02-BH-005,22.27,45.57,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681972,MOIL-BHR-02-BH-005,45.57,70.81,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681979,MOIL-BHR-02-BH-005,70.81,79.57,calc-granulite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681986,MOIL-BHR-02-BH-005,79.57,100.99,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681992,MOIL-BHR-02-BH-005,100.99,120.36,phyllite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.681999,MOIL-BHR-02-BH-005,120.36,124.41,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682006,MOIL-BHR-02-BH-005,124.41,130.3,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682013,MOIL-BHR-02-BH-006,0.0,30.46,quartzite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682020,MOIL-BHR-02-BH-006,30.46,59.9,manganese ore,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682027,MOIL-BHR-02-BH-006,59.9,72.84,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682034,MOIL-BHR-02-BH-006,72.84,84.76,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682041,MOIL-BHR-02-BH-006,84.76,105.6,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682048,MOIL-BHR-02-BH-007,0.0,45.45,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682055,MOIL-BHR-02-BH-007,45.45,47.99,phyllite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682062,MOIL-BHR-02-BH-007,47.99,75.57,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682069,MOIL-BHR-02-BH-007,75.57,119.11,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682076,MOIL-BHR-02-BH-007,119.11,144.11,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682083,MOIL-BHR-02-BH-007,144.11,164.3,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682090,MOIL-BHR-02-BH-008,0.0,29.23,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682097,MOIL-BHR-02-BH-008,29.23,52.63,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682104,MOIL-BHR-02-BH-008,52.63,56.0,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682111,MOIL-BHR-02-BH-009,0.0,20.77,manganese ore,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682118,MOIL-BHR-02-BH-009,20.77,38.47,phyllite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682126,MOIL-BHR-02-BH-009,38.47,40.89,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682134,MOIL-BHR-02-BH-009,40.89,59.83,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682141,MOIL-BHR-02-BH-009,59.83,73.11,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682149,MOIL-BHR-02-BH-009,73.11,93.33,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682156,MOIL-BHR-02-BH-009,93.33,97.21,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682165,MOIL-BHR-02-BH-009,97.21,107.15,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682172,MOIL-BHR-02-BH-009,107.15,113.7,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682179,MOIL-BHR-02-BH-010,0.0,7.06,manganese ore,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682186,MOIL-BHR-02-BH-010,7.06,28.33,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682194,MOIL-BHR-02-BH-010,28.33,32.36,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682201,MOIL-BHR-02-BH-010,32.36,56.52,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682208,MOIL-BHR-02-BH-010,56.52,73.55,mica-schist,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682215,MOIL-BHR-02-BH-010,73.55,98.67,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682222,MOIL-BHR-02-BH-010,98.67,104.92,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682229,MOIL-BHR-02-BH-010,104.92,130.53,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682236,MOIL-BHR-02-BH-010,130.53,142.03,manganese ore,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682243,MOIL-BHR-02-BH-010,142.03,157.97,quartzite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682250,MOIL-BHR-02-BH-010,157.97,169.79,gondite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682257,MOIL-BHR-02-BH-010,169.79,186.41,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682264,MOIL-BHR-02-BH-010,186.41,200.23,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682270,MOIL-BHR-02-BH-010,200.23,216.08,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682277,MOIL-BHR-02-BH-010,216.08,226.61,gondite,Sausar Group / Mansar Formation,completely
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682284,MOIL-BHR-02-BH-010,226.61,227.9,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682291,MOIL-BHR-02-BH-011,0.0,17.33,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682298,MOIL-BHR-02-BH-011,17.33,28.48,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682305,MOIL-BHR-02-BH-011,28.48,44.47,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682312,MOIL-BHR-02-BH-011,44.47,58.6,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682319,MOIL-BHR-02-BH-011,58.6,69.12,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682326,MOIL-BHR-02-BH-011,69.12,98.0,manganese ore,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682333,MOIL-BHR-02-BH-012,0.0,25.34,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682340,MOIL-BHR-02-BH-012,25.34,43.32,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682347,MOIL-BHR-02-BH-012,43.32,46.5,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682354,MOIL-BHR-02-BH-012,46.5,66.3,mica-schist,Sausar Group / Mansar Formation,completely
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682361,MOIL-BHR-02-BH-012,66.3,77.43,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682368,MOIL-BHR-02-BH-012,77.43,106.34,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682375,MOIL-BHR-02-BH-012,106.34,128.24,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682383,MOIL-BHR-02-BH-012,128.24,143.78,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682390,MOIL-BHR-02-BH-012,143.78,161.97,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682398,MOIL-BHR-02-BH-012,161.97,162.5,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682405,MOIL-UKW-03-BH-001,0.0,30.32,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682412,MOIL-UKW-03-BH-001,30.32,47.82,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682419,MOIL-UKW-03-BH-001,47.82,73.4,gondite,Sausar Group / Mansar Formation,completely
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682426,MOIL-UKW-03-BH-002,0.0,10.84,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682433,MOIL-UKW-03-BH-002,10.84,25.22,manganese ore,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682440,MOIL-UKW-03-BH-002,25.22,37.77,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682447,MOIL-UKW-03-BH-002,37.77,55.4,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682454,MOIL-UKW-03-BH-002,55.4,72.57,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682461,MOIL-UKW-03-BH-002,72.57,104.07,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682468,MOIL-UKW-03-BH-002,104.07,111.97,calc-granulite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682475,MOIL-UKW-03-BH-002,111.97,127.07,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682482,MOIL-UKW-03-BH-002,127.07,144.81,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682489,MOIL-UKW-03-BH-002,144.81,164.6,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682496,MOIL-UKW-03-BH-003,0.0,17.38,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682503,MOIL-UKW-03-BH-003,17.38,25.69,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682510,MOIL-UKW-03-BH-003,25.69,36.01,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682517,MOIL-UKW-03-BH-003,36.01,54.51,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682524,MOIL-UKW-03-BH-003,54.51,87.5,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682531,MOIL-UKW-03-BH-004,0.0,18.69,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682538,MOIL-UKW-03-BH-004,18.69,20.88,manganese ore,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682545,MOIL-UKW-03-BH-004,20.88,29.35,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682552,MOIL-UKW-03-BH-004,29.35,45.49,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682559,MOIL-UKW-03-BH-004,45.49,57.56,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682566,MOIL-UKW-03-BH-004,57.56,64.15,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682573,MOIL-UKW-03-BH-004,64.15,90.25,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682580,MOIL-UKW-03-BH-004,90.25,104.64,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682586,MOIL-UKW-03-BH-004,104.64,127.86,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682593,MOIL-UKW-03-BH-004,127.86,150.12,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682602,MOIL-UKW-03-BH-004,150.12,151.1,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682609,MOIL-UKW-03-BH-005,0.0,26.09,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682621,MOIL-UKW-03-BH-005,26.09,44.83,phyllite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682628,MOIL-UKW-03-BH-005,44.83,48.38,manganese ore,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682635,MOIL-UKW-03-BH-005,48.38,59.88,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682642,MOIL-UKW-03-BH-005,59.88,66.43,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682648,MOIL-UKW-03-BH-005,66.43,71.0,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682656,MOIL-UKW-03-BH-005,71.0,84.3,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682664,MOIL-UKW-03-BH-006,0.0,13.37,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682672,MOIL-UKW-03-BH-006,13.37,35.45,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682679,MOIL-UKW-03-BH-006,35.45,41.82,calc-granulite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682686,MOIL-UKW-03-BH-006,41.82,46.92,manganese ore,Sausar Group / Mansar Formation,completely
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682692,MOIL-UKW-03-BH-006,46.92,60.23,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682699,MOIL-UKW-03-BH-006,60.23,69.15,quartzite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682706,MOIL-UKW-03-BH-006,69.15,97.91,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682713,MOIL-UKW-03-BH-006,97.91,111.76,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682720,MOIL-UKW-03-BH-006,111.76,138.31,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682727,MOIL-UKW-03-BH-006,138.31,145.92,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682736,MOIL-UKW-03-BH-006,145.92,155.47,quartzite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682743,MOIL-UKW-03-BH-006,155.47,159.5,calc-granulite,Sausar Group / Mansar Formation,completely
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682751,MOIL-UKW-03-BH-007,0.0,5.88,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682758,MOIL-UKW-03-BH-007,5.88,11.36,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682767,MOIL-UKW-03-BH-007,11.36,28.08,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682774,MOIL-UKW-03-BH-007,28.08,40.56,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682781,MOIL-UKW-03-BH-007,40.56,70.99,manganese ore,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682788,MOIL-UKW-03-BH-007,70.99,91.89,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682795,MOIL-UKW-03-BH-007,91.89,103.53,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682802,MOIL-UKW-03-BH-007,103.53,116.46,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682809,MOIL-UKW-03-BH-007,116.46,144.1,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682816,MOIL-UKW-03-BH-007,144.1,167.04,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682823,MOIL-UKW-03-BH-007,167.04,182.29,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682831,MOIL-UKW-03-BH-007,182.29,193.0,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682838,MOIL-UKW-03-BH-008,0.0,6.47,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682845,MOIL-UKW-03-BH-008,6.47,30.74,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682852,MOIL-UKW-03-BH-008,30.74,43.33,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682859,MOIL-UKW-03-BH-008,43.33,57.52,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682866,MOIL-UKW-03-BH-008,57.52,75.62,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682873,MOIL-UKW-03-BH-008,75.62,96.05,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682880,MOIL-UKW-03-BH-008,96.05,102.72,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682887,MOIL-UKW-03-BH-008,102.72,107.78,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682894,MOIL-UKW-03-BH-008,107.78,125.1,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682901,MOIL-UKW-03-BH-009,0.0,24.51,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682920,MOIL-UKW-03-BH-009,24.51,47.6,quartzite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682927,MOIL-UKW-03-BH-009,47.6,90.02,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682933,MOIL-UKW-03-BH-009,90.02,94.56,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682940,MOIL-UKW-03-BH-009,94.56,98.67,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682946,MOIL-UKW-03-BH-009,98.67,109.7,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682953,MOIL-UKW-03-BH-010,0.0,10.38,mica-schist,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682959,MOIL-UKW-03-BH-010,10.38,33.2,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682966,MOIL-UKW-03-BH-010,33.2,57.86,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682972,MOIL-UKW-03-BH-010,57.86,70.14,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682978,MOIL-UKW-03-BH-010,70.14,104.11,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682984,MOIL-UKW-03-BH-010,104.11,116.04,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682991,MOIL-UKW-03-BH-010,116.04,145.09,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.682997,MOIL-UKW-03-BH-010,145.09,158.0,phyllite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683005,MOIL-UKW-03-BH-011,0.0,4.49,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683011,MOIL-UKW-03-BH-011,4.49,41.93,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683018,MOIL-UKW-03-BH-011,41.93,60.54,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683025,MOIL-UKW-03-BH-011,60.54,72.33,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683032,MOIL-UKW-03-BH-011,72.33,95.04,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683039,MOIL-UKW-03-BH-011,95.04,97.18,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683046,MOIL-UKW-03-BH-011,97.18,116.42,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683054,MOIL-UKW-03-BH-011,116.42,141.67,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683061,MOIL-UKW-03-BH-011,141.67,149.12,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683068,MOIL-UKW-03-BH-011,149.12,175.77,manganese ore,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683075,MOIL-UKW-03-BH-011,175.77,182.95,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683082,MOIL-UKW-03-BH-011,182.95,193.3,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683089,MOIL-UKW-03-BH-012,0.0,34.98,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683096,MOIL-UKW-03-BH-012,34.98,50.83,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683103,MOIL-UKW-03-BH-012,50.83,63.96,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683110,MOIL-UKW-03-BH-012,63.96,78.34,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683117,MOIL-UKW-03-BH-012,78.34,90.11,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683124,MOIL-UKW-03-BH-012,90.11,96.11,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683131,MOIL-UKW-03-BH-012,96.11,111.34,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683138,MOIL-UKW-03-BH-012,111.34,115.94,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683144,MOIL-UKW-03-BH-012,115.94,133.77,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683151,MOIL-UKW-03-BH-012,133.77,142.45,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683158,MOIL-UKW-03-BH-012,142.45,157.3,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683167,MOIL-TIR-04-BH-001,0.0,34.9,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683174,MOIL-TIR-04-BH-001,34.9,41.88,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683182,MOIL-TIR-04-BH-001,41.88,84.05,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683189,MOIL-TIR-04-BH-001,84.05,84.4,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683197,MOIL-TIR-04-BH-002,0.0,15.79,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683204,MOIL-TIR-04-BH-002,15.79,29.7,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683211,MOIL-TIR-04-BH-002,29.7,33.2,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683218,MOIL-TIR-04-BH-002,33.2,37.92,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683225,MOIL-TIR-04-BH-002,37.92,68.2,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683232,MOIL-TIR-04-BH-002,68.2,82.48,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683238,MOIL-TIR-04-BH-002,82.48,101.79,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683246,MOIL-TIR-04-BH-002,101.79,110.96,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683252,MOIL-TIR-04-BH-002,110.96,121.95,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683260,MOIL-TIR-04-BH-002,121.95,145.41,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683267,MOIL-TIR-04-BH-002,145.41,155.88,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683275,MOIL-TIR-04-BH-002,155.88,163.4,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683282,MOIL-TIR-04-BH-002,163.4,173.26,phyllite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683289,MOIL-TIR-04-BH-002,173.26,191.17,quartzite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683296,MOIL-TIR-04-BH-002,191.17,203.1,manganese ore,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683303,MOIL-TIR-04-BH-003,0.0,36.81,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683311,MOIL-TIR-04-BH-003,36.81,61.49,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683319,MOIL-TIR-04-BH-003,61.49,72.3,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683325,MOIL-TIR-04-BH-003,72.3,91.45,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683332,MOIL-TIR-04-BH-003,91.45,105.14,mica-schist,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683339,MOIL-TIR-04-BH-003,105.14,114.63,phyllite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683346,MOIL-TIR-04-BH-003,114.63,139.59,mica-schist,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683354,MOIL-TIR-04-BH-003,139.59,154.67,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683361,MOIL-TIR-04-BH-003,154.67,177.6,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683368,MOIL-TIR-04-BH-003,177.6,190.13,calc-granulite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683374,MOIL-TIR-04-BH-003,190.13,198.77,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683381,MOIL-TIR-04-BH-003,198.77,206.32,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683388,MOIL-TIR-04-BH-003,206.32,211.5,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683395,MOIL-TIR-04-BH-003,211.5,240.07,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683402,MOIL-TIR-04-BH-003,240.07,241.0,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683409,MOIL-TIR-04-BH-004,0.0,5.36,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683416,MOIL-TIR-04-BH-004,5.36,19.32,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683423,MOIL-TIR-04-BH-004,19.32,45.3,quartzite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683430,MOIL-TIR-04-BH-004,45.3,66.92,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683437,MOIL-TIR-04-BH-004,66.92,83.8,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683444,MOIL-TIR-04-BH-004,83.8,105.94,quartzite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683451,MOIL-TIR-04-BH-004,105.94,115.85,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683458,MOIL-TIR-04-BH-004,115.85,116.8,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683465,MOIL-TIR-04-BH-005,0.0,8.3,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683471,MOIL-TIR-04-BH-005,8.3,29.48,manganese ore,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683478,MOIL-TIR-04-BH-005,29.48,34.22,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683485,MOIL-TIR-04-BH-005,34.22,41.85,mica-schist,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683493,MOIL-TIR-04-BH-005,41.85,85.1,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683500,MOIL-TIR-04-BH-005,85.1,87.28,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683507,MOIL-TIR-04-BH-005,87.28,122.58,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683514,MOIL-TIR-04-BH-005,122.58,131.3,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683521,MOIL-TIR-04-BH-006,0.0,23.0,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683528,MOIL-TIR-04-BH-006,23.0,33.4,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683535,MOIL-TIR-04-BH-006,33.4,45.83,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683542,MOIL-TIR-04-BH-006,45.83,51.5,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683549,MOIL-TIR-04-BH-006,51.5,60.34,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683556,MOIL-TIR-04-BH-006,60.34,90.61,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683563,MOIL-TIR-04-BH-006,90.61,111.7,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683570,MOIL-TIR-04-BH-006,111.7,138.17,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683577,MOIL-TIR-04-BH-006,138.17,143.23,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683584,MOIL-TIR-04-BH-006,143.23,159.16,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683591,MOIL-TIR-04-BH-006,159.16,167.45,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683598,MOIL-TIR-04-BH-006,167.45,193.1,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683606,MOIL-TIR-04-BH-007,0.0,13.28,manganese ore,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683612,MOIL-TIR-04-BH-007,13.28,33.57,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683619,MOIL-TIR-04-BH-007,33.57,62.7,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683626,MOIL-TIR-04-BH-007,62.7,70.94,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683633,MOIL-TIR-04-BH-007,70.94,87.66,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683640,MOIL-TIR-04-BH-007,87.66,111.68,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683647,MOIL-TIR-04-BH-007,111.68,125.93,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683654,MOIL-TIR-04-BH-007,125.93,132.68,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683661,MOIL-TIR-04-BH-007,132.68,138.04,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683668,MOIL-TIR-04-BH-007,138.04,164.0,phyllite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683675,MOIL-TIR-04-BH-007,164.0,174.05,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683682,MOIL-TIR-04-BH-007,174.05,195.25,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683692,MOIL-TIR-04-BH-007,195.25,202.02,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683700,MOIL-TIR-04-BH-007,202.02,203.1,mica-schist,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683707,MOIL-TIR-04-BH-008,0.0,5.53,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683715,MOIL-TIR-04-BH-008,5.53,8.38,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683722,MOIL-TIR-04-BH-008,8.38,22.85,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683728,MOIL-TIR-04-BH-008,22.85,26.47,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683735,MOIL-TIR-04-BH-008,26.47,32.24,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683742,MOIL-TIR-04-BH-008,32.24,42.5,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683749,MOIL-TIR-04-BH-008,42.5,72.03,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683756,MOIL-TIR-04-BH-008,72.03,91.18,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683763,MOIL-TIR-04-BH-008,91.18,103.85,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683770,MOIL-TIR-04-BH-008,103.85,125.29,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683777,MOIL-TIR-04-BH-008,125.29,133.07,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683784,MOIL-TIR-04-BH-008,133.07,145.2,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683790,MOIL-TIR-04-BH-008,145.2,169.64,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683797,MOIL-TIR-04-BH-008,169.64,185.8,phyllite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683804,MOIL-TIR-04-BH-008,185.8,200.38,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683811,MOIL-TIR-04-BH-008,200.38,207.92,calc-granulite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683818,MOIL-TIR-04-BH-008,207.92,223.61,calc-granulite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683825,MOIL-TIR-04-BH-008,223.61,254.46,quartzite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683832,MOIL-TIR-04-BH-008,254.46,293.7,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683839,MOIL-TIR-04-BH-008,293.7,309.6,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683846,MOIL-TIR-04-BH-009,0.0,8.53,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683853,MOIL-TIR-04-BH-009,8.53,18.01,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683863,MOIL-TIR-04-BH-009,18.01,45.7,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683870,MOIL-TIR-04-BH-009,45.7,55.2,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683877,MOIL-TIR-04-BH-009,55.2,66.29,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683884,MOIL-TIR-04-BH-009,66.29,82.88,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683891,MOIL-TIR-04-BH-009,82.88,98.85,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683898,MOIL-TIR-04-BH-009,98.85,111.4,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683905,MOIL-TIR-04-BH-009,111.4,157.76,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683912,MOIL-TIR-04-BH-009,157.76,176.02,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683919,MOIL-TIR-04-BH-009,176.02,230.4,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683926,MOIL-TIR-04-BH-010,0.0,8.76,manganese ore,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683934,MOIL-TIR-04-BH-010,8.76,22.34,mica-schist,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683941,MOIL-TIR-04-BH-010,22.34,30.65,calc-granulite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683949,MOIL-TIR-04-BH-010,30.65,53.0,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683957,MOIL-TIR-04-BH-010,53.0,66.61,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683964,MOIL-TIR-04-BH-010,66.61,101.18,manganese ore,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683971,MOIL-TIR-04-BH-010,101.18,121.63,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683977,MOIL-TIR-04-BH-010,121.63,138.5,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683984,MOIL-TIR-04-BH-010,138.5,143.61,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683991,MOIL-TIR-04-BH-010,143.61,151.2,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.683999,MOIL-TIR-04-BH-011,0.0,9.73,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684006,MOIL-TIR-04-BH-011,9.73,25.71,mica-schist,Sausar Group / Mansar Formation,completely
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684013,MOIL-TIR-04-BH-011,25.71,37.15,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684020,MOIL-TIR-04-BH-011,37.15,43.15,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684026,MOIL-TIR-04-BH-011,43.15,56.37,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684033,MOIL-TIR-04-BH-011,56.37,87.27,mica-schist,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684040,MOIL-TIR-04-BH-011,87.27,98.18,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684047,MOIL-TIR-04-BH-011,98.18,113.8,calc-granulite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684054,MOIL-TIR-04-BH-012,0.0,4.06,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684061,MOIL-TIR-04-BH-012,4.06,7.52,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684068,MOIL-TIR-04-BH-012,7.52,27.67,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684075,MOIL-TIR-04-BH-012,27.67,32.13,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684082,MOIL-TIR-04-BH-012,32.13,39.25,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684089,MOIL-TIR-04-BH-012,39.25,59.49,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684095,MOIL-TIR-04-BH-012,59.49,75.03,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684102,MOIL-TIR-04-BH-012,75.03,96.73,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684109,MOIL-TIR-04-BH-012,96.73,109.91,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684116,MOIL-TIR-04-BH-012,109.91,130.11,mica-schist,Sausar Group / Mansar Formation,completely
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684123,MOIL-TIR-04-BH-012,130.11,147.93,phyllite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684130,MOIL-TIR-04-BH-012,147.93,184.58,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684137,MOIL-TIR-04-BH-012,184.58,200.73,phyllite,Sausar Group / Mansar Formation,highly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684144,MOIL-TIR-04-BH-012,200.73,207.0,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684152,MOIL-DON-05-BH-001,0.0,26.93,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684159,MOIL-DON-05-BH-001,26.93,52.43,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684166,MOIL-DON-05-BH-001,52.43,57.31,quartzite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684173,MOIL-DON-05-BH-001,57.31,85.85,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684180,MOIL-DON-05-BH-001,85.85,105.62,phyllite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684187,MOIL-DON-05-BH-001,105.62,133.02,manganese ore,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684194,MOIL-DON-05-BH-001,133.02,134.9,gondite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684205,MOIL-DON-05-BH-002,0.0,10.87,quartzite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684212,MOIL-DON-05-BH-002,10.87,25.0,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684221,MOIL-DON-05-BH-002,25.0,42.42,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684228,MOIL-DON-05-BH-002,42.42,56.31,calc-granulite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684235,MOIL-DON-05-BH-002,56.31,82.71,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684242,MOIL-DON-05-BH-002,82.71,103.14,gondite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684249,MOIL-DON-05-BH-002,103.14,114.1,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684256,MOIL-DON-05-BH-003,0.0,32.59,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684263,MOIL-DON-05-BH-003,32.59,47.08,quartzite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684270,MOIL-DON-05-BH-003,47.08,47.6,calc-granulite,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684277,MOIL-DON-05-BH-004,0.0,19.12,mica-schist,Sausar Group / Mansar Formation,fresh
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684284,MOIL-DON-05-BH-004,19.12,31.03,gondite,Sausar Group / Mansar Formation,slightly
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684291,MOIL-DON-05-BH-004,31.03,47.41,calc-granulite,Sausar Group / Mansar Formation,moderately
+1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.684298,MOIL-DON-05-BH-004,47.41,69.13,phyllite,Sausar Group / Mansar Formation,fresh
