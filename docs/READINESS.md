@@ -2,6 +2,9 @@
 
 **Assessed against:** `main` @ `34e99d4` (Phases 1–7 merged) plus this branch's sweep fixes.
 **Date:** 2026-09-22 · **Assessor:** Phase 8 re-traceability
+**Revised:** 2026-09-24 — dashboard rows re-checked in a real browser after DEF-1
+(`DECISIONS.md` D-028). Rows whose evidence had been API-level only are now
+marked *browser-verified* with a date; two findings added to §5; score recomputed.
 
 > This is an honest assessment, not a pitch. Where evidence is incomplete it says
 > so. The score is a **target estimate**, not a claim of what a jury will award.
@@ -12,17 +15,25 @@
 
 | | |
 |---|---|
-| **Weighted score (target)** | **73 / 100** |
+| **Weighted score (target)** | **74 / 100** — recomputed 2026-09-24, see §4 |
 | Requirements fully met | **25 / 44 (57%)** |
 | Partial | **14 / 44 (32%)** |
 | Missing | **5 / 44 (11%)** — 4 of them deferred past Phase 1 by PRD §10 |
-| Broken | **0** |
-| Fabrications found this phase | **6 clusters** — all fixed |
+| Broken | **0** — but **1 was broken and undetected until 2026-09-24** (DEF-1, §5) |
+| Fabrications found this phase | **6 clusters** fixed · **1 more found 2026-09-24**, not yet fixed (§5) |
+| Browser-verified requirement rows | **6**, by `npm run test:e2e` |
 
 **The single most important fact about this project:** its operational data is
 synthetic, generated to a published ingestion contract, because MOIL's records
 are proprietary (PRD §8.2). Weather and satellite imagery are genuinely
 measured. Everything in the UI states which it is.
+
+**The most important lesson from this revision:** every dashboard requirement in
+§2 was once marked met on the strength of a component, an endpoint or a curl —
+and for months the console could not render a single number, because all of
+those checks used the one id format that worked. Evidence that a thing exists is
+not evidence that it works. Six rows now say *browser-verified*, and a test
+asserts them.
 
 ---
 
@@ -41,7 +52,7 @@ file:line, a test name, or a measured number.
 | A-4 per-cell uncertainty | P0 | **fully** | Ordinary kriging, `AI/scripts/kriging.py`. Measured: sd **0.000** at an observation vs **0.297** far outside. `test_track_a.py::test_kriging_uncertainty_rises_away_from_data`. |
 | A-5 ranked drill targets with evidence | P0 | **fully** | `rank_drill_targets()` returns rank, score, uncertainty and an `evidence` string per target. Rendered in `TrackAPanel.tsx`. |
 | A-6 tonnage/grade over a drawn zone | P1 | **partial** | `compute_borehole_spatial_model` returns in-situ tonnage and weighted grade from supplied boreholes, but **not over a user-drawn zone** and not from an interpolated resource model. |
-| A-7 feature attribution | P1 | **fully** | `feature_importance` returned per prediction and rendered as a bar list in the model card. |
+| A-7 feature attribution | P1 | **fully** | Genuine implementation: `/api/v1/prospectivity/metrics` returns `feature_importance`, rendered as a bar list from live model output in `RealtimeMLTrainingStudio.tsx` — **browser-verified 2026-09-24**. ⚠ Separately, `/evaluator` renders a second "Geological feature importance breakdown" chart (30.2% / 21.9% / 16.4% / 13.7% / 10.0% / 7.9%) from a **hardcoded array** in `JudgesArchitectureDeck.tsx:10`, with no provenance envelope. The requirement is met by the first; the second is a fabrication-class defect logged in §5. |
 | A-8 versioned reproducible runs | P1 | **partial** | `model_version: track-a-gbt-lomo-v1` returned; features seeded and reproducible (`features.py::_rng_for`). **No run registry or input manifest.** |
 | A-9 InSAR subsidence | P2 | **missing** | Not implemented. PRD §10 defers it past Phase 1. |
 | A-10 export GeoJSON/shapefile | P1 | **partial** | GeoJSON export works (`05_export_geojson.py`, path fixed in Phase 2). Exports **cells, not ranked targets**; no shapefile. |
@@ -84,12 +95,12 @@ file:line, a test name, or a measured number.
 | ID | Pri | Status | Evidence |
 |---|---|---|---|
 | D-1 show predicted reserves | P0 | **partial** | Prospectivity with uncertainty is shown, correctly typed and never called "reserve" (§2.4). A **resource/grade estimate over a zone is not** (blocked on A-6). |
-| D-2 production trends | P0 | **fully** | Per-grade trajectory chart with 80% interval and seasonal-naive overlay, `TrackBPanel.tsx`. |
-| D-3 shortfall risk | P0 | **fully** | Headline tiles + per-grade P(shortfall) chips. |
-| D-4 corrective steps | P0 | **fully** | Approved actions with effect and assumptions; **rejected actions shown with the rule each broke**. |
+| D-2 production trends | P0 | **fully** | Per-grade trajectory chart with 80% interval and seasonal-naive overlay, `TrackBPanel.tsx`. **Browser-verified 2026-09-24**; before the DEF-1 fix this chart never rendered, because the forecast call 503'd. |
+| D-3 shortfall risk | P0 | **fully** | Headline tiles + per-grade P(shortfall) chips. **Browser-verified 2026-09-24** — ten portfolio cards with a probability each, four grades for Balaghat. Before the DEF-1 fix every card read "forecast unavailable". |
+| D-4 corrective steps | P0 | **fully** | Approved actions with effect, assumptions and the checks each passed — **browser-verified 2026-09-24**, three approved for Balaghat. The rejection panel is implemented and renders the rule broken when `rejected_actions` is non-empty, but **that path has never been observed**: the engine rejects nothing at any of the ten mines with the current synthetic inputs, so the panel shows its empty-state line instead. Previously this row asserted "rejected actions shown with the rule each broke" as if it had been seen. It had not. |
 | D-5 map with prospectivity + targets | P0 | **partial** | Prospectivity layer and ranked target table exist; targets are **not plotted as map pins** in the console (they are in a table). |
 | D-6 portfolio → mine → face | P1 | **partial** | Portfolio and mine levels implemented (`DecisionConsole.tsx`, `level === 'portfolio' \| 'mine'`). **Face/section level is grade-level**, because the contract has no face key — deliberate, `DECISIONS.md` D-021. |
-| D-7 evidence panel | P0 | **fully** | `Evidence.tsx::Metric` is the only number-rendering component; refuses a value without an envelope and prints an N-3 violation marker if one appears. |
+| D-7 evidence panel | P0 | **fully** | `Evidence.tsx::Metric` is the only number-rendering component; refuses a value without an envelope and prints an N-3 violation marker if one appears. **Browser-verified 2026-09-24**: every one of the ten portfolio cards carries a provenance badge, asserted by `npm run test:e2e`. |
 | D-8 export PDF/Excel | P1 | **fully** | CSV (Excel-readable, provenance columns) + print-to-PDF, `console-export.ts`. |
 | D-9 role-based views | P2 | **missing** | Not implemented (`grep persona` → 0). PRD §10 defers past Phase 1. |
 
@@ -106,7 +117,7 @@ file:line, a test name, or a measured number.
 | N-5 on-premise | — | **partial** | Models, constraint engine, kriging and contract are local. **Supabase (auth) is an external dependency**; weather/imagery are external by nature and degrade with a stated reason. |
 | N-6 degrade + state staleness | Required | **fully** | Backend down → 4/4 endpoints 503 with reason, **zero numeric fields**, `/console` still 200. Backtest reports `artifact_age_hours`. |
 | N-7 audit log of recommendations | Required | **missing** | `grep audit_log\|disposition` → no hits. Not implemented. |
-| N-8 backtest visible in UI | Required | **fully** | On-demand panel in `TrackBPanel.tsx` showing model vs baseline MAPE, coverage vs nominal, per-horizon table. |
+| N-8 backtest visible in UI | Required | **fully** | On-demand panel in `TrackBPanel.tsx` showing model vs baseline MAPE, coverage vs nominal, per-horizon table. **Browser-verified 2026-09-24**: MAPE 11.67% vs 14.81%, coverage 0.812, four horizons. Before the DEF-1 fix the panel returned 503 and rendered nothing. |
 
 **Non-functional: 5 fully · 2 partial · 1 missing**
 
@@ -238,7 +249,7 @@ Deducted mainly for the partials that matter: A-1 has no persistence, A-6/D-1
 have no zone-based resource estimate, and C-1/C-2/C-3 produce templated actions
 rather than optimised ones.
 
-### Functional correctness — **19 / 25**
+### Functional correctness — **18 / 25**  *(was 19)*
 
 What works, works honestly and is tested: the forecaster beats its baseline on a
 correct rolling-origin protocol with calibrated intervals (0.812 vs 0.800); the
@@ -247,6 +258,11 @@ reports infeasible with an LP-derived diagnosis; weather and imagery are
 genuinely live. Deducted for: Track A's headline AUC leaning partly on terrain
 (§5), alerts not wired to the B-6 probability, and recommendations being
 templated rather than computed.
+
+**−1 for the hardcoded feature-importance chart on `/evaluator`** (§5). The
+previous 19 was also, in hindsight, generous for a different reason: it was
+awarded while `/console` could not render a number. That is now fixed, so the
+mark is finally measuring what it claimed to measure.
 
 ### Architecture — **16 / 20**
 
@@ -261,40 +277,93 @@ UI surface that still sits outside the provenance discipline.
 
 Owned code is lint-clean and typechecks; decisions are documented (25 entries in
 `DECISIONS.md`); guardrails are asserted in tests, not just prose. Deducted for:
-**52 pre-existing lint errors** in legacy screens; two parallel UI surfaces
+**46 pre-existing lint errors** in legacy screens (52 before the UI redesign); two parallel UI surfaces
 (`/console` and the legacy dashboard) with different honesty standards; and the
 fact that **six fabrication clusters survived into Phase 8** — they were found,
 but a codebase that needed eight sweeps has a quality problem, not just a
 fabrication problem.
 
-### Testing & demo — **11 / 15**
+### Testing & demo — **13 / 15**  *(was 11)*
 
-Six suites, 39 assertions, covering the load-bearing logic: no-leakage (corrupts
-post-origin actuals 10× and asserts bit-identical forecasts), backtest beats
-baseline, interval coverage near nominal, constraint rejections, blend
+Six backend suites, 39 assertions, covering the load-bearing logic: no-leakage
+(corrupts post-origin actuals 10× and asserts bit-identical forecasts), backtest
+beats baseline, interval coverage near nominal, constraint rejections, blend
 infeasibility, cross-runtime PRNG parity, and the performance contract.
-`docs/DEMO.md` scripts a 3-minute path. Deducted for: **no frontend tests at
-all** (no component or E2E coverage), no CI configuration, and the demo depending
-on two manually started processes.
+
+**+2 for browser-level coverage, which did not exist before.** `npm run test:e2e`
+drives `/console` in headless Chrome and asserts 18 things about the rendered
+page — ten cards each with a probability and a provenance badge, the full
+drill-down chain, backtest MAPE and coverage, constraint-checked actions, zero
+5xx — including a guard that opens the *second* mine and asserts the screen shows
+that mine, which is the assertion DEF-1 fails. Verified capable of failing: 3/18
+against the reverted register. `tools/demo-walk.js` executes every step of
+`docs/DEMO.md` and screenshots each, and `tools/a11y.js` runs axe-core per route.
+
+Still deducted for: no CI configuration (nothing runs these automatically), the
+demo depending on two manually started processes, and no component-level tests.
 
 ### Total
 
 ```
-PRD coverage        17/25  × 1.00 = 17
-Functional          19/25  × 1.00 = 19
-Architecture        16/20  × 1.00 = 16
-Code quality        10/15  × 1.00 = 10
-Testing & demo      11/15  × 1.00 = 11
+PRD coverage        17/25  × 1.00 = 17   (unchanged)
+Functional          18/25  × 1.00 = 18   (was 19 — hardcoded chart, §5)
+Architecture        16/20  × 1.00 = 16   (unchanged)
+Code quality        10/15  × 1.00 = 10   (unchanged)
+Testing & demo      13/15  × 1.00 = 13   (was 11 — browser-level coverage)
                                    ────
-                                    73 / 100
+                                    74 / 100
 ```
 
-**73/100 — a target, not a claim.** A jury weighting novelty or polish
+**74/100, recomputed 2026-09-24 — not carried forward.** Two components moved in
+opposite directions and the total happens to land one point up; that is a
+coincidence, not stability. The more important change is not the number: until
+DEF-1 was fixed, six of the rows this score rests on asserted rendering that had
+never happened in a browser. The same 73 would have been wrong yesterday and is
+roughly right today for reasons that had nothing to do with arithmetic.
+
+**A target, not a claim.** A jury weighting novelty or polish
 differently could land meaningfully above or below this.
 
 ---
 
 ## 5. Limits, stated plainly
+
+**DEF-1 — the console could not render a single number, and every check missed
+it.** Until 2026-09-24 a Next route handler shadowed FastAPI's mine register and
+returned slug ids (`'balaghat'`) where the service layer keys mines by integer.
+`forecast`, `backtest` and `recommendations` therefore returned 503 for all ten
+mines, and `telemetry` computed `parseInt(id) || 1` — so a request for *any*
+mine returned **Balaghat's** record, with `live_sources_ok: true` and no
+degradation flag. One mine's measurements under another mine's name: the same
+defect class removed from `EVIDENCE_DB` in an earlier phase, surviving in a
+fallback expression. Fixed; see `DECISIONS.md` D-028.
+
+**The reason it hid is the part worth keeping.** Every trace in this document
+that claimed a dashboard requirement was met cited a component, an endpoint or a
+curl — all of which used numeric ids, the path that always worked. Nothing
+exercised the path a browser takes: fetch the register, then use the id it
+returns. **An API-level check is not evidence that a screen works**, and six
+rows in §2 asserted rendering that had never been observed. They are now marked
+browser-verified, with the date, and `npm run test:e2e` asserts them on every
+run so the claim cannot rot again.
+
+**A second hardcoded chart survived the fabrication sweeps.** `/evaluator`
+renders a "Geological feature importance breakdown" — Fault Distance 30.2%,
+Rainfall 21.9%, Slope 16.4%, Iron Oxide 13.7%, Elevation 10.0%, Ferrous Mineral
+7.9% — from a literal array in `JudgesArchitectureDeck.tsx:10`, with no
+provenance envelope and nothing marking it as illustrative. The real importances
+are available from `/api/v1/prospectivity/metrics` and are rendered honestly
+elsewhere, which makes this one gratuitous. Found 2026-09-24, **not yet fixed** —
+it is in a screen the UI redesign rewrites in Stage 2. Two of its six
+descriptions do say "simulated", but the percentages are presented as measured.
+
+**The constraint engine's rejection path is unexercised.** `rejected_actions` is
+empty for all ten mines, so the panel that names a broken rule has never been
+seen with real data. The engine demonstrably runs — its scope and exclusions are
+returned per request, and five tests in `test_track_b.py` assert it rejects
+night blasting and an infeasible relocation — but the *UI* path is unproven.
+`docs/DEMO.md` previously told the presenter to scroll to a rejected block that
+would not be there; corrected 2026-09-24.
 
 **Track A's 0.85 AUC is softer than it looks.** The ablation is published
 because the headline alone would mislead: spectral features alone reach

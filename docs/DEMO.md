@@ -25,6 +25,33 @@ Open **http://localhost:3000/console**.
 > closed rather than signing cookies with a guessable key. The console itself
 > does not need auth.
 
+### Check the console actually works before you present
+
+With both processes up:
+
+```bash
+cd frontend && npm run test:e2e
+```
+
+This drives `/console` in headless Chrome and asserts what this script is about
+to show: ten portfolio cards each with a probability and a provenance badge, the
+drill-down chain through forecast, per-grade breakdown, backtest and
+constraint-checked actions, and zero 5xx responses. Expect `PASS — 18/18`.
+
+It exists because of DEF-1 (`docs/DECISIONS.md` D-028): a duplicate mine
+register keyed by slug meant the console could not render a single number, while
+every API-level check stayed green because they all used numeric ids. Run this,
+not curl, to know the demo will work.
+
+The first forecast for each mine costs roughly 40 s cold and a few milliseconds
+warm. **Warm the cache before presenting**, or the portfolio will still be
+filling in while you talk:
+
+```bash
+for i in $(seq 1 10); do curl -s -o /dev/null \
+  "http://localhost:8000/api/v1/mines/$i/forecast"; done
+```
+
 ---
 
 ## 0:00 — Frame the problem (20 s)
@@ -116,13 +143,27 @@ of them including the two that failed.
 Approved actions in green, each with its expected effect, its ΔP(shortfall), its
 **stated assumptions**, and the list of **checks it passed**.
 
-**Scroll to the rejected block** — this is the part worth showing:
+**On the rejection panel — read what is actually on screen.** With the current
+synthetic operational data, no candidate action violates a constraint at any of
+the ten mines, so the panel reads:
+
+> *No candidate violated a constraint this run. The engine still ran — see its
+> scope below.*
+
+Do not promise a list of rejected actions; there is not one to show. The line
+above is the better point anyway:
 
 > PRD §6.3 says a recommender that suggests blasting during a statutory rest
 > period, or moving a shovel 200 km overnight, discredits the system in one
-> demo. So the engine checks both. Rejected actions are *removed*, not shown
-> with a warning — and we display what was rejected and which rule it broke, so
-> you can see the engine actually ran.
+> demo. So the engine checks both, and it reports when it rejected nothing
+> rather than going quiet — an empty result and an engine that never ran look
+> identical otherwise. When a candidate *is* rejected, it is removed rather than
+> shown with a warning, and the panel names the rule it broke.
+
+**Verified 2026-09-24:** `rejected_actions` is empty for all ten mines. If you
+want a live rejection on stage, you need operational inputs that push a
+candidate outside `shift_hours` or `blast_window` — that is a data-generation
+change, not a UI one.
 
 Footer line: `enforced, not learned · scope: shift_hours, blast_window,
 blast_separation, equipment_compatibility, relocation_feasibility · excluded:
