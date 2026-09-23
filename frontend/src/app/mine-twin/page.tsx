@@ -76,7 +76,7 @@ export default function MineTwinPage() {
         {/* Bottom Page Navigation Bar */}
         <div className="p-4 rounded-2xl bg-[#060C1B]/95 border border-white/20 backdrop-blur-2xl shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 mt-12">
           <Link
-            href="/evaluator"
+            href="/method"
             className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-mono text-xs font-bold flex items-center justify-center gap-2 transition-colors"
           >
             <ArrowLeft size={16} />

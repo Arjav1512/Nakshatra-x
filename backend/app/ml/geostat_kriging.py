@@ -23,17 +23,42 @@ def compute_borehole_spatial_model(
             "message": "No borehole assay data provided",
         }
 
+    # Every assay field is required.
+    #
+    # These previously defaulted to mn 38.0, fe 8.5, sio2 6.2, density 3.8,
+    # recovery 88.0 and a 40-60 m interval — all plausible manganese values. A
+    # borehole supplied as `{}` therefore produced a grade, a seam thickness and
+    # an in-situ tonnage, and the output was indistinguishable from one computed
+    # from real assays. Tonnage is thickness x area x density x recovery, so two
+    # of those defaults fed the headline number directly.
+    #
+    # The list was called `valid_holes` while nothing was validated. It is now.
+    REQUIRED = ("mn_pct", "fe_pct", "sio2_pct", "density_t_m3",
+                "recovery_pct", "depth_from_m", "depth_to_m")
+
     valid_holes = []
-    for bh in boreholes:
-        mn = float(bh.get("mn_pct", 38.0))
-        fe = float(bh.get("fe_pct", 8.5))
-        sio2 = float(bh.get("sio2_pct", 6.2))
-        thickness = max(0.5, float(bh.get("depth_to_m", 60)) - float(bh.get("depth_from_m", 40)))
-        density = float(bh.get("density_t_m3", 3.8))
-        rec = float(bh.get("recovery_pct", 88.0))
+    rejected: List[Dict[str, Any]] = []
+
+    for idx, bh in enumerate(boreholes):
+        missing = [k for k in REQUIRED if bh.get(k) is None]
+        if missing:
+            rejected.append({
+                "hole_id": bh.get("hole_id") or f"(unnamed, index {idx})",
+                "missing_fields": missing,
+                "reason": "Assay incomplete. Values are not inferred, so this "
+                          "hole contributes to no tonnage or grade figure.",
+            })
+            continue
+
+        mn = float(bh["mn_pct"])
+        fe = float(bh["fe_pct"])
+        sio2 = float(bh["sio2_pct"])
+        thickness = max(0.5, float(bh["depth_to_m"]) - float(bh["depth_from_m"]))
+        density = float(bh["density_t_m3"])
+        rec = float(bh["recovery_pct"])
 
         valid_holes.append({
-            "hole_id": bh.get("hole_id", "BH-01"),
+            "hole_id": bh.get("hole_id") or f"(unnamed, index {idx})",
             "x": float(bh.get("x", 0)),
             "y": float(bh.get("y", 0)),
             "thickness_m": thickness,
@@ -44,6 +69,13 @@ def compute_borehole_spatial_model(
             "recovery_pct": rec,
             "tonnes_proxy": thickness * (block_size_m ** 2) * density * (rec / 100.0),
         })
+
+    if not valid_holes:
+        return {
+            "success": False,
+            "message": "No borehole had a complete assay. Nothing was estimated.",
+            "rejected_boreholes": rejected,
+        }
 
     # Summary statistics
     total_thickness = sum(h["thickness_m"] for h in valid_holes)
@@ -71,9 +103,16 @@ def compute_borehole_spatial_model(
         ore_type = "Blast Furnace Grade (Low/Blend Value)"
         grade_band = "Low / blending grade (Mn < 35%)"
 
-    # Confidence based on borehole spacing and recovery
+    # `geostatistical_confidence_pct` used to be reported here as
+    #     min(96.0, avg_recovery * 0.95 + n_holes * 1.5)
+    # which is not a confidence in any statistical sense: the coefficients 0.95
+    # and 1.5 and the 96.0 ceiling were chosen to make the number look right,
+    # and it rises with hole count regardless of whether the holes agree. A
+    # figure labelled "confidence" that no interval or variance backs is a
+    # fabricated statistic, so it is gone.
+    #
+    # What remains are the two inputs it was built from, reported as themselves.
     avg_recovery = sum(h["recovery_pct"] for h in valid_holes) / len(valid_holes)
-    drill_confidence = min(96.0, round(avg_recovery * 0.95 + len(valid_holes) * 1.5, 1))
 
     return {
         "success": True,
@@ -89,7 +128,15 @@ def compute_borehole_spatial_model(
             "reserve classification, and must not be reported as one."
         ),
         "economic_ore_category": ore_type,
-        "geostatistical_confidence_pct": drill_confidence,
+        "boreholes_rejected": len(rejected),
+        "rejected_boreholes": rejected,
+        "mean_core_recovery_pct": round(avg_recovery, 1),
+        "confidence_note": (
+            "No confidence percentage is reported. Core recovery and hole count "
+            "are given as themselves; neither is a statistical confidence, and "
+            "this estimate carries no interval because the inputs do not support "
+            "one."
+        ),
         "borehole_assay_breakdown": [
             {
                 "hole_id": h["hole_id"],

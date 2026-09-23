@@ -1,0 +1,11 @@
+# Development and test dependencies.
+#
+# The six suites in backend/ could not be run from a clean checkout: pytest was
+# assumed to be present but appeared in no requirements file. Install with:
+#
+#   pip install -r requirements.txt -r requirements-dev.txt
+#   python -m pytest
+#
+-r requirements.txt
+
+pytest==8.3.4

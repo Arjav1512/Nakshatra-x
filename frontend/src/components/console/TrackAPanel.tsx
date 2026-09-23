@@ -249,11 +249,22 @@ export function TrackAPanel() {
               env={derived(probe.kriged_prospectivity_score, 'score 0-1', 'Ordinary kriging over measured observations', {
                 model_version: probe.model_version,
                 method: probe.uncertainty_basis,
-                uncertainty: {
-                  plus_minus: Number(probe.uncertainty_sd?.toFixed(3) ?? 0),
-                  confidence: 0.68,
-                  basis: `Kriging standard deviation; variogram range ${Math.round((probe.variogram?.range_m ?? 0) / 1000)} km.`,
-                },
+                // `?? 0` here reported an uncertainty of ZERO when the kriging
+                // standard deviation was missing — the single most misleading
+                // value available, since it claims the estimate is exact. An
+                // absent spread is now "not quantified", which is what Metric
+                // renders when `uncertainty` is undefined.
+                uncertainty:
+                  probe.uncertainty_sd != null
+                    ? {
+                        plus_minus: Number(probe.uncertainty_sd.toFixed(3)),
+                        confidence: 0.68,
+                        basis:
+                          probe.variogram?.range_m != null
+                            ? `Kriging standard deviation; variogram range ${Math.round(probe.variogram.range_m / 1000)} km.`
+                            : 'Kriging standard deviation; variogram range not reported.',
+                      }
+                    : undefined,
               })}
             />
             {probe.direct_model_score != null ? (

@@ -39,7 +39,7 @@ const NAV: NavItem[] = [
       { label: 'Flood alert', href: '/flood-alert' },
     ],
   },
-  { label: 'Method', href: '/evaluator' },
+  { label: 'Method', href: '/method' },
 ]
 
 function isActive(pathname: string, item: NavItem) {

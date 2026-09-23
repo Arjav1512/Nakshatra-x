@@ -68,7 +68,7 @@ export default function HomePage() {
             Open the console
           </Link>
           <Link
-            href="/evaluator"
+            href="/method"
             className="inline-flex h-10 items-center justify-center rounded-md border border-border-interactive bg-surface-2 px-4 text-base font-medium text-text-primary transition-colors duration-[120ms] ease-out hover:bg-surface-3"
           >
             Method and evidence
