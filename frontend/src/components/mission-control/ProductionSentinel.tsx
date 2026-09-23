@@ -232,25 +232,25 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
   const shiftPace = Math.round((liveShiftExtracted / (shiftInfo.shiftTargetTonnes * (shiftInfo.progressPct / 100 || 0.01))) * 100)
 
   return (
-    <div className="ios-glass-card p-5 sm:p-6 flex flex-col justify-between gap-6 shadow-2xl border border-[#38BDF8]/30">
+    <div className="ios-glass-card p-5 sm:p-6 flex flex-col justify-between gap-6 shadow-2xl border border-accent/30">
       {/* Header with clock and simulated-feed status */}
       <div>
         <div className="flex items-center justify-between gap-4 mb-2 flex-wrap">
           <div className="flex items-center gap-2">
-            <span className="ios-badge ios-badge-live text-[10px] font-mono font-bold flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-[#00FF88] " />
+            <span className="ios-badge ios-badge-live text-xs font-mono font-bold flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5 text-accent " />
               AI/ML MODULE 02 &bull; PROPHET &amp; XGBOOST
             </span>
-            <span className="text-xs font-mono text-[#38BDF8] font-bold">
+            <span className="text-xs font-mono text-accent font-bold">
               {mine.name} ({mine.code})
             </span>
           </div>
 
           <div className="flex items-center gap-2.5">
             {/* Real-time IST Clock */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 border border-white/15 text-white font-mono text-xs shadow-inner">
-              <Clock className="w-3.5 h-3.5 text-[#38BDF8]" />
-              <span className="font-bold text-[#38BDF8]" suppressHydrationWarning>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-0/80 border border-border-default text-text-primary font-mono text-xs shadow-inner">
+              <Clock className="w-3.5 h-3.5 text-accent" />
+              <span className="font-bold text-accent" suppressHydrationWarning>
                 {mounted ? currentTime.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false }) : '11:25:00'} IST
               </span>
             </div>
@@ -258,28 +258,28 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
             {/* Live Stream Toggle */}
             <button
               onClick={() => setIsLiveStreaming(!isLiveStreaming)}
-              className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-colors ${
+              className={`px-2.5 py-1 rounded-full text-xs font-mono font-bold flex items-center gap-1 cursor-pointer transition-colors ${
                 isLiveStreaming
-                  ? 'bg-[#00FF88]/20 border border-[#00FF88] text-[#00FF88]'
-                  : 'bg-white/10 border border-white/20 text-slate-400'
+                  ? 'bg-accent/20 border border-accent text-accent'
+                  : 'bg-surface-3 border border-border-interactive text-text-secondary'
               }`}
               type="button"
               title={isLiveStreaming ? 'Pause the simulated activity feed' : 'Resume the simulated activity feed'}
             >
               {isLiveStreaming ? (
                 <>
-                  <Radio className="w-3 h-3 text-[#00FF88] " />
+                  <Radio className="w-3 h-3 text-accent " />
                   <span>STREAMING</span>
                 </>
               ) : (
                 <>
-                  <Pause className="w-3 h-3 text-slate-400" />
+                  <Pause className="w-3 h-3 text-text-secondary" />
                   <span>PAUSED</span>
                 </>
               )}
             </button>
 
-            <span className={`ios-badge ${riskBadgeClass} font-mono font-bold text-[10px]`}>
+            <span className={`ios-badge ${riskBadgeClass} font-mono font-bold text-xs`}>
               {riskLevel} SHORTFALL
             </span>
           </div>
@@ -287,13 +287,13 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
 
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight font-space flex items-center gap-2">
+            <h3 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight font-sans flex items-center gap-2">
               Production Sentinel &amp; Shortfall Forecast
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#38BDF8]/20 text-[#38BDF8] border border-[#38BDF8]/40">
+              <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-accent/20 text-accent border border-accent/40">
                 REAL-TIME
               </span>
             </h3>
-            <p className="text-xs text-slate-300 mt-0.5 leading-relaxed font-sans">
+            <p className="text-xs text-text-secondary mt-0.5 leading-relaxed font-sans">
               14-day extraction outlook using measured Open-Meteo rainfall together with simulated hoist and downtime activity. There is no SCADA or CMMS connection (PRD §4 non-goal 2).
             </p>
           </div>
@@ -301,85 +301,85 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
       </div>
 
       {/* Real-Time Operational Cockpit (Changes with Time) */}
-      <div className="p-4 rounded-2xl bg-gradient-to-r from-[#061224] via-[#091D38] to-[#0A264A] border border-[#38BDF8]/40 shadow-xl space-y-3">
-        <div className="flex items-center justify-between border-b border-white/15 pb-2.5 flex-wrap gap-2">
+      <div className="p-4 rounded-md bg-gradient-to-r from-surface-1 via-[#091D38] to-[#0A264A] border border-accent/40 shadow-xl space-y-3">
+        <div className="flex items-center justify-between border-b border-border-default pb-2.5 flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <Radio className="w-4 h-4 text-[#00FF88] " />
-            <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+            <Radio className="w-4 h-4 text-accent " />
+            <span className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">
               Live Shift Production Telemetry &bull; {shiftInfo.name}
             </span>
           </div>
-          <div className="text-[11px] font-mono text-slate-300">
-            Window: <strong className="text-white">{shiftInfo.timeRange}</strong> ({shiftInfo.progressPct}% elapsed)
+          <div className="text-xs font-mono text-text-secondary">
+            Window: <strong className="text-text-primary">{shiftInfo.timeRange}</strong> ({shiftInfo.progressPct}% elapsed)
           </div>
         </div>
 
         {/* Real-time Tickers Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-mono">
-          <div className="ios-glass-inset p-3 rounded-xl border border-white/10 space-y-1">
-            <span className="text-[10px] font-mono uppercase text-slate-400">Shift Extracted</span>
-            <div className="text-lg sm:text-xl font-bold text-[#00FF88] font-mono flex items-baseline gap-1">
+          <div className="ios-glass-inset p-3 rounded-md border border-border-default space-y-1">
+            <span className="text-xs font-mono uppercase text-text-secondary">Shift Extracted</span>
+            <div className="text-lg sm:text-xl font-bold text-accent font-mono flex items-baseline gap-1">
               <span>{liveShiftExtracted.toLocaleString()}</span>
-              <span className="text-[11px] text-slate-400">/ {shiftInfo.shiftTargetTonnes.toLocaleString()} T</span>
+              <span className="text-xs text-text-secondary">/ {shiftInfo.shiftTargetTonnes.toLocaleString()} T</span>
             </div>
-            <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+            <div className="w-full bg-surface-3 h-1.5 rounded-full overflow-hidden">
               <div
-                className="bg-[#00FF88] h-full transition-colors duration-500"
+                className="bg-accent h-full transition-colors duration-500"
                 style={{ width: `${Math.min(100, Math.round((liveShiftExtracted / shiftInfo.shiftTargetTonnes) * 100))}%` }}
               />
             </div>
           </div>
 
-          <div className="ios-glass-inset p-3 rounded-xl border border-white/10 space-y-1">
-            <span className="text-[10px] font-mono uppercase text-slate-400">Live Run Rate</span>
-            <div className="text-lg sm:text-xl font-bold text-[#38BDF8] font-mono flex items-baseline gap-1">
+          <div className="ios-glass-inset p-3 rounded-md border border-border-default space-y-1">
+            <span className="text-xs font-mono uppercase text-text-secondary">Live Run Rate</span>
+            <div className="text-lg sm:text-xl font-bold text-accent font-mono flex items-baseline gap-1">
               <span>{liveHourlyRate}</span>
-              <span className="text-[11px] text-slate-400">T/hr</span>
+              <span className="text-xs text-text-secondary">T/hr</span>
             </div>
-            <span className="text-[9px] font-mono text-slate-300">
-              Pace: <strong className={shiftPace >= 95 ? 'text-[#00FF88]' : 'text-[#FACC15]'}>{shiftPace}% of Target</strong>
+            <span className="text-xs font-mono text-text-secondary">
+              Pace: <strong className={shiftPace >= 95 ? 'text-accent' : 'text-status-caution'}>{shiftPace}% of Target</strong>
             </span>
           </div>
 
-          <div className="ios-glass-inset p-3 rounded-xl border border-white/10 space-y-1">
-            <span className="text-[10px] font-mono uppercase text-slate-400">Weighbridge Clear</span>
-            <div className="text-lg sm:text-xl font-bold text-[#FACC15] font-mono flex items-baseline gap-1">
+          <div className="ios-glass-inset p-3 rounded-md border border-border-default space-y-1">
+            <span className="text-xs font-mono uppercase text-text-secondary">Weighbridge Clear</span>
+            <div className="text-lg sm:text-xl font-bold text-status-caution font-mono flex items-baseline gap-1">
               <span>{trucksDispatched}</span>
-              <span className="text-[11px] text-slate-400">Trucks</span>
+              <span className="text-xs text-text-secondary">Trucks</span>
             </div>
-            <span className="text-[9px] font-mono text-slate-300">
-              Avg Payload: <strong className="text-white">24.5 Tonnes</strong>
+            <span className="text-xs font-mono text-text-secondary">
+              Avg Payload: <strong className="text-text-primary">24.5 Tonnes</strong>
             </span>
           </div>
 
-          <div className="ios-glass-inset p-3 rounded-xl border border-white/10 space-y-1">
-            <span className="text-[10px] font-mono uppercase text-slate-400">Winder Hoist Cycle</span>
+          <div className="ios-glass-inset p-3 rounded-md border border-border-default space-y-1">
+            <span className="text-xs font-mono uppercase text-text-secondary">Winder Hoist Cycle</span>
             <div className="text-lg sm:text-xl font-bold text-[#A855F7] font-mono flex items-baseline gap-1">
               <span>#{activeSkipCycle}</span>
-              <span className="text-[11px] text-slate-400">Cycle</span>
+              <span className="text-xs text-text-secondary">Cycle</span>
             </div>
-            <span className="text-[9px] font-mono text-[#00FF88]">&bull; Shafe Level -340m RL</span>
+            <span className="text-xs font-mono text-accent">&bull; Shafe Level -340m RL</span>
           </div>
         </div>
 
         {/* Rolling simulated-activity ticker (no SCADA link) */}
         <div className="pt-1">
-          <div className="flex items-center gap-2 mb-1 text-[10px] font-mono text-slate-400 uppercase font-bold">
-            <Activity className="w-3 h-3 text-[#38BDF8]" />
+          <div className="flex items-center gap-2 mb-1 text-xs font-mono text-text-secondary uppercase font-bold">
+            <Activity className="w-3 h-3 text-accent" />
             <span>Simulated conveyor &amp; hoist activity (not a SCADA feed):</span>
           </div>
           <div className="space-y-1 max-h-20 overflow-y-auto custom-scrollbar pr-1">
             {scadaLogs.map((log) => (
               <div
                 key={log.id}
-                className="text-[11px] font-mono flex items-center justify-between p-1.5 rounded-lg bg-black/40 border border-white/5 text-slate-200"
+                className="text-xs font-mono flex items-center justify-between p-1.5 rounded-lg bg-black/40 border border-border-subtle text-text-primary"
               >
                 <div className="flex items-center gap-2 overflow-hidden">
-                  <span className="text-[#38BDF8] text-[10px] shrink-0">[{log.timestamp}]</span>
+                  <span className="text-accent text-xs shrink-0">[{log.timestamp}]</span>
                   <span className="truncate">{log.message}</span>
                 </div>
                 {log.tonnes && (
-                  <span className="text-[10px] font-bold text-[#00FF88] shrink-0 ml-2">
+                  <span className="text-xs font-bold text-accent shrink-0 ml-2">
                     +{log.tonnes} T
                   </span>
                 )}
@@ -391,62 +391,62 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
 
       {/* Hero Stat Cards: 14-Day Target, Predicted, and Shortfall */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="ios-glass-inset p-4 rounded-2xl border border-white/10 space-y-1">
-          <span className="text-[10px] font-mono uppercase text-slate-400 tracking-wider">
+        <div className="ios-glass-inset p-4 rounded-md border border-border-default space-y-1">
+          <span className="text-xs font-mono uppercase text-text-secondary tracking-wider">
             14-Day Production Target
           </span>
-          <div className="my-1 text-2xl font-mono font-bold text-white">
-            {planned14d.toLocaleString('en-IN')} <span className="text-xs text-slate-400">Tonnes</span>
+          <div className="my-1 text-2xl font-mono font-bold text-text-primary">
+            {planned14d.toLocaleString('en-IN')} <span className="text-xs text-text-secondary">Tonnes</span>
           </div>
-          <span className="text-[10px] font-mono text-slate-300">
+          <span className="text-xs font-mono text-text-secondary">
             Ministry of Steel Planned Dispatch
           </span>
         </div>
 
-        <div className="ios-glass-inset p-4 rounded-2xl border border-white/10 space-y-1">
-          <span className="text-[10px] font-mono uppercase text-slate-400 tracking-wider">
+        <div className="ios-glass-inset p-4 rounded-md border border-border-default space-y-1">
+          <span className="text-xs font-mono uppercase text-text-secondary tracking-wider">
             AI Predicted Extraction
           </span>
-          <div className="my-1 text-2xl font-mono font-bold text-[#00FF88]">
-            {predicted14d.toLocaleString('en-IN')} <span className="text-xs text-slate-400">Tonnes</span>
+          <div className="my-1 text-2xl font-mono font-bold text-accent">
+            {predicted14d.toLocaleString('en-IN')} <span className="text-xs text-text-secondary">Tonnes</span>
           </div>
-          <span className="text-[10px] font-mono text-[#00FF88]">
+          <span className="text-xs font-mono text-accent">
             {Math.round((predicted14d / planned14d) * 100)}% Extraction Realization
           </span>
         </div>
 
-        <div className="ios-glass-inset p-4 rounded-2xl border border-white/10 space-y-1">
-          <span className="text-[10px] font-mono uppercase text-slate-400 tracking-wider">
+        <div className="ios-glass-inset p-4 rounded-md border border-border-default space-y-1">
+          <span className="text-xs font-mono uppercase text-text-secondary tracking-wider">
             Projected Output Deficit
           </span>
           <div className="my-1 text-2xl font-mono font-bold" style={{ color: riskColor }}>
-            -{shortfallTonnes.toLocaleString('en-IN')} <span className="text-xs text-slate-400">Tonnes</span>
+            -{shortfallTonnes.toLocaleString('en-IN')} <span className="text-xs text-text-secondary">Tonnes</span>
           </div>
-          <span className="text-[10px] font-mono font-bold" style={{ color: riskColor }}>
+          <span className="text-xs font-mono font-bold" style={{ color: riskColor }}>
             {shortfallPct}% Output Deficit ({riskLevel})
           </span>
         </div>
       </div>
 
       {/* 14-Day Interactive Trajectory Chart */}
-      <div className="ios-glass-inset p-4 rounded-2xl border border-white/10 space-y-3">
+      <div className="ios-glass-inset p-4 rounded-md border border-border-default space-y-3">
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+            <span className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">
               14-Day Production Trajectory vs Target
             </span>
-            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-slate-300">
+            <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-surface-3 text-text-secondary">
               {chartView === 'daily' ? 'Daily Dispatches' : 'Cumulative Envelope'}
             </span>
           </div>
 
           <div className="flex items-center gap-2">
             {/* View switcher */}
-            <div className="flex items-center p-0.5 rounded-lg bg-black/60 border border-white/15 text-[10px] font-mono">
+            <div className="flex items-center p-0.5 rounded-lg bg-surface-0/80 border border-border-default text-xs font-mono">
               <button
                 onClick={() => setChartView('daily')}
                 className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${
-                  chartView === 'daily' ? 'bg-[#38BDF8] text-black font-bold' : 'text-slate-400 hover:text-white'
+                  chartView === 'daily' ? 'bg-accent text-black font-bold' : 'text-text-secondary hover:text-text-primary'
                 }`}
                 type="button"
               >
@@ -455,7 +455,7 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
               <button
                 onClick={() => setChartView('cumulative')}
                 className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${
-                  chartView === 'cumulative' ? 'bg-[#00FF88] text-black font-bold' : 'text-slate-400 hover:text-white'
+                  chartView === 'cumulative' ? 'bg-accent text-black font-bold' : 'text-text-secondary hover:text-text-primary'
                 }`}
                 type="button"
               >
@@ -463,12 +463,12 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
               </button>
             </div>
 
-            <div className="flex items-center gap-3 text-[10px] font-mono hidden sm:flex">
-              <span className="flex items-center gap-1.5 text-slate-300">
+            <div className="flex items-center gap-3 text-xs font-mono hidden sm:flex">
+              <span className="flex items-center gap-1.5 text-text-secondary">
                 <span className="h-2 w-2 rounded-sm bg-white/30" /> Target
               </span>
-              <span className="flex items-center gap-1.5 text-[#00FF88]">
-                <span className="h-2 w-2 rounded-sm bg-[#00FF88]" /> AI Yield
+              <span className="flex items-center gap-1.5 text-accent">
+                <span className="h-2 w-2 rounded-sm bg-accent" /> AI Yield
               </span>
             </div>
           </div>
@@ -535,19 +535,19 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
       {/* Live Constraint Simulation Sliders */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-xs font-mono">
-          <span className="text-slate-300 uppercase tracking-wider flex items-center gap-1.5 font-bold">
-            <Sliders className="w-3.5 h-3.5 text-[#FB923C]" />
+          <span className="text-text-secondary uppercase tracking-wider flex items-center gap-1.5 font-bold">
+            <Sliders className="w-3.5 h-3.5 text-status-caution" />
             Real-Time What-If Constraint Simulator
           </span>
-          <span className="text-[#00FF88] text-[11px] font-bold">Instant ML Recalibration</span>
+          <span className="text-accent text-xs font-bold">Instant ML Recalibration</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Rainfall Slider */}
-          <div className="ios-glass-inset p-3.5 rounded-xl border border-white/10 space-y-1.5">
+          <div className="ios-glass-inset p-3.5 rounded-md border border-border-default space-y-1.5">
             <div className="flex justify-between text-xs font-mono">
-              <span className="text-slate-400">Monsoon Rainfall:</span>
-              <span className="font-bold text-[#38BDF8]">{rainfallSlider} mm</span>
+              <span className="text-text-secondary">Monsoon Rainfall:</span>
+              <span className="font-bold text-accent">{rainfallSlider} mm</span>
             </div>
             <input
               type="range"
@@ -555,9 +555,9 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
               max="260"
               value={rainfallSlider}
               onChange={(e) => setRainfallSlider(Number(e.target.value))}
-              className="w-full accent-[#38BDF8] cursor-pointer"
+              className="w-full accent-accent cursor-pointer"
             />
-            <div className="flex justify-between text-[9px] text-slate-400 font-mono">
+            <div className="flex justify-between text-xs text-text-secondary font-mono">
               <span>Dry (10mm)</span>
               <span>Open-Meteo ({Math.round(initialRain)}mm)</span>
               <span>Flood (260mm)</span>
@@ -565,10 +565,10 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
           </div>
 
           {/* Downtime Slider */}
-          <div className="ios-glass-inset p-3.5 rounded-xl border border-white/10 space-y-1.5">
+          <div className="ios-glass-inset p-3.5 rounded-md border border-border-default space-y-1.5">
             <div className="flex justify-between text-xs font-mono">
-              <span className="text-slate-400">CMMS Downtime:</span>
-              <span className="font-bold text-[#FACC15]">{downtimeSlider} hrs/wk</span>
+              <span className="text-text-secondary">CMMS Downtime:</span>
+              <span className="font-bold text-status-caution">{downtimeSlider} hrs/wk</span>
             </div>
             <input
               type="range"
@@ -577,9 +577,9 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
               step="0.5"
               value={downtimeSlider}
               onChange={(e) => setDowntimeSlider(Number(e.target.value))}
-              className="w-full accent-[#FACC15] cursor-pointer"
+              className="w-full accent-status-caution cursor-pointer"
             />
-            <div className="flex justify-between text-[9px] text-slate-400 font-mono">
+            <div className="flex justify-between text-xs text-text-secondary font-mono">
               <span>Zero (0h)</span>
               <span>Nominal (12h)</span>
               <span>Major Breakdown (50h)</span>
@@ -587,10 +587,10 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
           </div>
 
           {/* Grade Dilution Slider */}
-          <div className="ios-glass-inset p-3.5 rounded-xl border border-white/10 space-y-1.5">
+          <div className="ios-glass-inset p-3.5 rounded-md border border-border-default space-y-1.5">
             <div className="flex justify-between text-xs font-mono">
-              <span className="text-slate-400">Ore Grade Variance:</span>
-              <span className={`font-bold ${gradeVariance >= 0 ? 'text-[#00FF88]' : 'text-[#F87171]'}`}>
+              <span className="text-text-secondary">Ore Grade Variance:</span>
+              <span className={`font-bold ${gradeVariance >= 0 ? 'text-accent' : 'text-status-critical'}`}>
                 {gradeVariance > 0 ? `+${gradeVariance}%` : `${gradeVariance}%`} Mn
               </span>
             </div>
@@ -601,9 +601,9 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
               step="0.5"
               value={gradeVariance}
               onChange={(e) => setGradeVariance(Number(e.target.value))}
-              className="w-full accent-[#00FF88] cursor-pointer"
+              className="w-full accent-accent cursor-pointer"
             />
-            <div className="flex justify-between text-[9px] text-slate-400 font-mono">
+            <div className="flex justify-between text-xs text-text-secondary font-mono">
               <span>-5% Dilution</span>
               <span>0% Baseline</span>
               <span>+5% Rich Vein</span>
@@ -613,14 +613,14 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
       </div>
 
       {/* Real-time Shortfall Mitigation Directive Card */}
-      <div className="p-3.5 rounded-xl bg-black/40 border border-white/10 flex items-start justify-between gap-3 text-xs font-mono">
+      <div className="p-3.5 rounded-md bg-black/40 border border-border-default flex items-start justify-between gap-3 text-xs font-mono">
         <div className="flex items-start gap-2.5">
-          <ShieldCheck className="w-4 h-4 text-[#00FF88] shrink-0 mt-0.5" />
+          <ShieldCheck className="w-4 h-4 text-accent shrink-0 mt-0.5" />
           <div>
-            <span className="text-[10px] font-mono text-[#00FF88] font-bold uppercase tracking-wider">
+            <span className="text-xs font-mono text-accent font-bold uppercase tracking-wider">
               Automated Dispatch Directive ({riskLevel} Risk):
             </span>
-            <p className="text-slate-200 mt-0.5 leading-relaxed font-sans font-medium text-xs">
+            <p className="text-text-primary mt-0.5 leading-relaxed font-sans font-medium text-xs">
               {riskLevel === 'CRITICAL'
                 ? `Activate secondary high-grade stockpile SP-1 (+42% Mn) blending line at ${mine.name} to mitigate -${shortfallTonnes.toLocaleString()} Tonnes shortfall before month-end audit.`
                 : riskLevel === 'MODERATE'
@@ -636,7 +636,7 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
             setDowntimeSlider(12.5)
             setGradeVariance(0)
           }}
-          className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white text-[10px] font-mono shrink-0 cursor-pointer hover:bg-white/15 transition-colors"
+          className="px-2.5 py-1 rounded-lg bg-surface-2 border border-border-default text-text-secondary hover:text-text-primary text-xs font-mono shrink-0 cursor-pointer hover:bg-white/15 transition-colors"
           type="button"
           title="Reset sliders to live telemetry baseline"
         >

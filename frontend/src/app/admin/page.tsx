@@ -194,30 +194,30 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#030712] text-white p-4 sm:p-8 font-mono bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,233,0.1),rgba(255,255,255,0))]">
+    <div className="min-h-screen bg-[#030712] text-text-primary p-4 sm:p-8 font-mono bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,233,0.1),rgba(255,255,255,0))]">
       <div className="max-w-7xl mx-auto">
         {/* ================= TOP COMMANDER HEADER ================= */}
-        <header className="border-b border-white/10 pb-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <header className="border-b border-border-default pb-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-[#38BDF8]/10 border border-[#38BDF8]/40 flex items-center justify-center text-[#38BDF8] shadow-[0_0_30px_rgba(56,189,248,0.25)]">
+            <div className="h-12 w-12 rounded-md bg-accent/10 border border-accent/40 flex items-center justify-center text-accent">
               <Orbit size={26} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black tracking-widest text-white">
+                <h1 className="text-xl sm:text-2xl font-semibold tracking-widest text-text-primary">
                   GLOBAL COMMAND CENTER
                 </h1>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#FF2E63]/15 border border-[#FF2E63]/40 text-[#FF2E63]">
+                <span className="px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider bg-status-critical/15 border border-status-critical/40 text-status-critical">
                   LEVEL-5 OMEGA
                 </span>
               </div>
-              <p className="text-xs text-[#94A3B8] mt-0.5 flex items-center gap-2">
+              <p className="text-xs text-text-tertiary mt-0.5 flex items-center gap-2">
                 <span>Primary Commander:</span>
-                <span className="text-[#38BDF8] font-bold">
+                <span className="text-accent font-bold">
                   {adminInfo?.full_name || 'Commander Rupraj Datta'}
                 </span>
-                <span className="text-slate-600">&bull;</span>
-                <span className="text-[#00FF88] flex items-center gap-1">
+                <span className="text-text-tertiary">&bull;</span>
+                <span className="text-accent flex items-center gap-1">
                   <ShieldCheck size={12} /> Slot Sealed (1/1)
                 </span>
               </p>
@@ -230,15 +230,15 @@ export default function AdminDashboard() {
                 fetchUserData()
                 fetchMines()
               }}
-              className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-slate-200 px-3.5 py-2 rounded-xl border border-white/10 hover:border-[#38BDF8]/40 text-xs transition-colors cursor-pointer"
+              className="flex items-center gap-2 bg-surface-2 hover:bg-surface-3 text-text-primary px-3.5 py-2 rounded-md border border-border-default hover:border-accent/40 text-xs transition-colors cursor-pointer"
             >
-              <RefreshCw size={14} className={loadingUsers ? 'animate-spin text-[#38BDF8]' : ''} />
+              <RefreshCw size={14} className={loadingUsers ? 'animate-spin text-accent' : ''} />
               <span>Sync</span>
             </button>
 
             <Link
               href="/"
-              className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 text-slate-300 px-3.5 py-2 rounded-xl border border-white/10 text-xs transition-colors"
+              className="flex items-center gap-1.5 bg-surface-2 hover:bg-surface-3 text-text-secondary px-3.5 py-2 rounded-md border border-border-default text-xs transition-colors"
             >
               <ExternalLink size={13} />
               <span>Live Site</span>
@@ -246,7 +246,7 @@ export default function AdminDashboard() {
 
             <button type="button"
               onClick={handleLogout}
-              className="flex items-center gap-1.5 bg-[#FF2E63]/10 hover:bg-[#FF2E63]/20 text-[#FF2E63] px-4 py-2 rounded-xl border border-[#FF2E63]/30 hover:border-[#FF2E63] text-xs transition-colors cursor-pointer shadow-sm"
+              className="flex items-center gap-1.5 bg-status-critical/10 hover:bg-status-critical/20 text-status-critical px-4 py-2 rounded-md border border-status-critical/30 hover:border-status-critical text-xs transition-colors cursor-pointer shadow-sm"
             >
               <LogOut size={14} />
               <span>Terminate Session</span>
@@ -257,21 +257,21 @@ export default function AdminDashboard() {
         {/* ================= KEY METRICS GRID ================= */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {/* Card 1: Total Registered */}
-          <div className="p-5 rounded-2xl bg-[#090D16]/90 border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.5)] relative overflow-hidden backdrop-blur-md">
-            <div className="flex items-center justify-between text-slate-400 mb-2">
-              <span className="text-[11px] uppercase tracking-wider font-bold">Total Users</span>
-              <Users size={16} className="text-[#38BDF8]" />
+          <div className="p-5 rounded-md bg-surface-1/90 border border-border-default relative overflow-hidden ">
+            <div className="flex items-center justify-between text-text-secondary mb-2">
+              <span className="text-xs uppercase tracking-wider font-bold">Total Users</span>
+              <Users size={16} className="text-accent" />
             </div>
-            <div className="text-3xl font-black text-white">{users.length}</div>
-            <div className="text-[10px] text-[#00FF88] mt-1 flex items-center gap-1">
+            <div className="text-3xl font-semibold text-text-primary">{users.length}</div>
+            <div className="text-xs text-accent mt-1 flex items-center gap-1">
               <Activity size={10} /> Live Supabase Registry Sync
             </div>
           </div>
 
           {/* Card 2: Google OAuth Users */}
-          <div className="p-5 rounded-2xl bg-[#090D16]/90 border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.5)] relative overflow-hidden backdrop-blur-md">
-            <div className="flex items-center justify-between text-slate-400 mb-2">
-              <span className="text-[11px] uppercase tracking-wider font-bold">Google Sign-Ins</span>
+          <div className="p-5 rounded-md bg-surface-1/90 border border-border-default relative overflow-hidden ">
+            <div className="flex items-center justify-between text-text-secondary mb-2">
+              <span className="text-xs uppercase tracking-wider font-bold">Google Sign-Ins</span>
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
@@ -291,39 +291,39 @@ export default function AdminDashboard() {
                 />
               </svg>
             </div>
-            <div className="text-3xl font-black text-[#38BDF8]">{googleCount}</div>
-            <div className="text-[10px] text-slate-400 mt-1">Verified Google OAuth Accounts</div>
+            <div className="text-3xl font-semibold text-accent">{googleCount}</div>
+            <div className="text-xs text-text-secondary mt-1">Verified Google OAuth Accounts</div>
           </div>
 
           {/* Card 3: Email OTP Logins */}
-          <div className="p-5 rounded-2xl bg-[#090D16]/90 border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.5)] relative overflow-hidden backdrop-blur-md">
-            <div className="flex items-center justify-between text-slate-400 mb-2">
-              <span className="text-[11px] uppercase tracking-wider font-bold">Email Logins</span>
-              <Mail size={16} className="text-[#00FF88]" />
+          <div className="p-5 rounded-md bg-surface-1/90 border border-border-default relative overflow-hidden ">
+            <div className="flex items-center justify-between text-text-secondary mb-2">
+              <span className="text-xs uppercase tracking-wider font-bold">Email Logins</span>
+              <Mail size={16} className="text-accent" />
             </div>
-            <div className="text-3xl font-black text-[#00FF88]">{emailCount}</div>
-            <div className="text-[10px] text-slate-400 mt-1">OTP Verified Inboxes</div>
+            <div className="text-3xl font-semibold text-accent">{emailCount}</div>
+            <div className="text-xs text-text-secondary mt-1">OTP Verified Inboxes</div>
           </div>
 
           {/* Card 4: Single Admin Lock Status */}
-          <div className="p-5 rounded-2xl bg-[#090D16]/90 border border-[#00FF88]/30 shadow-[0_0_30px_rgba(0,255,136,0.1)] relative overflow-hidden backdrop-blur-md">
-            <div className="flex items-center justify-between text-slate-400 mb-2">
-              <span className="text-[11px] uppercase tracking-wider font-bold">Admin Slot</span>
-              <Lock size={16} className="text-[#00FF88]" />
+          <div className="p-5 rounded-md bg-surface-1/90 border border-accent/30 relative overflow-hidden ">
+            <div className="flex items-center justify-between text-text-secondary mb-2">
+              <span className="text-xs uppercase tracking-wider font-bold">Admin Slot</span>
+              <Lock size={16} className="text-accent" />
             </div>
-            <div className="text-2xl font-black text-[#00FF88]">LOCKED 1/1</div>
-            <div className="text-[10px] text-[#94A3B8] mt-1">Single Administrator Sealed</div>
+            <div className="text-2xl font-semibold text-accent">LOCKED 1/1</div>
+            <div className="text-xs text-text-tertiary mt-1">Single Administrator Sealed</div>
           </div>
         </div>
 
         {/* ================= NAVIGATION TABS ================= */}
-        <div className="flex items-center gap-2 border-b border-white/10 pb-4 mb-6">
+        <div className="flex items-center gap-2 border-b border-border-default pb-4 mb-6">
           <button type="button"
             onClick={() => setActiveTab('users')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
               activeTab === 'users'
-                ? 'bg-[#38BDF8]/20 border border-[#38BDF8] text-[#38BDF8] shadow-[0_0_20px_rgba(56,189,248,0.2)]'
-                : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white'
+                ? 'bg-accent/20 border border-accent text-accent'
+                : 'bg-surface-2 border border-border-default text-text-secondary hover:text-text-primary'
             }`}
           >
             <Users size={14} />
@@ -332,10 +332,10 @@ export default function AdminDashboard() {
 
           <button type="button"
             onClick={() => setActiveTab('operations')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
               activeTab === 'operations'
-                ? 'bg-[#00FF88]/20 border border-[#00FF88] text-[#00FF88] shadow-[0_0_20px_rgba(0,255,136,0.2)]'
-                : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white'
+                ? 'bg-accent/20 border border-accent text-accent'
+                : 'bg-surface-2 border border-border-default text-text-secondary hover:text-text-primary'
             }`}
           >
             <Pickaxe size={14} />
@@ -347,22 +347,22 @@ export default function AdminDashboard() {
         {activeTab === 'users' && (
           <section className="space-y-4">
             {/* Search, Filter & Export Toolbar */}
-            <div className="p-4 rounded-2xl bg-[#090D16]/90 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="p-4 rounded-md bg-surface-1/90 border border-border-default flex flex-col sm:flex-row items-center justify-between gap-4">
               {/* Search Bar */}
               <div className="relative w-full sm:w-80">
-                <Search size={15} className="absolute left-3 top-3 text-slate-500" />
+                <Search size={15} className="absolute left-3 top-3 text-text-tertiary" />
                 <input
                   type="text"
                   placeholder="Search by name, email, or user ID..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs bg-black/60 border border-white/15 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-[#38BDF8] transition-colors"
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-surface-0/80 border border-border-default rounded-md text-text-primary placeholder-text-tertiary focus:outline-none focus:border-accent transition-colors"
                 />
               </div>
 
               {/* Provider Filter Buttons */}
               <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto">
-                <span className="text-[10px] uppercase text-slate-500 mr-1 flex items-center gap-1">
+                <span className="text-xs uppercase text-text-tertiary mr-1 flex items-center gap-1">
                   <Filter size={11} /> Filter:
                 </span>
                 {[
@@ -374,10 +374,10 @@ export default function AdminDashboard() {
                   <button type="button"
                     key={f.id}
                     onClick={() => setSelectedProvider(f.id)}
-                    className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase transition-colors cursor-pointer whitespace-nowrap ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-colors cursor-pointer whitespace-nowrap ${
                       selectedProvider === f.id
-                        ? 'bg-[#38BDF8] text-black'
-                        : 'bg-white/5 hover:bg-white/10 text-slate-400 border border-white/10'
+                        ? 'bg-accent text-black'
+                        : 'bg-surface-2 hover:bg-surface-3 text-text-secondary border border-border-default'
                     }`}
                   >
                     {f.label}
@@ -389,7 +389,7 @@ export default function AdminDashboard() {
               {/* Export Button */}
               <button type="button"
                 onClick={exportUsersCSV}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#00FF88]/15 hover:bg-[#00FF88]/25 border border-[#00FF88]/40 text-[#00FF88] text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer whitespace-nowrap"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-accent/15 hover:bg-accent/25 border border-accent/40 text-accent text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer whitespace-nowrap"
               >
                 <Download size={13} />
                 <span>Export CSV</span>
@@ -397,22 +397,22 @@ export default function AdminDashboard() {
             </div>
 
             {/* Users Table */}
-            <div className="rounded-2xl bg-[#090D16]/90 border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.6)] overflow-hidden">
+            <div className="rounded-md bg-surface-1/90 border border-border-default overflow-hidden">
               {loadingUsers ? (
-                <div className="p-16 flex flex-col items-center justify-center text-slate-400">
-                  <Orbit className="animate-spin text-[#38BDF8] h-8 w-8 mb-3" />
+                <div className="p-16 flex flex-col items-center justify-center text-text-secondary">
+                  <Orbit className="animate-spin text-accent h-8 w-8 mb-3" />
                   <p className="text-xs">Connecting to Supabase User Registry...</p>
                 </div>
               ) : filteredUsers.length === 0 ? (
-                <div className="p-16 text-center text-slate-500">
+                <div className="p-16 text-center text-text-tertiary">
                   <Users className="h-10 w-10 mx-auto mb-2 opacity-50" />
                   <p className="text-xs font-bold uppercase tracking-widest">No matching users found</p>
-                  <p className="text-[11px] text-slate-600 mt-1">Users will appear here once they log in.</p>
+                  <p className="text-xs text-text-tertiary mt-1">Users will appear here once they log in.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs text-left">
-                    <thead className="bg-white/5 text-slate-400 uppercase text-[10px] tracking-wider border-b border-white/10">
+                    <thead className="bg-surface-2 text-text-secondary uppercase text-xs tracking-wider border-b border-border-default">
                       <tr>
                         <th className="px-5 py-3.5">Operator</th>
                         <th className="px-5 py-3.5">Email Address</th>
@@ -429,17 +429,17 @@ export default function AdminDashboard() {
                         const isEmail = (u.provider || '').toLowerCase().includes('email')
 
                         return (
-                          <tr key={u.id} className="hover:bg-white/5 transition-colors">
+                          <tr key={u.id} className="hover:bg-surface-2 transition-colors">
                             {/* Operator Name & 3D Robot DP */}
                             <td className="px-5 py-3.5">
                               <div className="flex items-center gap-3">
                                 <CyberRobotAvatar
                                   size="sm"
-                                  className="h-8 w-8 shrink-0 border border-[#00FF88] shadow-[0_0_12px_rgba(0,255,136,0.35)]"
+                                  className="h-8 w-8 shrink-0 border border-accent"
                                 />
                                 <div>
-                                  <div className="font-bold text-white text-xs">{u.full_name || 'Anonymous User'}</div>
-                                  <div className="text-[10px] text-slate-500">Active Operator</div>
+                                  <div className="font-bold text-text-primary text-xs">{u.full_name || 'Anonymous User'}</div>
+                                  <div className="text-xs text-text-tertiary">Active Operator</div>
                                 </div>
                               </div>
                             </td>
@@ -447,9 +447,9 @@ export default function AdminDashboard() {
 
 
                             {/* Email */}
-                            <td className="px-5 py-3.5 text-[#38BDF8] font-mono">
+                            <td className="px-5 py-3.5 text-accent font-mono">
                               <a href={`mailto:${u.email}`} className="hover:underline flex items-center gap-1">
-                                <Mail size={11} className="text-slate-500" />
+                                <Mail size={11} className="text-text-tertiary" />
                                 {u.email}
                               </a>
                             </td>
@@ -457,12 +457,12 @@ export default function AdminDashboard() {
                             {/* Provider */}
                             <td className="px-5 py-3.5">
                               <span
-                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${
                                   isGoogle
-                                    ? 'bg-blue-500/10 border-blue-500/30 text-[#38BDF8]'
+                                    ? 'bg-accent/10 border-accent/30 text-accent'
                                     : isEmail
-                                    ? 'bg-[#00FF88]/10 border-[#00FF88]/30 text-[#00FF88]'
-                                    : 'bg-white/5 border-white/10 text-slate-300'
+                                    ? 'bg-accent/10 border-accent/30 text-accent'
+                                    : 'bg-surface-2 border-border-default text-text-secondary'
                                 }`}
                               >
                                 {isGoogle ? 'Google OAuth' : isEmail ? 'Email OTP' : u.provider || 'Session'}
@@ -471,29 +471,29 @@ export default function AdminDashboard() {
 
                             {/* Role */}
                             <td className="px-5 py-3.5">
-                              <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 text-[10px] font-bold uppercase">
+                              <span className="px-2 py-0.5 rounded bg-surface-2 border border-border-default text-text-secondary text-xs font-bold uppercase">
                                 {u.role || 'Operator'}
                               </span>
                             </td>
 
                             {/* User ID & Copy */}
-                            <td className="px-5 py-3.5 text-slate-400 font-mono text-[10px]">
+                            <td className="px-5 py-3.5 text-text-secondary font-mono text-xs">
                               <button type="button"
                                 onClick={() => copyToClipboard(u.id)}
                                 title="Click to copy ID"
-                                className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer group"
+                                className="flex items-center gap-1 hover:text-text-primary transition-colors cursor-pointer group"
                               >
                                 <span>{u.id ? `${u.id.slice(0, 8)}...` : 'N/A'}</span>
                                 {copiedId === u.id ? (
-                                  <Check size={11} className="text-[#00FF88]" />
+                                  <Check size={11} className="text-accent" />
                                 ) : (
-                                  <Copy size={11} className="text-slate-600 group-hover:text-slate-300" />
+                                  <Copy size={11} className="text-text-tertiary group-hover:text-text-secondary" />
                                 )}
                               </button>
                             </td>
 
                             {/* Last Active */}
-                            <td className="px-5 py-3.5 text-slate-400 text-[11px] whitespace-nowrap">
+                            <td className="px-5 py-3.5 text-text-secondary text-xs whitespace-nowrap">
                               {u.last_sign_in_at
                                 ? new Date(u.last_sign_in_at).toLocaleString('en-IN', {
                                     day: '2-digit',
@@ -505,7 +505,7 @@ export default function AdminDashboard() {
                             </td>
 
                             {/* Registered Date */}
-                            <td className="px-5 py-3.5 text-slate-500 text-[11px] whitespace-nowrap">
+                            <td className="px-5 py-3.5 text-text-tertiary text-xs whitespace-nowrap">
                               {u.created_at
                                 ? new Date(u.created_at).toLocaleDateString('en-IN', {
                                     day: '2-digit',
@@ -529,23 +529,23 @@ export default function AdminDashboard() {
         {activeTab === 'operations' && (
           <section className="space-y-4 animate-in fade-in">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Pickaxe className="text-[#38BDF8]" size={18} /> Active Mining Operations Management
+              <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                <Pickaxe className="text-accent" size={18} /> Active Mining Operations Management
               </h2>
               <button type="button"
                 onClick={handleSaveMines}
                 disabled={savingMines}
-                className="flex items-center gap-2 bg-[#00FF88]/20 hover:bg-[#00FF88]/30 text-[#00FF88] px-4 py-2 rounded-xl border border-[#00FF88]/40 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-[0_0_20px_rgba(0,255,136,0.2)]"
+                className="flex items-center gap-2 bg-accent/20 hover:bg-accent/30 text-accent px-4 py-2 rounded-md border border-accent/40 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
               >
                 <Save size={14} />
                 <span>{savingMines ? 'Saving...' : 'Save Operations Target'}</span>
               </button>
             </div>
 
-            <div className="bg-[#090D16]/90 border border-white/10 rounded-2xl overflow-hidden">
+            <div className="bg-surface-1/90 border border-border-default rounded-md overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-white/5 text-slate-400 uppercase text-[10px]">
+                  <thead className="bg-surface-2 text-text-secondary uppercase text-xs">
                     <tr>
                       <th className="px-6 py-4">Site Name</th>
                       <th className="px-6 py-4">State</th>
@@ -556,11 +556,11 @@ export default function AdminDashboard() {
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {Object.values(mines).map((mine) => (
-                      <tr key={mine.id} className="hover:bg-white/5 transition-colors">
-                        <td className="px-6 py-4 font-bold text-white">{mine.name}</td>
-                        <td className="px-6 py-4 text-slate-400">{mine.state}</td>
-                        <td className="px-6 py-4 text-slate-400 font-mono">{mine.lat}</td>
-                        <td className="px-6 py-4 text-slate-400 font-mono">{mine.lng}</td>
+                      <tr key={mine.id} className="hover:bg-surface-2 transition-colors">
+                        <td className="px-6 py-4 font-bold text-text-primary">{mine.name}</td>
+                        <td className="px-6 py-4 text-text-secondary">{mine.state}</td>
+                        <td className="px-6 py-4 text-text-secondary font-mono">{mine.lat}</td>
+                        <td className="px-6 py-4 text-text-secondary font-mono">{mine.lng}</td>
                         <td className="px-6 py-4 text-right">
                           <input
                             type="number"
@@ -572,7 +572,7 @@ export default function AdminDashboard() {
                                 [mine.id]: { ...prev[mine.id], targetTonnes: val },
                               }))
                             }}
-                            className="bg-black/60 border border-white/15 rounded-lg py-1.5 px-3 text-right text-xs font-mono text-[#00FF88] focus:outline-none focus:border-[#00FF88] w-36"
+                            className="bg-surface-0/80 border border-border-default rounded-lg py-1.5 px-3 text-right text-xs font-mono text-accent focus:outline-none focus:border-accent w-36"
                           />
                         </td>
                       </tr>

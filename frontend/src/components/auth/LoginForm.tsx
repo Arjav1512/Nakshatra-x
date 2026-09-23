@@ -373,33 +373,33 @@ export function LoginForm() {
   const codeFilled = digits.join('').length === 6
 
   return (
-    <GlassCard className="w-full max-w-[500px] p-6 sm:p-8 text-center relative border border-white/15 shadow-[0_0_50px_rgba(0,0,0,0.85)]">
+    <GlassCard className="w-full max-w-[500px] p-6 sm:p-8 text-center relative border border-border-default">
       {/* Brand Header */}
       <div className="mb-6 flex flex-col items-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#00FF88]/10 border border-[#00FF88]/40 text-[#00FF88] shadow-[0_0_24px_rgba(0,255,136,0.3)] mb-3">
+        <div className="flex h-12 w-12 items-center justify-center rounded-md bg-accent/10 border border-accent/40 text-accent mb-3">
           <ShieldCheck size={26} />
         </div>
-        <div className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-[#38BDF8]">
+        <div className="font-mono text-xs font-bold uppercase tracking-[0.25em] text-accent">
           NAKSHATRA-X MISSION SECURITY
         </div>
-        <h1 className="mt-1.5 text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+        <h1 className="mt-1.5 text-2xl sm:text-3xl font-semibold tracking-tight text-text-primary drop-">
           Orbital Console Login
         </h1>
-        <p className="mt-1 text-xs text-slate-400 max-w-xs">
+        <p className="mt-1 text-xs text-text-secondary max-w-xs">
           Enter your email to receive a 6-digit code in your inbox, or sign in via Google / GitHub.
         </p>
       </div>
 
       {/* Dynamic Alerts */}
       {error && (
-        <div className="mb-4 p-3 text-xs font-mono rounded-xl bg-[#FF2E63]/15 border border-[#FF2E63]/50 text-[#FF2E63] flex items-start gap-2 text-left animate-in fade-in">
+        <div className="mb-4 p-3 text-xs font-mono rounded-md bg-status-critical/15 border border-status-critical/50 text-status-critical flex items-start gap-2 text-left animate-in fade-in">
           <AlertCircle size={16} className="shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
       )}
 
       {successNotice && (
-        <div className="mb-4 p-3 text-xs font-mono rounded-xl bg-[#00FF88]/15 border border-[#00FF88]/50 text-[#00FF88] flex items-start gap-2 text-left animate-in fade-in">
+        <div className="mb-4 p-3 text-xs font-mono rounded-md bg-accent/15 border border-accent/50 text-accent flex items-start gap-2 text-left animate-in fade-in">
           <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
           <span>{successNotice}</span>
         </div>
@@ -413,7 +413,7 @@ export function LoginForm() {
             type="button"
             onClick={handleGoogleLogin}
             disabled={loading !== null}
-            className="w-full flex items-center justify-center gap-2.5 py-3 px-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-sans font-semibold text-xs transition-colors shadow-[0_0_15px_rgba(255,255,255,0.15)] cursor-pointer disabled:opacity-50 group"
+            className="w-full flex items-center justify-center gap-2.5 py-3 px-3.5 rounded-md bg-white hover:bg-text-primary text-slate-900 font-sans font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50 group"
           >
             {loading === 'google' ? (
               <Loader2 size={15} className="animate-spin text-slate-900" />
@@ -447,12 +447,12 @@ export function LoginForm() {
             type="button"
             onClick={handleGithubLogin}
             disabled={loading !== null}
-            className="w-full flex items-center justify-center gap-2.5 py-3 px-3.5 rounded-xl bg-[#24292F] hover:bg-[#1B1F23] border border-white/20 text-white font-sans font-semibold text-xs transition-colors shadow-[0_0_15px_rgba(0,0,0,0.4)] cursor-pointer disabled:opacity-50 group"
+            className="w-full flex items-center justify-center gap-2.5 py-3 px-3.5 rounded-md bg-surface-3 hover:bg-[#1B1F23] border border-border-interactive text-text-primary font-sans font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50 group"
           >
             {loading === 'github' ? (
-              <Loader2 size={15} className="animate-spin text-white" />
+              <Loader2 size={15} className="animate-spin text-text-primary" />
             ) : (
-              <svg className="w-4 h-4 shrink-0 fill-current text-white" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 shrink-0 fill-current text-text-primary" viewBox="0 0 24 24">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
               </svg>
             )}
@@ -465,21 +465,21 @@ export function LoginForm() {
         {/* Divider */}
         <div className="relative py-1 flex items-center justify-center">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/10" />
+            <div className="w-full border-t border-border-default" />
           </div>
-          <span className="relative bg-[#090D16] px-3 font-mono text-[10px] text-slate-500 uppercase tracking-widest">
+          <span className="relative bg-surface-1 px-3 font-mono text-xs text-text-tertiary uppercase tracking-widest">
             or sign in with email OTP
           </span>
         </div>
 
         {/* ================= SECTION 1: ENTER EMAIL ================= */}
-        <div className="p-4 rounded-xl bg-black/40 border border-white/10 text-left space-y-3">
+        <div className="p-4 rounded-md bg-black/40 border border-border-default text-left space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#38BDF8] flex items-center gap-1.5">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-accent flex items-center gap-1.5">
               <Mail size={13} /> 1. Enter Your Email
             </span>
             {codeSent && (
-              <span className="text-[10px] font-mono text-[#00FF88] flex items-center gap-1">
+              <span className="text-xs font-mono text-accent flex items-center gap-1">
                 <CheckCircle2 size={11} /> Code Sent
               </span>
             )}
@@ -493,16 +493,16 @@ export function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full pl-9 pr-3 py-2.5 text-xs font-mono bg-black/70 border border-white/15 rounded-xl text-white outline-none focus:border-[#38BDF8] transition-colors"
+                className="w-full pl-9 pr-3 py-2.5 text-xs font-mono bg-black/70 border border-border-default rounded-md text-text-primary outline-none focus:border-accent transition-colors"
               />
-              <Mail size={14} className="absolute left-3 top-3 text-slate-500" />
+              <Mail size={14} className="absolute left-3 top-3 text-text-tertiary" />
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 type="submit"
                 disabled={loading === 'send_otp' || resendCooldown > 0}
-                className="flex-1 py-2.5 px-3 rounded-xl bg-[#38BDF8]/15 hover:bg-[#38BDF8]/25 border border-[#38BDF8]/50 hover:border-[#38BDF8] text-[#38BDF8] font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-2.5 px-3 rounded-md bg-accent/15 hover:bg-accent/25 border border-accent/50 hover:border-accent text-accent font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading === 'send_otp' ? (
                   <Loader2 size={14} className="animate-spin" />
@@ -525,27 +525,27 @@ export function LoginForm() {
 
         {/* ================= SECTION 2: SUBMIT CODE SECTION ================= */}
         <div
-          className={`p-4 sm:p-5 rounded-xl text-left space-y-3.5 transition-colors ${
+          className={`p-4 sm:p-5 rounded-md text-left space-y-3.5 transition-colors ${
             codeSent
-              ? 'bg-[#00FF88]/5 border-2 border-[#00FF88]/60 shadow-[0_0_30px_rgba(0,255,136,0.15)]'
-              : 'bg-black/40 border border-white/15'
+              ? 'bg-accent/5 border-2 border-accent/60'
+              : 'bg-black/40 border border-border-default'
           }`}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <KeyRound size={14} className={codeSent ? 'text-[#00FF88]' : 'text-slate-400'} />
-              <span className={`text-[11px] font-mono font-bold uppercase tracking-wider ${codeSent ? 'text-[#00FF88]' : 'text-slate-300'}`}>
+              <KeyRound size={14} className={codeSent ? 'text-accent' : 'text-text-secondary'} />
+              <span className={`text-xs font-mono font-bold uppercase tracking-wider ${codeSent ? 'text-accent' : 'text-text-secondary'}`}>
                 2. Submit 6-Digit Code
               </span>
             </div>
-            <span className="text-[10px] font-mono text-slate-400">
+            <span className="text-xs font-mono text-text-secondary">
               {codeSent ? 'Auto-verifies on 6th digit' : 'Enter code from inbox'}
             </span>
           </div>
 
-          <p className="text-[11px] font-mono text-slate-400 leading-snug">
+          <p className="text-xs font-mono text-text-secondary leading-snug">
             {codeSent ? (
-              <>Check <strong className="text-white">{email}</strong> inbox for the 6-digit code and enter below:</>
+              <>Check <strong className="text-text-primary">{email}</strong> inbox for the 6-digit code and enter below:</>
             ) : (
               <>Enter your email above and click Send Code, or input your 6-digit verification code below:</>
             )}
@@ -566,10 +566,10 @@ export function LoginForm() {
                 onChange={(e) => handleDigitChange(idx, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(idx, e)}
                 onPaste={handlePaste}
-                className={`h-12 sm:h-14 w-full text-center font-mono font-black text-xl sm:text-2xl rounded-xl bg-black/90 border outline-none transition-colors ${
+                className={`h-12 sm:h-14 w-full text-center font-mono font-semibold text-xl sm:text-2xl rounded-md bg-black/90 border outline-none transition-colors ${
                   digit
-                    ? 'border-[#00FF88] text-[#00FF88] shadow-[0_0_15px_rgba(0,255,136,0.35)]'
-                    : 'border-white/20 text-white focus:border-[#00FF88] focus:shadow-[0_0_15px_rgba(0,255,136,0.2)] placeholder-slate-600'
+                    ? 'border-accent text-accent'
+                    : 'border-border-interactive text-text-primary focus:border-accent focus: placeholder-text-tertiary'
                 }`}
               />
             ))}
@@ -580,12 +580,12 @@ export function LoginForm() {
             type="button"
             onClick={() => executeVerification()}
             disabled={loading === 'verify_otp' || !codeFilled}
-            className="w-full py-3.5 rounded-xl bg-[#00FF88]/20 hover:bg-[#00FF88]/30 border border-[#00FF88] text-[#00FF88] hover:text-white font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(0,255,136,0.25)] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full py-3.5 rounded-md bg-accent/20 hover:bg-accent/30 border border-accent text-accent hover:text-text-primary font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {loading === 'verify_otp' ? (
-              <Loader2 size={16} className="animate-spin text-[#00FF88]" />
+              <Loader2 size={16} className="animate-spin text-accent" />
             ) : (
-              <CheckCircle2 size={16} className="text-[#00FF88]" />
+              <CheckCircle2 size={16} className="text-accent" />
             )}
             <span>
               {loading === 'verify_otp' ? 'Verifying Code...' : 'Submit Code & Log In'}
@@ -597,9 +597,9 @@ export function LoginForm() {
         {/* Divider */}
         <div className="relative py-1 flex items-center justify-center">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/10" />
+            <div className="w-full border-t border-border-default" />
           </div>
-          <span className="relative bg-[#090D16] px-3 font-mono text-[10px] text-slate-500 uppercase tracking-widest">
+          <span className="relative bg-surface-1 px-3 font-mono text-xs text-text-tertiary uppercase tracking-widest">
             or try instant demo
           </span>
         </div>
@@ -609,40 +609,40 @@ export function LoginForm() {
           type="button"
           onClick={handleGuestLogin}
           disabled={loading !== null}
-          className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 hover:border-[#38BDF8]/50 text-slate-200 hover:text-white transition-colors cursor-pointer shadow-sm group"
+          className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-md bg-surface-2 hover:bg-surface-3 border border-border-default hover:border-accent/50 text-text-primary hover:text-text-primary transition-colors cursor-pointer shadow-sm group"
         >
           {loading === 'guest' ? (
-            <Loader2 size={16} className="animate-spin text-[#38BDF8]" />
+            <Loader2 size={16} className="animate-spin text-accent" />
           ) : (
-            <Compass size={16} className="text-[#38BDF8] group-hover:scale-110 transition-transform" />
+            <Compass size={16} className="text-accent group- transition-transform" />
           )}
           <span className="font-mono text-xs font-bold uppercase tracking-wider">
             {loading === 'guest' ? 'Launching Guest Console...' : 'Try Website as Guest'}
           </span>
         </button>
-        <p className="text-[10px] font-mono text-slate-500 -mt-2">
+        <p className="text-xs font-mono text-text-tertiary -mt-2">
           Explore complete platform &bull; No email or code needed
         </p>
       </div>
 
       {/* Footer Security Badges */}
-      <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-slate-400">
-        <span className="flex items-center gap-1 text-[#00FF88]">
+      <div className="mt-6 pt-4 border-t border-border-default flex items-center justify-between text-xs font-mono text-text-secondary">
+        <span className="flex items-center gap-1 text-accent">
           <ShieldCheck size={12} /> Real Inbox Verification
         </span>
-        <span className="text-[#38BDF8]">Resend Secured</span>
+        <span className="text-accent">Resend Secured</span>
       </div>
 
       <div className="mt-3 flex items-center justify-between text-xs font-mono">
         <Link
           href="/"
-          className="text-slate-400 hover:text-white transition-colors"
+          className="text-text-secondary hover:text-text-primary transition-colors"
         >
           &larr; Return to 3D Space Platform
         </Link>
         <Link
           href="/admin/login"
-          className="text-slate-600 hover:text-[#38BDF8] transition-colors flex items-center gap-1 text-[11px]"
+          className="text-text-tertiary hover:text-accent transition-colors flex items-center gap-1 text-xs"
         >
           <Lock size={10} />
           <span>Admin Portal</span>

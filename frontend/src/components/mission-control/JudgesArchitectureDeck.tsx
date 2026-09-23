@@ -50,35 +50,35 @@ export default function JudgesArchitectureDeck() {
   return (
     <div className="ios-glass-card p-6 flex flex-col gap-6 relative overflow-hidden">
       {/* Absolute background glows */}
-      <div className="absolute top-0 right-0 w-80 h-80 bg-[#00FF88]/5 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#FF4D4F]/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-80 h-80 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-status-critical/5 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border-default pb-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="ios-badge ios-badge-copper flex items-center gap-1">
-              <Award className="w-3.5 h-3.5 text-[#E2A33E]" />
+              <Award className="w-3.5 h-3.5 text-status-caution" />
               JUDGES INTERACTIVE EXECUTIVE SUMMARY
             </span>
-            <span className="text-xs font-mono text-[#94A3B8]">&bull; Smart India Hackathon 2026 Evaluation</span>
+            <span className="text-xs font-mono text-text-tertiary">&bull; Smart India Hackathon 2026 Evaluation</span>
           </div>
-          <h3 className="text-2xl font-bold text-white tracking-tight mt-1.5 flex items-center gap-2">
+          <h3 className="text-2xl font-bold text-text-primary tracking-tight mt-1.5 flex items-center gap-2">
             Mineral Prospectivity Pipeline & Explainability
           </h3>
-          <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
+          <p className="text-xs text-text-tertiary mt-1 leading-relaxed">
             Gradient-boosting model over measured Sentinel-2 band ratios and SRTM terrain, validated leave-one-mine-out (AUC 0.85, 95% CI 0.72–0.95). Maps SURFACE prospectivity only — satellite inputs carry no subsurface information (PRD §2.2).
           </p>
         </div>
 
         {/* Tab Controls */}
-        <div className="flex items-center gap-1.5 bg-white/5 p-1 rounded-xl border border-white/10">
+        <div className="flex items-center gap-1.5 bg-surface-2 p-1 rounded-md border border-border-default">
           <button type="button"
             onClick={() => setActiveTab('pipeline')}
             className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-colors cursor-pointer ${
               activeTab === 'pipeline'
-                ? 'bg-gradient-to-r from-[#FB923C]/20 to-[#FACC15]/20 text-white border border-[#FB923C]/30 shadow-md'
-                : 'text-[#94A3B8] hover:text-white'
+                ? 'bg-gradient-to-r from-status-caution/20 to-status-caution/20 text-text-primary border border-status-caution/30 shadow-md'
+                : 'text-text-tertiary hover:text-text-primary'
             }`}
           >
             Pipeline Flow
@@ -87,8 +87,8 @@ export default function JudgesArchitectureDeck() {
             onClick={() => setActiveTab('hyperparameters')}
             className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-colors cursor-pointer ${
               activeTab === 'hyperparameters'
-                ? 'bg-gradient-to-r from-[#FB923C]/20 to-[#FACC15]/20 text-white border border-[#FB923C]/30 shadow-md'
-                : 'text-[#94A3B8] hover:text-white'
+                ? 'bg-gradient-to-r from-status-caution/20 to-status-caution/20 text-text-primary border border-status-caution/30 shadow-md'
+                : 'text-text-tertiary hover:text-text-primary'
             }`}
           >
             Model Specs
@@ -97,8 +97,8 @@ export default function JudgesArchitectureDeck() {
             onClick={() => setActiveTab('shap')}
             className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-colors cursor-pointer ${
               activeTab === 'shap'
-                ? 'bg-gradient-to-r from-[#FB923C]/20 to-[#FACC15]/20 text-white border border-[#FB923C]/30 shadow-md'
-                : 'text-[#94A3B8] hover:text-white'
+                ? 'bg-gradient-to-r from-status-caution/20 to-status-caution/20 text-text-primary border border-status-caution/30 shadow-md'
+                : 'text-text-tertiary hover:text-text-primary'
             }`}
           >
             Feature Importances
@@ -113,15 +113,15 @@ export default function JudgesArchitectureDeck() {
           <div className="ios-glass-inset p-4 flex flex-col justify-between border-t border-t-[#00FF88]/40">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-[#00FF88] font-bold">STEP 01</span>
-                <Layers className="w-4 h-4 text-[#00FF88]" />
+                <span className="text-xs font-mono text-accent font-bold">STEP 01</span>
+                <Layers className="w-4 h-4 text-accent" />
               </div>
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-1">Dataset Prep</h4>
-              <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Dataset Prep</h4>
+              <p className="text-xs text-text-tertiary leading-relaxed">
                 Aggregates 10 known GSI-verified manganese mine coordinates and synthesizes 400 regional background nodes.
               </p>
             </div>
-            <div className="mt-4 text-[10px] font-mono text-[#00FF88] bg-[#00FF88]/5 p-1.5 rounded border border-[#00FF88]/20">
+            <div className="mt-4 text-xs font-mono text-accent bg-accent/5 p-1.5 rounded border border-accent/20">
               CSV: 410 Points Generated
             </div>
           </div>
@@ -130,15 +130,15 @@ export default function JudgesArchitectureDeck() {
           <div className="ios-glass-inset p-4 flex flex-col justify-between border-t border-t-[#38BDF8]/40">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-[#38BDF8] font-bold">STEP 02</span>
-                <Sparkles className="w-4 h-4 text-[#38BDF8]" />
+                <span className="text-xs font-mono text-accent font-bold">STEP 02</span>
+                <Sparkles className="w-4 h-4 text-accent" />
               </div>
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-1">Feature Extraction</h4>
-              <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Feature Extraction</h4>
+              <p className="text-xs text-text-tertiary leading-relaxed">
                 Applies simulated Sentinel-2 SWIR band ratios, DEM topography formulas, and fault geodesic metrics offline.
               </p>
             </div>
-            <div className="mt-4 text-[10px] font-mono text-[#38BDF8] bg-[#38BDF8]/5 p-1.5 rounded border border-[#38BDF8]/20 font-semibold">
+            <div className="mt-4 text-xs font-mono text-accent bg-accent/5 p-1.5 rounded border border-accent/20 font-semibold">
               6 Geological Features / Point
             </div>
           </div>
@@ -147,15 +147,15 @@ export default function JudgesArchitectureDeck() {
           <div className="ios-glass-inset p-4 flex flex-col justify-between border-t border-t-[#FB923C]/40">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-[#FB923C] font-bold">STEP 03</span>
-                <Brain className="w-4 h-4 text-[#FB923C]" />
+                <span className="text-xs font-mono text-status-caution font-bold">STEP 03</span>
+                <Brain className="w-4 h-4 text-status-caution" />
               </div>
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-1">Model Training</h4>
-              <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Model Training</h4>
+              <p className="text-xs text-text-tertiary leading-relaxed">
                 Trains a Random Forest classifier. Imbalances resolved via balanced class weights to optimize recall.
               </p>
             </div>
-            <div className="mt-4 text-[10px] font-mono text-[#FB923C] bg-[#FB923C]/5 p-1.5 rounded border border-[#FB923C]/20">
+            <div className="mt-4 text-xs font-mono text-status-caution bg-status-caution/5 p-1.5 rounded border border-status-caution/20">
               Balanced RandomForest (n=100)
             </div>
           </div>
@@ -164,15 +164,15 @@ export default function JudgesArchitectureDeck() {
           <div className="ios-glass-inset p-4 flex flex-col justify-between border-t border-t-[#EAB308]/40">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-[#EAB308] font-bold">STEP 04</span>
-                <GitBranch className="w-4 h-4 text-[#EAB308]" />
+                <span className="text-xs font-mono text-status-caution font-bold">STEP 04</span>
+                <GitBranch className="w-4 h-4 text-status-caution" />
               </div>
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-1">Grid Inference</h4>
-              <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Grid Inference</h4>
+              <p className="text-xs text-text-tertiary leading-relaxed">
                 Scores a 725-point spatial grid (~9km spacing) covering the entire Madhya Pradesh - Maharashtra mineral belt.
               </p>
             </div>
-            <div className="mt-4 text-[10px] font-mono text-[#EAB308] bg-[#EAB308]/5 p-1.5 rounded border border-[#EAB308]/20">
+            <div className="mt-4 text-xs font-mono text-status-caution bg-status-caution/5 p-1.5 rounded border border-status-caution/20">
               725 Inferences Computed
             </div>
           </div>
@@ -181,15 +181,15 @@ export default function JudgesArchitectureDeck() {
           <div className="ios-glass-inset p-4 flex flex-col justify-between border-t border-t-[#FF4D4F]/40">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-[#FF4D4F] font-bold">STEP 05</span>
-                <Terminal className="w-4 h-4 text-[#FF4D4F]" />
+                <span className="text-xs font-mono text-status-critical font-bold">STEP 05</span>
+                <Terminal className="w-4 h-4 text-status-critical" />
               </div>
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-1">Export & Render</h4>
-              <p className="text-[11px] text-[#94A3B8] leading-relaxed">
+              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Export & Render</h4>
+              <p className="text-xs text-text-tertiary leading-relaxed">
                 Saves to GeoJSON and serves dynamically to render color-coded prospectivity beacons onto the Leaflet map.
               </p>
             </div>
-            <div className="mt-4 text-[10px] font-mono text-[#FF4D4F] bg-[#FF4D4F]/5 p-1.5 rounded border border-[#FF4D4F]/20 font-semibold">
+            <div className="mt-4 text-xs font-mono text-status-critical bg-status-critical/5 p-1.5 rounded border border-status-critical/20 font-semibold">
               GeoJSON + FastAPI / Next.js API
             </div>
           </div>
@@ -200,23 +200,22 @@ export default function JudgesArchitectureDeck() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="ios-glass-inset p-5 flex flex-col justify-between">
             <div>
-              <span className="text-[10px] font-mono text-[#94A3B8] uppercase block mb-1">Model Parameters</span>
-              <h4 className="text-2xl font-mono font-extrabold text-[#00FF88]">Random Forest</h4>
-              <p className="text-xs text-[#94A3B8] mt-2 leading-relaxed">
+              <span className="text-xs font-mono text-text-tertiary uppercase block mb-1">Model Parameters</span>
+              <h4 className="text-2xl font-mono font-semibold text-accent">Random Forest</h4>
+              <p className="text-xs text-text-tertiary mt-2 leading-relaxed">
                 Selected for non-linear feature handling, resilience to spatial collinearity, and zero risk of model gradient explosion.
               </p>
             </div>
-            <div className="space-y-1.5 mt-6 pt-3 border-t border-white/5 text-xs font-mono">
-              <div className="flex justify-between"><span className="text-[#94A3B8]">Estimators:</span> <span className="text-white">100 Trees</span></div>
-              <div className="flex justify-between"><span className="text-[#94A3B8]">Max Depth:</span> <span className="text-white">6 levels</span></div>
-              <div className="flex justify-between"><span className="text-[#94A3B8]">Class Weights:</span> <span className="text-[#00FF88] font-bold">Balanced</span></div>
-              <div className="flex justify-between"><span className="text-[#94A3B8]">Train-Test Split:</span> <span className="text-white">80 / 20 Stratified</span></div>
+            <div className="space-y-1.5 mt-6 pt-3 border-t border-border-subtle text-xs font-mono">
+              <div className="flex justify-between"><span className="text-text-tertiary">Estimators:</span> <span className="text-text-primary">100 Trees</span></div>
+              <div className="flex justify-between"><span className="text-text-tertiary">Max Depth:</span> <span className="text-text-primary">6 levels</span></div>
+              <div className="flex justify-between"><span className="text-text-tertiary">Class Weights:</span> <span className="text-accent font-bold">Balanced</span></div>
+              <div className="flex justify-between"><span className="text-text-tertiary">Train-Test Split:</span> <span className="text-text-primary">80 / 20 Stratified</span></div>
             </div>
           </div>
 
           {/*
-            These were literals: 95.1% accuracy, ROC-AUC 0.8875, recall 50.0%,
-            "410 Records". None came from the model, and they contradicted the
+            These were literals: 95.1% accuracy, ROC-AUC 0.8875, recall 50.0%, "410 Records". None came from the model, and they contradicted the
             project's own published figures — the honest model is validated
             leave-one-mine-out on 50 points and scores AUC 0.85 with a 95%
             interval of 0.723-0.95. Accuracy was the wrong headline in any case
@@ -285,17 +284,17 @@ export default function JudgesArchitectureDeck() {
 
           <div className="ios-glass-inset p-5 flex flex-col justify-between">
             <div>
-              <span className="text-[10px] font-mono text-[#94A3B8] uppercase block mb-1">Offline GEE Replacement</span>
-              <h4 className="text-2xl font-mono font-extrabold text-[#FF4D4F]">Zero Cost Sandbox</h4>
-              <p className="text-xs text-[#94A3B8] mt-2 leading-relaxed">
+              <span className="text-xs font-mono text-text-tertiary uppercase block mb-1">Offline GEE Replacement</span>
+              <h4 className="text-2xl font-mono font-semibold text-status-critical">Zero Cost Sandbox</h4>
+              <p className="text-xs text-text-tertiary mt-2 leading-relaxed">
                 Replaces Google Earth Engine APIs by computing terrain slope, elevation, fault distances, and rainfall mathematically.
               </p>
             </div>
-            <div className="space-y-1.5 mt-6 pt-3 border-t border-white/5 text-xs font-mono">
-              <div className="flex justify-between"><span className="text-[#94A3B8]">Terrain:</span> <span className="text-white">Deterministic DEM DEM proxy</span></div>
-              <div className="flex justify-between"><span className="text-[#94A3B8]">Weather:</span> <span className="text-white">Rainfall Seasonality Proxy</span></div>
-              <div className="flex justify-between"><span className="text-[#94A3B8]">Faults:</span> <span className="text-white">Sausar Shear coordinates</span></div>
-              <div className="flex justify-between"><span className="text-[#94A3B8]">API Key Requirement:</span> <span className="text-[#00FF88] font-bold">0% (Keyless Sandbox)</span></div>
+            <div className="space-y-1.5 mt-6 pt-3 border-t border-border-subtle text-xs font-mono">
+              <div className="flex justify-between"><span className="text-text-tertiary">Terrain:</span> <span className="text-text-primary">Deterministic DEM DEM proxy</span></div>
+              <div className="flex justify-between"><span className="text-text-tertiary">Weather:</span> <span className="text-text-primary">Rainfall Seasonality Proxy</span></div>
+              <div className="flex justify-between"><span className="text-text-tertiary">Faults:</span> <span className="text-text-primary">Sausar Shear coordinates</span></div>
+              <div className="flex justify-between"><span className="text-text-tertiary">API Key Requirement:</span> <span className="text-accent font-bold">0% (Keyless Sandbox)</span></div>
             </div>
           </div>
         </div>
@@ -382,14 +381,10 @@ export default function JudgesArchitectureDeck() {
                   display={item.value.toFixed(1)}
                   unit="%"
                   env={derived(
-                    item.value,
-                    '% of total importance',
-                    'Gradient-boosted prospectivity model, leave-one-mine-out validated',
+                    item.value, '% of total importance', 'Gradient-boosted prospectivity model, leave-one-mine-out validated',
                     {
                       model_version: metrics.model_version,
-                      method:
-                        'Impurity-based feature importance from the fitted model, normalised across ' +
-                        `${metrics.features.length} features. Not a SHAP value.`,
+                      method: 'Impurity-based feature importance from the fitted model, normalised across ' + `${metrics.features.length} features. Not a SHAP value.`,
                     }
                   )}
                 />

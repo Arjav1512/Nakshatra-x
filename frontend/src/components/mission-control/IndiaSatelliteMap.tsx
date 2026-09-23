@@ -840,25 +840,25 @@ export default function IndiaSatelliteMap({
   return (
     <div
       className={`ios-glass-card overflow-hidden transition-colors duration-500 relative ${
-        isFullscreen ? 'fixed inset-4 z-50 rounded-3xl shadow-[0_0_90px_rgba(0,0,0,0.95)]' : 'rounded-[32px]'
+        isFullscreen ? 'fixed inset-4 z-50 rounded-md' : 'rounded-[32px]'
       }`}
     >
       {/* Top Header Bar */}
-      <div className="p-4 sm:p-5 border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[rgba(10,14,20,0.75)] backdrop-blur-2xl">
+      <div className="p-4 sm:p-5 border-b border-border-default flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[rgba(10,14,20,0.75)] ">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#EF4444]/15 border border-[#EF4444]/40 shadow-[0_0_14px_rgba(239,68,68,0.3)]">
-            <Globe2 className="h-5 w-5 text-[#EF4444]" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-status-critical/15 border border-status-critical/40">
+            <Globe2 className="h-5 w-5 text-status-critical" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-black uppercase tracking-widest text-[#EF4444]">
+              <span className="text-xs font-mono font-semibold uppercase tracking-widest text-status-critical">
                 INDIAN MAP & AI MANGANESE DISCOVERY ENGINE
               </span>
-              <span className="ios-badge ios-badge-risk text-[9px]">
+              <span className="ios-badge ios-badge-risk text-xs">
                 CLICK / TYPE ANY LOCATION IN INDIA
               </span>
             </div>
-            <h4 className="text-sm font-semibold text-[#FFFFFF] mt-0.5">
+            <h4 className="text-sm font-semibold text-text-primary mt-0.5">
               Click any location or search any Indian city/district to run dynamic AI Machine Learning Manganese Ore Probability & Historical Success Ratio analysis.
             </h4>
           </div>
@@ -870,7 +870,7 @@ export default function IndiaSatelliteMap({
             type="button"
             onClick={() => setRadarSweepActive(!radarSweepActive)}
             className={`ios-glass-button px-3.5 py-1.5 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer ${
-              radarSweepActive ? 'border-[#EF4444] text-[#EF4444]' : 'text-[#94A3B8]'
+              radarSweepActive ? 'border-status-critical text-status-critical' : 'text-text-tertiary'
             }`}
           >
             <Radio className="w-3.5 h-3.5 " />
@@ -880,16 +880,16 @@ export default function IndiaSatelliteMap({
           <button
             type="button"
             onClick={zoomToNational}
-            className="ios-glass-button px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-[#FFFFFF] flex items-center gap-1.5 cursor-pointer"
+            className="ios-glass-button px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-text-primary flex items-center gap-1.5 cursor-pointer"
           >
-            <Compass className="w-3.5 h-3.5 text-[#38BDF8]" />
+            <Compass className="w-3.5 h-3.5 text-accent" />
             <span>National View</span>
           </button>
 
           <button
             type="button"
             onClick={zoomToIndia}
-            className="ios-glass-button px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-[#FFFFFF] flex items-center gap-1.5 cursor-pointer"
+            className="ios-glass-button px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-text-primary flex items-center gap-1.5 cursor-pointer"
           >
             <Navigation className="w-3.5 h-3.5 text-[#F97316]" />
             <span>Manganese Belt</span>
@@ -898,7 +898,7 @@ export default function IndiaSatelliteMap({
           <button
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="ios-glass-button p-2 rounded-full text-[#FFFFFF] hover:text-[#00FF88] transition-colors cursor-pointer"
+            className="ios-glass-button p-2 rounded-full text-text-primary hover:text-accent transition-colors cursor-pointer"
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
@@ -906,17 +906,17 @@ export default function IndiaSatelliteMap({
       </div>
 
       {/* SEARCH LOCATION & COORDINATES BAR */}
-      <div className="p-3 bg-black/70 border-b border-white/10 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 relative z-[500]">
+      <div className="p-3 bg-black/70 border-b border-border-default  flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 relative z-[500]">
         <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 w-full sm:max-w-xl relative">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-[#00FF88] absolute left-3 top-2.5 z-10" />
+            <Search className="w-4 h-4 text-accent absolute left-3 top-2.5 z-10" />
             <input
               type="text"
               value={searchQuery}
               onChange={handleInputChange}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               placeholder="Type any city, area, district, or coordinates in India (e.g. Lucknow, Noida, Pune, Balaghat, 21.83, 80.19)..."
-              className="w-full pl-9 pr-8 py-2 rounded-xl bg-white/10 border border-white/20 text-xs font-mono text-white placeholder-slate-400 focus:outline-none focus:border-[#00FF88] transition-colors"
+              className="w-full pl-9 pr-8 py-2 rounded-md bg-surface-3 border border-border-interactive text-xs font-mono text-text-primary placeholder-text-secondary focus:outline-none focus:border-accent transition-colors"
             />
             {searchQuery && (
               <button
@@ -927,7 +927,7 @@ export default function IndiaSatelliteMap({
                   setShowSuggestions(false)
                   setSearchError(null)
                 }}
-                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-white"
+                className="absolute right-2.5 top-2.5 text-text-secondary hover:text-text-primary"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -935,27 +935,27 @@ export default function IndiaSatelliteMap({
 
             {/* LIVE AUTOCOMPLETE SUGGESTIONS DROPDOWN */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-2 bg-[#090D14]/95 border border-[#00FF88]/40 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.9)] backdrop-blur-2xl max-h-64 overflow-y-auto z-[600] divide-y divide-white/5">
-                <div className="px-3 py-1.5 text-[9px] font-mono font-bold text-[#00FF88] uppercase tracking-wider bg-white/5 flex items-center justify-between">
+              <div className="absolute left-0 right-0 top-full mt-2 bg-[#090D14]/95 border border-accent/40 rounded-md  max-h-64 overflow-y-auto z-[600] divide-y divide-white/5">
+                <div className="px-3 py-1.5 text-xs font-mono font-bold text-accent uppercase tracking-wider bg-surface-2 flex items-center justify-between">
                   <span>Matched Indian Locations ({suggestions.length})</span>
-                  <span className="text-[8px] text-slate-400">Click to Select</span>
+                  <span className="text-xs text-text-secondary">Click to Select</span>
                 </div>
                 {suggestions.map((item, idx) => (
                   <button
                     key={`${item.lat}-${item.lng}-${idx}`}
                     type="button"
                     onClick={() => handleSelectSuggestion(item)}
-                    className="w-full text-left px-3.5 py-2.5 hover:bg-[#00FF88]/15 transition-colors flex items-start gap-2.5 group cursor-pointer"
+                    className="w-full text-left px-3.5 py-2.5 hover:bg-accent/15 transition-colors flex items-start gap-2.5 group cursor-pointer"
                   >
-                    <MapPin className="w-3.5 h-3.5 text-[#00FF88] shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                    <MapPin className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5 group- transition-transform" />
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-mono font-bold text-white group-hover:text-[#00FF88] truncate flex items-center justify-between">
+                      <div className="text-xs font-mono font-bold text-text-primary group-hover:text-accent truncate flex items-center justify-between">
                         <span>{item.name}</span>
-                        <span className="text-[9px] text-[#38BDF8] ml-2 shrink-0 font-normal">
+                        <span className="text-xs text-accent ml-2 shrink-0 font-normal">
                           {item.lat.toFixed(3)}°N, {item.lng.toFixed(3)}°E
                         </span>
                       </div>
-                      <div className="text-[10px] font-mono text-slate-400 truncate">
+                      <div className="text-xs font-mono text-text-secondary truncate">
                         {item.displayName || `${item.state || 'India'}`}
                       </div>
                     </div>
@@ -969,12 +969,12 @@ export default function IndiaSatelliteMap({
           <button
             type="submit"
             disabled={isSearching}
-            className="ios-glass-button px-5 py-2 rounded-xl text-xs font-mono font-bold text-[#00FF88] hover:text-white border border-[#00FF88]/40 hover:border-[#00FF88] flex items-center gap-2 cursor-pointer shadow-[0_0_18px_rgba(0,255,136,0.3)] transition-colors shrink-0 disabled:opacity-50"
+            className="ios-glass-button px-5 py-2 rounded-md text-xs font-mono font-bold text-accent hover:text-text-primary border border-accent/40 hover:border-accent flex items-center gap-2 cursor-pointer transition-colors shrink-0 disabled:opacity-50"
           >
             {isSearching ? (
-              <Loader2 className="w-3.5 h-3.5 text-[#00FF88] animate-spin" />
+              <Loader2 className="w-3.5 h-3.5 text-accent animate-spin" />
             ) : (
-              <Sparkles className="w-3.5 h-3.5 text-[#00FF88] " />
+              <Sparkles className="w-3.5 h-3.5 text-accent " />
             )}
             <span>{isSearching ? 'Locating...' : 'Locate AI'}</span>
           </button>
@@ -982,7 +982,7 @@ export default function IndiaSatelliteMap({
 
         {/* Preset Location Quick Chips */}
         <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto no-scrollbar">
-          <span className="text-[10px] font-mono text-[#94A3B8] uppercase shrink-0 font-bold">
+          <span className="text-xs font-mono text-text-tertiary uppercase shrink-0 font-bold">
             Presets:
           </span>
           {['bhopal', 'keonjhar', 'sandur', 'jaipur', 'nagpur', 'lucknow', 'delhi', 'mumbai'].map((key) => {
@@ -996,7 +996,7 @@ export default function IndiaSatelliteMap({
                   setSearchError(null)
                   triggerAIPrediction(loc.lat, loc.lng, loc.name)
                 }}
-                className="ios-glass-button px-3 py-1 rounded-full text-[10px] font-mono text-slate-300 hover:text-[#00FF88] whitespace-nowrap transition-colors cursor-pointer shrink-0"
+                className="ios-glass-button px-3 py-1 rounded-full text-xs font-mono text-text-secondary hover:text-accent whitespace-nowrap transition-colors cursor-pointer shrink-0"
               >
                 {key.toUpperCase()}
               </button>
@@ -1007,12 +1007,12 @@ export default function IndiaSatelliteMap({
 
       {/* SEARCH ERROR BANNER */}
       {searchError && (
-        <div className="bg-[#EF4444]/15 border-b border-[#EF4444]/40 px-4 py-2 text-xs font-mono text-[#EF4444] flex items-center justify-between gap-2 z-[400]">
+        <div className="bg-status-critical/15 border-b border-status-critical/40 px-4 py-2 text-xs font-mono text-status-critical flex items-center justify-between gap-2 z-[400]">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{searchError}</span>
           </div>
-          <button type="button" onClick={() => setSearchError(null)} className="hover:text-white">
+          <button type="button" onClick={() => setSearchError(null)} className="hover:text-text-primary">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -1022,7 +1022,7 @@ export default function IndiaSatelliteMap({
       <div
         className={`relative w-full ${
           isFullscreen ? 'h-[calc(100vh-200px)]' : 'h-[560px] sm:h-[620px]'
-        } bg-[#000000] overflow-hidden`}
+        } bg-surface-0 overflow-hidden`}
       >
         <div className="cyber-grid-overlay" />
 
@@ -1031,29 +1031,29 @@ export default function IndiaSatelliteMap({
         <div ref={mapContainerRef} className="w-full h-full" />
 
         {/* Floating Priority Legend & Multi-Spectral Switcher (Top Left) */}
-        <div className="absolute top-4 left-4 z-[400] flex flex-col gap-2.5 p-3.5 rounded-2xl bg-[rgba(8,12,18,0.88)] border border-white/15 backdrop-blur-2xl max-w-xs shadow-2xl">
-          <div className="space-y-1 pb-2 border-b border-white/10">
-            <span className="text-[10px] font-mono font-black text-[#FFFFFF] uppercase tracking-wider block mb-1">
+        <div className="absolute top-4 left-4 z-[400] flex flex-col gap-2.5 p-3.5 rounded-md bg-[rgba(8,12,18,0.88)] border border-border-default  max-w-xs shadow-2xl">
+          <div className="space-y-1 pb-2 border-b border-border-default">
+            <span className="text-xs font-mono font-semibold text-text-primary uppercase tracking-wider block mb-1">
               Hotspot Priority Legend:
             </span>
-            <div className="flex items-center gap-2 text-[10px] font-mono text-[#EF4444]">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#EF4444] shadow-[0_0_8px_#EF4444]" />
+            <div className="flex items-center gap-2 text-xs font-mono text-status-critical">
+              <span className="w-2.5 h-2.5 rounded-full bg-status-critical" />
               <span className="font-bold">CRITICAL PRIORITY:</span> &gt;14,000 T/m (42-46% Mn)
             </div>
-            <div className="flex items-center gap-2 text-[10px] font-mono text-[#F97316]">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#F97316] shadow-[0_0_8px_#F97316]" />
+            <div className="flex items-center gap-2 text-xs font-mono text-[#F97316]">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#F97316]" />
               <span className="font-bold">HIGH PRIORITY:</span> 10,000-13,000 T/m
             </div>
-            <div className="flex items-center gap-2 text-[10px] font-mono text-[#EAB308]">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#EAB308] shadow-[0_0_8px_#EAB308]" />
+            <div className="flex items-center gap-2 text-xs font-mono text-status-caution">
+              <span className="w-2.5 h-2.5 rounded-full bg-status-caution" />
               <span className="font-bold">MEDIUM PRIORITY:</span> Silico-Mn Blend Reserve
             </div>
           </div>
 
           {/* Sensor Layers */}
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-mono font-bold text-[#94A3B8] uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-[#00FF88]" />
+            <span className="text-xs font-mono font-bold text-text-tertiary uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-accent" />
               Satellite Layer:
             </span>
             {layers.map((l) => (
@@ -1061,13 +1061,13 @@ export default function IndiaSatelliteMap({
                 type="button"
                 key={l.key}
                 onClick={() => onChangeLayer(l.key)}
-                className={`px-3 py-1 rounded-xl text-left text-xs font-mono transition-colors flex items-center justify-between gap-3 cursor-pointer ${
+                className={`px-3 py-1 rounded-md text-left text-xs font-mono transition-colors flex items-center justify-between gap-3 cursor-pointer ${
                   activeLayer === l.key
-                    ? 'bg-white/20 text-[#FFFFFF] font-bold border border-white/30 shadow-md'
-                    : 'text-[#94A3B8] hover:text-[#FFFFFF] hover:bg-white/5'
+                    ? 'bg-white/20 text-text-primary font-bold border border-border-interactive shadow-md'
+                    : 'text-text-tertiary hover:text-text-primary hover:bg-surface-2'
                 }`}
               >
-                <span className="flex items-center gap-2 truncate text-[11px]">
+                <span className="flex items-center gap-2 truncate text-xs">
                   <span
                     className="h-2 w-2 rounded-full shrink-0"
                     style={{ backgroundColor: l.color }}
@@ -1075,7 +1075,7 @@ export default function IndiaSatelliteMap({
                   <span className="truncate">{l.label}</span>
                 </span>
                 {activeLayer === l.key && (
-                  <span className="text-[9px] font-bold text-[#00FF88] shrink-0">ON</span>
+                  <span className="text-xs font-bold text-accent shrink-0">ON</span>
                 )}
               </button>
             ))}
@@ -1084,16 +1084,16 @@ export default function IndiaSatelliteMap({
 
         {/* DEFAULT TELEMETRY CARD (Top Right - visible when search prediction report is not active) */}
         {!activePrediction && (
-          <div className="absolute top-4 right-4 z-[400] p-4 rounded-2xl bg-[rgba(8,12,18,0.92)] border border-white/15 backdrop-blur-2xl max-w-xs shadow-2xl">
+          <div className="absolute top-4 right-4 z-[400] p-4 rounded-md bg-[rgba(8,12,18,0.92)] border border-border-default  max-w-xs shadow-2xl">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full " style={{ backgroundColor: currentHotspotMeta.color }} />
-                <span className="text-xs font-mono font-black uppercase" style={{ color: currentHotspotMeta.color }}>
+                <span className="text-xs font-mono font-semibold uppercase" style={{ color: currentHotspotMeta.color }}>
                   {selectedMine.name} Hotspot
                 </span>
               </div>
               <span
-                className="ios-badge text-[9px]"
+                className="ios-badge text-xs"
                 style={{
                   backgroundColor: `${currentHotspotMeta.color}20`,
                   borderColor: `${currentHotspotMeta.color}60`,
@@ -1104,22 +1104,22 @@ export default function IndiaSatelliteMap({
               </span>
             </div>
 
-            <div className="space-y-2 text-xs font-mono pt-1.5 border-t border-white/10">
-              <div className="flex justify-between text-[#94A3B8]">
+            <div className="space-y-2 text-xs font-mono pt-1.5 border-t border-border-default">
+              <div className="flex justify-between text-text-tertiary">
                 <span>Monthly Target Rate:</span>
-                <span className="font-bold text-[#FFFFFF]">{currentHotspotMeta.rate}</span>
+                <span className="font-bold text-text-primary">{currentHotspotMeta.rate}</span>
               </div>
-              <div className="flex justify-between text-[#94A3B8]">
+              <div className="flex justify-between text-text-tertiary">
                 <span>Estimated Ore Grade:</span>
                 <span className="font-bold" style={{ color: currentHotspotMeta.color }}>{currentHotspotMeta.grade}</span>
               </div>
-              <div className="flex justify-between text-[#94A3B8]">
+              <div className="flex justify-between text-text-tertiary">
                 <span>Coordinates:</span>
-                <span className="text-[#38BDF8]">{selectedMine.lat}&deg;N, {selectedMine.lng}&deg;E</span>
+                <span className="text-accent">{selectedMine.lat}&deg;N, {selectedMine.lng}&deg;E</span>
               </div>
-              <div className="flex justify-between text-[#94A3B8]">
+              <div className="flex justify-between text-text-tertiary">
                 <span>Geological Belt:</span>
-                <span className="text-[#FFFFFF]">{selectedMine.state === 'MP' ? 'Central MP Syncline' : 'Western MH Corridor'}</span>
+                <span className="text-text-primary">{selectedMine.state === 'MP' ? 'Central MP Syncline' : 'Western MH Corridor'}</span>
               </div>
             </div>
           </div>
@@ -1127,22 +1127,22 @@ export default function IndiaSatelliteMap({
 
         {/* AI ML PROSPECTIVITY PREDICTION INSPECTOR REPORT (RIGHT-HAND SIDE PANEL) */}
         {activePrediction && (
-          <div className="absolute top-4 right-4 z-[450] p-4 rounded-2xl bg-[rgba(6,12,24,0.95)] border border-[#00FF88]/50 backdrop-blur-2xl w-[90%] sm:w-[380px] max-h-[90%] overflow-y-auto shadow-[0_0_45px_rgba(0,255,136,0.35)] text-xs font-mono text-white animate-in slide-in-from-right-4 duration-300">
-            <div className="flex items-center justify-between pb-2.5 border-b border-white/15 mb-3">
+          <div className="absolute top-4 right-4 z-[450] p-4 rounded-md bg-[rgba(6,12,24,0.95)] border border-accent/50  w-[90%] sm:w-[380px] max-h-[90%] overflow-y-auto text-xs font-mono text-text-primary animate-in slide-in-from-right-4 duration-300">
+            <div className="flex items-center justify-between pb-2.5 border-b border-border-default mb-3">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-xl bg-[#00FF88]/20 border border-[#00FF88]/40 text-[#00FF88] shadow-[0_0_10px_#00FF88]">
+                <div className="p-1.5 rounded-md bg-accent/20 border border-accent/40 text-accent">
                   <Cpu className="w-4 h-4 " />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold text-[#00FF88] uppercase tracking-wider">
+                    <span className="text-xs font-bold text-accent uppercase tracking-wider">
                       AI Prospectivity Dossier
                     </span>
                   </div>
-                  <h5 className="font-bold text-white text-xs truncate max-w-[210px]">
+                  <h5 className="font-bold text-text-primary text-xs truncate max-w-[210px]">
                     {activePrediction.location_name}
                   </h5>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-xs text-text-secondary">
                     {activePrediction.lat?.toFixed(4)}°N, {activePrediction.lng?.toFixed(4)}°E
                   </span>
                 </div>
@@ -1151,7 +1151,7 @@ export default function IndiaSatelliteMap({
               <button
                 type="button"
                 onClick={() => setActivePrediction(null)}
-                className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                className="p-1 rounded-lg hover:bg-surface-3 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
                 title="Close Report"
               >
                 <X className="w-4 h-4" />
@@ -1160,26 +1160,26 @@ export default function IndiaSatelliteMap({
 
             {/* AI Possibility & Historical Success Ratio Grid */}
             <div className="grid grid-cols-2 gap-2 mb-3">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-[#00FF88]/10 to-transparent border border-[#00FF88]/30">
-                <span className="text-[9px] uppercase text-slate-400 block mb-0.5 font-bold">
+              <div className="p-3 rounded-md bg-gradient-to-br from-accent/10 to-transparent border border-accent/30">
+                <span className="text-xs uppercase text-text-secondary block mb-0.5 font-bold">
                   Manganese Possibility
                 </span>
-                <div className="text-xl font-black text-[#00FF88]">
+                <div className="text-xl font-semibold text-accent">
                   {(activePrediction.probability * 100).toFixed(1)}%
                 </div>
-                <span className="text-[9px] text-[#00FF88] uppercase font-bold">
+                <span className="text-xs text-accent uppercase font-bold">
                   {activePrediction.confidence} Confidence
                 </span>
               </div>
 
-              <div className="p-3 rounded-xl bg-gradient-to-br from-[#FACC15]/10 to-transparent border border-[#FACC15]/30">
-                <span className="text-[9px] uppercase text-slate-400 block mb-0.5 font-bold">
+              <div className="p-3 rounded-md bg-gradient-to-br from-status-caution/10 to-transparent border border-status-caution/30">
+                <span className="text-xs uppercase text-text-secondary block mb-0.5 font-bold">
                   Historical Success Ratio
                 </span>
-                <div className="text-xl font-black text-[#FACC15]">
+                <div className="text-xl font-semibold text-status-caution">
                   {activePrediction.historical_success_ratio_pct}%
                 </div>
-                <span className="text-[9px] text-slate-400">
+                <span className="text-xs text-text-secondary">
                   {/* The 98.7% fallback here was invented and attributed to
                       GSI/MOIL. Honest validation is LOMO AUC with its CI,
                       served by /api/v1/prospectivity/metrics. */}
@@ -1191,51 +1191,51 @@ export default function IndiaSatelliteMap({
             </div>
 
             {/* Nearest Geological Fault Telemetry */}
-            <div className="p-2.5 rounded-xl bg-[#FACC15]/10 border border-[#FACC15]/30 text-[10px] text-[#FACC15] mb-2 font-mono flex items-center justify-between">
+            <div className="p-2.5 rounded-md bg-status-caution/10 border border-status-caution/30 text-xs text-status-caution mb-2 font-mono flex items-center justify-between">
               <span>Structural Fault:</span>
               <span className="font-bold truncate max-w-[190px]">{activePrediction.nearest_fault_name || 'Regional Fault'} ({activePrediction.dist_to_fault_km || 4.2} km)</span>
             </div>
 
             {/* Geological Metrics Table */}
-            <div className="p-2.5 rounded-xl bg-black/50 border border-white/10 space-y-1.5 mb-3 text-[10px]">
+            <div className="p-2.5 rounded-md bg-black/50 border border-border-default space-y-1.5 mb-3 text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-400">Iron Oxide Index:</span>
-                <span className="text-white font-bold">{activePrediction.features?.iron_oxide_index}</span>
+                <span className="text-text-secondary">Iron Oxide Index:</span>
+                <span className="text-text-primary font-bold">{activePrediction.features?.iron_oxide_index}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Ferrous Mineral Index:</span>
-                <span className="text-white font-bold">{activePrediction.features?.ferrous_mineral_index}</span>
+                <span className="text-text-secondary">Ferrous Mineral Index:</span>
+                <span className="text-text-primary font-bold">{activePrediction.features?.ferrous_mineral_index}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">SWIR B11/B12 Reflectance:</span>
-                <span className="text-[#00FF88] font-bold">{activePrediction.features?.swir_b11_reflectance || 0.32} / {activePrediction.features?.swir_b12_reflectance || 0.41}</span>
+                <span className="text-text-secondary">SWIR B11/B12 Reflectance:</span>
+                <span className="text-accent font-bold">{activePrediction.features?.swir_b11_reflectance || 0.32} / {activePrediction.features?.swir_b12_reflectance || 0.41}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Elevation & Slope:</span>
-                <span className="text-[#38BDF8]">{activePrediction.features?.elevation_m}m &bull; {activePrediction.features?.slope_deg}°</span>
+                <span className="text-text-secondary">Elevation & Slope:</span>
+                <span className="text-accent">{activePrediction.features?.elevation_m}m &bull; {activePrediction.features?.slope_deg}°</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Precipitation Baseline:</span>
-                <span className="text-[#FACC15]">{activePrediction.features?.rainfall_mm} mm</span>
+                <span className="text-text-secondary">Precipitation Baseline:</span>
+                <span className="text-status-caution">{activePrediction.features?.rainfall_mm} mm</span>
               </div>
             </div>
 
             {/* AI Natural Language Interpretation */}
-            <p className="text-[10px] text-slate-300 leading-relaxed mb-3 p-2.5 rounded-xl bg-white/5 border border-white/10">
-              💡 <span className="font-bold text-white">AI Geological Diagnostic:</span> {activePrediction.geological_interpretation}
+            <p className="text-xs text-text-secondary leading-relaxed mb-3 p-2.5 rounded-md bg-surface-2 border border-border-default">
+              💡 <span className="font-bold text-text-primary">AI Geological Diagnostic:</span> {activePrediction.geological_interpretation}
             </p>
 
             {/* Direct Action Links */}
-            <div className="flex items-center gap-2 pt-1 border-t border-white/10">
+            <div className="flex items-center gap-2 pt-1 border-t border-border-default">
               <a
                 href="#smart-blending"
-                className="ios-glass-button flex-1 py-2 rounded-xl text-[#00FF88] hover:text-white text-[10px] font-bold text-center uppercase tracking-wider transition-colors"
+                className="ios-glass-button flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
               >
                 3D Borehole Kriging
               </a>
               <a
                 href="#smart-blending"
-                className="ios-glass-button flex-1 py-2 rounded-xl text-[#38BDF8] hover:text-white text-[10px] font-bold text-center uppercase tracking-wider transition-colors"
+                className="ios-glass-button flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
               >
                 Simulate Blending
               </a>
@@ -1245,15 +1245,15 @@ export default function IndiaSatelliteMap({
 
         {/* Loading Indicator when user clicks or searches on Map */}
         {isPredicting && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500] px-4 py-2 rounded-full bg-black/90 border border-[#00FF88] text-[#00FF88] font-mono text-xs font-bold shadow-[0_0_20px_#00FF88] flex items-center gap-2 ">
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500] px-4 py-2 rounded-full bg-black/90 border border-accent text-accent font-mono text-xs font-bold flex items-center gap-2 ">
             <Activity className="w-4 h-4 animate-spin" />
             <span>Geocoding & Running AI Manganese Machine Learning Engine...</span>
           </div>
         )}
 
         {/* Bottom Fast-Switch Hotspot Dock */}
-        <div className="absolute bottom-4 left-4 right-16 z-[400] flex items-center gap-2 overflow-x-auto p-2 rounded-2xl bg-[rgba(6,10,14,0.88)] border border-white/15 backdrop-blur-2xl">
-          <span className="text-[10px] font-mono font-bold text-[#94A3B8] uppercase px-2 shrink-0 hidden sm:inline">
+        <div className="absolute bottom-4 left-4 right-16 z-[400] flex items-center gap-2 overflow-x-auto p-2 rounded-md bg-[rgba(6,10,14,0.88)] border border-border-default ">
+          <span className="text-xs font-mono font-bold text-text-tertiary uppercase px-2 shrink-0 hidden sm:inline">
             HOTSPOTS:
           </span>
           {HOTSPOT_TELEMETRY.map((m) => (
@@ -1265,10 +1265,10 @@ export default function IndiaSatelliteMap({
                 onSelectMine(orig)
                 triggerAIPrediction(m.lat, m.lng, `${m.name} Hotspot (${m.state})`)
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-md text-xs font-mono whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
                 selectedMine.id === m.id
-                  ? 'text-black font-black shadow-lg'
-                  : 'bg-white/5 border border-white/10 text-[#94A3B8] hover:text-[#FFFFFF] hover:bg-white/10'
+                  ? 'text-black font-semibold shadow-lg'
+                  : 'bg-surface-2 border border-border-default text-text-tertiary hover:text-text-primary hover:bg-surface-3'
               }`}
               style={{
                 backgroundColor: selectedMine.id === m.id ? m.color : undefined,

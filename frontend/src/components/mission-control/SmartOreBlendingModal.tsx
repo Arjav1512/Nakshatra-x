@@ -68,18 +68,18 @@ export default function SmartOreBlendingModal({ mine }: Props) {
             <span className="ios-badge ios-badge-gold">
               REAL CASE OPTIMIZER
             </span>
-            <span className="text-xs font-mono text-[#94A3B8]">SciPy Simplex Linear Programming</span>
+            <span className="text-xs font-mono text-text-tertiary">SciPy Simplex Linear Programming</span>
           </div>
           <span className="ios-badge ios-badge-live">
-            <Scale className="w-3 h-3 text-[#00FF88]" />
+            <Scale className="w-3 h-3 text-accent" />
             Shortfall Mitigator
           </span>
         </div>
 
-        <h3 className="text-2xl font-bold text-[#FFFFFF] tracking-tight">
+        <h3 className="text-2xl font-bold text-text-primary tracking-tight">
           Smart Ore Blending & Grade Optimizer
         </h3>
-        <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">
+        <p className="text-xs text-text-tertiary mt-1 leading-relaxed">
           When primary mining face suffers shortfall, dynamically solves multi-stockpile blending ratios to guarantee customer contract grade specifications ({targetMnMin}% Mn) with lowest cost.
         </p>
       </div>
@@ -88,8 +88,8 @@ export default function SmartOreBlendingModal({ mine }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ios-glass-inset p-4">
         <div>
           <div className="flex justify-between text-xs font-mono mb-1.5">
-            <span className="text-[#94A3B8]">Required Dispatch Volume:</span>
-            <span className="font-bold text-[#FFFFFF]">{targetTonnes.toLocaleString()} Tonnes</span>
+            <span className="text-text-tertiary">Required Dispatch Volume:</span>
+            <span className="font-bold text-text-primary">{targetTonnes.toLocaleString()} Tonnes</span>
           </div>
           <input
             type="range"
@@ -98,14 +98,14 @@ export default function SmartOreBlendingModal({ mine }: Props) {
             step="500"
             value={targetTonnes}
             onChange={(e) => setTargetTonnes(Number(e.target.value))}
-            className="w-full accent-[#00FF88] cursor-pointer"
+            className="w-full accent-accent cursor-pointer"
           />
         </div>
 
         <div>
           <div className="flex justify-between text-xs font-mono mb-1.5">
-            <span className="text-[#94A3B8]">Contract Min Mn Grade:</span>
-            <span className="font-bold text-[#FACC15]">{targetMnMin}% Mn</span>
+            <span className="text-text-tertiary">Contract Min Mn Grade:</span>
+            <span className="font-bold text-status-caution">{targetMnMin}% Mn</span>
           </div>
           <input
             type="range"
@@ -114,7 +114,7 @@ export default function SmartOreBlendingModal({ mine }: Props) {
             step="0.5"
             value={targetMnMin}
             onChange={(e) => setTargetMnMin(Number(e.target.value))}
-            className="w-full accent-[#FACC15] cursor-pointer"
+            className="w-full accent-status-caution cursor-pointer"
           />
         </div>
       </div>
@@ -123,7 +123,7 @@ export default function SmartOreBlendingModal({ mine }: Props) {
       <button type="button"
         onClick={handleRunOptimizer}
         disabled={isSolving}
-        className="ios-glass-button w-full py-3 rounded-2xl text-xs font-mono font-bold text-[#00FF88] flex items-center justify-center gap-2 cursor-pointer"
+        className="ios-glass-button w-full py-3 rounded-md text-xs font-mono font-bold text-accent flex items-center justify-center gap-2 cursor-pointer"
       >
         <Sparkles className={`w-4 h-4 ${isSolving ? 'animate-spin' : ''}`} />
         <span>{isSolving ? 'Solving Simplex Mathematical Model...' : 'Calculate Optimal Stockpile Blending Plan'}</span>
@@ -134,41 +134,41 @@ export default function SmartOreBlendingModal({ mine }: Props) {
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="ios-glass-inset p-3.5">
-              <span className="text-[10px] font-mono uppercase text-[#94A3B8]">Blended Mn Grade</span>
-              <div className="text-xl font-mono font-bold text-[#00FF88] my-1">
+              <span className="text-xs font-mono uppercase text-text-tertiary">Blended Mn Grade</span>
+              <div className="text-xl font-mono font-bold text-accent my-1">
                 {blendResult.blended_mn_grade_pct}% Mn
               </div>
-              <span className="text-[9px] font-mono text-[#94A3B8]">Meets customer spec</span>
+              <span className="text-xs font-mono text-text-tertiary">Meets customer spec</span>
             </div>
 
             <div className="ios-glass-inset p-3.5">
-              <span className="text-[10px] font-mono uppercase text-[#94A3B8]">Avg Blended Cost</span>
-              <div className="text-xl font-mono font-bold text-[#FACC15] my-1">
-                ₹{blendResult.avg_cost_per_tonne_inr?.toLocaleString() || 6240} <span className="text-xs font-normal text-[#94A3B8]">/ T</span>
+              <span className="text-xs font-mono uppercase text-text-tertiary">Avg Blended Cost</span>
+              <div className="text-xl font-mono font-bold text-status-caution my-1">
+                ₹{blendResult.avg_cost_per_tonne_inr?.toLocaleString() || 6240} <span className="text-xs font-normal text-text-tertiary">/ T</span>
               </div>
-              <span className="text-[9px] font-mono text-[#00FF88]">&bull; Cost Minimized</span>
+              <span className="text-xs font-mono text-accent">&bull; Cost Minimized</span>
             </div>
 
             <div className="ios-glass-inset p-3.5">
-              <span className="text-[10px] font-mono uppercase text-[#94A3B8]">Shortfall Recovered</span>
-              <div className="text-xl font-mono font-bold text-[#38BDF8] my-1">
+              <span className="text-xs font-mono uppercase text-text-tertiary">Shortfall Recovered</span>
+              <div className="text-xl font-mono font-bold text-accent my-1">
                 +{blendResult.target_tonnes?.toLocaleString()} T
               </div>
-              <span className="text-[9px] font-mono text-[#94A3B8]">100% Contract Fulfillment</span>
+              <span className="text-xs font-mono text-text-tertiary">100% Contract Fulfillment</span>
             </div>
           </div>
 
           {/* Allocation Breakdown Table */}
           <div className="ios-glass-inset p-4 space-y-2">
-            <span className="text-xs font-mono font-semibold text-[#FFFFFF] uppercase tracking-wider block mb-2">
+            <span className="text-xs font-mono font-semibold text-text-primary uppercase tracking-wider block mb-2">
               Recommended Stockpile Dispatch Allocation
             </span>
             {blendResult.blend_plan?.map((item: any, idx: number) => (
-              <div key={idx} className="flex items-center justify-between text-xs font-mono py-1.5 border-b border-white/5 last:border-0">
-                <span className="text-[#94A3B8]">{item.stockpile_name}</span>
+              <div key={idx} className="flex items-center justify-between text-xs font-mono py-1.5 border-b border-border-subtle last:border-0">
+                <span className="text-text-tertiary">{item.stockpile_name}</span>
                 <div className="flex items-center gap-3">
-                  <span className="text-[#00FF88] font-bold">{item.tonnes_allocated} T ({item.allocation_pct}%)</span>
-                  <span className="text-[#94A3B8]">₹{(item.cost_inr / 100000).toFixed(1)}L</span>
+                  <span className="text-accent font-bold">{item.tonnes_allocated} T ({item.allocation_pct}%)</span>
+                  <span className="text-text-tertiary">₹{(item.cost_inr / 100000).toFixed(1)}L</span>
                 </div>
               </div>
             ))}

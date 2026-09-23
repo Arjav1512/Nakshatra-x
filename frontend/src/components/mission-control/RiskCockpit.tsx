@@ -43,7 +43,7 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
           </span>
         </div>
 
-        <h3 className="text-2xl font-bold text-[#E8F0F2] tracking-tight">
+        <h3 className="text-2xl font-bold text-text-primary tracking-tight">
           Operational Risk & Constraint Cockpit
         </h3>
         <p className="text-xs text-[#8FA4B5] mt-1 leading-relaxed">
@@ -52,10 +52,10 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
       </div>
 
       {/* Composite Risk Gauge Hero */}
-      <div className="p-5 rounded-3xl bg-[rgba(6,10,14,0.7)] border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6 backdrop-blur-xl shadow-inner">
+      <div className="p-5 rounded-md bg-[rgba(6,10,14,0.7)] border border-border-default flex flex-col sm:flex-row items-center justify-between gap-6  shadow-inner">
         <div className="flex items-center gap-5">
           <div
-            className="relative flex h-20 w-20 items-center justify-center rounded-2xl border shadow-lg"
+            className="relative flex h-20 w-20 items-center justify-center rounded-md border shadow-lg"
             style={{
               backgroundColor: `${statusColor}15`,
               borderColor: `${statusColor}45`,
@@ -64,22 +64,22 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
             <Gauge className="w-10 h-10" style={{ color: statusColor }} />
           </div>
           <div>
-            <span className="text-[10px] font-mono uppercase text-[#8FA4B5] tracking-wider">
+            <span className="text-xs font-mono uppercase text-[#8FA4B5] tracking-wider">
               Composite Shortfall Risk Index
             </span>
-            <div className="text-3xl font-mono font-black" style={{ color: statusColor }}>
+            <div className="text-3xl font-mono font-semibold" style={{ color: statusColor }}>
               {compositeScore} <span className="text-sm font-normal text-[#8FA4B5]">/ 100</span>
             </div>
             <div className="text-xs text-[#8FA4B5] mt-1">
-              Primary Bottleneck: <span className="text-[#E8F0F2] font-semibold">{mine.state === 'MP' ? 'Rainfall Road Saturation' : 'Blasting Block Schedule'}</span>
+              Primary Bottleneck: <span className="text-text-primary font-semibold">{mine.state === 'MP' ? 'Rainfall Road Saturation' : 'Blasting Block Schedule'}</span>
             </div>
           </div>
         </div>
 
         <div className="text-right font-mono text-xs text-[#8FA4B5] space-y-1">
-          <div>Telemetry: <span className="text-[#00FF88]">Active (ISRO MOSDAC)</span></div>
-          <div>Sampling: <span className="text-[#E8F0F2]">Every 6 Hours</span></div>
-          <div>Mine Lat/Lng: <span className="text-[#E8F0F2]">{mine.lat}&deg;N, {mine.lng}&deg;E</span></div>
+          <div>Telemetry: <span className="text-accent">Active (ISRO MOSDAC)</span></div>
+          <div>Sampling: <span className="text-text-primary">Every 6 Hours</span></div>
+          <div>Mine Lat/Lng: <span className="text-text-primary">{mine.lat}&deg;N, {mine.lng}&deg;E</span></div>
         </div>
       </div>
 
@@ -94,10 +94,10 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
             </span>
             <span className="font-mono font-bold text-[#D9584A]">{rainfallMm} mm</span>
           </div>
-          <div className="text-[10px] text-[#8FA4B5] mb-2">
+          <div className="text-xs text-[#8FA4B5] mb-2">
             {rainfallMm > 90 ? 'Critical saturation' : 'Normal moisture level'}
           </div>
-          <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+          <div className="w-full bg-surface-3 h-1.5 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full bg-[#D9584A]"
               style={{ width: `${Math.min(100, (rainfallMm / 150) * 100)}%` }}
@@ -114,10 +114,10 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
             </span>
             <span className="font-mono font-bold text-[#D99A3A]">14.5 hrs</span>
           </div>
-          <div className="text-[10px] text-[#8FA4B5] mb-2">
+          <div className="text-xs text-[#8FA4B5] mb-2">
             85.5% Machinery Uptime
           </div>
-          <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+          <div className="w-full bg-surface-3 h-1.5 rounded-full overflow-hidden">
             <div className="h-full rounded-full bg-[#D99A3A]" style={{ width: '62%' }} />
           </div>
         </div>
@@ -129,13 +129,13 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
               <Flame className="w-3.5 h-3.5 text-[#C66A3D]" />
               Blast Block
             </span>
-            <span className="font-mono font-bold text-[#00FF88]">Ready</span>
+            <span className="font-mono font-bold text-accent">Ready</span>
           </div>
-          <div className="text-[10px] text-[#8FA4B5] mb-2">
+          <div className="text-xs text-[#8FA4B5] mb-2">
             Pre-split drilled (1,400T)
           </div>
-          <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-[#00FF88]" style={{ width: '85%' }} />
+          <div className="w-full bg-surface-3 h-1.5 rounded-full overflow-hidden">
+            <div className="h-full rounded-full bg-accent" style={{ width: '85%' }} />
           </div>
         </div>
 
@@ -148,10 +148,10 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
             </span>
             <span className="font-mono font-bold text-[#E5C76B]">6 Days</span>
           </div>
-          <div className="text-[10px] text-[#8FA4B5] mb-2">
+          <div className="text-xs text-[#8FA4B5] mb-2">
             Buffer below 7d baseline
           </div>
-          <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+          <div className="w-full bg-surface-3 h-1.5 rounded-full overflow-hidden">
             <div className="h-full rounded-full bg-[#E5C76B]" style={{ width: '55%' }} />
           </div>
         </div>
@@ -160,10 +160,10 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
       {/* 14-Day Rainfall Disruption Trend */}
       <div className="ios-glass-inset p-4">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-mono font-semibold text-[#E8F0F2] uppercase tracking-wider">
+          <span className="text-xs font-mono font-semibold text-text-primary uppercase tracking-wider">
             14-Day Cumulative Precipitation Disruption Curve (ISRO MOSDAC)
           </span>
-          <span className="text-[10px] font-mono text-[#D9584A]">
+          <span className="text-xs font-mono text-[#D9584A]">
             Saturation Threshold: 8.0 mm/day
           </span>
         </div>

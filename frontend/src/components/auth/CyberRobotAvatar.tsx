@@ -15,7 +15,7 @@ export function CyberRobotAvatar({ size = 'md', className = '' }: CyberRobotAvat
 
   return (
     <div
-      className={`relative flex items-center justify-center rounded-full bg-gradient-to-b from-[#051329]/95 via-[#030914]/98 to-[#000000] border-2 border-[#38BDF8]/60 shadow-[0_0_25px_rgba(0,255,136,0.4),inset_0_1px_3px_rgba(255,255,255,0.4)] backdrop-blur-2xl overflow-hidden group select-none ${dimensions} ${className}`}
+      className={`relative flex items-center justify-center rounded-full bg-gradient-to-b from-[#051329]/95 via-[#030914]/98 to-surface-0 border-2 border-accent/60  overflow-hidden group select-none ${dimensions} ${className}`}
     >
       {/* Outer Rotating Cyber Energy Ring */}
       <svg
@@ -66,7 +66,7 @@ export function CyberRobotAvatar({ size = 'md', className = '' }: CyberRobotAvat
       {/* Rotating & Bobbing Cute Laughing Cyber Robot Face */}
       <div className="relative flex items-center justify-center h-[76%] w-[76%] animate-[spin_12s_linear_infinite]">
         <svg
-          className="h-full w-full drop-shadow-[0_0_14px_#00FF88]"
+          className="h-full w-full drop-"
           viewBox="0 0 100 100"
           fill="none"
         >
@@ -94,7 +94,7 @@ export function CyberRobotAvatar({ size = 'md', className = '' }: CyberRobotAvat
 
           {/* Cute Robot Antenna with Wiggling Ball */}
           <path d="M50 20V8" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" />
-          <circle cx="50" cy="7" r="4.5" fill="#00FF88" className=" opacity-75" />
+          <circle cx="50" cy="7" r="4.5" fill="#00FF88" className="opacity-75" />
           <circle cx="50" cy="7" r="4" fill="#00FF88" />
 
           {/* Cute Bot Cat/Ears */}
@@ -164,7 +164,7 @@ export function CyberRobotAvatar({ size = 'md', className = '' }: CyberRobotAvat
       </div>
 
       {/* Cyber Glow Scanline Effect */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#00FF88]/15 to-transparent animate-[pulse_1.5s_easeInOut_infinite] pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/15 to-transparent animate-[pulse_1.5s_easeInOut_infinite] pointer-events-none" />
     </div>
   )
 }

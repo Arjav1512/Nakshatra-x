@@ -140,32 +140,32 @@ function AuthCallbackContent() {
   }, [searchParams, router])
 
   return (
-    <div className="relative isolate min-h-screen overflow-hidden bg-black text-white flex items-center justify-center p-4">
+    <div className="relative isolate min-h-screen overflow-hidden bg-black text-text-primary flex items-center justify-center p-4">
       <Starfield />
 
-      <GlassCard className="relative z-10 w-full max-w-md p-8 text-center border border-white/15 shadow-[0_0_50px_rgba(0,0,0,0.85)]">
-        <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-2xl bg-[#00FF88]/10 border border-[#00FF88]/40 text-[#00FF88] shadow-[0_0_24px_rgba(0,255,136,0.3)] mb-4">
+      <GlassCard className="relative z-10 w-full max-w-md p-8 text-center border border-border-default">
+        <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-md bg-accent/10 border border-accent/40 text-accent mb-4">
           <ShieldCheck size={30} />
         </div>
 
-        <div className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-[#38BDF8] mb-1">
+        <div className="font-mono text-xs font-bold uppercase tracking-[0.25em] text-accent mb-1">
           NAKSHATRA-X SECURITY GATEWAY
         </div>
 
-        <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white mb-2">
+        <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-text-primary mb-2">
           Supabase Authentication
         </h2>
 
         {error ? (
           <div className="space-y-4 text-left">
-            <div className="p-3.5 text-xs font-mono rounded-xl bg-[#FF2E63]/15 border border-[#FF2E63]/50 text-[#FF2E63] flex items-start gap-2.5">
+            <div className="p-3.5 text-xs font-mono rounded-md bg-status-critical/15 border border-status-critical/50 text-status-critical flex items-start gap-2.5">
               <AlertCircle size={16} className="shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
 
             <Link
               href="/login"
-              className="w-full py-3 px-4 rounded-xl bg-[#38BDF8]/20 hover:bg-[#38BDF8]/30 border border-[#38BDF8]/60 text-[#38BDF8] hover:text-white font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 rounded-md bg-accent/20 hover:bg-accent/30 border border-accent/60 text-accent hover:text-text-primary font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2"
             >
               <span>Return to Login</span>
               <ArrowRight size={14} />
@@ -173,11 +173,11 @@ function AuthCallbackContent() {
           </div>
         ) : (
           <div className="space-y-4 pt-2">
-            <div className="flex items-center justify-center gap-3 text-sm font-mono text-[#00FF88]">
-              <Loader2 size={18} className="animate-spin text-[#00FF88]" />
+            <div className="flex items-center justify-center gap-3 text-sm font-mono text-accent">
+              <Loader2 size={18} className="animate-spin text-accent" />
               <span>{status}</span>
             </div>
-            <p className="text-xs font-mono text-slate-400">
+            <p className="text-xs font-mono text-text-secondary">
               Validating real Google credentials &amp; orbital clearance...
             </p>
           </div>
@@ -191,7 +191,7 @@ export default function AuthCallbackPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-black text-white flex items-center justify-center font-mono text-xs text-slate-400">
+        <div className="min-h-screen bg-black text-text-primary flex items-center justify-center font-mono text-xs text-text-secondary">
           Loading orbital authentication gateway...
         </div>
       }

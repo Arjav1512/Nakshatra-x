@@ -58,32 +58,32 @@ export default function AdminProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white p-8 font-mono">
+    <div className="min-h-screen bg-[#050505] text-text-primary p-8 font-mono">
       <div className="max-w-6xl mx-auto">
-        <header className="flex justify-between items-center border-b border-white/10 pb-6 mb-8">
+        <header className="flex justify-between items-center border-b border-border-default pb-6 mb-8">
           <div className="flex items-center gap-4">
-            <Users className="h-8 w-8 text-[#00FF88]" />
+            <Users className="h-8 w-8 text-accent" />
             <div>
-              <h1 className="text-2xl font-bold tracking-widest text-[#00FF88]">USER DATABASE</h1>
-              <p className="text-xs text-[#94A3B8] uppercase">Admin Only &bull; Mission Operator Registry</p>
+              <h1 className="text-2xl font-bold tracking-widest text-accent">USER DATABASE</h1>
+              <p className="text-xs text-text-tertiary uppercase">Admin Only &bull; Mission Operator Registry</p>
             </div>
           </div>
           <div className="flex gap-4">
             <button type="button"
               onClick={fetchUsers}
-              className="flex items-center gap-2 bg-[#38BDF8]/20 text-[#38BDF8] px-4 py-2 rounded border border-[#38BDF8]/30 hover:bg-[#38BDF8]/30 transition-colors"
+              className="flex items-center gap-2 bg-accent/20 text-accent px-4 py-2 rounded border border-accent/30 hover:bg-accent/30 transition-colors"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
             </button>
             <button type="button"
               onClick={() => router.push('/admin')}
-              className="flex items-center gap-2 bg-white/5 text-white px-4 py-2 rounded border border-white/10 hover:bg-white/10 transition-colors"
+              className="flex items-center gap-2 bg-surface-2 text-text-primary px-4 py-2 rounded border border-border-default hover:bg-surface-3 transition-colors"
             >
               <ArrowLeft className="h-4 w-4" /> Back
             </button>
             <button type="button"
               onClick={handleLogout}
-              className="flex items-center gap-2 bg-white/5 text-white px-4 py-2 rounded border border-white/10 hover:bg-white/10 transition-colors"
+              className="flex items-center gap-2 bg-surface-2 text-text-primary px-4 py-2 rounded border border-border-default hover:bg-surface-3 transition-colors"
             >
               <LogOut className="h-4 w-4" /> Terminate
             </button>
@@ -91,7 +91,7 @@ export default function AdminProfilePage() {
         </header>
 
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-[#FF2E63]/15 border border-[#FF2E63]/50 text-[#FF2E63] text-sm font-mono">
+          <div className="mb-6 p-4 rounded-md bg-status-critical/15 border border-status-critical/50 text-status-critical text-sm font-mono">
             {error}
           </div>
         )}
@@ -99,25 +99,25 @@ export default function AdminProfilePage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold flex items-center gap-2">
-              <Shield className="text-[#38BDF8]" /> Registered Users ({users.length})
+              <Shield className="text-accent" /> Registered Users ({users.length})
             </h2>
           </div>
 
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <Orbit className="animate-spin text-[#38BDF8] h-8 w-8" />
+              <Orbit className="animate-spin text-accent h-8 w-8" />
             </div>
           ) : users.length === 0 ? (
-            <div className="bg-[#0A0A0A] border border-white/10 rounded-xl p-12 text-center">
-              <Users className="h-12 w-12 text-slate-600 mx-auto mb-4" />
-              <p className="text-slate-400 font-mono text-sm">
+            <div className="bg-[#0A0A0A] border border-border-default rounded-md p-12 text-center">
+              <Users className="h-12 w-12 text-text-tertiary mx-auto mb-4" />
+              <p className="text-text-secondary font-mono text-sm">
                 No users found. Users will appear here after signing in with Google OAuth.
               </p>
             </div>
           ) : (
-            <div className="bg-[#0A0A0A] border border-white/10 rounded-xl overflow-hidden">
+            <div className="bg-[#0A0A0A] border border-border-default rounded-md overflow-hidden">
               <table className="w-full text-sm text-left">
-                <thead className="bg-white/5 text-[#94A3B8] uppercase text-xs">
+                <thead className="bg-surface-2 text-text-tertiary uppercase text-xs">
                   <tr>
                     <th className="px-6 py-4">Avatar</th>
                     <th className="px-6 py-4">Full Name</th>
@@ -130,30 +130,30 @@ export default function AdminProfilePage() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {users.map((user) => (
-                    <tr key={user.id} className="hover:bg-white/5 transition-colors">
+                    <tr key={user.id} className="hover:bg-surface-2 transition-colors">
                       <td className="px-6 py-4">
                         <CyberRobotAvatar
                           size="sm"
-                          className="h-9 w-9 shrink-0 border border-[#00FF88] shadow-[0_0_12px_rgba(0,255,136,0.35)]"
+                          className="h-9 w-9 shrink-0 border border-accent"
                         />
                       </td>
 
-                      <td className="px-6 py-4 text-white font-bold">{user.full_name || 'N/A'}</td>
-                      <td className="px-6 py-4 text-[#38BDF8]">{user.email || 'N/A'}</td>
+                      <td className="px-6 py-4 text-text-primary font-bold">{user.full_name || 'N/A'}</td>
+                      <td className="px-6 py-4 text-accent">{user.email || 'N/A'}</td>
                       <td className="px-6 py-4">
-                        <span className="px-2 py-1 rounded-full bg-[#00FF88]/15 border border-[#00FF88]/40 text-[#00FF88] text-xs font-bold uppercase">
+                        <span className="px-2 py-1 rounded-full bg-accent/15 border border-accent/40 text-accent text-xs font-bold uppercase">
                           {user.role || 'operator'}
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="px-2 py-1 rounded-md bg-[#38BDF8]/10 border border-[#38BDF8]/30 text-[#38BDF8] text-[11px] font-mono">
+                        <span className="px-2 py-1 rounded-md bg-accent/10 border border-accent/30 text-accent text-xs font-mono">
                           {user.provider || 'Supabase'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-[#94A3B8] text-xs max-w-[120px] truncate" title={user.id}>
+                      <td className="px-6 py-4 text-text-tertiary text-xs max-w-[120px] truncate" title={user.id}>
                         {user.id?.slice(0, 8)}...
                       </td>
-                      <td className="px-6 py-4 text-[#94A3B8] text-xs">
+                      <td className="px-6 py-4 text-text-tertiary text-xs">
                         {user.created_at ? new Date(user.created_at).toLocaleDateString('en-IN', {
                           day: '2-digit',
                           month: 'short',
