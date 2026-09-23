@@ -51,13 +51,7 @@ const DEFAULT_MINE: MineInfo = {
   currentProduction: 1140,
 }
 
-const STARTER_QUESTIONS = [
-  'How does NAKSHATRA-X discover hidden manganese reserves?',
-  'What are the main pages and features on the website?',
-  'How do we prevent monsoon pit flooding and shortfall?',
-  'Walk me through SciPy ore blending optimization',
-  'What is the 3D Mine Twin Digital Simulator?',
-  'Tell me about SIH Problem Statement 26009 for MOIL!',
+const STARTER_QUESTIONS = [ 'How does NAKSHATRA-X discover hidden manganese reserves?', 'What are the main pages and features on the website?', 'How do we prevent monsoon pit flooding and shortfall?', 'Walk me through SciPy ore blending optimization', 'What is the 3D Mine Twin Digital Simulator?', 'Tell me about SIH Problem Statement 26009 for MOIL!',
 ]
 
 export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }: Props) {
@@ -243,7 +237,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
 
               <button type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all cursor-pointer"
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-colors cursor-pointer"
                 title="Close AI-X Assistant"
               >
                 <X className="w-4 h-4" />
@@ -256,7 +250,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
                 <button type="button"
                   key={idx}
                   onClick={() => handleSelectSuggestion(q)}
-                  className="px-3 py-1.5 rounded-full bg-white/5 hover:bg-[#00FF88]/20 border border-white/10 hover:border-[#00FF88]/40 text-[10px] font-mono text-slate-300 hover:text-[#00FF88] transition-all cursor-pointer shrink-0"
+                  className="px-3 py-1.5 rounded-full bg-white/5 hover:bg-[#00FF88]/20 border border-white/10 hover:border-[#00FF88]/40 text-[10px] font-mono text-slate-300 hover:text-[#00FF88] transition-colors cursor-pointer shrink-0"
                 >
                   ✦ {q}
                 </button>
@@ -298,7 +292,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
                             <button type="button"
                               key={idx}
                               onClick={() => handleSelectSuggestion(s)}
-                              className="px-2 py-1 rounded-full bg-white/5 hover:bg-[#00FF88]/20 border border-white/10 text-[9px] font-mono text-slate-300 hover:text-[#00FF88] transition-all cursor-pointer"
+                              className="px-2 py-1 rounded-full bg-white/5 hover:bg-[#00FF88]/20 border border-white/10 text-[9px] font-mono text-slate-300 hover:text-[#00FF88] transition-colors cursor-pointer"
                             >
                               ✦ {s}
                             </button>
@@ -319,7 +313,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
                     {m.actionButton && (
                       <button type="button"
                         onClick={() => triggerAction(m.actionButton!)}
-                        className="w-full p-2.5 rounded-xl bg-[#00FF88]/20 hover:bg-[#00FF88]/35 border border-[#00FF88]/50 text-[#00FF88] font-mono text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all shadow-[0_0_12px_rgba(0,255,136,0.3)]"
+                        className="w-full p-2.5 rounded-xl bg-[#00FF88]/20 hover:bg-[#00FF88]/35 border border-[#00FF88]/50 text-[#00FF88] font-mono text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-[0_0_12px_rgba(0,255,136,0.3)]"
                       >
                         <Zap className="w-3.5 h-3.5" />
                         <span>{m.actionButton.label}</span>
@@ -341,9 +335,9 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
                     <Bot className="w-4 h-4 text-[#00FF88] animate-spin" />
                   </div>
                   <div className="p-3 rounded-2xl bg-white/10 border border-white/10 flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#00FF88] animate-bounce" />
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#00FF88] animate-bounce [animation-delay:0.2s]" />
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#00FF88] animate-bounce [animation-delay:0.4s]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#00FF88] " />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#00FF88] [animation-delay:0.2s]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#00FF88] [animation-delay:0.4s]" />
                   </div>
                 </div>
               )}
@@ -362,7 +356,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
                     <button type="button"
                       key={idx}
                       onClick={() => handleSelectSuggestion(item)}
-                      className="w-full text-left px-3 py-2 rounded-xl text-xs font-mono text-slate-200 hover:text-white hover:bg-[#00FF88]/20 transition-all flex items-center gap-2 cursor-pointer border border-transparent hover:border-[#00FF88]/30"
+                      className="w-full text-left px-3 py-2 rounded-xl text-xs font-mono text-slate-200 hover:text-white hover:bg-[#00FF88]/20 transition-colors flex items-center gap-2 cursor-pointer border border-transparent hover:border-[#00FF88]/30"
                     >
                       <Search className="w-3.5 h-3.5 text-[#38BDF8] shrink-0" />
                       <span className="truncate">{item}</span>
@@ -390,7 +384,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
               <button type="button"
                 onClick={() => handleSend()}
                 disabled={!input.trim() || isTyping}
-                className="p-3 rounded-2xl bg-[#00FF88] hover:bg-[#00FF88]/80 text-black font-bold disabled:opacity-50 transition-all cursor-pointer shadow-[0_0_12px_#00FF88]"
+                className="p-3 rounded-2xl bg-[#00FF88] hover:bg-[#00FF88]/80 text-black font-bold disabled:opacity-50 transition-colors cursor-pointer shadow-[0_0_12px_#00FF88]"
               >
                 <Send className="w-4 h-4" />
               </button>

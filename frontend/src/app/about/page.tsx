@@ -14,20 +14,18 @@ import {
   ShieldCheck,
   Globe2,
 } from 'lucide-react'
-import SpaceDustParticles from '@/components/mission-control/SpaceDustParticles'
 
 export default function AboutPage() {
   return (
     <main className="relative min-h-screen bg-[#030712] text-white pt-24 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden font-sans">
       {/* Ambient Space Dust & Cosmic Radial Sheen */}
-      <SpaceDustParticles />
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-gradient-to-tr from-[#FF2E63]/15 via-[#00FF88]/10 to-[#38BDF8]/15 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="relative max-w-5xl mx-auto space-y-10 z-10">
         {/* Header Capsule */}
         <div className="flex flex-col items-center text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#FF2E63]/20 via-[#38BDF8]/20 to-[#00FF88]/20 border border-[#FF2E63]/40 shadow-[0_0_20px_rgba(255,46,99,0.3)]">
-            <Info size={14} className="text-[#FF2E63] animate-pulse" />
+            <Info size={14} className="text-[#FF2E63] " />
             <span className="text-xs font-mono font-black tracking-widest text-white uppercase">
               ABOUT NAKSHATRA-X &bull; SIH 2026 PROBLEM STATEMENT
             </span>
@@ -165,7 +163,7 @@ export default function AboutPage() {
         <div className="pt-8 border-t border-white/15 flex flex-col sm:flex-row items-center justify-between gap-4">
           <Link
             href="/"
-            className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-mono text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
+            className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-mono text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer"
           >
             <ArrowLeft size={16} />
             <span>Return to Mission Control</span>
@@ -175,7 +173,7 @@ export default function AboutPage() {
             <span>Theme: Space Technology</span>
             <span className="text-slate-600">&bull;</span>
             <span className="flex items-center gap-1.5 text-[#FF2E63] font-bold">
-              (made with love <Heart size={14} className="fill-[#FF2E63] animate-bounce" />)
+              (made with love <Heart size={14} className="fill-[#FF2E63] " />)
             </span>
           </div>
         </div>

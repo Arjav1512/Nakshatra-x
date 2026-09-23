@@ -218,7 +218,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
 
         <div className="flex items-center gap-2 shrink-0">
           <div className="px-3 py-1.5 rounded-full bg-[#081022]/90 border border-[#00FF88]/40 text-[11px] font-mono text-[#00FF88] font-bold flex items-center gap-2 shadow-[0_0_12px_rgba(0,255,136,0.3)]">
-            <Activity className="w-3.5 h-3.5 text-[#00FF88] animate-pulse" />
+            <Activity className="w-3.5 h-3.5 text-[#00FF88] " />
             <span>TWIN SYNCED (4ms)</span>
           </div>
         </div>
@@ -249,7 +249,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 <button
                   key={opt}
                   onClick={() => setShift(opt)}
-                  className={`py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer border ${
+                  className={`py-2 rounded-xl text-xs font-mono font-bold transition-colors cursor-pointer border ${
                     shift === opt
                       ? 'bg-[#00FF88]/20 border-[#00FF88] text-[#00FF88] shadow-[0_0_12px_rgba(0,255,136,0.3)]'
                       : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/15'
@@ -273,7 +273,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 <button
                   key={opt}
                   onClick={() => setBlastDelay(opt)}
-                  className={`py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer border ${
+                  className={`py-2 rounded-xl text-xs font-mono font-bold transition-colors cursor-pointer border ${
                     blastDelay === opt
                       ? 'bg-[#FACC15]/20 border-[#FACC15] text-[#FACC15] shadow-[0_0_12px_rgba(250,204,21,0.3)]'
                       : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/15'
@@ -297,7 +297,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 <button
                   key={opt}
                   onClick={() => setRedeploy(opt)}
-                  className={`py-2 px-1 rounded-xl text-[10px] font-mono font-bold transition-all cursor-pointer border text-center ${
+                  className={`py-2 px-1 rounded-xl text-[10px] font-mono font-bold transition-colors cursor-pointer border text-center ${
                     redeploy === opt
                       ? 'bg-[#38BDF8]/20 border-[#38BDF8] text-[#38BDF8] shadow-[0_0_12px_rgba(56,189,248,0.3)]'
                       : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/15'
@@ -321,7 +321,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 <button
                   key={opt}
                   onClick={() => setTolerance(opt)}
-                  className={`py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer border ${
+                  className={`py-2 rounded-xl text-xs font-mono font-bold transition-colors cursor-pointer border ${
                     tolerance === opt
                       ? 'bg-white/20 border-white text-white shadow-[0_0_12px_rgba(255,255,255,0.3)]'
                       : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/15'
@@ -338,7 +338,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
           <button
             onClick={runSimulation}
             disabled={loading}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#00FF88] to-[#38BDF8] text-black font-black text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all shadow-[0_0_20px_rgba(0,255,136,0.4)] hover:shadow-[0_0_30px_rgba(0,255,136,0.7)] hover:scale-[1.02]"
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#00FF88] to-[#38BDF8] text-black font-black text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-[0_0_20px_rgba(0,255,136,0.4)] hover:shadow-[0_0_30px_rgba(0,255,136,0.7)] hover:scale-[1.02]"
             type="button"
           >
             <Play className={`w-4 h-4 fill-black ${loading ? 'animate-spin' : ''}`} />
@@ -403,7 +403,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                   <button
                     key={m.key}
                     onClick={() => setChartMetric(m.key as any)}
-                    className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer font-bold ${
+                    className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer font-bold ${
                       chartMetric === m.key
                         ? 'bg-[#00FF88]/20 border border-[#00FF88] text-[#00FF88]'
                         : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white'
@@ -567,12 +567,12 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                     <div className="w-full flex items-end justify-center gap-1 h-24">
                       <div
                         style={{ height: `${baseH}%` }}
-                        className="w-1.5 sm:w-3 bg-slate-600 rounded-t-sm transition-all duration-500"
+                        className="w-1.5 sm:w-3 bg-slate-600 rounded-t-sm transition-colors duration-500"
                         title={`Baseline: ${d.base} T`}
                       />
                       <div
                         style={{ height: `${predH}%` }}
-                        className="w-1.5 sm:w-3 bg-[#00FF88] shadow-[0_0_8px_#00FF88] rounded-t-sm transition-all duration-500"
+                        className="w-1.5 sm:w-3 bg-[#00FF88] shadow-[0_0_8px_#00FF88] rounded-t-sm transition-colors duration-500"
                         title={`What-If: ${d.pred} T`}
                       />
                     </div>
@@ -614,7 +614,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               <div
                 key={s.id}
                 onClick={() => setComparedScenario(s)}
-                className={`ios-glass-inset p-3.5 rounded-2xl border transition-all cursor-pointer hover:border-[#00FF88]/50 ${
+                className={`ios-glass-inset p-3.5 rounded-2xl border transition-colors cursor-pointer hover:border-[#00FF88]/50 ${
                   comparedScenario?.id === s.id
                     ? 'border-[#00FF88] bg-[#00FF88]/10'
                     : 'border-white/10 bg-white/5'

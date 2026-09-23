@@ -219,3 +219,48 @@ cached payload keeps its original `vintage`, so reported freshness remains the
 observation's age, not the cache entry's. Failures are cached for 60 s so an
 outage does not make every request pay a full timeout. Result: **4.003 s →
 0.003 s warm**.
+
+## D-026 — Nine frontend dependencies removed; one dev dependency added
+**Redesign Stage 1.** Verified by import count before removal, not by
+assumption:
+
+- `three` (25 MB) and `react-globe.gl` (17 MB) — **zero imports** anywhere in
+  `src/`. Dead weight.
+- `cesium` (143 MB) and `@types/cesium` — one dynamic import, in
+  `components/globe/IndiaMineGlobe.tsx`, which is itself imported by nothing and
+  sets `CESIUM_BASE_URL = '/cesium/'`, a directory that does not exist in
+  `public/`. The component could never have rendered, so removing it cannot
+  regress a capability.
+- `framer-motion` (5.6 MB) — its only four import sites were
+  `AboutSection.tsx`, `StatsSection.tsx`, `FeaturesSection.tsx`,
+  `ui/hyper-text.tsx` and `ui/text-effect.tsx`. All were orphans except
+  `text-effect`, whose sole consumer used it for a staggered entrance animation
+  the motion policy bans. `StatsSection` additionally animated `0 → value` over
+  two seconds, displaying numbers that were never measured.
+- `@reactflow/{background,controls,core,minimap}` — zero direct imports; the
+  `reactflow` meta-package already installed re-exports them and declares them
+  as its own dependencies, so they remain available transitively to the two
+  `CausalMindMap` components that do use them.
+
+Added: **`axe-core` (devDependency)**. The redesign's acceptance criteria
+require an automated WCAG audit, and axe-core is the engine the criteria name.
+It is driven through the existing `puppeteer-core` rather than adding Playwright,
+so no second browser-automation stack enters the tree.
+
+## D-027 — `cividis` is the sequential colormap, and colormap stops are the one
+permitted colour literal
+**Redesign Stage 1.** Continuous quantities on the map and in charts use
+`cividis`, sampled from `matplotlib 3.11.2`. The choice is evidentiary rather
+than aesthetic: the colormap's source paper (Nuñez, Anderton & Renslow, *PLOS
+One* 2018) shows that rainbow/jet maps invent structure the data does not
+contain — bright yellow bands read as high values regardless of position — and
+that cividis is optimised so viewers with and without colour vision deficiency
+interpret it near-identically. Its relative luminance increases strictly across
+all nine sampled stops, so it also survives greyscale and print.
+
+The design system forbids colour literals outside `tokens.css`. A colormap is
+data, not theme, so its stops are the single documented exception and live in
+one module. Two narrower exceptions exist and are commented in place: the
+`@media print` block in `globals.css` (a dark token palette cannot be printed),
+and `themeColor` in `layout.tsx` (Next serialises it into a `<meta>` tag at
+build time, where a CSS custom property cannot resolve).

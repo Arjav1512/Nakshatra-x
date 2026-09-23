@@ -1,0 +1,101 @@
+/* ============================================================================
+   Nakshatra-X design tokens — the single source of truth for colour, type,
+   spacing, radii and elevation.
+   Specification: docs/design/DESIGN_SYSTEM.md
+
+   Nothing outside this file may declare a raw colour. The one documented
+   exception is the sequential colormap in src/lib/colormap.ts, because a
+   colormap is data rather than theme.
+
+   Tailwind 4 emits every token below as a CSS custom property on :root, so
+   each is available both as a utility (bg-surface-1, text-secondary) and as
+   var(--color-surface-1) for the rare case that needs it.
+   ============================================================================ */
+
+@theme {
+  /* --- Surfaces -----------------------------------------------------------
+     Elevation is value contrast. A raised element is a lighter surface, never
+     a glowing one. There are no elevation shadows except --shadow-overlay. */
+  --color-surface-0: #0b0d10; /* page background */
+  --color-surface-1: #121519; /* panels, app bar, rails */
+  --color-surface-2: #181c21; /* cards, inputs, table headers */
+  --color-surface-3: #1f242a; /* hover, active row, popover */
+
+  /* --- Text ---------------------------------------------------------------
+     Verified against all four surfaces at >= 4.5:1. There is deliberately no
+     fourth, dimmer step: text too unimportant to meet AA is too unimportant
+     to render. */
+  --color-text-primary: #e6e9ec;   /* 14.04:1 worst case */
+  --color-text-secondary: #a2aab3; /*  7.28:1 worst case */
+  --color-text-tertiary: #858d96;  /*  5.09:1 worst case */
+
+  /* --- Accent -------------------------------------------------------------
+     Exactly one. Links, selection, focus ring, and the single primary action
+     per view. Never an ordinary container border. */
+  --color-accent: #6aa5f0;         /*  6.73:1 worst case */
+  --color-accent-muted: #1e3149;   /* accent-tinted fill for selected rows */
+
+  /* --- Status -------------------------------------------------------------
+     Data semantics only — never emphasis, branding or decoration. Colour is
+     never the sole channel: every status also carries a text label and a
+     distinct icon shape (see StatusDot). That pairing, not the hue choice, is
+     what makes these safe for colour vision deficiency. */
+  --color-status-nominal: #3fb98f;  /* within expected range   6.97:1 */
+  --color-status-caution: #e0a33e;  /* approaching threshold   7.73:1 */
+  --color-status-critical: #f0684f; /* threshold breached      5.54:1 */
+  --color-status-unknown: #858d96;  /* no data / stale / degraded — default */
+
+  /* --- Borders ------------------------------------------------------------
+     Split deliberately. WCAG 2.2 section 1.4.11 requires 3:1 for the visual
+     boundary of a control the user must perceive, not for a decorative
+     divider. Conflating the two either fails the audit or produces a grid of
+     harsh lines. All borders are 1px; there are no 2px borders and no glows. */
+  --color-border-subtle: #23282e;      /* table rules, list dividers */
+  --color-border-default: #2e343b;     /* card and panel edges */
+  --color-border-strong: #3d444c;      /* section boundaries */
+  --color-border-interactive: #6a727b; /* input/select/button  3.51:1 worst */
+
+  /* --- Typography ---------------------------------------------------------
+     Two families. Inter is a neo-grotesque that holds up at small sizes and
+     ships true tabular figures; IBM Plex Mono carries data, IDs and code.
+     Both load through next/font in layout.tsx. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", monospace;
+
+  /* 7-step scale. Nothing renders below 12px except .label (11px, uppercase,
+     one to three words only) — the 10px body text the audit found is gone. */
+  --text-xs: 0.75rem;                 /* 12 */
+  --text-xs--line-height: 1rem;       /* 16 */
+  --text-sm: 0.8125rem;               /* 13 */
+  --text-sm--line-height: 1.25rem;    /* 20 */
+  --text-base: 0.9375rem;             /* 15 */
+  --text-base--line-height: 1.5rem;   /* 24 */
+  --text-lg: 1.125rem;                /* 18 */
+  --text-lg--line-height: 1.75rem;    /* 28 */
+  --text-xl: 1.375rem;                /* 22 */
+  --text-xl--line-height: 1.875rem;   /* 30 */
+  --text-2xl: 1.75rem;                /* 28 */
+  --text-2xl--line-height: 2.25rem;   /* 36 */
+  --text-3xl: 2.25rem;                /* 36 */
+  --text-3xl--line-height: 2.75rem;   /* 44 */
+
+  /* --- Radii --------------------------------------------------------------
+     Minimal. rounded-full is for genuinely circular objects only (avatars,
+     status dots); a pill-shaped text container is what made the old UI read
+     as consumer-casual. */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+
+  /* --- Elevation ----------------------------------------------------------
+     Exactly one shadow, for true overlays that float above the page. Nothing
+     else casts a shadow. */
+  --shadow-overlay: 0 8px 24px rgb(0 0 0 / 0.4);
+
+  /* --- Motion -------------------------------------------------------------
+     The only durations in the system. Anything longer is decoration.
+     See the motion inventory in DESIGN_SYSTEM.md section 7.4. */
+  --duration-feedback: 120ms;   /* hover / focus / press        <= 150ms */
+  --duration-disclosure: 180ms; /* accordion / drawer / popover <= 200ms */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}

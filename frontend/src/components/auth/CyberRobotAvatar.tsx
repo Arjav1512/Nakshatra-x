@@ -57,10 +57,10 @@ export function CyberRobotAvatar({ size = 'md', className = '' }: CyberRobotAvat
           strokeDasharray="2 16"
         />
         {/* Orbiting Sparkles */}
-        <circle cx="50" cy="14" r="2.5" fill="#00FF88" className="animate-pulse" />
-        <circle cx="86" cy="50" r="2" fill="#38BDF8" className="animate-pulse" />
-        <circle cx="50" cy="86" r="2.5" fill="#F472B6" className="animate-pulse" />
-        <circle cx="14" cy="50" r="2" fill="#FACC15" className="animate-pulse" />
+        <circle cx="50" cy="14" r="2.5" fill="#00FF88" />
+        <circle cx="86" cy="50" r="2" fill="#38BDF8" />
+        <circle cx="50" cy="86" r="2.5" fill="#F472B6" />
+        <circle cx="14" cy="50" r="2" fill="#FACC15" />
       </svg>
 
       {/* Rotating & Bobbing Cute Laughing Cyber Robot Face */}
@@ -94,7 +94,7 @@ export function CyberRobotAvatar({ size = 'md', className = '' }: CyberRobotAvat
 
           {/* Cute Robot Antenna with Wiggling Ball */}
           <path d="M50 20V8" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" />
-          <circle cx="50" cy="7" r="4.5" fill="#00FF88" className="animate-ping opacity-75" />
+          <circle cx="50" cy="7" r="4.5" fill="#00FF88" className=" opacity-75" />
           <circle cx="50" cy="7" r="4" fill="#00FF88" />
 
           {/* Cute Bot Cat/Ears */}

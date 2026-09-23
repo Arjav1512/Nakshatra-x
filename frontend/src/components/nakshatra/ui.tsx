@@ -12,7 +12,7 @@ export function GlassCard({ children, className, ...props }: GlassCardProps) {
   return (
     <div
       className={clsx(
-        'relative rounded-2xl border border-[#38BDF8]/25 bg-[#050A18]/80 p-6 backdrop-blur-2xl shadow-[0_0_40px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.15)] transition-all duration-300 hover:border-[#38BDF8]/50',
+        'relative rounded-2xl border border-[#38BDF8]/25 bg-[#050A18]/80 p-6 backdrop-blur-2xl shadow-[0_0_40px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.15)] transition-colors duration-300 hover:border-[#38BDF8]/50',
         className
       )}
       {...props}
@@ -38,7 +38,7 @@ export function GlassButton({
   ...props
 }: GlassButtonProps) {
   const baseStyles =
-    'relative inline-flex items-center justify-center gap-2 font-mono text-xs font-bold tracking-wider uppercase rounded-xl px-5 py-3 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed select-none'
+    'relative inline-flex items-center justify-center gap-2 font-mono text-xs font-bold tracking-wider uppercase rounded-xl px-5 py-3 transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed select-none'
 
   const variants = {
     primary:

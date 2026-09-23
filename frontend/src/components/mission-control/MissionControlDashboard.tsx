@@ -12,9 +12,7 @@ import type {
   STACScene,
 } from './types'
 import IndiaSatelliteMap, { type LayerType } from './IndiaSatelliteMap'
-import SpaceDustParticles from './SpaceDustParticles'
 import AICopilotModal from './AICopilotModal'
-import { TextEffect } from '@/components/ui/text-effect'
 import {
   ShieldCheck,
   MapPin,
@@ -128,8 +126,6 @@ export default function MissionControlDashboard() {
   return (
     <section id="mission-control" className="relative z-10 bg-transparent text-[#FFFFFF] border-t border-white/10 overflow-hidden">
       {/* Background Cosmic Particle Bokeh Field */}
-      <SpaceDustParticles />
-
       {/* Subtle Background Radial Light Sheen */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.03)_0%,_transparent_70%)] pointer-events-none" />
 
@@ -142,7 +138,7 @@ export default function MissionControlDashboard() {
             {/* Top Badges with Cyber Accents */}
             <div className="flex flex-wrap items-center justify-center gap-2.5 mb-5">
               <span className="ios-badge ios-badge-live !font-bold">
-                <span className="h-2 w-2 rounded-full bg-[#00FF88] shadow-[0_0_8px_#00FF88] animate-ping" />
+                <span className="h-2 w-2 rounded-full bg-[#00FF88] shadow-[0_0_8px_#00FF88] " />
                 LIVE SATELLITE TELEMETRY ACTIVE
               </span>
               <span className="ios-badge !bg-[#38BDF8]/15 !text-[#38BDF8] !border-[#38BDF8]/40 !font-bold">
@@ -169,19 +165,14 @@ export default function MissionControlDashboard() {
             </div>
 
             {/* Description - TextEffect Motion Component under Second NAKSHATRA-X heading */}
-            <TextEffect
-              per="word"
-              preset="slide"
-              delay={0.1}
-              className="text-sm sm:text-base text-slate-300 max-w-2xl mt-2 leading-relaxed font-normal text-center"
-            >
+            <p className="text-sm sm:text-base text-slate-300 max-w-2xl mt-2 leading-relaxed font-normal text-center">
               Autonomous Space-Geological Decision Support Platform for Ministry of Steel & MOIL Ltd. Powered by ISRO Earth Observation, MOSDAC / Bhuvan geospatial meteorology, and mathematical shortfall mitigation across India.
-            </TextEffect>
+            </p>
 
             {/* Floating Telemetry Status Capsule */}
             <div className="mt-6 flex items-center gap-4 px-5 py-2.5 rounded-full bg-[rgba(6,12,24,0.6)] backdrop-blur-2xl border border-white/15 shadow-2xl">
               <div className="flex items-center gap-2 font-mono text-[11px] text-[#38BDF8] uppercase font-bold tracking-wider">
-                <Radio className="w-3.5 h-3.5 text-[#FF2E63] animate-pulse drop-shadow-[0_0_8px_#FF2E63]" />
+                <Radio className="w-3.5 h-3.5 text-[#FF2E63] drop-shadow-[0_0_8px_#FF2E63]" />
                 <span>LIVE STREAM TICK: 4s</span>
               </div>
               <div className="h-4 w-px bg-white/20" />
@@ -192,7 +183,7 @@ export default function MissionControlDashboard() {
               <div className="h-4 w-px bg-white/20" />
               <button type="button"
                 onClick={() => loadMineData(selectedMine)}
-                className="p-1.5 px-2.5 rounded-lg bg-white/10 hover:bg-[#FF2E63]/20 border border-white/20 hover:border-[#FF2E63]/50 text-[#38BDF8] hover:text-[#FF2E63] hover:scale-105 transition-all shadow-md cursor-pointer flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase"
+                className="p-1.5 px-2.5 rounded-lg bg-white/10 hover:bg-[#FF2E63]/20 border border-white/20 hover:border-[#FF2E63]/50 text-[#38BDF8] hover:text-[#FF2E63] hover:scale-105 transition-colors shadow-md cursor-pointer flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase"
                 title="Force Immediate Orbital Sync"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -201,7 +192,7 @@ export default function MissionControlDashboard() {
               <div className="h-4 w-px bg-white/20" />
               <button
                 onClick={() => window.dispatchEvent(new CustomEvent('open-historical-forecast-modal'))}
-                className="ios-glass-button px-3.5 py-1.5 rounded-full text-xs font-mono font-bold flex items-center gap-2 cursor-pointer text-[#38BDF8] border border-[#38BDF8]/40 hover:border-[#00FF88] hover:text-[#00FF88] shadow-[0_0_12px_rgba(56,189,248,0.2)] hover:shadow-[0_0_16px_rgba(0,255,136,0.3)] transition-all"
+                className="ios-glass-button px-3.5 py-1.5 rounded-full text-xs font-mono font-bold flex items-center gap-2 cursor-pointer text-[#38BDF8] border border-[#38BDF8]/40 hover:border-[#00FF88] hover:text-[#00FF88] shadow-[0_0_12px_rgba(56,189,248,0.2)] hover:shadow-[0_0_16px_rgba(0,255,136,0.3)] transition-colors"
                 title="Open 50-Year Historical Database & 2040 Forecast Panel"
                 type="button"
               >
@@ -241,7 +232,7 @@ export default function MissionControlDashboard() {
                   }
                 }}
                 placeholder="Search mine location e.g. Dongri, Balaghat..."
-                className="w-full pl-9 pr-4 py-1.5 rounded-full bg-[#060C1B]/90 border border-white/20 text-white placeholder-slate-400 text-xs font-mono focus:outline-none focus:border-[#00FF88] shadow-inner transition-all"
+                className="w-full pl-9 pr-4 py-1.5 rounded-full bg-[#060C1B]/90 border border-white/20 text-white placeholder-slate-400 text-xs font-mono focus:outline-none focus:border-[#00FF88] shadow-inner transition-colors"
               />
             </div>
           </div>
@@ -256,7 +247,7 @@ export default function MissionControlDashboard() {
                 <button
                   key={m.id}
                   onClick={() => setSelectedMine(m)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-mono transition-all cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-mono transition-colors cursor-pointer ${
                     selectedMine.id === m.id
                       ? 'bg-gradient-to-r from-[#FB923C] to-[#FACC15] text-black font-extrabold shadow-[0_0_18px_rgba(251,146,60,0.6)]'
                       : 'text-[#94A3B8] hover:text-[#FFFFFF] hover:bg-white/10'
@@ -277,7 +268,7 @@ export default function MissionControlDashboard() {
                 <button
                   key={m.id}
                   onClick={() => setSelectedMine(m)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-mono transition-all cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-mono transition-colors cursor-pointer ${
                     selectedMine.id === m.id
                       ? 'bg-gradient-to-r from-[#FB923C] to-[#FACC15] text-black font-extrabold shadow-[0_0_18px_rgba(251,146,60,0.6)]'
                       : 'text-[#94A3B8] hover:text-[#FFFFFF] hover:bg-white/10'
@@ -297,7 +288,7 @@ export default function MissionControlDashboard() {
         <div id="satellite-map" className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#00FF88] animate-ping" />
+              <span className="h-2.5 w-2.5 rounded-full bg-[#00FF88] " />
               <h3 className="text-xs font-mono font-black uppercase tracking-widest text-[#00FF88]">
                 FEATURE 01 &bull; 3D REAL SATELLITE INDIAN MAP &amp; ORBITAL TELEMETRY COMMAND
               </h3>
@@ -333,8 +324,8 @@ export default function MissionControlDashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Page 2: ML Architecture */}
-            <div className="ios-glass-card p-6 rounded-3xl backdrop-blur-2xl bg-[#081022]/70 border border-[#FB923C]/50 hover:border-[#FB923C] shadow-[0_0_30px_rgba(251,146,60,0.2)] hover:shadow-[0_0_50px_rgba(251,146,60,0.45)] transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-44 h-44 rounded-full bg-gradient-to-br from-[#FF5E00]/30 via-[#FB923C]/20 to-transparent blur-3xl pointer-events-none group-hover:scale-125 transition-all duration-500" />
+            <div className="ios-glass-card p-6 rounded-3xl backdrop-blur-2xl bg-[#081022]/70 border border-[#FB923C]/50 hover:border-[#FB923C] shadow-[0_0_30px_rgba(251,146,60,0.2)] hover:shadow-[0_0_50px_rgba(251,146,60,0.45)] transition-colors duration-300 flex flex-col justify-between group relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-44 h-44 rounded-full bg-gradient-to-br from-[#FF5E00]/30 via-[#FB923C]/20 to-transparent blur-3xl pointer-events-none group-hover:scale-125 transition-colors duration-500" />
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[10px] font-mono font-black text-[#FB923C] bg-gradient-to-r from-[#FF5E00]/20 to-[#FACC15]/20 border border-[#FB923C]/50 px-3 py-1 rounded-full shadow-[0_0_12px_rgba(251,146,60,0.3)]">
@@ -351,21 +342,21 @@ export default function MissionControlDashboard() {
               </div>
               <Link
                 href="/evaluator"
-                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#FF5E00]/25 via-[#FB923C]/20 to-[#FACC15]/25 hover:from-[#FF5E00]/40 hover:to-[#FACC15]/40 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between transition-all duration-300 cursor-pointer border border-[#FB923C]/60 hover:border-[#FACC15] shadow-[0_0_18px_rgba(251,146,60,0.25)] hover:shadow-[0_0_30px_rgba(251,146,60,0.6)] backdrop-blur-xl hover:scale-[1.02] active:scale-[0.98] group/btn relative overflow-hidden"
+                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#FF5E00]/25 via-[#FB923C]/20 to-[#FACC15]/25 hover:from-[#FF5E00]/40 hover:to-[#FACC15]/40 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between transition-colors duration-300 cursor-pointer border border-[#FB923C]/60 hover:border-[#FACC15] shadow-[0_0_18px_rgba(251,146,60,0.25)] hover:shadow-[0_0_30px_rgba(251,146,60,0.6)] backdrop-blur-xl hover:scale-[1.02] active:scale-[0.98] group/btn relative overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/5 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 pointer-events-none" />
                 <span className="flex items-center gap-2 font-black tracking-wider text-white drop-shadow-[0_0_8px_rgba(251,146,60,0.6)]">
                   OPEN PAGE 2 &rarr;
                 </span>
                 <div className="w-6 h-6 rounded-lg bg-[#FB923C]/20 backdrop-blur-md flex items-center justify-center text-[#FB923C] border border-[#FB923C]/40 group-hover/btn:scale-110 transition-transform">
-                  <Sparkles size={12} className="animate-pulse text-[#FB923C]" />
+                  <Sparkles size={12} className=" text-[#FB923C]" />
                 </div>
               </Link>
             </div>
 
             {/* Page 3: Mine Twin */}
-            <div className="ios-glass-card p-6 rounded-3xl backdrop-blur-2xl bg-[#081022]/70 border border-[#00FF88]/50 hover:border-[#00FF88] shadow-[0_0_30px_rgba(0,255,136,0.2)] hover:shadow-[0_0_50px_rgba(0,255,136,0.45)] transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-44 h-44 rounded-full bg-gradient-to-br from-[#00FF88]/30 via-[#00E5FF]/20 to-transparent blur-3xl pointer-events-none group-hover:scale-125 transition-all duration-500" />
+            <div className="ios-glass-card p-6 rounded-3xl backdrop-blur-2xl bg-[#081022]/70 border border-[#00FF88]/50 hover:border-[#00FF88] shadow-[0_0_30px_rgba(0,255,136,0.2)] hover:shadow-[0_0_50px_rgba(0,255,136,0.45)] transition-colors duration-300 flex flex-col justify-between group relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-44 h-44 rounded-full bg-gradient-to-br from-[#00FF88]/30 via-[#00E5FF]/20 to-transparent blur-3xl pointer-events-none group-hover:scale-125 transition-colors duration-500" />
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[10px] font-mono font-black text-[#00FF88] bg-gradient-to-r from-[#00FF88]/20 to-[#00E5FF]/20 border border-[#00FF88]/50 px-3 py-1 rounded-full shadow-[0_0_12px_rgba(0,255,136,0.3)]">
@@ -382,21 +373,21 @@ export default function MissionControlDashboard() {
               </div>
               <Link
                 href="/mine-twin"
-                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#00FF88]/25 via-[#00E5FF]/20 to-[#38BDF8]/25 hover:from-[#00FF88]/40 hover:to-[#38BDF8]/40 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between transition-all duration-300 cursor-pointer border border-[#00FF88]/60 hover:border-[#00E5FF] shadow-[0_0_18px_rgba(0,255,136,0.25)] hover:shadow-[0_0_30px_rgba(0,255,136,0.6)] backdrop-blur-xl hover:scale-[1.02] active:scale-[0.98] group/btn relative overflow-hidden"
+                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#00FF88]/25 via-[#00E5FF]/20 to-[#38BDF8]/25 hover:from-[#00FF88]/40 hover:to-[#38BDF8]/40 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between transition-colors duration-300 cursor-pointer border border-[#00FF88]/60 hover:border-[#00E5FF] shadow-[0_0_18px_rgba(0,255,136,0.25)] hover:shadow-[0_0_30px_rgba(0,255,136,0.6)] backdrop-blur-xl hover:scale-[1.02] active:scale-[0.98] group/btn relative overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/5 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 pointer-events-none" />
                 <span className="flex items-center gap-2 font-black tracking-wider text-white drop-shadow-[0_0_8px_rgba(0,255,136,0.6)]">
                   OPEN PAGE 3 &rarr;
                 </span>
                 <div className="w-6 h-6 rounded-lg bg-[#00FF88]/20 backdrop-blur-md flex items-center justify-center text-[#00FF88] border border-[#00FF88]/40 group-hover/btn:scale-110 transition-transform">
-                  <Sparkles size={12} className="animate-pulse text-[#00FF88]" />
+                  <Sparkles size={12} className=" text-[#00FF88]" />
                 </div>
               </Link>
             </div>
 
             {/* Page 4: Production Sentinel */}
-            <div className="ios-glass-card p-6 rounded-3xl backdrop-blur-2xl bg-[#081022]/70 border border-[#38BDF8]/50 hover:border-[#38BDF8] shadow-[0_0_30px_rgba(56,189,248,0.2)] hover:shadow-[0_0_50px_rgba(56,189,248,0.45)] transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-44 h-44 rounded-full bg-gradient-to-br from-[#38BDF8]/30 via-[#818CF8]/20 to-transparent blur-3xl pointer-events-none group-hover:scale-125 transition-all duration-500" />
+            <div className="ios-glass-card p-6 rounded-3xl backdrop-blur-2xl bg-[#081022]/70 border border-[#38BDF8]/50 hover:border-[#38BDF8] shadow-[0_0_30px_rgba(56,189,248,0.2)] hover:shadow-[0_0_50px_rgba(56,189,248,0.45)] transition-colors duration-300 flex flex-col justify-between group relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-44 h-44 rounded-full bg-gradient-to-br from-[#38BDF8]/30 via-[#818CF8]/20 to-transparent blur-3xl pointer-events-none group-hover:scale-125 transition-colors duration-500" />
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[10px] font-mono font-black text-[#38BDF8] bg-gradient-to-r from-[#38BDF8]/20 to-[#A855F7]/20 border border-[#38BDF8]/50 px-3 py-1 rounded-full shadow-[0_0_12px_rgba(56,189,248,0.3)]">
@@ -418,21 +409,21 @@ export default function MissionControlDashboard() {
               </div>
               <Link
                 href="/production"
-                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#38BDF8]/25 via-[#818CF8]/20 to-[#A855F7]/25 hover:from-[#38BDF8]/40 hover:to-[#A855F7]/40 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between transition-all duration-300 cursor-pointer border border-[#38BDF8]/60 hover:border-[#A855F7] shadow-[0_0_18px_rgba(56,189,248,0.25)] hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] backdrop-blur-xl hover:scale-[1.02] active:scale-[0.98] group/btn relative overflow-hidden"
+                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#38BDF8]/25 via-[#818CF8]/20 to-[#A855F7]/25 hover:from-[#38BDF8]/40 hover:to-[#A855F7]/40 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between transition-colors duration-300 cursor-pointer border border-[#38BDF8]/60 hover:border-[#A855F7] shadow-[0_0_18px_rgba(56,189,248,0.25)] hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] backdrop-blur-xl hover:scale-[1.02] active:scale-[0.98] group/btn relative overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/5 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 pointer-events-none" />
                 <span className="flex items-center gap-2 font-black tracking-wider text-white drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]">
                   OPEN PAGE 4 &rarr;
                 </span>
                 <div className="w-6 h-6 rounded-lg bg-[#38BDF8]/20 backdrop-blur-md flex items-center justify-center text-[#38BDF8] border border-[#38BDF8]/40 group-hover/btn:scale-110 transition-transform">
-                  <Sparkles size={12} className="animate-pulse text-[#38BDF8]" />
+                  <Sparkles size={12} className=" text-[#38BDF8]" />
                 </div>
               </Link>
             </div>
 
             {/* Page 5: Ore Blending */}
-            <div className="ios-glass-card p-6 rounded-3xl backdrop-blur-2xl bg-[#081022]/70 border border-[#FF2E63]/50 hover:border-[#FF2E63] shadow-[0_0_30px_rgba(255,46,99,0.2)] hover:shadow-[0_0_50px_rgba(255,46,99,0.45)] transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-44 h-44 rounded-full bg-gradient-to-br from-[#FACC15]/30 via-[#FF2E63]/30 to-transparent blur-3xl pointer-events-none group-hover:scale-125 transition-all duration-500" />
+            <div className="ios-glass-card p-6 rounded-3xl backdrop-blur-2xl bg-[#081022]/70 border border-[#FF2E63]/50 hover:border-[#FF2E63] shadow-[0_0_30px_rgba(255,46,99,0.2)] hover:shadow-[0_0_50px_rgba(255,46,99,0.45)] transition-colors duration-300 flex flex-col justify-between group relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-44 h-44 rounded-full bg-gradient-to-br from-[#FACC15]/30 via-[#FF2E63]/30 to-transparent blur-3xl pointer-events-none group-hover:scale-125 transition-colors duration-500" />
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[10px] font-mono font-black text-[#FF2E63] bg-gradient-to-r from-[#FACC15]/20 to-[#FF2E63]/20 border border-[#FF2E63]/50 px-3 py-1 rounded-full shadow-[0_0_12px_rgba(255,46,99,0.3)]">
@@ -449,14 +440,14 @@ export default function MissionControlDashboard() {
               </div>
               <Link
                 href="/blending"
-                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#FACC15]/25 via-[#FF2E63]/25 to-[#990022]/30 hover:from-[#FACC15]/40 hover:to-[#FF2E63]/50 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between transition-all duration-300 cursor-pointer border border-[#FF2E63]/60 hover:border-[#FF80AB] shadow-[0_0_18px_rgba(255,46,99,0.25)] hover:shadow-[0_0_30px_rgba(255,46,99,0.6)] backdrop-blur-xl hover:scale-[1.02] active:scale-[0.98] group/btn relative overflow-hidden"
+                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#FACC15]/25 via-[#FF2E63]/25 to-[#990022]/30 hover:from-[#FACC15]/40 hover:to-[#FF2E63]/50 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between transition-colors duration-300 cursor-pointer border border-[#FF2E63]/60 hover:border-[#FF80AB] shadow-[0_0_18px_rgba(255,46,99,0.25)] hover:shadow-[0_0_30px_rgba(255,46,99,0.6)] backdrop-blur-xl hover:scale-[1.02] active:scale-[0.98] group/btn relative overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/5 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 pointer-events-none" />
                 <span className="flex items-center gap-2 font-black tracking-wider text-white drop-shadow-[0_0_8px_rgba(255,46,99,0.6)]">
                   OPEN PAGE 5 &rarr;
                 </span>
                 <div className="w-6 h-6 rounded-lg bg-[#FF2E63]/20 backdrop-blur-md flex items-center justify-center text-[#FF2E63] border border-[#FF2E63]/40 group-hover/btn:scale-110 transition-transform">
-                  <Sparkles size={12} className="animate-pulse text-[#FF2E63]" />
+                  <Sparkles size={12} className=" text-[#FF2E63]" />
                 </div>
               </Link>
             </div>
@@ -475,19 +466,19 @@ export default function MissionControlDashboard() {
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <Radio className="w-3.5 h-3.5 text-[#00FF88] animate-pulse" />
+              <Radio className="w-3.5 h-3.5 text-[#00FF88] " />
               Live Stream Sync: <span className="text-[#00FF88] font-bold" suppressHydrationWarning>{lastSyncTime} IST</span>
             </div>
             <Link
               href="/about"
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-[#FF2E63]/20 to-[#38BDF8]/20 border border-[#FF2E63]/40 text-white hover:text-[#FF2E63] text-[11px] font-bold transition-all shadow-[0_0_10px_rgba(255,46,99,0.2)]"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-[#FF2E63]/20 to-[#38BDF8]/20 border border-[#FF2E63]/40 text-white hover:text-[#FF2E63] text-[11px] font-bold transition-colors shadow-[0_0_10px_rgba(255,46,99,0.2)]"
             >
               <Sparkles size={12} className="text-[#FF2E63]" />
               <span>About Problem Statement</span>
             </Link>
             <Link
               href="/admin/login"
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/5 hover:bg-[#38BDF8]/15 border border-white/10 hover:border-[#38BDF8]/40 text-[#94A3B8] hover:text-[#38BDF8] text-[11px] transition-all"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/5 hover:bg-[#38BDF8]/15 border border-white/10 hover:border-[#38BDF8]/40 text-[#94A3B8] hover:text-[#38BDF8] text-[11px] transition-colors"
             >
               <Lock size={12} className="text-[#38BDF8]" />
               <span>Admin Portal</span>

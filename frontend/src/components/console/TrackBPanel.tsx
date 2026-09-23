@@ -28,8 +28,8 @@ function pct(x: number) {
 
 function Spinner({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-2 py-6 text-xs text-slate-400">
-      <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-600 border-t-sky-400" />
+    <div className="flex items-center gap-2 py-6 text-xs text-text-secondary">
+      <span className="h-3 w-3 animate-spin rounded-full border-2 border-text-tertiary border-t-accent" />
       {label}
     </div>
   )
@@ -37,9 +37,9 @@ function Spinner({ label }: { label: string }) {
 
 function Unavailable({ what, reason }: { what: string; reason: string }) {
   return (
-    <div className="rounded-lg border border-rose-500/30 bg-rose-500/5 p-3 text-xs">
-      <p className="font-semibold text-rose-300">{what} unavailable</p>
-      <p className="mt-1 leading-snug text-slate-400">{reason}</p>
+    <div className="rounded-md border border-status-critical/30 bg-status-critical/5 p-3 text-xs">
+      <p className="font-semibold text-status-critical">{what} unavailable</p>
+      <p className="mt-1 leading-snug text-text-secondary">{reason}</p>
     </div>
   )
 }
@@ -83,11 +83,11 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
   return (
     <section className="space-y-4">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-sky-300">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-accent">
           Track B · Production shortfall
         </h2>
         {forecast ? (
-          <p className="font-mono text-[10px] text-slate-500">
+          <p className="font-mono text-xs text-text-tertiary">
             {forecast.model_version} · origin {forecast.forecast_origin} · horizon{' '}
             {forecast.horizon_days} d
           </p>
@@ -164,8 +164,8 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
           </div>
 
           {/* --- grade-aware breakdown: PRD B-5 is per-grade at P0 --- */}
-          <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
-            <p className="mb-2 text-[11px] uppercase tracking-wider text-slate-400">
+          <div className="rounded-md border border-border-default bg-surface-2 p-3">
+            <p className="mb-2 text-xs uppercase tracking-wider text-text-secondary">
               By grade — a shortfall in one grade is not fungible with a surplus in another (PRD §3)
             </p>
             <div className="flex flex-wrap gap-2">
@@ -178,15 +178,15 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                     onClick={() => setGrade(g.grade)}
                     aria-pressed={on}
                     className={`rounded-md border px-3 py-2 text-left text-xs transition-colors ${
-                      on ? 'border-sky-400/60 bg-sky-500/10' : 'border-white/10 bg-white/[0.02] hover:border-white/25'
+                      on ? 'border-accent/60 bg-accent/10' : 'border-border-default bg-surface-2 hover:border-border-interactive'
                     }`}
                   >
-                    <span className="block font-medium text-slate-200">
+                    <span className="block font-medium text-text-primary">
                       {g.grade.replace(/_/g, ' ')}
                     </span>
                     <span
                       className={`mt-0.5 block font-mono ${
-                        risk > 0.8 ? 'text-rose-300' : risk > 0.5 ? 'text-amber-300' : 'text-emerald-300'
+                        risk > 0.8 ? 'text-status-critical' : risk > 0.5 ? 'text-status-caution' : 'text-status-nominal'
                       }`}
                     >
                       P(short) {pct(risk)}
@@ -199,12 +199,12 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
 
           {/* --- trajectory with prediction interval + baseline --- */}
           {selected ? (
-            <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+            <div className="rounded-md border border-border-default bg-surface-2 p-3">
               <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-                <p className="text-[11px] uppercase tracking-wider text-slate-400">
+                <p className="text-xs uppercase tracking-wider text-text-secondary">
                   {selected.grade.replace(/_/g, ' ')} · daily trajectory
                 </p>
-                <p className="font-mono text-[10px] text-slate-500">
+                <p className="font-mono text-xs text-text-tertiary">
                   band = {Math.round(forecast.interval.nominal_coverage * 100)}% prediction interval ·
                   dashed = {forecast.baseline_version}
                 </p>
@@ -212,28 +212,60 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
               <div className="h-56 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={selected.trajectory} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
+                    {/* Recharts theme — docs/design/DESIGN_SYSTEM.md section 8.
+                        Colours reference the design tokens through var(); no hex
+                        literal appears outside tokens.css. Entrance animation is
+                        off: an animating chart is a count-up by another name. */}
                     <defs>
                       <linearGradient id="pi" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#38bdf8" stopOpacity={0.28} />
-                        <stop offset="100%" stopColor="#38bdf8" stopOpacity={0.04} />
+                        <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.16} />
+                        <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0.16} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
-                    <XAxis dataKey="horizon_days" tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} />
-                    <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} width={48} />
+                    <CartesianGrid
+                      vertical={false}
+                      stroke="var(--color-border-subtle)"
+                    />
+                    <XAxis
+                      dataKey="horizon_days"
+                      tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }}
+                      tickLine={false}
+                      axisLine={false}
+                      width={48}
+                    />
                     <Tooltip
                       contentStyle={{
-                        background: '#0b1220', border: '1px solid #ffffff20',
-                        borderRadius: 8, fontSize: 11,
+                        background: 'var(--color-surface-3)',
+                        border: '1px solid var(--color-border-default)',
+                        borderRadius: 4,
+                        fontSize: 13,
+                        fontVariantNumeric: 'tabular-nums',
+                        color: 'var(--color-text-primary)',
                       }}
                       labelFormatter={(v) => `Day +${v}`}
                     />
-                    <Area type="monotone" dataKey="p90_tonnes" stroke="none" fill="url(#pi)" name="p90" />
-                    <Area type="monotone" dataKey="p10_tonnes" stroke="none" fill="#0b1220" name="p10" />
-                    <Line type="monotone" dataKey="median_tonnes" stroke="#38bdf8" strokeWidth={2} dot={false} name="median" />
+                    <Area
+                      type="monotone" dataKey="p90_tonnes" stroke="none" fill="url(#pi)"
+                      name="p90" isAnimationActive={false}
+                    />
+                    <Area
+                      type="monotone" dataKey="p10_tonnes" stroke="none"
+                      fill="var(--color-surface-2)" name="p10" isAnimationActive={false}
+                    />
                     <Line
-                      type="monotone" dataKey="baseline_tonnes" stroke="#f59e0b"
-                      strokeWidth={1.5} strokeDasharray="4 3" dot={false} name="seasonal-naive"
+                      type="monotone" dataKey="median_tonnes" stroke="var(--color-accent)"
+                      strokeWidth={2} dot={false} name="median" isAnimationActive={false}
+                    />
+                    <Line
+                      type="monotone" dataKey="baseline_tonnes"
+                      stroke="var(--color-text-tertiary)"
+                      strokeWidth={1} strokeDasharray="4 3" dot={false}
+                      name="seasonal-naive" isAnimationActive={false}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -244,15 +276,15 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
       )}
 
       {/* --- N-8: backtest visible in the UI --- */}
-      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+      <div className="rounded-md border border-border-default bg-surface-2 p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[11px] uppercase tracking-wider text-slate-400">
+          <p className="text-xs uppercase tracking-wider text-text-secondary">
             Backtest — held-out accuracy (PRD B-10, N-8)
           </p>
           {!backtest && !btLoading ? (
             <button type="button"
               onClick={runBacktest}
-              className="rounded-md border border-sky-400/40 bg-sky-500/10 px-3 py-1 text-[11px] text-sky-200 transition-colors hover:bg-sky-500/20"
+              className="rounded-md border border-accent/40 bg-accent/10 px-3 py-1 text-xs text-accent transition-colors hover:bg-accent/20"
             >
               Run rolling-origin backtest
             </button>
@@ -265,7 +297,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
           <div className="mt-2"><Unavailable what="Backtest" reason={bErr} /></div>
         ) : backtest ? (
           <div className="mt-3 space-y-3">
-            <p className="text-xs text-slate-300">{backtest.verdict}</p>
+            <p className="text-xs text-text-secondary">{backtest.verdict}</p>
             <div className="grid gap-3 sm:grid-cols-3">
               <Metric
                 label="Model MAPE"
@@ -292,30 +324,30 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 })}
               />
             </div>
-            <table className="w-full text-[11px]">
-              <thead className="text-slate-500">
-                <tr className="border-b border-white/10 text-left">
+            <table className="w-full text-xs">
+              <thead className="text-text-tertiary">
+                <tr className="border-b border-border-default text-left">
                   <th className="py-1 font-normal">Horizon</th>
                   <th className="py-1 font-normal">Model MAPE</th>
                   <th className="py-1 font-normal">Baseline MAPE</th>
                   <th className="py-1 font-normal">Coverage</th>
                 </tr>
               </thead>
-              <tbody className="font-mono text-slate-300">
+              <tbody className="font-mono text-text-secondary">
                 {backtest.by_horizon.map((h: any) => (
-                  <tr key={h.horizon_days} className="border-b border-white/5">
+                  <tr key={h.horizon_days} className="border-b border-border-subtle">
                     <td className="py-1">{h.horizon_days} d</td>
-                    <td className="py-1 text-sky-300">{h.model_mape_pct}%</td>
-                    <td className="py-1 text-amber-300">{h.baseline_mape_pct}%</td>
+                    <td className="py-1 text-accent">{h.model_mape_pct}%</td>
+                    <td className="py-1 text-status-caution">{h.baseline_mape_pct}%</td>
                     <td className="py-1">{h.coverage_80}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <p className="text-[10px] leading-snug text-slate-500">{backtest.note}</p>
+            <p className="text-xs leading-snug text-text-tertiary">{backtest.note}</p>
           </div>
         ) : (
-          <p className="mt-2 text-[11px] text-slate-500">
+          <p className="mt-2 text-xs text-text-tertiary">
             Not yet run in this session. The figure is computed on demand rather than cached from a
             previous build, so what you see was produced now.
           </p>
@@ -323,8 +355,8 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
       </div>
 
       {/* --- D-4 + C-5: recommendations, and what the engine rejected --- */}
-      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
-        <p className="mb-2 text-[11px] uppercase tracking-wider text-slate-400">
+      <div className="rounded-md border border-border-default bg-surface-2 p-3">
+        <p className="mb-2 text-xs uppercase tracking-wider text-text-secondary">
           Corrective actions (PRD C-1..C-5) — every action constraint-checked
         </p>
         {rErr ? (
@@ -334,24 +366,24 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
         ) : (
           <div className="space-y-2">
             {recs.approved_actions.map((a) => (
-              <div key={a.id} className="rounded-md border border-emerald-500/30 bg-emerald-500/[0.06] p-3">
+              <div key={a.id} className="rounded-md border border-status-nominal/30 bg-status-nominal/[0.06] p-3">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <span className="text-xs font-medium text-emerald-200">{a.description}</span>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-400">
+                  <span className="text-xs font-medium text-status-nominal">{a.description}</span>
+                  <span className="font-mono text-xs uppercase tracking-wider text-status-nominal">
                     approved
                   </span>
                 </div>
                 {a.expected_effect ? (
-                  <p className="mt-1 font-mono text-[11px] text-slate-300">
+                  <p className="mt-1 font-mono text-xs text-text-secondary">
                     +{Math.round(a.expected_effect.recovery_tonnes)} t · ΔP(shortfall){' '}
                     {a.expected_effect.delta_shortfall_probability}
                   </p>
                 ) : null}
-                <p className="mt-1 text-[10px] text-slate-500">
+                <p className="mt-1 text-xs text-text-tertiary">
                   checks passed: {a.constraint_check.checks_passed.join(' · ')}
                 </p>
                 {a.expected_effect?.assumptions?.length ? (
-                  <ul className="mt-1 list-disc pl-4 text-[10px] leading-snug text-slate-500">
+                  <ul className="mt-1 list-disc pl-4 text-xs leading-snug text-text-tertiary">
                     {a.expected_effect.assumptions.map((s) => <li key={s}>{s}</li>)}
                   </ul>
                 ) : null}
@@ -359,31 +391,31 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             ))}
 
             {recs.rejected_actions.length ? (
-              <div className="rounded-md border border-rose-500/30 bg-rose-500/[0.06] p-3">
-                <p className="text-[11px] font-medium text-rose-200">
+              <div className="rounded-md border border-status-critical/30 bg-status-critical/[0.06] p-3">
+                <p className="text-xs font-medium text-status-critical">
                   Rejected by the constraint engine — never shown as options
                 </p>
                 <ul className="mt-1 space-y-1">
                   {recs.rejected_actions.map((a) => (
-                    <li key={a.id} className="text-[11px] text-slate-300">
-                      <span className="font-mono text-rose-300">{a.action_type}</span> —{' '}
+                    <li key={a.id} className="text-xs text-text-secondary">
+                      <span className="font-mono text-status-critical">{a.action_type}</span> —{' '}
                       {a.constraint_check.violations[0]?.detail}
                     </li>
                   ))}
                 </ul>
               </div>
             ) : (
-              <p className="text-[10px] text-slate-500">
+              <p className="text-xs text-text-tertiary">
                 No candidate violated a constraint this run. The engine still ran — see its scope below.
               </p>
             )}
 
-            <p className="text-[10px] leading-snug text-slate-500">
+            <p className="text-xs leading-snug text-text-tertiary">
               {recs.constraint_engine.version} · enforced, not learned · scope:{' '}
               {recs.constraint_engine.scope.join(', ')} · excluded:{' '}
               {recs.constraint_engine.excluded.join(', ')}
             </p>
-            <p className="text-[10px] leading-snug text-slate-500">{recs.guardrail}</p>
+            <p className="text-xs leading-snug text-text-tertiary">{recs.guardrail}</p>
           </div>
         )}
       </div>

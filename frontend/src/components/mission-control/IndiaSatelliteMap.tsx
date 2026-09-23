@@ -246,8 +246,7 @@ export default function IndiaSatelliteMap({
                 &bull; Fault Distance: ${dist} km<br/>
                 &bull; Precip: ${rain} mm
               </div>
-            </div>
-          `
+            </div> `
           circle.bindPopup(popupContent, { className: 'prospectivity-popup' })
           circle.on('click', () => {
             triggerAIPrediction(lat, lng, `AI Grid Node (${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E)`)
@@ -289,8 +288,7 @@ export default function IndiaSatelliteMap({
                 <span style="color: #94A3B8;">Resolution:</span> 5.8m Multispectral<br/>
                 <span style="color: #94A3B8;">SWIR Mineral Ratio:</span> <strong style="color: ${color};">${ratio}</strong><br/>
                 <span style="color: #00FF88;">Ore Horizon Boundary Verified</span>
-              </div>
-            `
+              </div> `
           } else if (activeLayer === 'isro-risat') {
             const db = (-15.2 + distFromCenter * 0.9).toFixed(1)
             color = '#00E5FF'
@@ -301,8 +299,7 @@ export default function IndiaSatelliteMap({
                 <span style="color: #94A3B8;">Scene cloud filter:</span> applied at query time<br/>
                 <span style="color: #94A3B8;">Backscatter:</span> <strong style="color: #00E5FF;">${db} dB</strong><br/>
                 <span style="color: #00FF88;">Haul Road Slip Risk: Minimal</span>
-              </div>
-            `
+              </div> `
           } else if (activeLayer === 'isro-cartosat') {
             const slope = (28.4 + distFromCenter * 2.1).toFixed(1)
             color = '#FACC15'
@@ -313,8 +310,7 @@ export default function IndiaSatelliteMap({
                 <span style="color: #94A3B8;">Pit Slope Gradient:</span> <strong style="color: #FACC15;">${slope}&deg;</strong><br/>
                 <span style="color: #94A3B8;">Volumetric Accuracy:</span> 98.6%<br/>
                 <span style="color: #00FF88;">Bench Geometry: Stable</span>
-              </div>
-            `
+              </div> `
           } else if (activeLayer === 'ndvi') {
             const ndvi = Math.max(
               0.12,
@@ -334,8 +330,7 @@ export default function IndiaSatelliteMap({
               3
             )}</strong><br/>
                 <span style="color: #94A3B8;">Condition:</span> <span style="color: ${color}; font-weight: bold;">${ndviStatus}</span>
-              </div>
-            `
+              </div> `
           } else if (activeLayer === 'moisture') {
             const moisture = Math.max(
               8,
@@ -355,8 +350,7 @@ export default function IndiaSatelliteMap({
               1
             )}%</strong><br/>
                 <span style="color: #94A3B8;">Status:</span> <span style="color: ${color}; font-weight: bold;">${moistureStatus}</span>
-              </div>
-            `
+              </div> `
           } else if (activeLayer === 'thermal') {
             const temp = Math.max(
               20,
@@ -376,8 +370,7 @@ export default function IndiaSatelliteMap({
               1
             )}&deg;C</strong><br/>
                 <span style="color: #94A3B8;">Status:</span> <span style="color: ${color}; font-weight: bold;">${tempStatus}</span>
-              </div>
-            `
+              </div> `
           }
 
           const circle = L.circle([lat, lng], {
@@ -495,26 +488,22 @@ export default function IndiaSatelliteMap({
             height: 40px;
             display: flex;
             align-items: center;
-            justify-content: center;
-          ">
+            justify-content: center; ">
             <div style="
               position: absolute;
               inset: 0;
               border-radius: 50%;
               border: 2px dashed #00FF88;
               animation: spin 6s linear infinite;
-              box-shadow: 0 0 22px #00FF88;
-            "></div>
+              box-shadow: 0 0 22px #00FF88; "></div>
             <div style="
               width: 12px;
               height: 12px;
               border-radius: 50%;
               background: #00FF88;
               border: 2px solid #000000;
-              box-shadow: 0 0 16px #00FF88;
-            "></div>
-          </div>
-        `,
+              box-shadow: 0 0 16px #00FF88; "></div>
+          </div> `,
       })
 
       targetMarkerRef.current = L.marker([lat, lng], { icon: targetIcon }).addTo(map)
@@ -692,8 +681,7 @@ export default function IndiaSatelliteMap({
       L.control.zoom({ position: 'bottomright' }).addTo(map)
 
       // 1. High-Resolution Real Satellite Base Layer (ESRI World Imagery)
-      L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      L.tileLayer( 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         {
           maxZoom: 18,
           attribution: 'Esri Satellite',
@@ -739,8 +727,7 @@ export default function IndiaSatelliteMap({
               flex-direction: column;
               align-items: center;
               cursor: pointer;
-              position: relative;
-            ">
+              position: relative; ">
               ${
                 isSelected
                   ? `<div class="hotspot-radar-ring" style="border-color: ${pinColor}; width: 34px; height: 34px; top: -10px; left: 43px;"></div>`
@@ -754,21 +741,18 @@ export default function IndiaSatelliteMap({
                 border: 2px solid #FFFFFF;
                 box-shadow: 0 0 16px ${pinColor}, 0 2px 8px rgba(0,0,0,0.95);
                 margin-bottom: 2px;
-                transition: all 0.3s ease;
-              "></div>
+                transition: all 0.3s ease; "></div>
               <div style="
                 text-align: center;
                 white-space: nowrap;
-                pointer-events: none;
-              ">
+                pointer-events: none; ">
                 <div style="
                   font-family: monospace;
                   font-size: 10.5px;
                   font-weight: 900;
                   color: ${isSelected ? '#FFFFFF' : pinColor};
                   text-shadow: 0 0 8px ${pinColor}, 0 2px 4px #000000, 0 0 3px #000000;
-                  letter-spacing: 0.05em;
-                ">
+                  letter-spacing: 0.05em; ">
                   ${mine.name}
                 </div>
                 <div style="
@@ -778,13 +762,11 @@ export default function IndiaSatelliteMap({
                   color: #E2E8F0;
                   text-shadow: 0 1px 3px #000000, 0 0 4px #000000;
                   letter-spacing: 0.02em;
-                  opacity: 0.9;
-                ">
+                  opacity: 0.9; ">
                   ${mine.rate} &bull; ${mine.grade}
                 </div>
               </div>
-            </div>
-          `,
+            </div> `,
         })
 
         const orig = MOIL_MINES.find((item) => item.id === mine.id) || selectedMine
@@ -857,7 +839,7 @@ export default function IndiaSatelliteMap({
 
   return (
     <div
-      className={`ios-glass-card overflow-hidden transition-all duration-500 relative ${
+      className={`ios-glass-card overflow-hidden transition-colors duration-500 relative ${
         isFullscreen ? 'fixed inset-4 z-50 rounded-3xl shadow-[0_0_90px_rgba(0,0,0,0.95)]' : 'rounded-[32px]'
       }`}
     >
@@ -891,7 +873,7 @@ export default function IndiaSatelliteMap({
               radarSweepActive ? 'border-[#EF4444] text-[#EF4444]' : 'text-[#94A3B8]'
             }`}
           >
-            <Radio className="w-3.5 h-3.5 animate-pulse" />
+            <Radio className="w-3.5 h-3.5 " />
             <span>Radar Sweep {radarSweepActive ? 'ON' : 'OFF'}</span>
           </button>
 
@@ -916,7 +898,7 @@ export default function IndiaSatelliteMap({
           <button
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="ios-glass-button p-2 rounded-full text-[#FFFFFF] hover:text-[#00FF88] transition-all cursor-pointer"
+            className="ios-glass-button p-2 rounded-full text-[#FFFFFF] hover:text-[#00FF88] transition-colors cursor-pointer"
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
@@ -934,7 +916,7 @@ export default function IndiaSatelliteMap({
               onChange={handleInputChange}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               placeholder="Type any city, area, district, or coordinates in India (e.g. Lucknow, Noida, Pune, Balaghat, 21.83, 80.19)..."
-              className="w-full pl-9 pr-8 py-2 rounded-xl bg-white/10 border border-white/20 text-xs font-mono text-white placeholder-slate-400 focus:outline-none focus:border-[#00FF88] transition-all"
+              className="w-full pl-9 pr-8 py-2 rounded-xl bg-white/10 border border-white/20 text-xs font-mono text-white placeholder-slate-400 focus:outline-none focus:border-[#00FF88] transition-colors"
             />
             {searchQuery && (
               <button
@@ -963,7 +945,7 @@ export default function IndiaSatelliteMap({
                     key={`${item.lat}-${item.lng}-${idx}`}
                     type="button"
                     onClick={() => handleSelectSuggestion(item)}
-                    className="w-full text-left px-3.5 py-2.5 hover:bg-[#00FF88]/15 transition-all flex items-start gap-2.5 group cursor-pointer"
+                    className="w-full text-left px-3.5 py-2.5 hover:bg-[#00FF88]/15 transition-colors flex items-start gap-2.5 group cursor-pointer"
                   >
                     <MapPin className="w-3.5 h-3.5 text-[#00FF88] shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
                     <div className="flex-1 min-w-0">
@@ -987,12 +969,12 @@ export default function IndiaSatelliteMap({
           <button
             type="submit"
             disabled={isSearching}
-            className="ios-glass-button px-5 py-2 rounded-xl text-xs font-mono font-bold text-[#00FF88] hover:text-white border border-[#00FF88]/40 hover:border-[#00FF88] flex items-center gap-2 cursor-pointer shadow-[0_0_18px_rgba(0,255,136,0.3)] transition-all shrink-0 disabled:opacity-50"
+            className="ios-glass-button px-5 py-2 rounded-xl text-xs font-mono font-bold text-[#00FF88] hover:text-white border border-[#00FF88]/40 hover:border-[#00FF88] flex items-center gap-2 cursor-pointer shadow-[0_0_18px_rgba(0,255,136,0.3)] transition-colors shrink-0 disabled:opacity-50"
           >
             {isSearching ? (
               <Loader2 className="w-3.5 h-3.5 text-[#00FF88] animate-spin" />
             ) : (
-              <Sparkles className="w-3.5 h-3.5 text-[#00FF88] animate-pulse" />
+              <Sparkles className="w-3.5 h-3.5 text-[#00FF88] " />
             )}
             <span>{isSearching ? 'Locating...' : 'Locate AI'}</span>
           </button>
@@ -1014,7 +996,7 @@ export default function IndiaSatelliteMap({
                   setSearchError(null)
                   triggerAIPrediction(loc.lat, loc.lng, loc.name)
                 }}
-                className="ios-glass-button px-3 py-1 rounded-full text-[10px] font-mono text-slate-300 hover:text-[#00FF88] whitespace-nowrap transition-all cursor-pointer shrink-0"
+                className="ios-glass-button px-3 py-1 rounded-full text-[10px] font-mono text-slate-300 hover:text-[#00FF88] whitespace-nowrap transition-colors cursor-pointer shrink-0"
               >
                 {key.toUpperCase()}
               </button>
@@ -1079,7 +1061,7 @@ export default function IndiaSatelliteMap({
                 type="button"
                 key={l.key}
                 onClick={() => onChangeLayer(l.key)}
-                className={`px-3 py-1 rounded-xl text-left text-xs font-mono transition-all flex items-center justify-between gap-3 cursor-pointer ${
+                className={`px-3 py-1 rounded-xl text-left text-xs font-mono transition-colors flex items-center justify-between gap-3 cursor-pointer ${
                   activeLayer === l.key
                     ? 'bg-white/20 text-[#FFFFFF] font-bold border border-white/30 shadow-md'
                     : 'text-[#94A3B8] hover:text-[#FFFFFF] hover:bg-white/5'
@@ -1105,7 +1087,7 @@ export default function IndiaSatelliteMap({
           <div className="absolute top-4 right-4 z-[400] p-4 rounded-2xl bg-[rgba(8,12,18,0.92)] border border-white/15 backdrop-blur-2xl max-w-xs shadow-2xl">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full animate-ping" style={{ backgroundColor: currentHotspotMeta.color }} />
+                <span className="h-2.5 w-2.5 rounded-full " style={{ backgroundColor: currentHotspotMeta.color }} />
                 <span className="text-xs font-mono font-black uppercase" style={{ color: currentHotspotMeta.color }}>
                   {selectedMine.name} Hotspot
                 </span>
@@ -1149,7 +1131,7 @@ export default function IndiaSatelliteMap({
             <div className="flex items-center justify-between pb-2.5 border-b border-white/15 mb-3">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-xl bg-[#00FF88]/20 border border-[#00FF88]/40 text-[#00FF88] shadow-[0_0_10px_#00FF88]">
-                  <Cpu className="w-4 h-4 animate-pulse" />
+                  <Cpu className="w-4 h-4 " />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
@@ -1247,13 +1229,13 @@ export default function IndiaSatelliteMap({
             <div className="flex items-center gap-2 pt-1 border-t border-white/10">
               <a
                 href="#smart-blending"
-                className="ios-glass-button flex-1 py-2 rounded-xl text-[#00FF88] hover:text-white text-[10px] font-bold text-center uppercase tracking-wider transition-all"
+                className="ios-glass-button flex-1 py-2 rounded-xl text-[#00FF88] hover:text-white text-[10px] font-bold text-center uppercase tracking-wider transition-colors"
               >
                 3D Borehole Kriging
               </a>
               <a
                 href="#smart-blending"
-                className="ios-glass-button flex-1 py-2 rounded-xl text-[#38BDF8] hover:text-white text-[10px] font-bold text-center uppercase tracking-wider transition-all"
+                className="ios-glass-button flex-1 py-2 rounded-xl text-[#38BDF8] hover:text-white text-[10px] font-bold text-center uppercase tracking-wider transition-colors"
               >
                 Simulate Blending
               </a>
@@ -1263,7 +1245,7 @@ export default function IndiaSatelliteMap({
 
         {/* Loading Indicator when user clicks or searches on Map */}
         {isPredicting && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500] px-4 py-2 rounded-full bg-black/90 border border-[#00FF88] text-[#00FF88] font-mono text-xs font-bold shadow-[0_0_20px_#00FF88] flex items-center gap-2 animate-bounce">
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500] px-4 py-2 rounded-full bg-black/90 border border-[#00FF88] text-[#00FF88] font-mono text-xs font-bold shadow-[0_0_20px_#00FF88] flex items-center gap-2 ">
             <Activity className="w-4 h-4 animate-spin" />
             <span>Geocoding & Running AI Manganese Machine Learning Engine...</span>
           </div>
@@ -1283,7 +1265,7 @@ export default function IndiaSatelliteMap({
                 onSelectMine(orig)
                 triggerAIPrediction(m.lat, m.lng, `${m.name} Hotspot (${m.state})`)
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
                 selectedMine.id === m.id
                   ? 'text-black font-black shadow-lg'
                   : 'bg-white/5 border border-white/10 text-[#94A3B8] hover:text-[#FFFFFF] hover:bg-white/10'

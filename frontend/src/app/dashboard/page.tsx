@@ -127,7 +127,7 @@ export default async function DashboardPage() {
               </div>
               <Link
                 href="/#mission-control"
-                className="px-5 py-2.5 rounded-xl bg-[#00FF88]/15 border border-[#00FF88]/50 text-[#00FF88] hover:bg-[#00FF88]/25 font-mono text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all shadow-[0_0_15px_rgba(0,255,136,0.25)]"
+                className="px-5 py-2.5 rounded-xl bg-[#00FF88]/15 border border-[#00FF88]/50 text-[#00FF88] hover:bg-[#00FF88]/25 font-mono text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-colors shadow-[0_0_15px_rgba(0,255,136,0.25)]"
               >
                 Launch Console
               </Link>

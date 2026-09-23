@@ -75,7 +75,7 @@ export default function SingleFeaturePage({ params }: { params: Promise<{ id: st
     <main className="relative min-h-screen bg-[#020408] text-[#E8F0F2] pt-24 md:pt-28 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Dynamic Background Sheen matching feature accent color */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[450px] blur-3xl opacity-15 pointer-events-none transition-all duration-700"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[450px] blur-3xl opacity-15 pointer-events-none transition-colors duration-700"
         style={{ backgroundColor: currentFeature.color }}
       />
 
@@ -110,7 +110,7 @@ export default function SingleFeaturePage({ params }: { params: Promise<{ id: st
                 <button
                   key={feat.id}
                   onClick={() => router.push(`/features/${feat.slug}`)}
-                  className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`p-2.5 rounded-xl border text-left transition-colors cursor-pointer flex flex-col justify-between ${
                     isActive
                       ? 'bg-gradient-to-b from-[#00FF88]/20 to-[#00FF88]/5 border-[#00FF88] shadow-[0_0_20px_rgba(0,255,136,0.3)] scale-[1.02]'
                       : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 text-slate-300'
@@ -125,7 +125,7 @@ export default function SingleFeaturePage({ params }: { params: Promise<{ id: st
                     >
                       #{String(feat.number).padStart(2, '0')}
                     </span>
-                    {isActive && <span className="h-1.5 w-1.5 rounded-full bg-[#00FF88] animate-ping" />}
+                    {isActive && <span className="h-1.5 w-1.5 rounded-full bg-[#00FF88] " />}
                   </div>
                   <span
                     className={`text-xs font-bold font-space truncate ${
@@ -194,7 +194,7 @@ export default function SingleFeaturePage({ params }: { params: Promise<{ id: st
             <div className="shrink-0 flex flex-col gap-2.5 w-full sm:w-auto">
               <button
                 onClick={() => router.push(`/features/${nextFeature.slug}`)}
-                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-[#00FF88] to-[#38BDF8] text-black font-mono text-xs font-black uppercase tracking-wider hover:brightness-110 shadow-[0_0_20px_rgba(0,255,136,0.4)] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-[#00FF88] to-[#38BDF8] text-black font-mono text-xs font-black uppercase tracking-wider hover:brightness-110 shadow-[0_0_20px_rgba(0,255,136,0.4)] transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 type="button"
               >
                 <span>NEXT FEATURE (#{String(nextFeature.number).padStart(2, '0')})</span>
@@ -210,7 +210,7 @@ export default function SingleFeaturePage({ params }: { params: Promise<{ id: st
         <div className="mb-12">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#00FF88] animate-ping" />
+              <span className="h-2.5 w-2.5 rounded-full bg-[#00FF88] " />
               <h2 className="text-xs font-mono font-black uppercase tracking-widest text-[#00FF88]">
                 LIVE INTERACTIVE COMPONENT PREVIEW &bull; {currentFeature.shortTitle.toUpperCase()}
               </h2>
@@ -257,7 +257,7 @@ export default function SingleFeaturePage({ params }: { params: Promise<{ id: st
                 </p>
                 <button
                   onClick={() => window.dispatchEvent(new CustomEvent('open-historical-forecast-modal'))}
-                  className="px-6 py-3 rounded-xl bg-[#00E5FF] text-black font-mono font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,229,255,0.4)] cursor-pointer"
+                  className="px-6 py-3 rounded-xl bg-[#00E5FF] text-black font-mono font-bold text-xs uppercase tracking-wider hover:scale-105 transition-colors shadow-[0_0_20px_rgba(0,229,255,0.4)] cursor-pointer"
                   type="button"
                 >
                   Launch Interactive 50-Year Historical Modal
@@ -276,7 +276,7 @@ export default function SingleFeaturePage({ params }: { params: Promise<{ id: st
                 </p>
                 <button
                   onClick={() => window.dispatchEvent(new CustomEvent('open-aix-copilot'))}
-                  className="px-6 py-3 rounded-xl bg-[#00FF88] text-black font-mono font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,255,136,0.4)] cursor-pointer"
+                  className="px-6 py-3 rounded-xl bg-[#00FF88] text-black font-mono font-bold text-xs uppercase tracking-wider hover:scale-105 transition-colors shadow-[0_0_20px_rgba(0,255,136,0.4)] cursor-pointer"
                   type="button"
                 >
                   Launch Interactive AI Copilot
@@ -301,7 +301,7 @@ export default function SingleFeaturePage({ params }: { params: Promise<{ id: st
               {currentFeature.keyCapabilities.map((cap, i) => (
                 <div
                   key={i}
-                  className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-3 hover:border-white/20 transition-all"
+                  className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-3 hover:border-white/20 transition-colors"
                 >
                   <CheckCircle2 size={18} className="text-[#00FF88] shrink-0 mt-0.5" />
                   <span className="text-xs text-slate-200 leading-relaxed font-normal">{cap}</span>
@@ -335,7 +335,7 @@ export default function SingleFeaturePage({ params }: { params: Promise<{ id: st
           {/* Previous Feature Button */}
           <button
             onClick={() => router.push(`/features/${prevFeature.slug}`)}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-mono text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-mono text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
             type="button"
           >
             <ArrowLeft size={16} />
@@ -353,7 +353,7 @@ export default function SingleFeaturePage({ params }: { params: Promise<{ id: st
           {/* Next Feature Button */}
           <button
             onClick={() => router.push(`/features/${nextFeature.slug}`)}
-            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#00FF88] hover:bg-[#00FF88]/90 text-black font-mono text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(0,255,136,0.4)] cursor-pointer"
+            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#00FF88] hover:bg-[#00FF88]/90 text-black font-mono text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-[0_0_15px_rgba(0,255,136,0.4)] cursor-pointer"
             type="button"
           >
             <span>NEXT: FEATURE #{String(nextFeature.number).padStart(2, '0')} ({nextFeature.shortTitle})</span>

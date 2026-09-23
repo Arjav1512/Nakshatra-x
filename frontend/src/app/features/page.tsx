@@ -74,7 +74,7 @@ export default function FeaturesHubPage() {
               <Link
                 key={feat.id}
                 href={`/features/${feat.slug}`}
-                className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-[#00FF88] text-white hover:text-black font-mono text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer border border-white/10 hover:border-[#00FF88]"
+                className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-[#00FF88] text-white hover:text-black font-mono text-xs font-bold transition-colors shadow-md flex items-center gap-1.5 cursor-pointer border border-white/10 hover:border-[#00FF88]"
                 title={feat.title}
               >
                 <span className="text-[#38BDF8] group-hover:text-black">#{String(feat.number).padStart(2, '0')}</span>
@@ -92,7 +92,7 @@ export default function FeaturesHubPage() {
             return (
               <div
                 key={feature.id}
-                className="group relative rounded-2xl bg-[#081022]/90 border border-white/10 hover:border-[#00FF88]/50 p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,255,136,0.15)] hover:-translate-y-1 overflow-hidden"
+                className="group relative rounded-2xl bg-[#081022]/90 border border-white/10 hover:border-[#00FF88]/50 p-6 flex flex-col justify-between transition-colors duration-300 hover:shadow-[0_0_30px_rgba(0,255,136,0.15)] hover:-translate-y-1 overflow-hidden"
               >
                 {/* Accent glow on hover */}
                 <div
@@ -131,7 +131,7 @@ export default function FeaturesHubPage() {
                 {/* Open Feature Button */}
                 <Link
                   href={`/features/${feature.slug}`}
-                  className="w-full py-2.5 px-4 rounded-xl bg-white/5 group-hover:bg-[#00FF88] text-white group-hover:text-black font-mono text-xs font-bold flex items-center justify-between transition-all border border-white/10 group-hover:border-[#00FF88] shadow-md cursor-pointer"
+                  className="w-full py-2.5 px-4 rounded-xl bg-white/5 group-hover:bg-[#00FF88] text-white group-hover:text-black font-mono text-xs font-bold flex items-center justify-between transition-colors border border-white/10 group-hover:border-[#00FF88] shadow-md cursor-pointer"
                 >
                   <span>OPEN FEATURE #{String(feature.number).padStart(2, '0')}</span>
                   <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
