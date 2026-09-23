@@ -160,14 +160,7 @@ export default function AdminDashboard() {
   // Export Users as CSV
   const exportUsersCSV = () => {
     const headers = ['User ID', 'Full Name', 'Email', 'Role', 'Provider', 'Created At', 'Last Sign In']
-    const rows = users.map((u) => [
-      `"${u.id}"`,
-      `"${u.full_name || ''}"`,
-      `"${u.email || ''}"`,
-      `"${u.role || 'operator'}"`,
-      `"${u.provider || 'Supabase'}"`,
-      `"${u.created_at || ''}"`,
-      `"${u.last_sign_in_at || ''}"`,
+    const rows = users.map((u) => [ `"${u.id}"`, `"${u.full_name || ''}"`, `"${u.email || ''}"`, `"${u.role || 'operator'}"`, `"${u.provider || 'Supabase'}"`, `"${u.created_at || ''}"`, `"${u.last_sign_in_at || ''}"`,
     ])
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n')
@@ -207,7 +200,7 @@ export default function AdminDashboard() {
         <header className="border-b border-white/10 pb-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 rounded-2xl bg-[#38BDF8]/10 border border-[#38BDF8]/40 flex items-center justify-center text-[#38BDF8] shadow-[0_0_30px_rgba(56,189,248,0.25)]">
-              <Orbit size={26} className="animate-spin-slow" />
+              <Orbit size={26} />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -237,7 +230,7 @@ export default function AdminDashboard() {
                 fetchUserData()
                 fetchMines()
               }}
-              className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-slate-200 px-3.5 py-2 rounded-xl border border-white/10 hover:border-[#38BDF8]/40 text-xs transition-all cursor-pointer"
+              className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-slate-200 px-3.5 py-2 rounded-xl border border-white/10 hover:border-[#38BDF8]/40 text-xs transition-colors cursor-pointer"
             >
               <RefreshCw size={14} className={loadingUsers ? 'animate-spin text-[#38BDF8]' : ''} />
               <span>Sync</span>
@@ -253,7 +246,7 @@ export default function AdminDashboard() {
 
             <button type="button"
               onClick={handleLogout}
-              className="flex items-center gap-1.5 bg-[#FF2E63]/10 hover:bg-[#FF2E63]/20 text-[#FF2E63] px-4 py-2 rounded-xl border border-[#FF2E63]/30 hover:border-[#FF2E63] text-xs transition-all cursor-pointer shadow-sm"
+              className="flex items-center gap-1.5 bg-[#FF2E63]/10 hover:bg-[#FF2E63]/20 text-[#FF2E63] px-4 py-2 rounded-xl border border-[#FF2E63]/30 hover:border-[#FF2E63] text-xs transition-colors cursor-pointer shadow-sm"
             >
               <LogOut size={14} />
               <span>Terminate Session</span>
@@ -327,7 +320,7 @@ export default function AdminDashboard() {
         <div className="flex items-center gap-2 border-b border-white/10 pb-4 mb-6">
           <button type="button"
             onClick={() => setActiveTab('users')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
               activeTab === 'users'
                 ? 'bg-[#38BDF8]/20 border border-[#38BDF8] text-[#38BDF8] shadow-[0_0_20px_rgba(56,189,248,0.2)]'
                 : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white'
@@ -339,7 +332,7 @@ export default function AdminDashboard() {
 
           <button type="button"
             onClick={() => setActiveTab('operations')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
               activeTab === 'operations'
                 ? 'bg-[#00FF88]/20 border border-[#00FF88] text-[#00FF88] shadow-[0_0_20px_rgba(0,255,136,0.2)]'
                 : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white'
@@ -396,7 +389,7 @@ export default function AdminDashboard() {
               {/* Export Button */}
               <button type="button"
                 onClick={exportUsersCSV}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#00FF88]/15 hover:bg-[#00FF88]/25 border border-[#00FF88]/40 text-[#00FF88] text-xs font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#00FF88]/15 hover:bg-[#00FF88]/25 border border-[#00FF88]/40 text-[#00FF88] text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer whitespace-nowrap"
               >
                 <Download size={13} />
                 <span>Export CSV</span>
@@ -542,7 +535,7 @@ export default function AdminDashboard() {
               <button type="button"
                 onClick={handleSaveMines}
                 disabled={savingMines}
-                className="flex items-center gap-2 bg-[#00FF88]/20 hover:bg-[#00FF88]/30 text-[#00FF88] px-4 py-2 rounded-xl border border-[#00FF88]/40 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-[0_0_20px_rgba(0,255,136,0.2)]"
+                className="flex items-center gap-2 bg-[#00FF88]/20 hover:bg-[#00FF88]/30 text-[#00FF88] px-4 py-2 rounded-xl border border-[#00FF88]/40 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-[0_0_20px_rgba(0,255,136,0.2)]"
               >
                 <Save size={14} />
                 <span>{savingMines ? 'Saving...' : 'Save Operations Target'}</span>

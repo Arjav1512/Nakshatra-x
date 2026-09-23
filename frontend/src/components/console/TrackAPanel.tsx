@@ -6,6 +6,7 @@ import {
   type DrillTargetsResponse, type TrackAMetrics,
   fetchDrillTargets, fetchTrackAMetrics, predictPoint,
 } from '@/lib/console-api'
+import { cividis } from '@/lib/colormap'
 import { Metric } from './Evidence'
 
 /**
@@ -24,17 +25,17 @@ const OPENCAST_PILOT = { name: 'Dongri Buzurg', lat: 20.99, lng: 79.34 }
 
 function Unavailable({ what, reason }: { what: string; reason: string }) {
   return (
-    <div className="rounded-lg border border-rose-500/30 bg-rose-500/5 p-3 text-xs">
-      <p className="font-semibold text-rose-300">{what} unavailable</p>
-      <p className="mt-1 leading-snug text-slate-400">{reason}</p>
+    <div className="rounded-md border border-status-critical/30 bg-status-critical/5 p-3 text-xs">
+      <p className="font-semibold text-status-critical">{what} unavailable</p>
+      <p className="mt-1 leading-snug text-text-secondary">{reason}</p>
     </div>
   )
 }
 
 function Spinner({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-2 py-6 text-xs text-slate-400">
-      <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-600 border-t-emerald-400" />
+    <div className="flex items-center gap-2 py-6 text-xs text-text-secondary">
+      <span className="h-3 w-3 animate-spin rounded-full border-2 border-text-tertiary border-t-status-nominal" />
       {label}
     </div>
   )
@@ -71,11 +72,11 @@ export function TrackAPanel() {
   return (
     <section className="space-y-4">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-emerald-300">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-status-nominal">
           Track A · Prospectivity
         </h2>
         {metrics ? (
-          <p className="font-mono text-[10px] text-slate-500">
+          <p className="font-mono text-xs text-text-tertiary">
             {metrics.model_version} · validated {metrics.validation}
           </p>
         ) : null}
@@ -122,7 +123,7 @@ export function TrackAPanel() {
             />
           </div>
 
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/[0.07] p-3 text-[11px] leading-relaxed text-amber-100">
+          <div className="rounded-md border border-status-caution/30 bg-status-caution/[0.07] p-3 text-xs leading-relaxed text-status-caution">
             <p className="font-semibold">What this number does and does not support</p>
             <p className="mt-1">{metrics.ablation_note}</p>
             <p className="mt-1">{metrics.lithology_note}</p>
@@ -136,8 +137,8 @@ export function TrackAPanel() {
       )}
 
       {/* --- A-5 ranked drill targets with evidence --- */}
-      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
-        <p className="mb-2 text-[11px] uppercase tracking-wider text-slate-400">
+      <div className="rounded-md border border-border-default bg-surface-2 p-3">
+        <p className="mb-2 text-xs uppercase tracking-wider text-text-secondary">
           Ranked drill targets (PRD A-5) — ranked by score, each with its evidence
         </p>
         {tErr ? (
@@ -146,39 +147,53 @@ export function TrackAPanel() {
           <Spinner label="Ranking candidates…" />
         ) : (
           <>
-            <p className="mb-2 font-mono text-[10px] text-slate-500">
+            <p className="mb-2 font-mono text-xs text-text-tertiary">
               {targets.n_candidates.toLocaleString()} candidate cells · {targets.n_observations} measured
               observations · {targets.ranked_by}
             </p>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[520px] text-[11px]">
-                <thead className="text-slate-500">
-                  <tr className="border-b border-white/10 text-left">
+              <table className="w-full min-w-[520px] text-xs">
+                <thead className="text-text-tertiary">
+                  <tr className="border-b border-border-default text-left">
                     <th className="py-1 font-normal">#</th>
                     <th className="py-1 font-normal">Location</th>
                     <th className="py-1 font-normal">Prospectivity</th>
                     <th className="py-1 font-normal">Uncertainty (±sd)</th>
                   </tr>
                 </thead>
-                <tbody className="font-mono text-slate-300">
+                <tbody className="font-mono text-text-secondary">
                   {targets.targets.map((t) => (
-                    <tr key={`${t.lat},${t.lng}`} className="border-b border-white/5 align-top">
+                    <tr key={`${t.lat},${t.lng}`} className="border-b border-border-subtle align-top">
                       <td className="py-1.5">{t.rank}</td>
                       <td className="py-1.5">{t.lat.toFixed(3)}, {t.lng.toFixed(3)}</td>
-                      <td className="py-1.5 text-emerald-300">{t.prospectivity_score.toFixed(3)}</td>
-                      <td className="py-1.5 text-slate-400">±{t.uncertainty_sd.toFixed(3)}</td>
+                      <td className="py-1.5">
+                        {/* Continuous quantity -> sequential colormap, not a
+                            status colour: a score is not a state. The swatch
+                            carries the magnitude, the figure carries the value. */}
+                        <span className="inline-flex items-center gap-2">
+                          <span
+                            aria-hidden="true"
+                            className="inline-block h-2.5 w-2.5 rounded-sm"
+                            style={{ background: cividis(t.prospectivity_score) }}
+                          />
+                          <span className="text-text-primary">
+                            {t.prospectivity_score.toFixed(3)}
+                          </span>
+                        </span>
+                      </td>
+                      <td className="py-1.5 text-text-secondary">±{t.uncertainty_sd.toFixed(3)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
             <details className="mt-2">
-              <summary className="cursor-pointer text-[10px] uppercase tracking-wider text-slate-500 hover:text-slate-300">
+              <summary className="cursor-pointer text-xs uppercase tracking-wider text-text-tertiary hover:text-text-secondary">
                 evidence for rank 1
               </summary>
-              <p className="mt-1 text-[11px] leading-snug text-slate-400">{targets.targets[0]?.evidence}</p>
+              <p className="mt-1 text-xs leading-snug text-text-secondary">{targets.targets[0]?.evidence}</p>
             </details>
-            <p className="mt-2 text-[10px] leading-snug text-slate-500">
+            <p className="mt-2 text-xs leading-snug text-text-tertiary">
               {targets.information_gain_note}
             </p>
           </>
@@ -186,38 +201,38 @@ export function TrackAPanel() {
       </div>
 
       {/* --- map-click equivalent: the real model, with uncertainty --- */}
-      <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
-        <p className="mb-2 text-[11px] uppercase tracking-wider text-slate-400">
+      <div className="rounded-md border border-border-default bg-surface-2 p-3">
+        <p className="mb-2 text-xs uppercase tracking-wider text-text-secondary">
           Score a location (PRD A-3, A-4, A-7)
         </p>
         <div className="flex flex-wrap items-end gap-2">
-          <label className="text-[10px] text-slate-500">
+          <label className="text-xs text-text-tertiary">
             <span className="mb-1 block uppercase tracking-wider">Latitude</span>
             <input
               value={lat} onChange={(e) => setLat(e.target.value)} inputMode="decimal"
-              className="w-28 rounded border border-white/15 bg-black/40 px-2 py-1 font-mono text-xs text-slate-200 outline-none focus:border-emerald-400/60"
+              className="w-28 rounded border border-border-default bg-black/40 px-2 py-1 font-mono text-xs text-text-primary outline-none focus:border-status-nominal/60"
             />
           </label>
-          <label className="text-[10px] text-slate-500">
+          <label className="text-xs text-text-tertiary">
             <span className="mb-1 block uppercase tracking-wider">Longitude</span>
             <input
               value={lng} onChange={(e) => setLng(e.target.value)} inputMode="decimal"
-              className="w-28 rounded border border-white/15 bg-black/40 px-2 py-1 font-mono text-xs text-slate-200 outline-none focus:border-emerald-400/60"
+              className="w-28 rounded border border-border-default bg-black/40 px-2 py-1 font-mono text-xs text-text-primary outline-none focus:border-status-nominal/60"
             />
           </label>
-          <label className="flex items-center gap-1.5 pb-1 text-[10px] text-slate-400">
-            <input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} className="accent-emerald-500" />
+          <label className="flex items-center gap-1.5 pb-1 text-xs text-text-secondary">
+            <input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} className="accent-status-nominal" />
             fetch live Sentinel-2 (slower)
           </label>
           <button type="button"
             onClick={runProbe} disabled={pLoading}
-            className="rounded-md border border-emerald-400/40 bg-emerald-500/10 px-3 py-1.5 text-[11px] text-emerald-200 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
+            className="rounded-md border border-border-interactive bg-surface-2 px-3 py-1.5 text-xs text-text-primary transition-colors duration-[120ms] ease-out hover:bg-surface-3 disabled:opacity-45"
           >
             {pLoading ? 'Scoring…' : 'Score'}
           </button>
           <button type="button"
             onClick={() => { setLat(String(OPENCAST_PILOT.lat)); setLng(String(OPENCAST_PILOT.lng)) }}
-            className="rounded-md border border-white/15 px-3 py-1.5 text-[11px] text-slate-300 transition-colors hover:border-white/30"
+            className="rounded-md border border-border-default px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-border-interactive"
           >
             {OPENCAST_PILOT.name} (opencast pilot)
           </button>
@@ -263,7 +278,7 @@ export function TrackAPanel() {
         ) : null}
 
         {probe?.guardrails ? (
-          <div className="mt-3 space-y-1 rounded-md border border-white/10 bg-black/20 p-2 text-[10px] leading-snug text-slate-400">
+          <div className="mt-3 space-y-1 rounded-md border border-border-default bg-black/20 p-2 text-xs leading-snug text-text-secondary">
             <p>⛔ {probe.guardrails.no_subsurface_detection}</p>
             <p>⛔ {probe.guardrails.not_a_reserve}</p>
           </div>

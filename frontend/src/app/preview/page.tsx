@@ -123,7 +123,7 @@ export default function PreviewPage() {
                   NAKSHATRA-X AUTHENTICATION
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-[#00FF88]/15 border border-[#00FF88]/40 px-2 py-0.5 text-[9px] font-mono text-[#00FF88] font-bold">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#00FF88] animate-ping" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#00FF88] " />
                   LIVE PREVIEW
                 </span>
               </div>
@@ -246,7 +246,7 @@ export default function PreviewPage() {
               <button type="button"
                 onClick={handleQuickGuest}
                 disabled={actionLoading !== null}
-                className="w-full p-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 hover:border-[#38BDF8]/60 text-white text-left font-mono text-xs font-bold transition-all flex items-center justify-between cursor-pointer"
+                className="w-full p-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 hover:border-[#38BDF8]/60 text-white text-left font-mono text-xs font-bold transition-colors flex items-center justify-between cursor-pointer"
               >
                 <div>
                   <div className="text-white flex items-center gap-2">
@@ -337,7 +337,7 @@ export default function PreviewPage() {
                   <div className="pt-2">
                     <Link
                       href="/dashboard"
-                      className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#00FF88]/25 to-[#38BDF8]/25 hover:from-[#00FF88]/35 hover:to-[#38BDF8]/35 border border-[#00FF88] text-center font-mono text-xs font-bold text-white transition-all shadow-[0_0_20px_rgba(0,255,136,0.2)] flex items-center justify-center gap-1.5"
+                      className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#00FF88]/25 to-[#38BDF8]/25 hover:from-[#00FF88]/35 hover:to-[#38BDF8]/35 border border-[#00FF88] text-center font-mono text-xs font-bold text-white transition-colors shadow-[0_0_20px_rgba(0,255,136,0.2)] flex items-center justify-center gap-1.5"
                     >
                       Enter Operator Console <ArrowRight size={14} />
                     </Link>

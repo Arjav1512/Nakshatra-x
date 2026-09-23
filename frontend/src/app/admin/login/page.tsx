@@ -157,7 +157,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-[#38BDF8] to-[#00FF88] text-black font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_25px_rgba(56,189,248,0.25)] disabled:opacity-50"
+              className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-[#38BDF8] to-[#00FF88] text-black font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_25px_rgba(56,189,248,0.25)] disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -181,7 +181,7 @@ export default function AdminLoginPage() {
               </Link>
             ) : (
               <span className="text-[#38BDF8] text-[10px] flex items-center gap-1">
-                <Radio size={12} className="animate-pulse" /> Security Sealed
+                <Radio size={12} /> Security Sealed
               </span>
             )}
             <Link href="/" className="hover:text-white transition-colors">

@@ -5,6 +5,7 @@ import { type MineRow, fetchForecast, fetchMines, fetchTelemetry } from '@/lib/c
 import { synthetic } from '@/lib/provenance'
 import { type ExportRow, buildCsv, downloadCsv, exportPdf } from '@/lib/console-export'
 import { IntegrityBanner, Metric, SourceBadge } from './Evidence'
+import { Button, Card, EmptyState, Skeleton, StatusDot, type Status } from '@/components/ui/primitives'
 import { TrackAPanel } from './TrackAPanel'
 import { TrackBPanel } from './TrackBPanel'
 
@@ -21,6 +22,25 @@ import { TrackBPanel } from './TrackBPanel'
  */
 
 type Level = 'portfolio' | 'mine'
+
+/**
+ * A portfolio cell. Failures keep their status code so the UI can tell a
+ * backend that answered badly from one it could not reach at all — the two
+ * used to collapse to the same literal 'err' and render the same words.
+ * Distinguishing a *warming* backend from a broken one needs a signal the API
+ * does not yet send; that is logged in FEATURE_BACKLOG.md B-2, not faked here.
+ */
+type Cell = { shortfall: number; p: number } | { error: string; status: number } | null
+
+const isFailure = (c: Cell): c is { error: string; status: number } =>
+  c !== null && 'error' in c
+
+/** Risk band. Paired with a shape and a text label, never colour alone. */
+function band(p: number): { status: Status; label: string } {
+  if (p > 0.8) return { status: 'critical', label: 'high' }
+  if (p > 0.5) return { status: 'caution', label: 'elevated' }
+  return { status: 'nominal', label: 'low' }
+}
 
 /** Balaghat — PRD §13 Q4 names it the Track B pilot. */
 const PILOT_CODE = 'MOIL-BAL-01'
@@ -47,7 +67,7 @@ export function DecisionConsole() {
   const [level, setLevel] = useState<Level>('portfolio')
   const [track, setTrack] = useState<'B' | 'A'>('B')
   const [telemetry, setTelemetry] = useState<any>(null)
-  const [portfolio, setPortfolio] = useState<Record<number, { shortfall: number; p: number } | 'err' | null>>({})
+  const [portfolio, setPortfolio] = useState<Record<number, Cell>>({})
 
   useEffect(() => {
     let alive = true
@@ -77,7 +97,7 @@ export function DecisionConsole() {
                 shortfall: r.data.portfolio.expected_shortfall_tonnes,
                 p: Math.max(0, ...r.data.grades.map((g) => g.shortfall.p_shortfall)),
               }
-            : 'err',
+            : { error: r.error, status: r.status },
         }))
       }
     })()
@@ -113,7 +133,7 @@ export function DecisionConsole() {
     }
     for (const [id, v] of Object.entries(portfolio)) {
       const mine = mines?.find((m) => m.id === Number(id))
-      if (!mine || !v || v === 'err') continue
+      if (!mine || !v || isFailure(v)) continue
       rows.push({
         section: 'portfolio', metric: `${mine.name} expected shortfall`, value: Math.round(v.shortfall),
         unit: 'tonnes', source: 'Track B forecaster over synthetic operational data',
@@ -135,137 +155,164 @@ export function DecisionConsole() {
   }
 
   return (
-    <div className="min-h-screen bg-[#060b13] text-slate-200">
-      <style jsx global>{`
-        @media print {
-          .no-print { display: none !important; }
-          body { background: #fff !important; color: #000 !important; }
-          .print-plain { background: #fff !important; color: #000 !important; border-color: #ccc !important; }
-          details { display: block !important; }
-          details > summary { display: none; }
-        }
-      `}</style>
+    <div className="mx-auto max-w-[1280px] px-4 pb-4 pt-6 sm:px-6 lg:px-8">
 
-      {/* --- breadcrumb: portfolio -> mine -> face (D-6) --- */}
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-[#060b13]/95 backdrop-blur no-print">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-2 gap-y-1 px-4 py-3 text-xs">
-          <button type="button"
-            onClick={() => { setLevel('portfolio'); setSelected(null) }}
-            className={`transition-colors ${level === 'portfolio' ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`}
-          >
+      {/* Breadcrumb: portfolio -> mine -> track (D-6). Not sticky — the app bar
+          already is, and two stacked sticky rows eat the viewport on a laptop. */}
+      <div className="no-print flex flex-wrap items-center gap-x-2 gap-y-2 border-b border-border-subtle pb-3 text-sm">
+        <button
+          type="button"
+          onClick={() => { setLevel('portfolio'); setSelected(null) }}
+          className="rounded-md px-1.5 py-0.5 transition-colors duration-[120ms] ease-out hover:bg-surface-2 hover:text-text-primary"
+          aria-current={level === 'portfolio' ? 'page' : undefined}
+        >
+          <span className={level === 'portfolio' ? 'text-text-primary' : 'text-text-secondary'}>
             Portfolio
-          </button>
-          {selected ? (
-            <>
-              <span className="text-slate-600">/</span>
-              <span className="text-white">{selected.name}</span>
-              <span className="text-slate-600">/</span>
-              <span className="text-slate-400">{track === 'B' ? 'production risk' : 'prospectivity'}</span>
-            </>
-          ) : null}
-          <div className="ml-auto flex items-center gap-2">
-            <button type="button" onClick={doExportCsv} className="rounded border border-white/15 px-2.5 py-1 text-[11px] text-slate-300 transition-colors hover:border-white/30">
-              Export CSV
-            </button>
-            <button type="button" onClick={exportPdf} className="rounded border border-white/15 px-2.5 py-1 text-[11px] text-slate-300 transition-colors hover:border-white/30">
-              Export PDF
-            </button>
-          </div>
+          </span>
+        </button>
+        {selected ? (
+          <>
+            <span aria-hidden="true" className="text-text-tertiary">/</span>
+            <span className="text-text-primary">{selected.name}</span>
+            <span aria-hidden="true" className="text-text-tertiary">/</span>
+            <span className="text-text-secondary">
+              {track === 'B' ? 'production risk' : 'prospectivity'}
+            </span>
+          </>
+        ) : null}
+        <div className="ml-auto flex items-center gap-2">
+          <Button onClick={doExportCsv}>Export CSV</Button>
+          <Button onClick={exportPdf}>Export PDF</Button>
         </div>
-      </header>
+      </div>
 
-      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6">
+      <main className="space-y-8 pt-6">
         <div className="print-plain">
-          <h1 className="text-lg font-semibold text-white">
-            Nakshatra-X · decision support for MOIL
-          </h1>
-          <p className="mt-1 max-w-3xl text-xs leading-relaxed text-slate-400">
-            Two tracks, as the problem statement implies but does not say: <strong className="text-sky-300">Track B</strong> predicts
-            production shortfall over days to months, <strong className="text-emerald-300">Track A</strong> ranks where to
-            prospect over years. Satellite data is used for what it can measure — weather and surface
-            geology. Nothing here claims to see ore underground.
+          <h1 className="text-2xl">Decision support for MOIL</h1>
+          <p className="measure mt-2 text-sm text-text-secondary">
+            Two tracks, as the problem statement implies but does not say:{' '}
+            <strong className="font-medium text-text-primary">Track B</strong> predicts production
+            shortfall over days to months,{' '}
+            <strong className="font-medium text-text-primary">Track A</strong> ranks where to
+            prospect over years. Satellite data is used for what it can measure — weather and
+            surface geology. Nothing here claims to see ore underground.
           </p>
         </div>
 
         {telemetry?.data_integrity ? <IntegrityBanner integrity={telemetry.data_integrity} /> : null}
 
         {level === 'portfolio' ? (
-          <section className="space-y-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-300">
-              Portfolio · shortfall risk by mine
-            </h2>
+          <section>
+            <h2 className="label">Portfolio · shortfall risk by mine</h2>
+
             {minesErr ? (
-              <div className="rounded-lg border border-rose-500/30 bg-rose-500/5 p-3 text-xs">
-                <p className="font-semibold text-rose-300">Mine register unavailable</p>
-                <p className="mt-1 text-slate-400">{minesErr}</p>
-              </div>
+              <EmptyState
+                className="mt-3"
+                title="Mine register unavailable"
+                detail={minesErr}
+              />
             ) : !mines ? (
-              <p className="py-6 text-xs text-slate-400">Loading mine register…</p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {[0, 1, 2, 3, 4, 5].map((i) => (
+                  <Card key={i}>
+                    <div className="space-y-2 p-4">
+                      <Skeleton className="h-4 w-28" />
+                      <Skeleton className="h-3 w-20" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  </Card>
+                ))}
+                <p className="sr-only">Loading mine register</p>
+              </div>
             ) : (
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <ul className="mt-3 grid list-none gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {mines.map((m) => {
                   const v = portfolio[m.id]
                   const isPilot = m.mine_code === PILOT_CODE
                   return (
-                    <button type="button"
-                      key={m.id}
-                      onClick={() => openMine(m)}
-                      className={`rounded-lg border p-3 text-left transition-colors ${
-                        isPilot ? 'border-sky-400/40 bg-sky-500/[0.06] hover:border-sky-400/70'
-                                : 'border-white/10 bg-white/[0.02] hover:border-white/30'
-                      }`}
-                    >
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className="text-sm font-medium text-white">{m.name}</span>
-                        <span className="font-mono text-[10px] text-slate-500">{m.mine_code}</span>
-                      </div>
-                      <p className="mt-0.5 text-[10px] text-slate-500">{m.state} · {m.zone}</p>
-                      {v === undefined || v === null ? (
-                        <p className="mt-2 text-[11px] text-slate-500">computing…</p>
-                      ) : v === 'err' ? (
-                        <p className="mt-2 text-[11px] text-rose-300">forecast unavailable</p>
-                      ) : (
-                        <div className="mt-2 flex flex-wrap items-baseline gap-2">
-                          <span className={`font-mono text-sm ${
-                            v.p > 0.8 ? 'text-rose-300' : v.p > 0.5 ? 'text-amber-300' : 'text-emerald-300'
-                          }`}>
-                            P {Math.round(v.p * 100)}%
-                          </span>
-                          <span className="font-mono text-[11px] text-slate-400">
-                            −{Math.round(v.shortfall).toLocaleString()} t
-                          </span>
-                          {/* N-3: the strip shows numbers, so it must show their kind too. */}
-                          <SourceBadge env={PORTFOLIO_ENV} />
-                        </div>
-                      )}
-                      {isPilot ? (
-                        <p className="mt-1 text-[10px] text-sky-300/80">Track B pilot (PRD §13 Q4)</p>
-                      ) : null}
-                    </button>
+                    <li key={m.id}>
+                      <Card interactive className="h-full">
+                        <button
+                          type="button"
+                          onClick={() => openMine(m)}
+                          className="h-full w-full p-4 text-left"
+                        >
+                          <div className="flex items-baseline justify-between gap-2">
+                            <span className="font-medium text-text-primary">{m.name}</span>
+                            <span className="font-mono text-xs text-text-tertiary">
+                              {m.mine_code}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs text-text-tertiary">
+                            {m.state} · {m.zone}
+                          </p>
+
+                          {v === undefined || v === null ? (
+                            <div className="mt-3">
+                              <Skeleton className="h-4 w-24" />
+                              <span className="sr-only">Computing forecast</span>
+                            </div>
+                          ) : isFailure(v) ? (
+                            /* A backend that answered and one that could not be
+                               reached are different problems; say which. */
+                            <p className="mt-3 text-sm text-status-unknown">
+                              {v.status === 0
+                                ? 'Forecast unreachable — no response from the service.'
+                                : `Forecast unavailable (${v.status}).`}
+                            </p>
+                          ) : (
+                            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                              <span className="inline-flex items-center gap-1.5">
+                                <StatusDot status={band(v.p).status} />
+                                <span className="font-mono text-base text-text-primary">
+                                  P {Math.round(v.p * 100)}%
+                                </span>
+                                <span className="text-xs text-text-secondary">
+                                  {band(v.p).label}
+                                </span>
+                              </span>
+                              <span className="font-mono text-sm text-text-secondary">
+                                −{Math.round(v.shortfall).toLocaleString()} t
+                              </span>
+                              {/* N-3: the strip shows numbers, so it shows their kind too. */}
+                              <SourceBadge env={PORTFOLIO_ENV} />
+                            </div>
+                          )}
+
+                          {isPilot ? (
+                            <p className="mt-2 text-xs text-text-tertiary">
+                              Track B pilot (PRD §13 Q4)
+                            </p>
+                          ) : null}
+                        </button>
+                      </Card>
+                    </li>
                   )
                 })}
-              </div>
+              </ul>
             )}
-            <p className="text-[10px] leading-snug text-slate-500">
-              Shortfall probabilities are computed per mine from the Track B forecaster over synthetic
-              operational data. Open a mine for drivers, the backtest and constraint-checked actions.
+
+            <p className="measure mt-4 text-xs text-text-tertiary">
+              Shortfall probabilities are computed per mine from the Track B forecaster over
+              synthetic operational data. Open a mine for drivers, the backtest and
+              constraint-checked actions.
             </p>
           </section>
         ) : null}
 
         {level === 'mine' && selected ? (
           <>
-            <nav className="flex gap-2 no-print">
+            <nav aria-label="Track" className="no-print flex flex-wrap gap-2">
               {(['B', 'A'] as const).map((t) => (
-                <button type="button"
+                <button
+                  type="button"
                   key={t}
                   onClick={() => setTrack(t)}
                   aria-pressed={track === t}
-                  className={`rounded-md border px-3 py-1.5 text-xs transition-colors ${
+                  className={`rounded-md border px-3 py-1.5 text-sm transition-colors duration-[120ms] ease-out ${
                     track === t
-                      ? t === 'B' ? 'border-sky-400/60 bg-sky-500/10 text-sky-200'
-                                  : 'border-emerald-400/60 bg-emerald-500/10 text-emerald-200'
-                      : 'border-white/10 text-slate-400 hover:border-white/25'
+                      ? 'border-accent bg-accent-muted text-text-primary'
+                      : 'border-border-default text-text-secondary hover:bg-surface-2 hover:text-text-primary'
                   }`}
                 >
                   {t === 'B' ? 'Track B · production risk' : 'Track A · prospectivity'}
@@ -273,14 +320,17 @@ export function DecisionConsole() {
               ))}
             </nav>
 
-            {/* --- face/section level (D-6) --- */}
+            {/* face/section level (D-6) */}
             {track === 'B' && telemetry ? (
-              <section className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
-                <p className="mb-2 text-[11px] uppercase tracking-wider text-slate-400">
-                  {selected.name} · conditions
-                </p>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  {['weather.rainfall_14d_mm', 'weather.land_surface_temp_c', 'risk.live_downtime_hours', 'operations.blasts_this_week']
+              <section>
+                <h2 className="label">{selected.name} · conditions</h2>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {[
+                    'weather.rainfall_14d_mm',
+                    'weather.land_surface_temp_c',
+                    'risk.live_downtime_hours',
+                    'operations.blasts_this_week',
+                  ]
                     .filter((k) => telemetry.provenance?.[k])
                     .map((k) => (
                       <Metric
@@ -294,24 +344,13 @@ export function DecisionConsole() {
               </section>
             ) : null}
 
-            {track === 'B'
-              ? <TrackBPanel mineId={selected.id} mineName={selected.name} />
-              : <TrackAPanel />}
+            {track === 'B' ? (
+              <TrackBPanel mineId={selected.id} mineName={selected.name} />
+            ) : (
+              <TrackAPanel />
+            )}
           </>
         ) : null}
-
-        <footer className="border-t border-white/10 pt-4 text-[10px] leading-relaxed text-slate-500">
-          <p>
-            <strong className="text-slate-400">Guardrails.</strong> No subsurface ore detection from
-            satellite — the named inputs are surface and atmospheric only. No statutory UNFC reserve
-            figures — outputs are decision support for a qualified person. Constraints are enforced,
-            never learned. Stale or missing sources are stated, never silently extrapolated.
-          </p>
-          <p className="mt-1">
-            Operational data is synthetic, generated to the published ingestion contract, because
-            MOIL&rsquo;s records are proprietary (PRD §8.2). Weather is measured live.
-          </p>
-        </footer>
       </main>
     </div>
   )

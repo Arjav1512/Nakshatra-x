@@ -108,12 +108,12 @@ export default function LoadingPreviewPage() {
             <div className="h-28 w-28 rounded-full border border-[#00FF88]/30 border-t-[#00FF88] border-r-transparent animate-spin [animation-duration:2.5s]" />
             <div className="absolute h-20 w-20 rounded-full border border-[#38BDF8]/40 border-b-[#38BDF8] border-l-transparent animate-spin [animation-direction:reverse] [animation-duration:1.8s]" />
             <div className="absolute flex h-12 w-12 items-center justify-center rounded-2xl bg-[#00FF88]/15 border border-[#00FF88]/50 shadow-[0_0_24px_rgba(0,255,136,0.6)]">
-              <Satellite className="h-6 w-6 text-[#00FF88] animate-pulse" />
+              <Satellite className="h-6 w-6 text-[#00FF88] " />
             </div>
           </div>
 
           <div className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-[#38BDF8] flex items-center justify-center gap-1.5 mb-1.5">
-            <Activity className="h-3.5 w-3.5 text-[#00FF88] animate-pulse" />
+            <Activity className="h-3.5 w-3.5 text-[#00FF88] " />
             NAKSHATRA-X DEEP SPACE TELEMETRY
           </div>
 
@@ -146,7 +146,7 @@ export default function LoadingPreviewPage() {
             </div>
             <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden p-0.5 border border-white/10">
               <div
-                className="h-full bg-gradient-to-r from-[#00FF88] via-[#38BDF8] to-[#00FF88] rounded-full transition-all duration-150 shadow-[0_0_15px_#00FF88]"
+                className="h-full bg-gradient-to-r from-[#00FF88] via-[#38BDF8] to-[#00FF88] rounded-full transition-colors duration-150 shadow-[0_0_15px_#00FF88]"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -157,7 +157,7 @@ export default function LoadingPreviewPage() {
             <button
               type="button"
               onClick={runSimulation}
-              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 hover:border-white/30 text-xs font-mono text-slate-300 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 hover:border-white/30 text-xs font-mono text-slate-300 hover:text-white transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
               <RefreshCw size={13} />
               <span>Re-run Calibration</span>
@@ -165,7 +165,7 @@ export default function LoadingPreviewPage() {
 
             <Link
               href="/"
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#00FF88]/20 border border-[#00FF88]/60 hover:bg-[#00FF88]/30 text-[#00FF88] font-mono text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(0,255,136,0.3)]"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#00FF88]/20 border border-[#00FF88]/60 hover:bg-[#00FF88]/30 text-[#00FF88] font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(0,255,136,0.3)]"
             >
               <span>Launch Website</span>
               <ChevronRight size={14} />
@@ -173,7 +173,7 @@ export default function LoadingPreviewPage() {
 
             <Link
               href="/login"
-              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#38BDF8]/20 border border-[#38BDF8]/50 hover:bg-[#38BDF8]/30 text-[#38BDF8] font-mono text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#38BDF8]/20 border border-[#38BDF8]/50 hover:bg-[#38BDF8]/30 text-[#38BDF8] font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1"
             >
               <span>Mission Login</span>
             </Link>

@@ -28,7 +28,7 @@ function CustomNode({ data }: NodeProps) {
   const d = data as unknown as NodeData
   return (
     <div
-      className="ios-glass-card px-4 py-3 text-center shadow-2xl transition-all"
+      className="ios-glass-card px-4 py-3 text-center shadow-2xl transition-colors"
       style={{ minWidth: 150, borderColor: d.color + '60' }}
     >
       <Handle type="target" position={Position.Left} className="!bg-transparent !border-none" />

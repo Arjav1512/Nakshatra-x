@@ -238,7 +238,7 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
         <div className="flex items-center justify-between gap-4 mb-2 flex-wrap">
           <div className="flex items-center gap-2">
             <span className="ios-badge ios-badge-live text-[10px] font-mono font-bold flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-[#00FF88] animate-pulse" />
+              <Activity className="w-3.5 h-3.5 text-[#00FF88] " />
               AI/ML MODULE 02 &bull; PROPHET &amp; XGBOOST
             </span>
             <span className="text-xs font-mono text-[#38BDF8] font-bold">
@@ -258,7 +258,7 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
             {/* Live Stream Toggle */}
             <button
               onClick={() => setIsLiveStreaming(!isLiveStreaming)}
-              className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-all ${
+              className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-colors ${
                 isLiveStreaming
                   ? 'bg-[#00FF88]/20 border border-[#00FF88] text-[#00FF88]'
                   : 'bg-white/10 border border-white/20 text-slate-400'
@@ -268,7 +268,7 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
             >
               {isLiveStreaming ? (
                 <>
-                  <Radio className="w-3 h-3 text-[#00FF88] animate-pulse" />
+                  <Radio className="w-3 h-3 text-[#00FF88] " />
                   <span>STREAMING</span>
                 </>
               ) : (
@@ -304,7 +304,7 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
       <div className="p-4 rounded-2xl bg-gradient-to-r from-[#061224] via-[#091D38] to-[#0A264A] border border-[#38BDF8]/40 shadow-xl space-y-3">
         <div className="flex items-center justify-between border-b border-white/15 pb-2.5 flex-wrap gap-2">
           <div className="flex items-center gap-2">
-            <Radio className="w-4 h-4 text-[#00FF88] animate-pulse" />
+            <Radio className="w-4 h-4 text-[#00FF88] " />
             <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
               Live Shift Production Telemetry &bull; {shiftInfo.name}
             </span>
@@ -324,7 +324,7 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
             </div>
             <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
               <div
-                className="bg-[#00FF88] h-full transition-all duration-500"
+                className="bg-[#00FF88] h-full transition-colors duration-500"
                 style={{ width: `${Math.min(100, Math.round((liveShiftExtracted / shiftInfo.shiftTargetTonnes) * 100))}%` }}
               />
             </div>
@@ -445,7 +445,7 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
             <div className="flex items-center p-0.5 rounded-lg bg-black/60 border border-white/15 text-[10px] font-mono">
               <button
                 onClick={() => setChartView('daily')}
-                className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
+                className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${
                   chartView === 'daily' ? 'bg-[#38BDF8] text-black font-bold' : 'text-slate-400 hover:text-white'
                 }`}
                 type="button"
@@ -454,7 +454,7 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
               </button>
               <button
                 onClick={() => setChartView('cumulative')}
-                className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
+                className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${
                   chartView === 'cumulative' ? 'bg-[#00FF88] text-black font-bold' : 'text-slate-400 hover:text-white'
                 }`}
                 type="button"
@@ -636,7 +636,7 @@ export default function ProductionSentinel({ mine, forecast, risk, weather }: Pr
             setDowntimeSlider(12.5)
             setGradeVariance(0)
           }}
-          className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white text-[10px] font-mono shrink-0 cursor-pointer hover:bg-white/15 transition-all"
+          className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white text-[10px] font-mono shrink-0 cursor-pointer hover:bg-white/15 transition-colors"
           type="button"
           title="Reset sliders to live telemetry baseline"
         >

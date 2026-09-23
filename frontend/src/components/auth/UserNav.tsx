@@ -103,15 +103,15 @@ export function UserNav() {
       {/* 3D Cyber Robot Avatar Trigger Button */}
       <button
         onClick={() => setMenuOpen(!menuOpen)}
-        className="relative h-9 w-9 md:h-10 md:w-10 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 shrink-0 cursor-pointer group"
+        className="relative h-9 w-9 md:h-10 md:w-10 rounded-full flex items-center justify-center transition-colors hover:scale-110 active:scale-95 shrink-0 cursor-pointer group"
         type="button"
         title="3D Cyber Robot Avatar • Click to open Sign In & Guest Mode"
       >
         <CyberRobotAvatar
           size="sm"
-          className="h-9 w-9 md:h-10 md:w-10 border-2 border-[#00FF88] shadow-[0_0_16px_rgba(0,255,136,0.5)] group-hover:shadow-[0_0_25px_rgba(0,255,136,0.95)] transition-all"
+          className="h-9 w-9 md:h-10 md:w-10 border-2 border-[#00FF88] shadow-[0_0_16px_rgba(0,255,136,0.5)] group-hover:shadow-[0_0_25px_rgba(0,255,136,0.95)] transition-colors"
         />
-        <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#00FF88] border border-black animate-ping" />
+        <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#00FF88] border border-black " />
         <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#00FF88] border border-black" />
       </button>
 
@@ -147,7 +147,7 @@ export function UserNav() {
                     setMenuOpen(false)
                     router.push('/dashboard')
                   }}
-                  className="flex-1 py-2 px-3 rounded-xl bg-[#00FF88]/20 border border-[#00FF88] text-[#00FF88] hover:text-white font-mono text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  className="flex-1 py-2 px-3 rounded-xl bg-[#00FF88]/20 border border-[#00FF88] text-[#00FF88] hover:text-white font-mono text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <LayoutDashboard size={14} />
                   <span>Dashboard</span>
@@ -155,7 +155,7 @@ export function UserNav() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="py-2 px-3 rounded-xl bg-[#FF2E63]/20 border border-[#FF2E63]/60 text-[#FF2E63] hover:text-white font-mono text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer"
+                  className="py-2 px-3 rounded-xl bg-[#FF2E63]/20 border border-[#FF2E63]/60 text-[#FF2E63] hover:text-white font-mono text-xs font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                   title="Sign Out"
                 >
                   <LogOut size={14} />
@@ -173,7 +173,7 @@ export function UserNav() {
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-sans font-semibold text-xs transition-all shadow-md cursor-pointer group"
+                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-sans font-semibold text-xs transition-colors shadow-md cursor-pointer group"
               >
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                   <path
@@ -201,7 +201,7 @@ export function UserNav() {
                 type="button"
                 onClick={handleGithubLogin}
                 disabled={actionLoading === 'github'}
-                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 rounded-xl bg-[#24292F] hover:bg-[#1B1F23] border border-white/20 text-white font-sans font-semibold text-xs transition-all shadow-md cursor-pointer group disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 rounded-xl bg-[#24292F] hover:bg-[#1B1F23] border border-white/20 text-white font-sans font-semibold text-xs transition-colors shadow-md cursor-pointer group disabled:opacity-50"
               >
                 {actionLoading === 'github' ? (
                   <Loader2 size={15} className="animate-spin text-white" />
@@ -218,7 +218,7 @@ export function UserNav() {
                 type="button"
                 onClick={handleGuestLogin}
                 disabled={actionLoading === 'guest'}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-3.5 rounded-xl bg-[#00FF88]/15 hover:bg-[#00FF88]/25 border border-[#00FF88]/60 text-[#00FF88] font-mono text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-[0_0_15px_rgba(0,255,136,0.2)] disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-3.5 rounded-xl bg-[#00FF88]/15 hover:bg-[#00FF88]/25 border border-[#00FF88]/60 text-[#00FF88] font-mono text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-[0_0_15px_rgba(0,255,136,0.2)] disabled:opacity-50"
               >
                 {actionLoading === 'guest' ? (
                   <Loader2 size={15} className="animate-spin text-[#00FF88]" />
@@ -235,7 +235,7 @@ export function UserNav() {
                   setMenuOpen(false)
                   router.push('/login')
                 }}
-                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-[11px] font-mono transition-all cursor-pointer border border-white/10"
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-[11px] font-mono transition-colors cursor-pointer border border-white/10"
               >
                 <Mail size={13} className="text-[#38BDF8]" />
                 <span>Or Sign in with Email OTP &rarr;</span>

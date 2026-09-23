@@ -413,7 +413,7 @@ export function LoginForm() {
             type="button"
             onClick={handleGoogleLogin}
             disabled={loading !== null}
-            className="w-full flex items-center justify-center gap-2.5 py-3 px-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-sans font-semibold text-xs transition-all shadow-[0_0_15px_rgba(255,255,255,0.15)] cursor-pointer disabled:opacity-50 group"
+            className="w-full flex items-center justify-center gap-2.5 py-3 px-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-sans font-semibold text-xs transition-colors shadow-[0_0_15px_rgba(255,255,255,0.15)] cursor-pointer disabled:opacity-50 group"
           >
             {loading === 'google' ? (
               <Loader2 size={15} className="animate-spin text-slate-900" />
@@ -447,7 +447,7 @@ export function LoginForm() {
             type="button"
             onClick={handleGithubLogin}
             disabled={loading !== null}
-            className="w-full flex items-center justify-center gap-2.5 py-3 px-3.5 rounded-xl bg-[#24292F] hover:bg-[#1B1F23] border border-white/20 text-white font-sans font-semibold text-xs transition-all shadow-[0_0_15px_rgba(0,0,0,0.4)] cursor-pointer disabled:opacity-50 group"
+            className="w-full flex items-center justify-center gap-2.5 py-3 px-3.5 rounded-xl bg-[#24292F] hover:bg-[#1B1F23] border border-white/20 text-white font-sans font-semibold text-xs transition-colors shadow-[0_0_15px_rgba(0,0,0,0.4)] cursor-pointer disabled:opacity-50 group"
           >
             {loading === 'github' ? (
               <Loader2 size={15} className="animate-spin text-white" />
@@ -502,7 +502,7 @@ export function LoginForm() {
               <button
                 type="submit"
                 disabled={loading === 'send_otp' || resendCooldown > 0}
-                className="flex-1 py-2.5 px-3 rounded-xl bg-[#38BDF8]/15 hover:bg-[#38BDF8]/25 border border-[#38BDF8]/50 hover:border-[#38BDF8] text-[#38BDF8] font-mono text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-2.5 px-3 rounded-xl bg-[#38BDF8]/15 hover:bg-[#38BDF8]/25 border border-[#38BDF8]/50 hover:border-[#38BDF8] text-[#38BDF8] font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading === 'send_otp' ? (
                   <Loader2 size={14} className="animate-spin" />
@@ -525,7 +525,7 @@ export function LoginForm() {
 
         {/* ================= SECTION 2: SUBMIT CODE SECTION ================= */}
         <div
-          className={`p-4 sm:p-5 rounded-xl text-left space-y-3.5 transition-all ${
+          className={`p-4 sm:p-5 rounded-xl text-left space-y-3.5 transition-colors ${
             codeSent
               ? 'bg-[#00FF88]/5 border-2 border-[#00FF88]/60 shadow-[0_0_30px_rgba(0,255,136,0.15)]'
               : 'bg-black/40 border border-white/15'
@@ -566,7 +566,7 @@ export function LoginForm() {
                 onChange={(e) => handleDigitChange(idx, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(idx, e)}
                 onPaste={handlePaste}
-                className={`h-12 sm:h-14 w-full text-center font-mono font-black text-xl sm:text-2xl rounded-xl bg-black/90 border outline-none transition-all ${
+                className={`h-12 sm:h-14 w-full text-center font-mono font-black text-xl sm:text-2xl rounded-xl bg-black/90 border outline-none transition-colors ${
                   digit
                     ? 'border-[#00FF88] text-[#00FF88] shadow-[0_0_15px_rgba(0,255,136,0.35)]'
                     : 'border-white/20 text-white focus:border-[#00FF88] focus:shadow-[0_0_15px_rgba(0,255,136,0.2)] placeholder-slate-600'
@@ -580,7 +580,7 @@ export function LoginForm() {
             type="button"
             onClick={() => executeVerification()}
             disabled={loading === 'verify_otp' || !codeFilled}
-            className="w-full py-3.5 rounded-xl bg-[#00FF88]/20 hover:bg-[#00FF88]/30 border border-[#00FF88] text-[#00FF88] hover:text-white font-mono text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(0,255,136,0.25)] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full py-3.5 rounded-xl bg-[#00FF88]/20 hover:bg-[#00FF88]/30 border border-[#00FF88] text-[#00FF88] hover:text-white font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(0,255,136,0.25)] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {loading === 'verify_otp' ? (
               <Loader2 size={16} className="animate-spin text-[#00FF88]" />
@@ -609,7 +609,7 @@ export function LoginForm() {
           type="button"
           onClick={handleGuestLogin}
           disabled={loading !== null}
-          className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 hover:border-[#38BDF8]/50 text-slate-200 hover:text-white transition-all cursor-pointer shadow-sm group"
+          className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 hover:border-[#38BDF8]/50 text-slate-200 hover:text-white transition-colors cursor-pointer shadow-sm group"
         >
           {loading === 'guest' ? (
             <Loader2 size={16} className="animate-spin text-[#38BDF8]" />

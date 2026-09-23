@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { FALLBACK_MINES } from '@/components/mission-control/data'
 import LocationFloodAlertFinder from '@/components/mission-control/LocationFloodAlertFinder'
-import SpaceDustParticles from '@/components/mission-control/SpaceDustParticles'
 import { CloudRain, ArrowLeft, ArrowRight, Home, Sparkles } from 'lucide-react'
 
 export default function DedicatedFloodAlertPage() {
@@ -12,8 +11,6 @@ export default function DedicatedFloodAlertPage() {
 
   return (
     <main className="relative min-h-screen bg-[#020408] text-[#E8F0F2] pt-24 md:pt-28 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      <SpaceDustParticles />
-
       {/* Radial background sheen */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-[radial-gradient(ellipse_at_top,_rgba(0,229,255,0.15)_0%,_transparent_70%)] pointer-events-none" />
 
@@ -32,7 +29,7 @@ export default function DedicatedFloodAlertPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/"
-              className="px-3.5 py-1.5 rounded-full bg-[#00FF88]/15 border border-[#00FF88]/40 text-[#00FF88] text-xs font-mono font-bold flex items-center gap-2 hover:bg-[#00FF88]/25 transition-all shadow-[0_0_12px_rgba(0,255,136,0.3)]"
+              className="px-3.5 py-1.5 rounded-full bg-[#00FF88]/15 border border-[#00FF88]/40 text-[#00FF88] text-xs font-mono font-bold flex items-center gap-2 hover:bg-[#00FF88]/25 transition-colors shadow-[0_0_12px_rgba(0,255,136,0.3)]"
             >
               <Sparkles size={13} />
               <span>Back to Video Landing Page</span>
@@ -43,7 +40,7 @@ export default function DedicatedFloodAlertPage() {
         {/* Page Title & Subtitle */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <CloudRain className="text-[#00E5FF] animate-pulse" size={24} />
+            <CloudRain className="text-[#00E5FF] " size={24} />
             <h1 className="text-xl sm:text-3xl font-bold font-space text-white">
               ISRO RAIN RADAR &amp; REAL-TIME SATELLITE FLOOD ALERT FINDER
             </h1>
@@ -60,7 +57,7 @@ export default function DedicatedFloodAlertPage() {
         <div className="p-4 rounded-2xl bg-[#060C1B]/95 border border-white/20 backdrop-blur-2xl shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 mt-12">
           <Link
             href="/"
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-mono text-xs font-bold flex items-center justify-center gap-2 transition-all"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-mono text-xs font-bold flex items-center justify-center gap-2 transition-colors"
           >
             <ArrowLeft size={16} />
             <span>Mission Control Landing Page</span>
@@ -68,7 +65,7 @@ export default function DedicatedFloodAlertPage() {
 
           <Link
             href="/production"
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#00E5FF]/25 via-[#38BDF8]/20 to-[#A855F7]/25 hover:from-[#00E5FF]/40 hover:to-[#A855F7]/40 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all duration-300 cursor-pointer border border-[#00E5FF]/60 shadow-[0_0_18px_rgba(0,229,255,0.25)] backdrop-blur-xl"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#00E5FF]/25 via-[#38BDF8]/20 to-[#A855F7]/25 hover:from-[#00E5FF]/40 hover:to-[#A855F7]/40 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2.5 transition-colors duration-300 cursor-pointer border border-[#00E5FF]/60 shadow-[0_0_18px_rgba(0,229,255,0.25)] backdrop-blur-xl"
           >
             <span className="font-extrabold text-white">Production &amp; SCADA Dewatering Pumps</span>
             <ArrowRight size={15} className="text-[#00E5FF]" />

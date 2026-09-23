@@ -71,9 +71,11 @@ Most-used: `#00FF88` ×641 · `#38BDF8` ×343 · `#FACC15` ×110 · `#94A3B8` ×
 
 ### 3.2 Typography — `S2`
 
-17 distinct text-size utilities; four families in play (`font-inter`,
-`font-space`, `font-mono`, `font-sans`) plus a decorative `font-3d-cyber`;
-**exactly one** `next/font` usage in the codebase.
+17 distinct text-size utilities. Three families are loaded through `next/font`
+in `layout.tsx` — Inter, Space Grotesk and IBM Plex Mono — which is the correct
+mechanism; the problem is that the third exists only to paint gradient display
+text, and that `globals.css` also references `'Space Grotesk'` as a raw family
+name in one place.
 
 | # | Problem | Sev | Decision |
 |---|---|---|---|
@@ -82,7 +84,9 @@ Most-used: `#00FF88` ×641 · `#38BDF8` ×343 · `#FACC15` ×110 · `#94A3B8` ×
 | T-3 | **`font-3d-cyber` with `tracking-[0.22em]` and stacked `drop-shadow`** on the wordmark. Costume typography. | S2 | remove |
 | T-4 | **`uppercase` + wide tracking used for paragraphs and labels everywhere**, which destroys word-shape and slows reading. Acceptable for short eyebrow labels only. | S2 | simplify |
 | T-5 | **No tabular numerals.** Every metric, forecast and interval is set in proportional figures, so digits jitter between renders and columns do not align. For a numbers product this is a correctness-of-presentation issue. | S2 | redesign |
-| T-6 | **Fonts not loaded through `next/font`** (1 usage), so the app pays layout-shift and an extra round trip. | S3 | restructure |
+| T-6 | **A third family exists only for decoration.** `next/font` is used correctly (Inter, Space Grotesk, IBM Plex Mono in `layout.tsx`), but Space Grotesk's only job is `.font-3d-cyber` / `.font-3d-cyber-hero` — gradient-clipped display text. Drop the family, drop to two. | S3 | remove |
+| T-7 | **Gradient-filled text** (`-webkit-background-clip: text; -webkit-text-fill-color: transparent`) on the wordmark and headings. Text painted with a gradient has no single contrast ratio, so it can neither pass nor be measured by an audit, and it renders invisible wherever `background-clip: text` is unsupported. | S2 | remove |
+| T-8 | **`globals.css:873` hardcodes `'Space Grotesk'`** ahead of the `--font-space` variable, bypassing the `next/font` fallback chain and re-introducing the layout shift `next/font` exists to prevent. | S3 | remove |
 
 ### 3.3 Motion — `S1`
 

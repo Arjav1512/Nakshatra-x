@@ -235,7 +235,7 @@ export default function LocationFloodAlertFinder({ onSelectMine }: Props) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="p-2.5 rounded-xl bg-[#00E5FF]/15 border border-[#00E5FF]/40 text-[#00E5FF]">
-            <CloudRain className="w-6 h-6 animate-pulse" />
+            <CloudRain className="w-6 h-6 " />
           </div>
           <div>
             <h3 className="text-base sm:text-lg font-bold font-space text-white flex items-center gap-2 flex-wrap">
@@ -278,13 +278,13 @@ export default function LocationFloodAlertFinder({ onSelectMine }: Props) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Enter location or mine name (e.g. Dongri, Balaghat, Chikla, Tirodi, Nagpur)..."
-              className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-[#040C1A]/95 border-2 border-[#00E5FF]/60 text-white placeholder-slate-400 text-xs sm:text-sm font-mono focus:outline-none focus:border-[#00FF88] shadow-[0_0_20px_rgba(0,229,255,0.2)] transition-all"
+              className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-[#040C1A]/95 border-2 border-[#00E5FF]/60 text-white placeholder-slate-400 text-xs sm:text-sm font-mono focus:outline-none focus:border-[#00FF88] shadow-[0_0_20px_rgba(0,229,255,0.2)] transition-colors"
             />
           </div>
           <button
             type="submit"
             disabled={isLoading}
-            className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#00E5FF] via-[#00FF88] to-[#38BDF8] text-black font-mono text-xs sm:text-sm font-black uppercase tracking-wider flex items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_24px_rgba(0,229,255,0.5)] cursor-pointer shrink-0 border border-white/40"
+            className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#00E5FF] via-[#00FF88] to-[#38BDF8] text-black font-mono text-xs sm:text-sm font-black uppercase tracking-wider flex items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] transition-colors shadow-[0_0_24px_rgba(0,229,255,0.5)] cursor-pointer shrink-0 border border-white/40"
           >
             {isLoading ? (
               <>
@@ -313,7 +313,7 @@ export default function LocationFloodAlertFinder({ onSelectMine }: Props) {
                 setSearchQuery(loc.name)
                 fetchRealFloodAlert(loc.lat, loc.lng, `${loc.name} Mining Sector (${loc.state})`)
               }}
-              className="px-3.5 py-1.5 rounded-full bg-[#040C1A] hover:bg-[#00E5FF]/25 border border-white/20 hover:border-[#00E5FF] text-slate-200 hover:text-white text-xs font-bold transition-all cursor-pointer shadow-sm flex items-center gap-1"
+              className="px-3.5 py-1.5 rounded-full bg-[#040C1A] hover:bg-[#00E5FF]/25 border border-white/20 hover:border-[#00E5FF] text-slate-200 hover:text-white text-xs font-bold transition-colors cursor-pointer shadow-sm flex items-center gap-1"
               type="button"
             >
               <span>{loc.name}</span>
@@ -346,7 +346,7 @@ export default function LocationFloodAlertFinder({ onSelectMine }: Props) {
                     : 'bg-[#00FF88]/20 border-[#00FF88]/60 text-[#00FF88]'
                 }`}
               >
-                <CloudRain className="w-6 h-6 animate-pulse" />
+                <CloudRain className="w-6 h-6 " />
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -356,7 +356,7 @@ export default function LocationFloodAlertFinder({ onSelectMine }: Props) {
                   <span
                     className={`px-3 py-0.5 rounded-full font-mono text-[10px] font-extrabold ${
                       floodData.floodRiskLevel === 'CRITICAL'
-                        ? 'bg-[#FF2E63]/25 text-[#FF2E63] border border-[#FF2E63]/60 animate-pulse shadow-[0_0_12px_rgba(255,46,99,0.4)]'
+                        ? 'bg-[#FF2E63]/25 text-[#FF2E63] border border-[#FF2E63]/60  shadow-[0_0_12px_rgba(255,46,99,0.4)]'
                         : floodData.floodRiskLevel === 'MODERATE'
                         ? 'bg-[#FACC15]/25 text-[#FACC15] border border-[#FACC15]/60'
                         : 'bg-[#00FF88]/25 text-[#00FF88] border border-[#00FF88]/60'
@@ -377,7 +377,7 @@ export default function LocationFloodAlertFinder({ onSelectMine }: Props) {
 
             <div className="flex items-center gap-2 shrink-0">
               <span className="ios-badge !bg-[#00E5FF]/15 !text-[#00E5FF] !border-[#00E5FF]/40 text-xs font-mono font-bold">
-                <Radio className="w-3.5 h-3.5 text-[#00E5FF] animate-ping" />
+                <Radio className="w-3.5 h-3.5 text-[#00E5FF] " />
                 30-MIN ISRO RADAR LEAD TIME
               </span>
             </div>
@@ -441,7 +441,7 @@ export default function LocationFloodAlertFinder({ onSelectMine }: Props) {
                 <button
                   type="button"
                   onClick={() => setActiveTab('14day')}
-                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold ${
+                  className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer font-bold ${
                     activeTab === '14day'
                       ? 'bg-[#00E5FF] text-black shadow-[0_0_12px_rgba(0,229,255,0.4)]'
                       : 'text-slate-400 hover:text-white'
@@ -452,7 +452,7 @@ export default function LocationFloodAlertFinder({ onSelectMine }: Props) {
                 <button
                   type="button"
                   onClick={() => setActiveTab('30min')}
-                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold ${
+                  className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer font-bold ${
                     activeTab === '30min'
                       ? 'bg-[#00FF88] text-black shadow-[0_0_12px_rgba(0,255,136,0.4)]'
                       : 'text-slate-400 hover:text-white'

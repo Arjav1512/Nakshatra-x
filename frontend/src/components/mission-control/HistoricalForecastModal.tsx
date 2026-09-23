@@ -201,8 +201,7 @@ export default function HistoricalForecastModal() {
 
     setIsPredicting(false)
     setPredictionStep('')
-    setPredictionSuccessMsg(
-      `Mathematical Model Recalibrated! Scenario: ${scenario.toUpperCase()} | 2040 Output: ${(
+    setPredictionSuccessMsg( `Mathematical Model Recalibrated! Scenario: ${scenario.toUpperCase()} | 2040 Output: ${(
         updated[updated.length - 1].predictedProductionTonnes / 1000000
       ).toFixed(2)}M Tonnes`
     )
@@ -249,7 +248,7 @@ export default function HistoricalForecastModal() {
 
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-2 rounded-xl bg-white/10 hover:bg-[#FF3366]/20 border border-white/20 hover:border-[#FF3366]/60 text-slate-300 hover:text-white transition-all cursor-pointer shadow-md shrink-0"
+                  className="p-2 rounded-xl bg-white/10 hover:bg-[#FF3366]/20 border border-white/20 hover:border-[#FF3366]/60 text-slate-300 hover:text-white transition-colors cursor-pointer shadow-md shrink-0"
                   type="button"
                   title="Close Panel (Esc)"
                 >
@@ -262,7 +261,7 @@ export default function HistoricalForecastModal() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <button
                     onClick={() => setActiveTab('history')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
                       activeTab === 'history'
                         ? 'bg-[#38BDF8] text-black shadow-[0_0_15px_rgba(56,189,248,0.5)]'
                         : 'bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10'
@@ -275,7 +274,7 @@ export default function HistoricalForecastModal() {
 
                   <button
                     onClick={() => setActiveTab('future')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
                       activeTab === 'future'
                         ? 'bg-[#00FF88] text-black shadow-[0_0_15px_rgba(0,255,136,0.5)]'
                         : 'bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10'
@@ -288,7 +287,7 @@ export default function HistoricalForecastModal() {
 
                   <button
                     onClick={() => setActiveTab('formula')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
                       activeTab === 'formula'
                         ? 'bg-[#A855F7] text-white shadow-[0_0_15px_rgba(168,85,247,0.5)]'
                         : 'bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10'
@@ -301,7 +300,7 @@ export default function HistoricalForecastModal() {
 
                   <button
                     onClick={() => setActiveTab('sources')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
                       activeTab === 'sources'
                         ? 'bg-[#FACC15] text-black shadow-[0_0_15px_rgba(250,204,21,0.5)]'
                         : 'bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10'
@@ -459,7 +458,7 @@ export default function HistoricalForecastModal() {
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           placeholder="Search 50-year archive by year, milestone, grade or source..."
-                          className="w-full pl-9 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-[#38BDF8]/60 transition-all"
+                          className="w-full pl-9 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-[#38BDF8]/60 transition-colors"
                         />
                       </div>
 
@@ -487,7 +486,7 @@ export default function HistoricalForecastModal() {
                               }
                               setSearchQuery('')
                             }}
-                            className={`px-2 py-1 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer ${
+                            className={`px-2 py-1 rounded-lg text-[10px] font-mono font-bold transition-colors cursor-pointer ${
                               selectedHistoryYear.year === era.year
                                 ? 'bg-[#38BDF8] text-black shadow-[0_0_10px_rgba(56,189,248,0.4)]'
                                 : 'bg-white/5 border border-white/10 text-slate-300 hover:bg-[#38BDF8]/20 hover:text-[#38BDF8]'
@@ -515,7 +514,7 @@ export default function HistoricalForecastModal() {
                           <button
                             key={item.year}
                             onClick={() => setSelectedHistoryYear(item)}
-                            className={`px-2.5 py-1.5 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer shrink-0 ${
+                            className={`px-2.5 py-1.5 rounded-xl font-mono text-xs font-bold transition-colors cursor-pointer shrink-0 ${
                               selectedHistoryYear.year === item.year
                                 ? 'bg-[#38BDF8] text-black shadow-[0_0_12px_rgba(56,189,248,0.6)] scale-105'
                                 : 'bg-white/5 border border-white/10 text-slate-300 hover:bg-white/15'
@@ -645,7 +644,7 @@ export default function HistoricalForecastModal() {
                       </div>
                       <button
                         onClick={() => setActiveTab('formula')}
-                        className="px-2.5 py-1 rounded-lg bg-[#A855F7] text-white text-[10px] font-mono font-bold hover:bg-[#9333EA] transition-all cursor-pointer flex items-center gap-1 shrink-0"
+                        className="px-2.5 py-1 rounded-lg bg-[#A855F7] text-white text-[10px] font-mono font-bold hover:bg-[#9333EA] transition-colors cursor-pointer flex items-center gap-1 shrink-0"
                         type="button"
                       >
                         <span>View Math</span>
@@ -701,7 +700,7 @@ export default function HistoricalForecastModal() {
                           <label className="text-[10px] font-mono text-slate-300 uppercase">SciPy Ore Blending (M<sub>AI</sub>):</label>
                           <button
                             onClick={() => setAiBoost(!aiBoost)}
-                            className={`w-full p-2 rounded-xl text-xs font-mono font-bold transition-all border cursor-pointer ${
+                            className={`w-full p-2 rounded-xl text-xs font-mono font-bold transition-colors border cursor-pointer ${
                               aiBoost
                                 ? 'bg-[#00FF88]/20 border-[#00FF88] text-[#00FF88]'
                                 : 'bg-white/5 border-white/15 text-slate-400'
@@ -717,7 +716,7 @@ export default function HistoricalForecastModal() {
                       <button
                         onClick={handleRunPrediction}
                         disabled={isPredicting}
-                        className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#00FF88] via-[#10B981] to-[#38BDF8] text-black font-mono text-xs font-extrabold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,255,136,0.4)] hover:shadow-[0_0_28px_rgba(0,255,136,0.6)] transition-all cursor-pointer disabled:opacity-50"
+                        className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#00FF88] via-[#10B981] to-[#38BDF8] text-black font-mono text-xs font-extrabold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,255,136,0.4)] hover:shadow-[0_0_28px_rgba(0,255,136,0.6)] transition-colors cursor-pointer disabled:opacity-50"
                         type="button"
                       >
                         {isPredicting ? (
@@ -735,7 +734,7 @@ export default function HistoricalForecastModal() {
 
                       {/* Step Feedback */}
                       {isPredicting && (
-                        <div className="p-2.5 rounded-xl bg-black/60 border border-[#00FF88]/30 font-mono text-[11px] text-[#00FF88] flex items-center gap-2 animate-pulse">
+                        <div className="p-2.5 rounded-xl bg-black/60 border border-[#00FF88]/30 font-mono text-[11px] text-[#00FF88] flex items-center gap-2 ">
                           <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
                           <span>{predictionStep}</span>
                         </div>
@@ -759,7 +758,7 @@ export default function HistoricalForecastModal() {
                           <button
                             key={item.year}
                             onClick={() => setSelectedFutureYear(item)}
-                            className={`px-3 py-1.5 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer shrink-0 ${
+                            className={`px-3 py-1.5 rounded-xl font-mono text-xs font-bold transition-colors cursor-pointer shrink-0 ${
                               selectedFutureYear.year === item.year
                                 ? 'bg-[#00FF88] text-black shadow-[0_0_12px_rgba(0,255,136,0.6)] scale-105'
                                 : 'bg-white/5 border border-white/10 text-slate-300 hover:bg-white/15'

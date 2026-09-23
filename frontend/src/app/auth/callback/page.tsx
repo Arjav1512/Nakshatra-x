@@ -165,7 +165,7 @@ function AuthCallbackContent() {
 
             <Link
               href="/login"
-              className="w-full py-3 px-4 rounded-xl bg-[#38BDF8]/20 hover:bg-[#38BDF8]/30 border border-[#38BDF8]/60 text-[#38BDF8] hover:text-white font-mono text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 rounded-xl bg-[#38BDF8]/20 hover:bg-[#38BDF8]/30 border border-[#38BDF8]/60 text-[#38BDF8] hover:text-white font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2"
             >
               <span>Return to Login</span>
               <ArrowRight size={14} />

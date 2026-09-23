@@ -249,7 +249,7 @@ export default function HistoricalForecastGlassVisualizer() {
               <button type="button"
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`px-3 py-2 rounded-xl text-xs font-mono font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
                   activeTab === tab.id
                     ? 'bg-gradient-to-r from-[#00FF88] to-[#38BDF8] text-black font-extrabold shadow-[0_0_15px_rgba(0,255,136,0.4)]'
                     : 'text-slate-400 hover:text-white hover:bg-white/10'
@@ -265,7 +265,7 @@ export default function HistoricalForecastGlassVisualizer() {
 
       {/* Summary KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="p-4 rounded-2xl bg-[#081024]/80 border border-white/10 backdrop-blur-xl space-y-1 hover:border-[#00FF88]/40 transition-all">
+        <div className="p-4 rounded-2xl bg-[#081024]/80 border border-white/10 backdrop-blur-xl space-y-1 hover:border-[#00FF88]/40 transition-colors">
           <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">50-Yr Cumulative</span>
           <div className="text-lg font-black font-mono text-[#00FF88] drop-shadow-[0_0_8px_rgba(0,255,136,0.5)]">
             {(summaryStats?.cumulativeProductionTonnes / 1000000 || 45.8).toFixed(1)}M Tonnes
@@ -273,7 +273,7 @@ export default function HistoricalForecastGlassVisualizer() {
           <span className="text-[9px] font-mono text-slate-400 block">&bull; 1975–2025 Total ROM</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#081024]/80 border border-white/10 backdrop-blur-xl space-y-1 hover:border-[#FACC15]/40 transition-all">
+        <div className="p-4 rounded-2xl bg-[#081024]/80 border border-white/10 backdrop-blur-xl space-y-1 hover:border-[#FACC15]/40 transition-colors">
           <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Single Year Record</span>
           <div className="text-lg font-black font-mono text-[#FACC15] drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]">
             1.756M Tonnes
@@ -281,7 +281,7 @@ export default function HistoricalForecastGlassVisualizer() {
           <span className="text-[9px] font-mono text-amber-400 font-bold block">&bull; Achieved in FY23 (MOIL)</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#081024]/80 border border-white/10 backdrop-blur-xl space-y-1 hover:border-[#38BDF8]/40 transition-all">
+        <div className="p-4 rounded-2xl bg-[#081024]/80 border border-white/10 backdrop-blur-xl space-y-1 hover:border-[#38BDF8]/40 transition-colors">
           <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">2040 Vision Target</span>
           <div className="text-lg font-black font-mono text-[#38BDF8] drop-shadow-[0_0_8px_rgba(56,189,248,0.5)]">
             4.08M Tonnes
@@ -289,7 +289,7 @@ export default function HistoricalForecastGlassVisualizer() {
           <span className="text-[9px] font-mono text-[#38BDF8] font-bold block">&bull; Zero Import Dependence</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#081024]/80 border border-white/10 backdrop-blur-xl space-y-1 hover:border-[#A855F7]/40 transition-all">
+        <div className="p-4 rounded-2xl bg-[#081024]/80 border border-white/10 backdrop-blur-xl space-y-1 hover:border-[#A855F7]/40 transition-colors">
           <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Indicative Resource Base</span>
           <div className="text-lg font-black font-mono text-[#A855F7]">
             {((summaryStats?.indicativeResourceBaseTonnes ?? 58200000) / 1000000).toFixed(1)}M T
@@ -297,7 +297,7 @@ export default function HistoricalForecastGlassVisualizer() {
           <span className="text-[9px] font-mono text-slate-400 block">&bull; Proved Ore Inventory</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#081024]/80 border border-white/10 backdrop-blur-xl space-y-1 hover:border-emerald-400/40 transition-all">
+        <div className="p-4 rounded-2xl bg-[#081024]/80 border border-white/10 backdrop-blur-xl space-y-1 hover:border-emerald-400/40 transition-colors">
           <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">15-Yr Production CAGR</span>
           <div className="text-lg font-black font-mono text-emerald-400">
             +{summaryStats?.growthCagr15YearPct || 4.02}% / year
@@ -305,7 +305,7 @@ export default function HistoricalForecastGlassVisualizer() {
           <span className="text-[9px] font-mono text-slate-400 block">&bull; 2010 to 2025 Trend</span>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#081024]/80 border border-white/10 backdrop-blur-xl space-y-1 hover:border-cyan-400/40 transition-all">
+        <div className="p-4 rounded-2xl bg-[#081024]/80 border border-white/10 backdrop-blur-xl space-y-1 hover:border-cyan-400/40 transition-colors">
           <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Model Precision</span>
           <div className="text-lg font-black font-mono text-cyan-300">
             {summaryStats?.historicalAccuracyPct != null ? `${summaryStats.historicalAccuracyPct}% Fit` : 'Not backtested'}
@@ -379,7 +379,7 @@ export default function HistoricalForecastGlassVisualizer() {
                     setSelectedYear(y)
                     setYearTargetOverride(null)
                   }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer border ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-colors cursor-pointer border ${
                     selectedYear === y
                       ? 'bg-gradient-to-r from-[#00FF88] to-[#38BDF8] text-black border-transparent font-extrabold shadow-[0_0_12px_rgba(0,255,136,0.5)]'
                       : y >= 2026
@@ -590,7 +590,7 @@ export default function HistoricalForecastGlassVisualizer() {
                   <button type="button"
                     key={m.key}
                     onClick={() => setSelectedMetric(m.key as any)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer border ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-mono transition-colors cursor-pointer border ${
                       selectedMetric === m.key
                         ? 'bg-white/15 border-white text-white font-bold shadow-[0_0_10px_rgba(255,255,255,0.2)]'
                         : 'bg-white/5 border-white/10 text-slate-400 hover:text-white hover:bg-white/10'
@@ -615,7 +615,7 @@ export default function HistoricalForecastGlassVisualizer() {
                   <button type="button"
                     key={r.key}
                     onClick={() => setSelectedRange(r.key as any)}
-                    className={`px-3 py-1 rounded-lg text-xs font-mono transition-all cursor-pointer border ${
+                    className={`px-3 py-1 rounded-lg text-xs font-mono transition-colors cursor-pointer border ${
                       selectedRange === r.key
                         ? 'bg-[#00FF88]/20 border-[#00FF88] text-[#00FF88] font-bold'
                         : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
@@ -741,7 +741,7 @@ export default function HistoricalForecastGlassVisualizer() {
                               fill={isSelected ? '#FFFFFF' : p.item.isForecast ? '#FACC15' : '#00FF88'}
                               stroke={isSelected ? (p.item.isForecast ? '#FACC15' : '#00FF88') : 'none'}
                               strokeWidth={3}
-                              className="transition-all duration-300 hover:scale-150"
+                              className="transition-colors duration-300 hover:scale-150"
                             />
                             {(p.item.year % 5 === 0 || p.item.year === 2040) && (
                               <text
@@ -782,7 +782,7 @@ export default function HistoricalForecastGlassVisualizer() {
                 </p>
               </div>
               {loading && (
-                <div className="px-3 py-1 rounded-full bg-[#00FF88]/20 text-[#00FF88] text-xs font-mono font-bold animate-pulse">
+                <div className="px-3 py-1 rounded-full bg-[#00FF88]/20 text-[#00FF88] text-xs font-mono font-bold ">
                   Re-computing Model...
                 </div>
               )}
@@ -803,7 +803,7 @@ export default function HistoricalForecastGlassVisualizer() {
                     <button type="button"
                       key={s.key}
                       onClick={() => handleScenarioChange(s.key as any, monsoonRiskFactor, aiEfficiencyBoost)}
-                      className={`w-full p-3 rounded-xl text-left font-mono transition-all cursor-pointer border ${
+                      className={`w-full p-3 rounded-xl text-left font-mono transition-colors cursor-pointer border ${
                         scenario === s.key
                           ? 'bg-[#00FF88]/20 border-[#00FF88] text-[#00FF88] shadow-[0_0_12px_rgba(0,255,136,0.3)]'
                           : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/15'
@@ -847,7 +847,7 @@ export default function HistoricalForecastGlassVisualizer() {
                 </label>
                 <button type="button"
                   onClick={() => handleScenarioChange(scenario, monsoonRiskFactor, !aiEfficiencyBoost)}
-                  className={`w-full py-3.5 px-4 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer border flex items-center justify-between ${
+                  className={`w-full py-3.5 px-4 rounded-xl font-mono text-xs font-bold transition-colors cursor-pointer border flex items-center justify-between ${
                     aiEfficiencyBoost
                       ? 'bg-[#38BDF8]/20 border-[#38BDF8] text-[#38BDF8] shadow-[0_0_12px_rgba(56,189,248,0.3)]'
                       : 'bg-white/5 border-white/10 text-slate-400'
@@ -911,7 +911,7 @@ export default function HistoricalForecastGlassVisualizer() {
                   .map((row) => (
                     <tr
                       key={row.year}
-                      className={`hover:bg-white/5 transition-all ${
+                      className={`hover:bg-white/5 transition-colors ${
                         selectedYear === row.year ? 'bg-[#00FF88]/10 border-l-4 border-l-[#00FF88]' : ''
                       }`}
                     >
@@ -942,7 +942,7 @@ export default function HistoricalForecastGlassVisualizer() {
                             setSelectedYear(row.year)
                             setActiveTab('year-picker')
                           }}
-                          className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-[#00FF88] hover:text-black text-white font-bold transition-all cursor-pointer"
+                          className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-[#00FF88] hover:text-black text-white font-bold transition-colors cursor-pointer"
                         >
                           Inspect &rarr;
                         </button>
@@ -972,7 +972,7 @@ export default function HistoricalForecastGlassVisualizer() {
             {citations.map((src) => (
               <div
                 key={src.id}
-                className="p-5 rounded-2xl bg-[#060D1F]/90 border border-white/15 space-y-3 hover:border-[#00FF88]/40 transition-all"
+                className="p-5 rounded-2xl bg-[#060D1F]/90 border border-white/15 space-y-3 hover:border-[#00FF88]/40 transition-colors"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>

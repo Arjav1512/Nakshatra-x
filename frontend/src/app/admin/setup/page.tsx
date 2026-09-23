@@ -114,9 +114,9 @@ export default function AdminSetupPage() {
       <div className="min-h-screen bg-[#030712] flex flex-col items-center justify-center p-4 font-mono text-white">
         <div className="relative">
           <div className="h-16 w-16 rounded-full border-2 border-[#38BDF8]/20 border-t-[#38BDF8] animate-spin" />
-          <Radio className="absolute inset-0 m-auto h-6 w-6 text-[#38BDF8] animate-pulse" />
+          <Radio className="absolute inset-0 m-auto h-6 w-6 text-[#38BDF8] " />
         </div>
-        <p className="mt-4 text-xs tracking-widest text-[#38BDF8] uppercase animate-pulse">
+        <p className="mt-4 text-xs tracking-widest text-[#38BDF8] uppercase ">
           Scanning Commander Cryptographic Registry...
         </p>
       </div>
@@ -131,7 +131,7 @@ export default function AdminSetupPage() {
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase border bg-black/50 backdrop-blur-md">
             {isSlotAvailable ? (
               <>
-                <span className="h-2 w-2 rounded-full bg-[#00FF88] animate-ping" />
+                <span className="h-2 w-2 rounded-full bg-[#00FF88] " />
                 <span className="text-[#00FF88]">Slot Available: 1 of 1 Free</span>
               </>
             ) : (
@@ -251,7 +251,7 @@ export default function AdminSetupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-4 py-3 px-4 rounded-xl bg-gradient-to-r from-[#00FF88] to-[#38BDF8] text-black font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_30px_rgba(0,255,136,0.3)] disabled:opacity-50"
+                className="w-full mt-4 py-3 px-4 rounded-xl bg-gradient-to-r from-[#00FF88] to-[#38BDF8] text-black font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_30px_rgba(0,255,136,0.3)] disabled:opacity-50"
               >
                 {loading ? (
                   <>
@@ -333,7 +333,7 @@ export default function AdminSetupPage() {
             <button
               type="button"
               onClick={() => router.push('/admin/login')}
-              className="w-full py-3 px-4 rounded-xl bg-[#38BDF8] hover:bg-[#38BDF8]/90 text-black font-bold text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(56,189,248,0.3)]"
+              className="w-full py-3 px-4 rounded-xl bg-[#38BDF8] hover:bg-[#38BDF8]/90 text-black font-bold text-xs uppercase tracking-widest transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(56,189,248,0.3)]"
             >
               <span>Enter Commander Login Console</span>
               <ArrowRight size={15} />

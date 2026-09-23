@@ -44,7 +44,7 @@ export default function JudgesArchitectureDeck() {
         <div className="flex items-center gap-1.5 bg-white/5 p-1 rounded-xl border border-white/10">
           <button type="button"
             onClick={() => setActiveTab('pipeline')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-colors cursor-pointer ${
               activeTab === 'pipeline'
                 ? 'bg-gradient-to-r from-[#FB923C]/20 to-[#FACC15]/20 text-white border border-[#FB923C]/30 shadow-md'
                 : 'text-[#94A3B8] hover:text-white'
@@ -54,7 +54,7 @@ export default function JudgesArchitectureDeck() {
           </button>
           <button type="button"
             onClick={() => setActiveTab('hyperparameters')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-colors cursor-pointer ${
               activeTab === 'hyperparameters'
                 ? 'bg-gradient-to-r from-[#FB923C]/20 to-[#FACC15]/20 text-white border border-[#FB923C]/30 shadow-md'
                 : 'text-[#94A3B8] hover:text-white'
@@ -64,7 +64,7 @@ export default function JudgesArchitectureDeck() {
           </button>
           <button type="button"
             onClick={() => setActiveTab('shap')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-colors cursor-pointer ${
               activeTab === 'shap'
                 ? 'bg-gradient-to-r from-[#FB923C]/20 to-[#FACC15]/20 text-white border border-[#FB923C]/30 shadow-md'
                 : 'text-[#94A3B8] hover:text-white'
