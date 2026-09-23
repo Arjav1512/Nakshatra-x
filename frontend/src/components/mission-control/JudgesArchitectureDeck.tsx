@@ -1,20 +1,51 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Sparkles, Brain, Layers, GitBranch, Terminal, ShieldAlert, Award, } from 'lucide-react'
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
+import { type TrackAMetrics, fetchTrackAMetrics } from '@/lib/console-api'
+import { Metric } from '@/components/console/Evidence'
+import { EmptyState, Skeleton } from '@/components/ui/primitives'
+import { derived } from '@/lib/provenance'
 
 export default function JudgesArchitectureDeck() {
   const [activeTab, setActiveTab] = useState<'pipeline' | 'hyperparameters' | 'shap'>('pipeline')
 
-  const featureImportances = [
-    { name: 'Fault Distance', value: 30.18, fill: '#FF4D4F', description: 'Geodesic proximity to Sausar shear zone' },
-    { name: 'Rainfall', value: 21.94, fill: '#00FF88', description: 'Simulated rainfall precipitation proxy' },
-    { name: 'Slope (deg)', value: 16.36, fill: '#E2A33E', description: 'Topographical gradient derived from simulated DEM' },
-    { name: 'Iron Oxide Index', value: 13.68, fill: '#E2A33E', description: 'Sentinel-2 Band 4 / Band 2 absorption ratio' },
-    { name: 'Elevation (m)', value: 9.99, fill: '#7CB98B', description: 'Height above sea level (meters)' },
-    { name: 'Ferrous Mineral', value: 7.86, fill: '#7CB98B', description: 'Sentinel-2 Band 12 / Band 8 SWIR reflectance ratio' },
-  ]
+  /**
+   * Feature importances come from the trained model.
+   *
+   * They used to be a literal array in this file — Fault Distance 30.18,
+   * Rainfall 21.94, Slope 16.36, Iron Oxide 13.68, Elevation 9.99, Ferrous
+   * 7.86 — rendered as a bar chart with no provenance. Two of those names are
+   * not features of the model at all: the honest rebuild dropped
+   * distance-to-known-mine features precisely because they leaked the labels,
+   * and there is no rainfall feature in Track A. The real top feature is
+   * elevation at 40.6%, which is the evidence behind the published caveat that
+   * part of what the model learns is where mines are built.
+   *
+   * A chart that disagreed with the model on which features exist is worse than
+   * no chart, so it now reads the model or says it cannot.
+   */
+  const [metrics, setMetrics] = useState<TrackAMetrics | null>(null)
+  const [metricsErr, setMetricsErr] = useState<string | null>(null)
+
+  useEffect(() => {
+    let alive = true
+    fetchTrackAMetrics().then((r) => {
+      if (!alive) return
+      if (r.ok) setMetrics(r.data)
+      else setMetricsErr(r.error)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  const featureImportances = metrics
+    ? Object.entries(metrics.feature_importance)
+        .sort((a, b) => b[1] - a[1])
+        .map(([name, value]) => ({ name, value: Number((value * 100).toFixed(1)) }))
+    : []
 
   return (
     <div className="ios-glass-card p-6 flex flex-col gap-6 relative overflow-hidden">
@@ -183,20 +214,73 @@ export default function JudgesArchitectureDeck() {
             </div>
           </div>
 
-          <div className="ios-glass-inset p-5 flex flex-col justify-between">
-            <div>
-              <span className="text-[10px] font-mono text-[#94A3B8] uppercase block mb-1">Model Evaluation Metrics</span>
-              <h4 className="text-2xl font-mono font-extrabold text-[#FACC15]">95.1% Accuracy</h4>
-              <p className="text-xs text-[#94A3B8] mt-2 leading-relaxed">
-                Trained on Central India Precambrian schist. Balanced weights yield high sensitivity to trace manganese signatures.
-              </p>
-            </div>
-            <div className="space-y-1.5 mt-6 pt-3 border-t border-white/5 text-xs font-mono">
-              <div className="flex justify-between"><span className="text-[#94A3B8]">Overall Accuracy:</span> <span className="text-white">95.12%</span></div>
-              <div className="flex justify-between"><span className="text-[#94A3B8]">ROC-AUC:</span> <span className="text-[#00FF88] font-bold">0.8875</span></div>
-              <div className="flex justify-between"><span className="text-[#94A3B8]">Manganese Recall:</span> <span className="text-[#00FF88] font-bold">50.0%</span></div>
-              <div className="flex justify-between"><span className="text-[#94A3B8]">Dataset Size:</span> <span className="text-white">410 Records</span></div>
-            </div>
+          {/*
+            These were literals: 95.1% accuracy, ROC-AUC 0.8875, recall 50.0%,
+            "410 Records". None came from the model, and they contradicted the
+            project's own published figures — the honest model is validated
+            leave-one-mine-out on 50 points and scores AUC 0.85 with a 95%
+            interval of 0.723-0.95. Accuracy was the wrong headline in any case
+            at a 20% base rate, where predicting "no ore" everywhere scores 80%.
+          */}
+          <div className="rounded-md border border-border-default bg-surface-2 p-5">
+            <p className="label">Model evaluation</p>
+            {metricsErr ? (
+              <EmptyState
+                className="mt-3"
+                title="Metrics unavailable"
+                detail={metricsErr}
+              />
+            ) : !metrics ? (
+              <div className="mt-3 space-y-2">
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+              </div>
+            ) : (
+              <>
+                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <Metric
+                    label="LOMO AUC"
+                    emphasis
+                    display={metrics.lomo.auc.toFixed(3)}
+                    env={derived(metrics.lomo.auc, 'AUC', `Leave-one-mine-out cross-validation over ${metrics.lomo.n_out_of_fold} out-of-fold points`, {
+                      model_version: metrics.model_version,
+                      method: metrics.validation,
+                      uncertainty: {
+                        plus_minus: Number(((metrics.lomo.auc_ci95[1] - metrics.lomo.auc_ci95[0]) / 2).toFixed(3)),
+                        confidence: 0.95,
+                        basis: `95% CI [${metrics.lomo.auc_ci95[0]}, ${metrics.lomo.auc_ci95[1]}] — an entire deposit is held out at a time.`,
+                      },
+                    })}
+                  />
+                  <Metric
+                    label="Average precision"
+                    display={metrics.lomo.average_precision.toFixed(3)}
+                    env={derived(metrics.lomo.average_precision, 'AP', 'Leave-one-mine-out cross-validation', {
+                      model_version: metrics.model_version,
+                      method: `Base rate is ${metrics.lomo.base_rate}, so AP is the honest headline rather than accuracy.`,
+                    })}
+                  />
+                  <Metric
+                    label="Validation points"
+                    display={metrics.n_samples}
+                    unit="points"
+                    env={derived(metrics.n_samples, 'points', 'Track A training set', {
+                      model_version: metrics.model_version,
+                      method: 'Ten positive sites. An interval this wide is what that sample supports.',
+                    })}
+                  />
+                  <Metric
+                    label="Random-split AUC (for contrast)"
+                    display={metrics.random_split_auc_for_contrast.toFixed(3)}
+                    env={derived(metrics.random_split_auc_for_contrast, 'AUC', 'Random 5-fold split — shown only as a contrast', {
+                      model_version: metrics.model_version,
+                      method: 'A random split leaks neighbouring cells of the same deposit across folds, so it flatters the model. LOMO is the figure to quote.',
+                    })}
+                  />
+                </div>
+                <p className="measure mt-3 text-xs text-text-tertiary">{metrics.lithology_note}</p>
+              </>
+            )}
           </div>
 
           <div className="ios-glass-inset p-5 flex flex-col justify-between">
@@ -218,46 +302,103 @@ export default function JudgesArchitectureDeck() {
       )}
 
       {activeTab === 'shap' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
-          <div className="h-[240px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={featureImportances} layout="vertical" margin={{ left: 20, right: 20, top: 10, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 9, fill: '#94A3B8' }} tickLine={false} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 9, fill: '#FFFFFF', fontWeight: 'bold' }} tickLine={false} width={100} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'rgba(14,20,28,0.95)',
-                    borderColor: 'rgba(255,255,255,0.2)',
-                    borderRadius: '16px',
-                    fontSize: '11px',
-                    fontFamily: 'monospace',
-                  }}
-                  formatter={(value: any) => [`${value}% Importance`]}
-                />
-                <Bar dataKey="value" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+        metricsErr ? (
+          <EmptyState
+            title="Feature importances unavailable"
+            detail={`The model metrics endpoint could not be reached: ${metricsErr}. No importances are shown, because the only alternative is numbers that did not come from the model.`}
+          />
+        ) : !metrics ? (
+          <div className="space-y-2">
+            <Skeleton className="h-[240px] w-full" />
+            <span className="sr-only">Loading model metrics</span>
+          </div>
+        ) : (
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+          <div>
+            <p className="label mb-2">
+              Feature importance — {metrics.features.length} features, model{' '}
+              {metrics.model_version}
+            </p>
+            <div className="h-[240px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={featureImportances}
+                  layout="vertical"
+                  margin={{ left: 20, right: 20, top: 10, bottom: 10 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--color-border-subtle)"
+                    horizontal={false}
+                  />
+                  <XAxis
+                    type="number"
+                    tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }}
+                    tickLine={false}
+                    axisLine={false}
+                    unit="%"
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    tick={{ fontSize: 12, fill: 'var(--color-text-secondary)' }}
+                    tickLine={false}
+                    axisLine={false}
+                    width={150}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'var(--color-surface-3)',
+                      border: '1px solid var(--color-border-default)',
+                      borderRadius: 4,
+                      fontSize: 13,
+                      fontVariantNumeric: 'tabular-nums',
+                      color: 'var(--color-text-primary)',
+                    }}
+                    formatter={(value: any) => [`${value}%`, 'importance']}
+                  />
+                  <Bar
+                    dataKey="value"
+                    fill="var(--color-accent)"
+                    radius={[0, 2, 2, 0]}
+                    isAnimationActive={false}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="measure mt-3 text-xs text-text-tertiary">{metrics.ablation_note}</p>
           </div>
 
-          <div className="space-y-4">
-            <h4 className="text-xs font-mono font-black text-white uppercase tracking-wider flex items-center gap-1.5">
-              <ShieldAlert className="w-4 h-4 text-[#FF4D4F]" />
-              Geological Feature Importance Breakdown:
+          <div>
+            <h4 className="label mb-3 flex items-center gap-1.5">
+              <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
+              Every figure below is read from the trained model
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
-              {featureImportances.map((item, idx) => (
-                <div key={idx} className="ios-glass-inset p-2.5 flex flex-col gap-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white font-bold truncate">{item.name}</span>
-                    <span className="text-[#FACC15] font-bold">{item.value.toFixed(1)}%</span>
-                  </div>
-                  <span className="text-[10px] text-[#94A3B8] leading-tight">{item.description}</span>
-                </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {featureImportances.map((item) => (
+                <Metric
+                  key={item.name}
+                  label={item.name.replace(/_/g, ' ')}
+                  display={item.value.toFixed(1)}
+                  unit="%"
+                  env={derived(
+                    item.value,
+                    '% of total importance',
+                    'Gradient-boosted prospectivity model, leave-one-mine-out validated',
+                    {
+                      model_version: metrics.model_version,
+                      method:
+                        'Impurity-based feature importance from the fitted model, normalised across ' +
+                        `${metrics.features.length} features. Not a SHAP value.`,
+                    }
+                  )}
+                />
               ))}
             </div>
+            <p className="measure mt-3 text-xs text-text-tertiary">{metrics.honest_note}</p>
           </div>
         </div>
+        )
       )}
     </div>
   )

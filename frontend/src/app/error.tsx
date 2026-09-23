@@ -1,8 +1,22 @@
 'use client'
 
 import { useEffect } from 'react'
-import { AlertTriangle, RefreshCw, ShieldCheck } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 
+/**
+ * Client error boundary.
+ *
+ * The previous version announced "SINGLE-THREAD THREAD GUARDRAIL ACTIVE" and
+ * said the error had been "safely isolated by the NAKSHATRA-X security
+ * boundary, preventing Node.js event loop disruption". None of that describes
+ * what happens here: this is React's render boundary, it runs in the browser,
+ * and it has no relationship to the server's event loop. It also borrowed the
+ * word "guardrail", which in this project names four specific commitments about
+ * data, not an exception handler.
+ *
+ * A screen shown when something broke is the worst place to overstate what the
+ * system did.
+ */
 export default function GlobalErrorBoundary({
   error,
   reset,
@@ -11,38 +25,42 @@ export default function GlobalErrorBoundary({
   reset: () => void
 }) {
   useEffect(() => {
-    // Log error safely without exposing raw system pointers
-    console.error('[Security Single-Thread Guardrail] Handled UI Exception:', error.message)
+    console.error('[ui] render error:', error.message)
   }, [error])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#050914] text-white p-6">
-      <div className="max-w-md w-full p-8 rounded-3xl bg-white/[0.03] backdrop-blur-2xl border border-white/10 shadow-2xl text-center space-y-5">
-        <div className="w-14 h-14 mx-auto rounded-2xl bg-[#FF2E63]/15 border border-[#FF2E63]/40 flex items-center justify-center text-[#FF2E63] shadow-[0_0_20px_rgba(255,46,99,0.3)]">
-          <AlertTriangle className="w-7 h-7" />
-        </div>
+    <main className="mx-auto flex min-h-[60vh] max-w-[1280px] items-center px-4 sm:px-6 lg:px-8">
+      <div className="measure">
+        <p className="label">Error</p>
+        <h1 className="mt-3 text-2xl">This screen failed to render</h1>
+        <p className="mt-3 text-base text-text-secondary">
+          Something in the page threw while rendering. Nothing was saved or sent, and no data has
+          been changed. Reloading may work; if it does not, the problem is not on your side.
+        </p>
 
-        <div>
-          <span className="ios-badge !bg-[#00FF88]/15 !text-[#00FF88] !border-[#00FF88]/40 mb-3 inline-flex items-center gap-1 text-[10px] font-mono font-bold">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            SINGLE-THREAD THREAD GUARDRAIL ACTIVE
-          </span>
-          <h2 className="text-xl font-bold font-space uppercase tracking-wider text-white">
-            Process Intercepted Safely
-          </h2>
-          <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-            An unexpected error was safely isolated by the NAKSHATRA-X security boundary, preventing Node.js event loop disruption.
+        {error.digest ? (
+          <p className="mt-4 font-mono text-xs text-text-tertiary">
+            Reference: {error.digest}
           </p>
-        </div>
+        ) : null}
 
-        <button type="button"
-          onClick={() => reset()}
-          className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#38BDF8] to-[#00FF88] text-[#050914] font-mono font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#00FF88]/20"
-        >
-          <RefreshCw className="w-4 h-4" />
-          <span>Recover Thread & Reload State</span>
-        </button>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => reset()}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-accent px-4 text-base font-medium text-surface-0 transition-colors duration-[120ms] ease-out hover:bg-accent/90"
+          >
+            <RefreshCw className="h-4 w-4" aria-hidden="true" />
+            Try again
+          </button>
+          <a
+            href="/console"
+            className="inline-flex h-10 items-center justify-center rounded-md border border-border-interactive bg-surface-2 px-4 text-base font-medium text-text-primary transition-colors duration-[120ms] ease-out hover:bg-surface-3"
+          >
+            Back to the console
+          </a>
+        </div>
       </div>
-    </div>
+    </main>
   )
 }
