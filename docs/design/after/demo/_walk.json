@@ -1,0 +1,112 @@
+{
+  "steps": [
+    {
+      "step": "0:00 frame the problem",
+      "ok": true,
+      "note": null
+    },
+    {
+      "step": "0:20 portfolio — ten mines with P(shortfall)",
+      "ok": true,
+      "note": "10 cards, 10 probabilities"
+    },
+    {
+      "step": "0:20 Balaghat marked as Track B pilot",
+      "ok": true,
+      "note": null
+    },
+    {
+      "step": "0:45 four condition tiles",
+      "ok": true,
+      "note": null
+    },
+    {
+      "step": "0:45 LIVE and SYNTHETIC badges both present",
+      "ok": true,
+      "note": null
+    },
+    {
+      "step": "0:45 \"+ evidence\" opens provenance",
+      "ok": true,
+      "note": null
+    },
+    {
+      "step": "1:05 four headline tiles",
+      "ok": true,
+      "note": null
+    },
+    {
+      "step": "1:05 per-grade probabilities (PRD B-5)",
+      "ok": true,
+      "note": "4 grades"
+    },
+    {
+      "step": "1:05 chart states its interval and baseline",
+      "ok": true,
+      "note": null
+    },
+    {
+      "step": "1:35 backtest runs and reports MAPE",
+      "ok": true,
+      "note": null
+    },
+    {
+      "step": "1:35 interval coverage reported",
+      "ok": true,
+      "note": "coverage 0.812"
+    },
+    {
+      "step": "2:05 approved actions with checks",
+      "ok": true,
+      "note": "3 approved"
+    },
+    {
+      "step": "2:05 rejected block shown (DEMO.md: \"scroll to the rejected block\")",
+      "ok": false,
+      "note": "DEMO.md says rejected actions are displayed with the rule they broke"
+    },
+    {
+      "step": "2:05 constraint scope footer line",
+      "ok": true,
+      "note": null
+    },
+    {
+      "step": "2:30 Track A opens",
+      "ok": true,
+      "note": null
+    },
+    {
+      "step": "2:30 LOMO AUC with confidence interval",
+      "ok": true,
+      "note": null
+    },
+    {
+      "step": "2:30 ablations (spectral-only, slope-only)",
+      "ok": true,
+      "note": null
+    },
+    {
+      "step": "2:30 ranked drill targets with kriging uncertainty",
+      "ok": true,
+      "note": null
+    },
+    {
+      "step": "2:55 guardrail footer present",
+      "ok": true,
+      "note": null
+    },
+    {
+      "step": "2:55 Export CSV available",
+      "ok": true,
+      "note": null
+    },
+    {
+      "step": "no 5xx during the walk",
+      "ok": true,
+      "note": ""
+    }
+  ],
+  "findings": [
+    "2:05 rejected block shown (DEMO.md: \"scroll to the rejected block\"): DEMO.md says rejected actions are displayed with the rule they broke"
+  ]
+}

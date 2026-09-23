@@ -137,7 +137,7 @@ unknown".
 Not design gaps — existing bugs the redesign surfaced. Logged rather than fixed,
 because this phase makes no backend or API changes.
 
-## DEF-1 — The decision console cannot render a single forecast (pre-existing)
+## DEF-1 — The decision console cannot render a single forecast (pre-existing) — ✅ FIXED 2026-09-24
 
 **Severity: high.** `/console` is the product's primary screen. Every mine on it
 reports a failed forecast, and has done since before this branch.
@@ -188,11 +188,55 @@ It is one line at the call site (use `numericId`) or a decision to delete the
 shadowing Next route and let the backend serve the register. Which of those is
 correct is an API question, not a design one.
 
-**Consequence for this PR.** `docs/design/after/console@*.png` shows the console
-in its real current state: correct layout, typography, spacing, provenance
-footer and error handling — with no forecast values, because there are none to
-show. That is the honest screenshot. The design is reviewable; the data is not
-available to it until DEF-1 is fixed.
+**Consequence for the Stage 1 PR.** `docs/design/after/console@*.png` showed the
+console in its real state at that time: correct layout with no forecast values,
+because there were none to show.
+
+---
+
+### Resolution — `fix/console-mine-id`, 2026-09-24
+
+`/api/v1/mines` is now a thin proxy of FastAPI's register and the duplicate is
+deleted; `MineNumericIdParamSchema` parses the id at the edge; the `|| 1` and
+`?? 1` mine defaults are gone. Full reasoning in `docs/DECISIONS.md` D-028.
+
+**Every mine-keyed call from the UI, audited.** Status measured against a
+running stack, slug id vs numeric id, before and after.
+
+| # | Call site | Endpoint | Before | After |
+|---|---|---|---|---|
+| 1 | `console-api.ts:39` `fetchMines` | `GET /api/v1/mines` | **200, wrong shape** — served by a Next handler with slug ids, shadowing FastAPI | **200**, proxied from FastAPI, `id: 1` |
+| 2 | `console-api.ts:139` `fetchForecast` | `GET /mines/{id}/forecast` | **503** (slug → `parseInt` → `NaN`) | **200** |
+| 3 | `console-api.ts:142` `fetchBacktest` | `GET /mines/{id}/backtest` | **503** | **200** |
+| 4 | `console-api.ts:145` `fetchRecommendations` | `GET /mines/{id}/recommendations` | **503** | **200** |
+| 5 | `console-api.ts:148` `fetchTelemetry` | `GET /mines/{id}/telemetry` | **200 — WRONG MINE.** `NaN \|\| 1` returned Balaghat for every id | **200**, correct mine |
+| 6 | `HotspotEvidence.tsx:85` | `GET /mines/{id}/telemetry` | **200 — WRONG MINE** for any slug outside `SLUG_TO_ID` (`?? 1`) | **200**, or a stated error for an unknown mine |
+| 7 | `mission-control/data.ts:50` | `GET /mines/{numericId}/telemetry` | **200**, correct — this path already used numeric ids | **200**, and now throws rather than defaulting to mine 1 |
+| 8 | `console-export.ts` CSV / PDF | derived from 2 + 5 | **empty** — nothing upstream resolved | **populated**, with provenance columns |
+
+Bad ids now fail loudly instead of degrading:
+
+```
+/api/v1/mines/balaghat/forecast   400   (was 503)
+/api/v1/mines/balaghat/telemetry  400   (was 200 with Balaghat's data)
+/api/v1/mines/0/telemetry         400
+/api/v1/mines/99/forecast         503   (valid id, no such mine — backend's answer)
+```
+
+**Drill-down, browser-verified.** Portfolio → mine → Track B / Track A all
+render; opening the *second* mine now shows the second mine. `npm run test:e2e`
+asserts this and 17 other things, and reports 3/18 against the reverted register.
+
+**Two things this fix did not resolve**, logged rather than papered over:
+
+- The constraint engine's rejection panel is still unexercised —
+  `rejected_actions` is empty at all ten mines, so the "rejected with the rule it
+  broke" path has never been seen with real data. `docs/DEMO.md` was corrected;
+  it had told the presenter to scroll to a block that would not be there.
+- `/evaluator` renders a hardcoded feature-importance chart
+  (`JudgesArchitectureDeck.tsx:10`) with no provenance. Found while re-checking
+  A-7 in a browser; recorded in `docs/READINESS.md` §5 and left for the Stage 2
+  redesign, which rewrites that screen.
 
 ## Not backlogged
 

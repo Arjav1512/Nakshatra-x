@@ -219,6 +219,25 @@ export async function secureApiHandler<T>(
 // ============================================================================
 export const MineIdParamSchema = z.string().min(1).max(64).regex(/^[a-zA-Z0-9_-]+$/)
 
+/**
+ * Mine primary key as the service layer defines it: a positive integer (DEF-1).
+ *
+ * `MineIdParamSchema` above accepts any slug, which is correct for the routes
+ * that genuinely key on slugs. The mine data routes do not: they forward the id
+ * to FastAPI, which keys mines by integer. They previously validated with the
+ * slug schema and then called `parseInt`, so `'balaghat'` passed validation and
+ * became `NaN` — producing a request for `/api/v1/mines/NaN/...`, or worse,
+ * `NaN || 1`, which silently served mine 1's record under another mine's name.
+ *
+ * Parsing here rather than after validation means an id that is not a mine id
+ * is rejected at the edge with a 400, instead of degrading into a wrong answer.
+ */
+export const MineNumericIdParamSchema = z
+  .string()
+  .regex(/^\d+$/, 'Mine id must be a positive integer')
+  .transform((v) => Number.parseInt(v, 10))
+  .refine((n) => Number.isSafeInteger(n) && n > 0, 'Mine id must be a positive integer')
+
 export const DispatchAlertSchema = z.object({
   mine_id: z.string().min(1).max(64),
   type: z.enum(['ALERT', 'WORK_ORDER', 'DISPATCH', 'HAULAGE_DIVERT']),

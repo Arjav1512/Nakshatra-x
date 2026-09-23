@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { MineIdParamSchema } from '@/lib/security'
+import { MineNumericIdParamSchema } from '@/lib/security'
 import { backendUrl, fetchFromBackend } from '@/lib/backend'
 
 /**
@@ -13,7 +13,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ mineId: string }> }
 ) {
-  const p = MineIdParamSchema.safeParse((await params).mineId)
+  const p = MineNumericIdParamSchema.safeParse((await params).mineId)
   if (!p.success) return NextResponse.json({ error: 'Invalid Mine ID' }, { status: 400 })
 
   const url = new URL(request.url)
@@ -21,7 +21,7 @@ export async function GET(
   const step = url.searchParams.get('step_days') ?? '14'
 
   const r = await fetchFromBackend(
-    `/api/v1/mines/${parseInt(p.data, 10)}/backtest?span_days=${encodeURIComponent(span)}&step_days=${encodeURIComponent(step)}`,
+    `/api/v1/mines/${p.data}/backtest?span_days=${encodeURIComponent(span)}&step_days=${encodeURIComponent(step)}`,
     { timeoutMs: 600000 }
   )
   if (r.ok) return NextResponse.json({ ...r.data, served_by: 'fastapi', proxied_from: backendUrl() })

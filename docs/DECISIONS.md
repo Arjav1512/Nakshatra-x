@@ -264,3 +264,52 @@ one module. Two narrower exceptions exist and are commented in place: the
 `@media print` block in `globals.css` (a dark token palette cannot be printed),
 and `themeColor` in `layout.tsx` (Next serialises it into a `<meta>` tag at
 build time, where a CSS custom property cannot resolve).
+
+## D-028 — One mine register, one ID scheme: FastAPI's
+**DEF-1 fix.** Two handlers answered `/api/v1/mines`. A Next route handler
+returned its own hardcoded register keyed by slug (`id: 'balaghat'`) and
+shadowed the FastAPI endpoint of the same path, which keys mines by integer.
+
+The register was chosen as the single source of truth on FastAPI's side, and the
+Next route is now a thin proxy with the duplicate deleted. Three facts made this
+the small change rather than the large one:
+
+- `MineRow` in `console-api.ts` already declared FastAPI's exact shape
+  (`id: number`, `mine_code`, `latitude`, `target_tonnes`). The mismatch went
+  unnoticed for the ordinary reason — `get<MineRow[]>` casts `res.json()`
+  instead of parsing it, so TypeScript validated a promise, not a payload.
+- `console-api.ts` was the only consumer of the endpoint. Mission Control reads
+  a different one, `/api/admin/mines`.
+- The `MOIL_MINES` constant the route exported was imported by nothing.
+  `IndiaSatelliteMap` imports a same-named constant from
+  `mission-control/data.ts`.
+
+Keeping the frontend register instead would have meant teaching FastAPI about
+slugs, which is the wrong direction: the models are fitted per mine id, and the
+register the models were fitted against is the one the UI must read.
+
+**Two failure modes, one cause.** The visible one: `forecast`, `backtest` and
+`recommendations` validated the id with a slug-permissive schema and then called
+`parseInt`, so `'balaghat'` passed validation and became `NaN` — the backend was
+asked for `/api/v1/mines/NaN/forecast` and every call returned 503.
+
+The invisible one was worse. `telemetry` computed `parseInt(id, 10) || 1`, and
+`NaN || 1` is `1`, so a request for **any** mine returned **Balaghat's**
+telemetry — with `served_by: fastapi`, `live_sources_ok: true` and no
+degradation flag. Verified before the fix: `bharweli`, `ukwa` and `gumgaon` all
+returned `MOIL-BAL-01`. That is the same defect class this project removed from
+`EVIDENCE_DB` in an earlier phase — one mine's data under another mine's name —
+surviving in a route's fallback expression rather than in a data file.
+
+`MineNumericIdParamSchema` now parses the id at the edge, so a non-integer is a
+400 rather than a silent substitution, and the `|| 1` / `?? 1` defaults in
+`telemetry/route.ts`, `HotspotEvidence.tsx` and `mission-control/data.ts` are
+gone. A mine that cannot be identified is reported, never guessed: degraded
+telemetry now carries `-1` for "unidentified" instead of impersonating mine 1.
+
+**Why it stayed hidden.** Every prior trace of these endpoints used numeric ids
+— curl and route-level checks — which is the path that always worked. Nothing
+exercised the path the browser actually takes: fetch the register, then use the
+id it returns. The regression test added with this fix (`npm run test:e2e`)
+drives the console in a real browser precisely so that a green API check can no
+longer stand in for a working screen.

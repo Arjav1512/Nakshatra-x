@@ -79,9 +79,19 @@ export default function HotspotEvidence({ mineId }: { mineId: string }) {
 
   useEffect(() => {
     let alive = true
-    const id = SLUG_TO_ID[mineId] ?? 1
     setT(null)
     setErr(null)
+
+    // DEF-1: this was `SLUG_TO_ID[mineId] ?? 1`. An unmapped slug resolved to
+    // mine 1, so this panel showed Balaghat's telemetry under whatever mine the
+    // caller asked for — the same defect the header above describes being
+    // removed from EVIDENCE_DB. An id that cannot be resolved is now an error.
+    const id = SLUG_TO_ID[mineId]
+    if (id === undefined) {
+      setErr(`Unknown mine "${mineId}" — no telemetry requested.`)
+      return
+    }
+
     fetch(`/api/v1/mines/${id}/telemetry`, { cache: 'no-store' })
       .then(async (r) => {
         const body = await r.json().catch(() => null)

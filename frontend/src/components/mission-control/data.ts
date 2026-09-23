@@ -47,7 +47,14 @@ export async function fetchLiveMineTelemetry(mine: MineInfo): Promise<{
   stacScenes: STACScene[]
 }> {
   try {
-    const mineId = mine.numericId || 1
+    // DEF-1: `mine.numericId || 1` silently requested mine 1 whenever a mine
+    // arrived without a numeric id, returning Balaghat's telemetry under
+    // another mine's name. A mine with no numeric id is a register problem and
+    // is reported as one.
+    const mineId = mine.numericId
+    if (!Number.isInteger(mineId) || (mineId as number) <= 0) {
+      throw new Error(`Mine ${mine.name} has no numeric id; cannot request telemetry.`)
+    }
     const res = await fetch(`${API_BASE}/mines/${mineId}/telemetry`, { cache: 'no-store' })
     if (res.ok) {
       const data = await res.json()
@@ -79,5 +86,11 @@ export async function fetchLiveMineTelemetry(mine: MineInfo): Promise<{
  * shared degraded builder.
  */
 function getFallbackTelemetry(mine: MineInfo) {
-  return degradedTelemetry(mine.numericId || 1, 'Next.js route unreachable from the browser')
+  // Degraded mode keeps the mine's own id so the payload is not attributed to
+  // a different mine; -1 marks "unidentified" rather than defaulting to 1.
+  const id = mine.numericId
+  return degradedTelemetry(
+    typeof id === 'number' && Number.isInteger(id) && id > 0 ? id : -1,
+    'Next.js route unreachable from the browser'
+  )
 }

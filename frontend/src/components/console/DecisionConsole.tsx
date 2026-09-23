@@ -213,7 +213,13 @@ export function DecisionConsole() {
               />
             ) : !mines ? (
               <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {[0, 1, 2, 3, 4, 5].map((i) => (
+                {/* One placeholder per mine in MOIL's register. Six were
+                    rendered here while ten cards were about to arrive, so the
+                    page grew by four rows the moment the register resolved —
+                    which is most of the console's layout shift. If the register
+                    ever returns a different count the cost is one small shift,
+                    not the four-row jump. */}
+                {Array.from({ length: 10 }, (_, i) => i).map((i) => (
                   <Card key={i}>
                     <div className="space-y-2 p-4">
                       <Skeleton className="h-4 w-28" />
@@ -247,21 +253,25 @@ export function DecisionConsole() {
                             {m.state} · {m.zone}
                           </p>
 
+                          {/* All three states occupy the same height, so a card
+                              does not grow when its forecast lands. Without this
+                              the portfolio shifts ten times as results arrive
+                              (measured: CLS 0.257). */}
                           {v === undefined || v === null ? (
-                            <div className="mt-3">
+                            <div className="mt-3 flex min-h-6 items-center">
                               <Skeleton className="h-4 w-24" />
                               <span className="sr-only">Computing forecast</span>
                             </div>
                           ) : isFailure(v) ? (
                             /* A backend that answered and one that could not be
                                reached are different problems; say which. */
-                            <p className="mt-3 text-sm text-status-unknown">
+                            <p className="mt-3 flex min-h-6 items-center text-sm text-status-unknown">
                               {v.status === 0
                                 ? 'Forecast unreachable — no response from the service.'
                                 : `Forecast unavailable (${v.status}).`}
                             </p>
                           ) : (
-                            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                            <div className="mt-3 flex min-h-6 flex-wrap items-center gap-x-3 gap-y-1.5">
                               <span className="inline-flex items-center gap-1.5">
                                 <StatusDot status={band(v.p).status} />
                                 <span className="font-mono text-base text-text-primary">

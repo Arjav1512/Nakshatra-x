@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { MineIdParamSchema, validateReplayNonce } from '@/lib/security'
+import { MineNumericIdParamSchema, validateReplayNonce } from '@/lib/security'
 import { backendUrl, fetchFromBackend } from '@/lib/backend'
 import { degradedTelemetry } from '@/lib/degraded-telemetry'
 
@@ -28,12 +28,17 @@ export async function GET(
   }
 
   const resolvedParams = await params
-  const parsedId = MineIdParamSchema.safeParse(resolvedParams.mineId)
+  const parsedId = MineNumericIdParamSchema.safeParse(resolvedParams.mineId)
   if (!parsedId.success) {
     return NextResponse.json({ error: 'Invalid Mine ID parameter' }, { status: 400 })
   }
 
-  const idNum = parseInt(parsedId.data, 10) || 1
+  // DEF-1: this was `parseInt(parsedId.data, 10) || 1`. A slug parsed to NaN
+  // and `NaN || 1` resolved to mine 1, so a request for any other mine
+  // returned Balaghat's record — one mine's measurements under another
+  // mine's name, with no degradation flag. The id is now validated as an
+  // integer at the edge and never defaulted.
+  const idNum = parsedId.data
 
   const result = await fetchFromBackend(`/api/v1/mines/${idNum}/telemetry`)
 
