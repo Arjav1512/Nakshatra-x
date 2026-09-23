@@ -1,201 +1,125 @@
 'use client'
 
-import type { MineInfo, WeatherSignal, RiskAnalysis } from './types'
-import { CloudRain, Wrench, Flame, Box, Gauge } from 'lucide-react'
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
+import type { MineInfo, RiskAnalysis, WeatherSignal } from './types'
+import { Metric } from '@/components/console/Evidence'
+import { EmptyState, StatusDot, type Status } from '@/components/ui/primitives'
+import { derived, measured } from '@/lib/provenance'
+
+/**
+ * Risk context for the mine whose stockpiles are being blended.
+ *
+ * WHAT THIS REPLACED. Every value had a fabricated fallback keyed off the
+ * mine's state, so a failed telemetry fetch produced confident-looking numbers:
+ *
+ *   compositeScore = risk?.composite_risk_score ?? (state === 'MP' ? 72.4 : 44.5)
+ *   rainfallMm     = weather?.rainfall_14d_mm   ?? (state === 'MP' ? 118  : 64)
+ *   soilMoisture   = weather?.soil_moisture_pct ?? (state === 'MP' ? 42   : 34)
+ *   landTemp       = weather?.land_surface_temp_c ?? 34.2
+ *
+ * It also synthesised a 14-day rainfall series from `sin(i * 0.7)` and drew it
+ * as a trend, and labelled itself "Isolation Forest & Constraint Scoring" —
+ * Isolation Forest is not a dependency of this project and fits nothing here.
+ *
+ * Absent telemetry now renders as absent.
+ */
 
 interface Props {
   mine: MineInfo
-  weather?: WeatherSignal | null
-  risk?: RiskAnalysis | null
+  weather: WeatherSignal | null
+  risk: RiskAnalysis | null
 }
 
+function band(score: number): { status: Status; label: string } {
+  if (score >= 70) return { status: 'critical', label: 'high' }
+  if (score >= 40) return { status: 'caution', label: 'elevated' }
+  return { status: 'nominal', label: 'low' }
+}
+
+const WEATHER_SOURCE = 'NASA POWER daily meteorology'
+
 export default function RiskCockpit({ mine, weather, risk }: Props) {
-  const compositeScore = risk?.composite_risk_score ?? (mine.state === 'MP' ? 72.4 : 44.5)
-  const status = risk?.risk_status || (mine.state === 'MP' ? 'ELEVATED' : 'WATCH')
+  if (!weather && !risk) {
+    return (
+      <EmptyState
+        title="Risk context unavailable"
+        detail={`No telemetry was returned for ${mine.name}. Nothing is shown in its place — the figures here previously defaulted to values chosen from the mine's state, which made a failed request look like a reading.`}
+      />
+    )
+  }
 
-  const rainfallMm = weather?.rainfall_14d_mm ?? (mine.state === 'MP' ? 118 : 64)
-  const soilMoisture = weather?.soil_moisture_pct ?? (mine.state === 'MP' ? 42 : 34)
-  const landTemp = weather?.land_surface_temp_c ?? 34.2
-
-  const statusBadgeClass = status === 'ELEVATED' ? 'ios-badge-risk' : status === 'WATCH' ? 'ios-badge-gold' : 'ios-badge-live'
-  const statusColor = status === 'ELEVATED' ? '#D9584A' : status === 'WATCH' ? '#D99A3A' : '#00FF88'
-
-  const rainTrend = Array.from({ length: 14 }, (_, i) => ({
-    day: `Day ${i + 1}`,
-    rainfall: Math.round(Math.max(0, rainfallMm / 14 + Math.sin(i * 0.7) * 8 + (i > 8 ? 6 : -2))),
-    threshold: 8,
-  }))
+  const score = risk?.composite_risk_score
 
   return (
-    <div className="ios-glass-card p-6 flex flex-col justify-between gap-6 h-full">
-      {/* Header */}
-      <div>
-        <div className="flex items-center justify-between gap-4 mb-2">
-          <div className="flex items-center gap-2">
-            <span className="ios-badge ios-badge-risk">
-              AI/ML MODULE 03
-            </span>
-            <span className="text-xs font-mono text-[#8FA4B5]">Isolation Forest & Constraint Scoring</span>
-          </div>
-          <span className={`ios-badge ${statusBadgeClass}`}>
-            {status} STATUS
+    <div className="rounded-md border border-border-default bg-surface-2 p-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <div>
+          <p className="label">Risk context</p>
+          <h3 className="mt-1 text-lg font-semibold">{mine.name}</h3>
+        </div>
+        {typeof score === 'number' ? (
+          <span className="inline-flex items-center gap-1.5 text-sm text-text-secondary">
+            <StatusDot status={band(score).status} />
+            {band(score).label}
           </span>
-        </div>
-
-        <h3 className="text-2xl font-bold text-text-primary tracking-tight">
-          Operational Risk & Constraint Cockpit
-        </h3>
-        <p className="text-xs text-[#8FA4B5] mt-1 leading-relaxed">
-          Real-time synthesis of weather saturation, machinery breakdowns, and blasting constraints at {mine.name}.
-        </p>
+        ) : null}
       </div>
 
-      {/* Composite Risk Gauge Hero */}
-      <div className="p-5 rounded-md bg-[rgba(6,10,14,0.7)] border border-border-default flex flex-col sm:flex-row items-center justify-between gap-6  shadow-inner">
-        <div className="flex items-center gap-5">
-          <div
-            className="relative flex h-20 w-20 items-center justify-center rounded-md border shadow-lg"
-            style={{
-              backgroundColor: `${statusColor}15`,
-              borderColor: `${statusColor}45`,
-            }}
-          >
-            <Gauge className="w-10 h-10" style={{ color: statusColor }} />
-          </div>
-          <div>
-            <span className="text-xs font-mono uppercase text-[#8FA4B5] tracking-wider">
-              Composite Shortfall Risk Index
-            </span>
-            <div className="text-3xl font-mono font-semibold" style={{ color: statusColor }}>
-              {compositeScore} <span className="text-sm font-normal text-[#8FA4B5]">/ 100</span>
-            </div>
-            <div className="text-xs text-[#8FA4B5] mt-1">
-              Primary Bottleneck: <span className="text-text-primary font-semibold">{mine.state === 'MP' ? 'Rainfall Road Saturation' : 'Blasting Block Schedule'}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="text-right font-mono text-xs text-[#8FA4B5] space-y-1">
-          <div>Telemetry: <span className="text-accent">Active (ISRO MOSDAC)</span></div>
-          <div>Sampling: <span className="text-text-primary">Every 6 Hours</span></div>
-          <div>Mine Lat/Lng: <span className="text-text-primary">{mine.lat}&deg;N, {mine.lng}&deg;E</span></div>
-        </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <Metric
+          label="Composite risk"
+          emphasis
+          display={typeof score === 'number' ? score.toFixed(1) : null}
+          unit="/ 100"
+          unavailableReason="The risk service returned no composite score."
+          env={
+            typeof score === 'number'
+              ? derived(score, 'score 0-100', 'Constraint-weighted composite over weather and operational drivers', {
+                  method:
+                    'A weighted index, not a probability. The calibrated probability of shortfall is on the console, from the Track B forecaster.',
+                })
+              : undefined
+          }
+        />
+        <Metric
+          label="Rainfall, 14 days"
+          display={weather?.rainfall_14d_mm != null ? weather.rainfall_14d_mm : null}
+          unit="mm"
+          unavailableReason="No measured rainfall was returned for this location."
+          env={
+            weather?.rainfall_14d_mm != null
+              ? measured(weather.rainfall_14d_mm, 'mm', WEATHER_SOURCE)
+              : undefined
+          }
+        />
+        <Metric
+          label="Soil moisture"
+          display={weather?.soil_moisture_pct != null ? weather.soil_moisture_pct : null}
+          unit="%"
+          unavailableReason="No soil-moisture value was returned."
+          env={
+            weather?.soil_moisture_pct != null
+              ? measured(weather.soil_moisture_pct, '%', WEATHER_SOURCE)
+              : undefined
+          }
+        />
+        <Metric
+          label="Land surface temperature"
+          display={weather?.land_surface_temp_c != null ? weather.land_surface_temp_c : null}
+          unit="°C"
+          unavailableReason="No land-surface temperature was returned."
+          env={
+            weather?.land_surface_temp_c != null
+              ? measured(weather.land_surface_temp_c, '°C', WEATHER_SOURCE)
+              : undefined
+          }
+        />
       </div>
 
-      {/* 4 Pillars Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Pillar 1: Rainfall */}
-        <div className="ios-glass-inset p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs mb-2">
-            <span className="text-[#8FA4B5] flex items-center gap-1.5">
-              <CloudRain className="w-3.5 h-3.5 text-[#3B82F6]" />
-              Rainfall 14d
-            </span>
-            <span className="font-mono font-bold text-[#D9584A]">{rainfallMm} mm</span>
-          </div>
-          <div className="text-xs text-[#8FA4B5] mb-2">
-            {rainfallMm > 90 ? 'Critical saturation' : 'Normal moisture level'}
-          </div>
-          <div className="w-full bg-surface-3 h-1.5 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full bg-[#D9584A]"
-              style={{ width: `${Math.min(100, (rainfallMm / 150) * 100)}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Pillar 2: Equipment Downtime */}
-        <div className="ios-glass-inset p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs mb-2">
-            <span className="text-[#8FA4B5] flex items-center gap-1.5">
-              <Wrench className="w-3.5 h-3.5 text-[#E5C76B]" />
-              Downtime
-            </span>
-            <span className="font-mono font-bold text-[#D99A3A]">14.5 hrs</span>
-          </div>
-          <div className="text-xs text-[#8FA4B5] mb-2">
-            85.5% Machinery Uptime
-          </div>
-          <div className="w-full bg-surface-3 h-1.5 rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-[#D99A3A]" style={{ width: '62%' }} />
-          </div>
-        </div>
-
-        {/* Pillar 3: Blasting Delay */}
-        <div className="ios-glass-inset p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs mb-2">
-            <span className="text-[#8FA4B5] flex items-center gap-1.5">
-              <Flame className="w-3.5 h-3.5 text-[#C66A3D]" />
-              Blast Block
-            </span>
-            <span className="font-mono font-bold text-accent">Ready</span>
-          </div>
-          <div className="text-xs text-[#8FA4B5] mb-2">
-            Pre-split drilled (1,400T)
-          </div>
-          <div className="w-full bg-surface-3 h-1.5 rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-accent" style={{ width: '85%' }} />
-          </div>
-        </div>
-
-        {/* Pillar 4: Stockpile Buffer */}
-        <div className="ios-glass-inset p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs mb-2">
-            <span className="text-[#8FA4B5] flex items-center gap-1.5">
-              <Box className="w-3.5 h-3.5 text-[#8FA4B5]" />
-              Stockpile
-            </span>
-            <span className="font-mono font-bold text-[#E5C76B]">6 Days</span>
-          </div>
-          <div className="text-xs text-[#8FA4B5] mb-2">
-            Buffer below 7d baseline
-          </div>
-          <div className="w-full bg-surface-3 h-1.5 rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-[#E5C76B]" style={{ width: '55%' }} />
-          </div>
-        </div>
-      </div>
-
-      {/* 14-Day Rainfall Disruption Trend */}
-      <div className="ios-glass-inset p-4">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-mono font-semibold text-text-primary uppercase tracking-wider">
-            14-Day Cumulative Precipitation Disruption Curve (ISRO MOSDAC)
-          </span>
-          <span className="text-xs font-mono text-[#D9584A]">
-            Saturation Threshold: 8.0 mm/day
-          </span>
-        </div>
-
-        <div className="h-[140px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={rainTrend}>
-              <defs>
-                <linearGradient id="rainFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-              <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#8FA4B5' }} tickLine={false} />
-              <YAxis tick={{ fontSize: 9, fill: '#8FA4B5' }} tickLine={false} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'rgba(10,16,22,0.95)',
-                  borderColor: 'rgba(255,255,255,0.2)',
-                  borderRadius: '16px',
-                  fontSize: '11px',
-                  fontFamily: 'monospace',
-                  backdropFilter: 'blur(20px)',
-                  boxShadow: '0 12px 32px rgba(0,0,0,0.8)',
-                }}
-              />
-              <Area type="monotone" dataKey="rainfall" name="Rainfall (mm)" stroke="#3B82F6" fill="url(#rainFill)" strokeWidth={2} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+      <p className="measure mt-4 text-xs text-text-tertiary">
+        Rain and temperature are measured. The composite score is an index over those measurements
+        and the mine's synthetic operational record — useful for ordering mines, not for stating
+        how likely a shortfall is. That number is on the console, with its interval.
+      </p>
     </div>
   )
 }

@@ -3,7 +3,6 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { Starfield } from '@/components/nakshatra/sections'
 import { GlassCard } from '@/components/nakshatra/ui'
 import { ShieldCheck, Loader2, AlertCircle, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
@@ -141,8 +140,6 @@ function AuthCallbackContent() {
 
   return (
     <div className="relative isolate min-h-screen overflow-hidden bg-black text-text-primary flex items-center justify-center p-4">
-      <Starfield />
-
       <GlassCard className="relative z-10 w-full max-w-md p-8 text-center border border-border-default">
         <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-md bg-accent/10 border border-accent/40 text-accent mb-4">
           <ShieldCheck size={30} />
