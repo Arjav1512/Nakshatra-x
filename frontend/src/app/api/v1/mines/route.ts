@@ -1,18 +1,40 @@
 import { NextResponse } from 'next/server'
+import { backendUrl, fetchFromBackend } from '@/lib/backend'
 
-export const MOIL_MINES = [
-  { id: 'balaghat', numericId: 1, name: 'Balaghat', code: 'MOIL-BAL-01', state: 'MP', lat: 21.83, lng: 80.19, zone: 'Central India', targetTonnes: 18000, currentProduction: 16800 },
-  { id: 'bharweli', numericId: 2, name: 'Bharweli', code: 'MOIL-BHR-02', state: 'MP', lat: 21.86, lng: 80.26, zone: 'Central India', targetTonnes: 14500, currentProduction: 12200 },
-  { id: 'ukwa', numericId: 3, name: 'Ukwa', code: 'MOIL-UKW-03', state: 'MP', lat: 21.93, lng: 80.52, zone: 'Central India', targetTonnes: 9800, currentProduction: 8900 },
-  { id: 'tirodi', numericId: 4, name: 'Tirodi', code: 'MOIL-TIR-04', state: 'MP', lat: 22.16, lng: 79.68, zone: 'Central India', targetTonnes: 11200, currentProduction: 10100 },
-  { id: 'dongri-buzurg', numericId: 5, name: 'Dongri Buzurg', code: 'MOIL-DON-05', state: 'MH', lat: 20.99, lng: 79.34, zone: 'Western Belt', targetTonnes: 12000, currentProduction: 11200 },
-  { id: 'chikla', numericId: 6, name: 'Chikla', code: 'MOIL-CHK-06', state: 'MH', lat: 21.30, lng: 79.66, zone: 'Western Belt', targetTonnes: 10800, currentProduction: 9800 },
-  { id: 'mansar', numericId: 7, name: 'Mansar', code: 'MOIL-MAN-07', state: 'MH', lat: 21.44, lng: 79.25, zone: 'Western Belt', targetTonnes: 12500, currentProduction: 11800 },
-  { id: 'kandri', numericId: 8, name: 'Kandri', code: 'MOIL-KAN-08', state: 'MH', lat: 21.38, lng: 79.32, zone: 'Western Belt', targetTonnes: 9300, currentProduction: 8400 },
-  { id: 'gumgaon', numericId: 9, name: 'Gumgaon', code: 'MOIL-GUM-09', state: 'MH', lat: 21.33, lng: 79.03, zone: 'Western Belt', targetTonnes: 10200, currentProduction: 9600 },
-  { id: 'beldongri', numericId: 10, name: 'Beldongri', code: 'MOIL-BEL-10', state: 'MH', lat: 21.16, lng: 79.18, zone: 'Western Belt', targetTonnes: 8600, currentProduction: 7800 },
-]
-
+/**
+ * Mine register proxy (DEF-1).
+ *
+ * This route previously returned its own hardcoded register with slug primary
+ * keys (`id: 'balaghat'`), shadowing the FastAPI endpoint of the same path,
+ * which keys mines by integer. The console read this register and then built
+ * `/api/v1/mines/balaghat/forecast`, which the backend cannot resolve — so
+ * every forecast, backtest and recommendation request failed, and telemetry
+ * silently fell back to mine 1 and returned Balaghat's record for every mine.
+ *
+ * There is now one register and one ID scheme: FastAPI's. `MineRow` in
+ * console-api.ts already declared exactly this shape — the mismatch went
+ * unnoticed because the client casts `res.json()` rather than parsing it.
+ *
+ * Thin by design, matching the other mine routes: no local register, and an
+ * unavailable backend is reported as unavailable rather than substituted
+ * (PRD N-6).
+ */
 export async function GET() {
-  return NextResponse.json(MOIL_MINES)
+  const r = await fetchFromBackend('/api/v1/mines')
+
+  if (r.ok) {
+    return NextResponse.json(r.data, {
+      headers: { 'x-served-by': 'fastapi', 'x-proxied-from': backendUrl() },
+    })
+  }
+
+  return NextResponse.json(
+    {
+      error: 'Mine register unavailable',
+      detail: r.error,
+      note: 'The FastAPI service layer could not be reached. No register is shown, because a mine list assembled in the browser would not be the one the models were fitted against.',
+      served_by: 'nextjs-degraded',
+    },
+    { status: 503 }
+  )
 }
