@@ -1,0 +1,229 @@
+[
+  {
+    "route": "/",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/console",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/dashboard",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 2,
+        "sample": [
+          "<span class=\"relative bg-[#090D16] px-3 font-mono text-[10px] text-slate-500 uppercase tracking-widest\">or sign in with email OTP</span>",
+          "<span class=\"relative bg-[#090D16] px-3 font-mono text-[10px] text-slate-500 uppercase tracking-widest\">or try instant demo</span>"
+        ]
+      }
+    ],
+    "seriousOrCritical": 1
+  },
+  {
+    "route": "/production",
+    "violations": [
+      {
+        "id": "label",
+        "impact": "critical",
+        "help": "Form elements must have labels",
+        "nodes": 3,
+        "sample": [
+          "<input min=\"10\" max=\"260\" class=\"w-full accent-[#38BDF8] cursor-pointer\" type=\"range\" value=\"94.8\">",
+          "<input min=\"0\" max=\"50\" step=\"0.5\" class=\"w-full accent-[#FACC15] cursor-pointer\" type=\"range\" value=\"12.5\">"
+        ]
+      },
+      {
+        "id": "scrollable-region-focusable",
+        "impact": "serious",
+        "help": "Scrollable region must have keyboard access",
+        "nodes": 1,
+        "sample": [
+          "<div class=\"space-y-1 max-h-20 overflow-y-auto custom-scrollbar pr-1\">"
+        ]
+      }
+    ],
+    "seriousOrCritical": 2
+  },
+  {
+    "route": "/blending",
+    "violations": [
+      {
+        "id": "label",
+        "impact": "critical",
+        "help": "Form elements must have labels",
+        "nodes": 2,
+        "sample": [
+          "<input type=\"range\" min=\"1000\" max=\"12000\" step=\"500\" class=\"w-full accent-[#00FF88] cursor-pointer\" value=\"5000\">",
+          "<input type=\"range\" min=\"30.0\" max=\"45.0\" step=\"0.5\" class=\"w-full accent-[#FACC15] cursor-pointer\" value=\"41\">"
+        ]
+      }
+    ],
+    "seriousOrCritical": 1
+  },
+  {
+    "route": "/mine-twin",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/flood-alert",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/evaluator",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 4,
+        "sample": [
+          "<p class=\"mt-0.5 font-mono text-[10px] text-slate-500\">95% CI [0.723, 0.95]</p>",
+          "<p class=\"mt-0.5 text-[10px] text-slate-500\">the geological claim in isolation</p>"
+        ]
+      }
+    ],
+    "seriousOrCritical": 1
+  },
+  {
+    "route": "/features",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/features/1",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/preview",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 2,
+        "sample": [
+          "<span class=\"relative bg-[#090D16] px-3 font-mono text-[10px] text-slate-500 uppercase tracking-widest\">or sign in with email OTP</span>",
+          "<span class=\"relative bg-[#090D16] px-3 font-mono text-[10px] text-slate-500 uppercase tracking-widest\">or try instant demo</span>"
+        ]
+      }
+    ],
+    "seriousOrCritical": 1
+  },
+  {
+    "route": "/about",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/login",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 2,
+        "sample": [
+          "<span class=\"relative bg-[#090D16] px-3 font-mono text-[10px] text-slate-500 uppercase tracking-widest\">or sign in with email OTP</span>",
+          "<span class=\"relative bg-[#090D16] px-3 font-mono text-[10px] text-slate-500 uppercase tracking-widest\">or try instant demo</span>"
+        ]
+      }
+    ],
+    "seriousOrCritical": 1
+  },
+  {
+    "route": "/loading",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/admin",
+    "violations": [
+      {
+        "id": "button-name",
+        "impact": "critical",
+        "help": "Buttons must have discernible text",
+        "nodes": 1,
+        "sample": [
+          "<button type=\"button\" class=\"absolute right-3 top-3 text-slate-500 hover:text-white transition-colors cursor-pointer\">"
+        ]
+      },
+      {
+        "id": "target-size",
+        "impact": "serious",
+        "help": "All touch targets must be 24px large, or leave sufficient space",
+        "nodes": 1,
+        "sample": [
+          "<button type=\"button\" class=\"absolute right-3 top-3 text-slate-500 hover:text-white transition-colors cursor-pointer\">"
+        ]
+      }
+    ],
+    "seriousOrCritical": 2
+  },
+  {
+    "route": "/admin/login",
+    "violations": [
+      {
+        "id": "button-name",
+        "impact": "critical",
+        "help": "Buttons must have discernible text",
+        "nodes": 1,
+        "sample": [
+          "<button type=\"button\" class=\"absolute right-3 top-3 text-slate-500 hover:text-white transition-colors cursor-pointer\">"
+        ]
+      },
+      {
+        "id": "target-size",
+        "impact": "serious",
+        "help": "All touch targets must be 24px large, or leave sufficient space",
+        "nodes": 1,
+        "sample": [
+          "<button type=\"button\" class=\"absolute right-3 top-3 text-slate-500 hover:text-white transition-colors cursor-pointer\">"
+        ]
+      }
+    ],
+    "seriousOrCritical": 2
+  },
+  {
+    "route": "/admin/setup",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/admin/profile",
+    "violations": [
+      {
+        "id": "button-name",
+        "impact": "critical",
+        "help": "Buttons must have discernible text",
+        "nodes": 1,
+        "sample": [
+          "<button type=\"button\" class=\"absolute right-3 top-3 text-slate-500 hover:text-white transition-colors cursor-pointer\">"
+        ]
+      },
+      {
+        "id": "target-size",
+        "impact": "serious",
+        "help": "All touch targets must be 24px large, or leave sufficient space",
+        "nodes": 1,
+        "sample": [
+          "<button type=\"button\" class=\"absolute right-3 top-3 text-slate-500 hover:text-white transition-colors cursor-pointer\">"
+        ]
+      }
+    ],
+    "seriousOrCritical": 2
+  },
+  {
+    "route": "/auth/callback",
+    "violations": [],
+    "seriousOrCritical": 0
+  }
+]

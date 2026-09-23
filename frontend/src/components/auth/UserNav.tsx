@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { CyberRobotAvatar } from '@/components/auth/CyberRobotAvatar'
 import {
   Compass,
   LogOut,
@@ -10,6 +9,7 @@ import {
   LayoutDashboard,
   Loader2,
   Mail,
+  User,
 } from 'lucide-react'
 
 interface UserData {
@@ -100,44 +100,51 @@ export function UserNav() {
 
   return (
     <div className="relative inline-block text-left" ref={popoverRef}>
-      {/* 3D Cyber Robot Avatar Trigger Button */}
+      {/* Account control.
+
+          The two stacked green dots that used to sit here rendered
+          unconditionally — they were not guarded by `user` — so a signed-out
+          visitor saw the same "active" indicator as a signed-in operator. They
+          are gone rather than made conditional: session state belongs in the
+          label, where a screen reader can reach it, not in a colour.
+
+          Also dropped: hover scale and the glow shadow, both banned by the
+          motion and elevation policies. */}
       <button
         onClick={() => setMenuOpen(!menuOpen)}
-        className="relative h-9 w-9 md:h-10 md:w-10 rounded-full flex items-center justify-center transition-colors hover:scale-110 active:scale-95 shrink-0 cursor-pointer group"
+        aria-expanded={menuOpen}
+        aria-haspopup="true"
+        className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border-interactive bg-surface-2 text-text-secondary transition-colors duration-[120ms] ease-out hover:bg-surface-3 hover:text-text-primary"
         type="button"
-        title="3D Cyber Robot Avatar • Click to open Sign In & Guest Mode"
+        title={user ? `Signed in as ${user.full_name || user.email}` : 'Sign in'}
       >
-        <CyberRobotAvatar
-          size="sm"
-          className="h-9 w-9 md:h-10 md:w-10 border-2 border-[#00FF88] shadow-[0_0_16px_rgba(0,255,136,0.5)] group-hover:shadow-[0_0_25px_rgba(0,255,136,0.95)] transition-colors"
-        />
-        <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#00FF88] border border-black " />
-        <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#00FF88] border border-black" />
+        <User className="h-4 w-4" aria-hidden="true" />
+        <span className="sr-only">{user ? 'Account menu' : 'Sign in'}</span>
       </button>
 
       {/* Floating Interactive Popover Menu */}
       {menuOpen && (
-        <div className="absolute right-0 mt-3 w-72 sm:w-80 p-4 rounded-3xl bg-[#061224]/98 backdrop-blur-2xl border-2 border-[#00FF88]/50 shadow-[0_0_40px_rgba(0,255,136,0.3)] z-50 animate-in fade-in zoom-in-95 duration-150 space-y-3">
+        <div className="absolute right-0 z-50 mt-2 w-72 space-y-3 rounded-md border border-border-default bg-surface-3 p-4  sm:w-80">
           {/* Header Status */}
-          <div className="flex items-center justify-between pb-2 border-b border-white/10">
+          <div className="flex items-center justify-between pb-2 border-b border-border-subtle">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#00FF88]" />
-              <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+              <ShieldCheck className="w-4 h-4 text-accent" />
+              <span className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">
                 {user ? 'Authenticated Session' : 'Access Console'}
               </span>
             </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00FF88]/20 text-[#00FF88] border border-[#00FF88]/40">
+            <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-accent/20 text-accent border border-accent/40">
               {user ? 'OPERATOR' : 'SELECT MODE'}
             </span>
           </div>
 
           {/* User Info (If Authenticated) */}
           {user ? (
-            <div className="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-              <div className="text-xs font-bold text-white truncate font-space">
+            <div className="p-3 rounded-md bg-surface-2 border border-border-subtle space-y-2">
+              <div className="text-xs font-bold text-text-primary truncate font-sans">
                 {user.full_name || user.email}
               </div>
-              <div className="text-[10px] font-mono text-slate-400 truncate">
+              <div className="text-xs font-mono text-text-secondary truncate">
                 {user.email}
               </div>
               <div className="pt-1 flex gap-2">
@@ -147,7 +154,7 @@ export function UserNav() {
                     setMenuOpen(false)
                     router.push('/dashboard')
                   }}
-                  className="flex-1 py-2 px-3 rounded-xl bg-[#00FF88]/20 border border-[#00FF88] text-[#00FF88] hover:text-white font-mono text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="flex-1 py-2 px-3 rounded-md bg-accent/20 border border-accent text-accent hover:text-text-primary font-mono text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <LayoutDashboard size={14} />
                   <span>Dashboard</span>
@@ -155,7 +162,7 @@ export function UserNav() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="py-2 px-3 rounded-xl bg-[#FF2E63]/20 border border-[#FF2E63]/60 text-[#FF2E63] hover:text-white font-mono text-xs font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                  className="py-2 px-3 rounded-md bg-status-critical/20 border border-status-critical/60 text-status-critical hover:text-text-primary font-mono text-xs font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                   title="Sign Out"
                 >
                   <LogOut size={14} />
@@ -165,7 +172,7 @@ export function UserNav() {
           ) : (
             /* Sign In Options (Google, GitHub, Guest, Email) */
             <div className="space-y-2.5">
-              <p className="text-[11px] font-mono text-slate-300 leading-snug">
+              <p className="text-xs font-mono text-text-secondary leading-snug">
                 Select your authentication method or launch Guest Mode:
               </p>
 
@@ -173,7 +180,7 @@ export function UserNav() {
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-sans font-semibold text-xs transition-colors shadow-md cursor-pointer group"
+                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 rounded-md bg-white hover:bg-slate-100 text-slate-900 font-sans font-semibold text-xs transition-colors shadow-md cursor-pointer group"
               >
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                   <path
@@ -201,12 +208,12 @@ export function UserNav() {
                 type="button"
                 onClick={handleGithubLogin}
                 disabled={actionLoading === 'github'}
-                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 rounded-xl bg-[#24292F] hover:bg-[#1B1F23] border border-white/20 text-white font-sans font-semibold text-xs transition-colors shadow-md cursor-pointer group disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 rounded-md bg-[#24292F] hover:bg-[#1B1F23] border border-border-interactive text-text-primary font-sans font-semibold text-xs transition-colors shadow-md cursor-pointer group disabled:opacity-50"
               >
                 {actionLoading === 'github' ? (
-                  <Loader2 size={15} className="animate-spin text-white" />
+                  <Loader2 size={15} className="animate-spin text-text-primary" />
                 ) : (
-                  <svg className="w-4 h-4 shrink-0 fill-current text-white" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 shrink-0 fill-current text-text-primary" viewBox="0 0 24 24">
                     <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
                   </svg>
                 )}
@@ -218,12 +225,12 @@ export function UserNav() {
                 type="button"
                 onClick={handleGuestLogin}
                 disabled={actionLoading === 'guest'}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-3.5 rounded-xl bg-[#00FF88]/15 hover:bg-[#00FF88]/25 border border-[#00FF88]/60 text-[#00FF88] font-mono text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-[0_0_15px_rgba(0,255,136,0.2)] disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-3.5 rounded-md bg-accent/15 hover:bg-accent/25 border border-accent/60 text-accent font-mono text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer  disabled:opacity-50"
               >
                 {actionLoading === 'guest' ? (
-                  <Loader2 size={15} className="animate-spin text-[#00FF88]" />
+                  <Loader2 size={15} className="animate-spin text-accent" />
                 ) : (
-                  <Compass size={15} className="text-[#00FF88]" />
+                  <Compass size={15} className="text-accent" />
                 )}
                 <span>{actionLoading === 'guest' ? 'Entering Guest Mode...' : 'Enter Guest Mode'}</span>
               </button>
@@ -235,7 +242,7 @@ export function UserNav() {
                   setMenuOpen(false)
                   router.push('/login')
                 }}
-                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-[11px] font-mono transition-colors cursor-pointer border border-white/10"
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md bg-surface-2 hover:bg-white/10 text-text-secondary text-xs font-mono transition-colors cursor-pointer border border-border-subtle"
               >
                 <Mail size={13} className="text-[#38BDF8]" />
                 <span>Or Sign in with Email OTP &rarr;</span>
@@ -244,9 +251,9 @@ export function UserNav() {
           )}
 
           {/* Footer Badge */}
-          <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[9px] font-mono text-slate-400">
+          <div className="pt-2 border-t border-border-subtle flex items-center justify-between text-xs font-mono text-text-secondary">
             <span>MOIL &bull; NAKSHATRA-X</span>
-            <span className="text-[#00FF88]">SECURED ACCESS</span>
+            <span className="text-accent">SECURED ACCESS</span>
           </div>
         </div>
       )}

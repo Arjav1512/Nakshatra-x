@@ -130,6 +130,70 @@ unknown".
 
 ---
 
+---
+
+# Defects found during the redesign
+
+Not design gaps — existing bugs the redesign surfaced. Logged rather than fixed,
+because this phase makes no backend or API changes.
+
+## DEF-1 — The decision console cannot render a single forecast (pre-existing)
+
+**Severity: high.** `/console` is the product's primary screen. Every mine on it
+reports a failed forecast, and has done since before this branch.
+
+**Cause — two different `/api/v1/mines` answer the same path.**
+
+`frontend/src/app/api/v1/mines/route.ts` is a Next route handler that returns a
+hardcoded register and never proxies the backend. It shadows the FastAPI
+endpoint of the same path, and the two disagree about the primary key:
+
+```
+GET :8000/api/v1/mines   (FastAPI)  ->  { "id": 1,          "mine_code": "MOIL-BAL-01", ... }
+GET :3000/api/v1/mines   (Next)     ->  { "id": "balaghat", "numericId": 1, "code": "MOIL-BAL-01", ... }
+```
+
+`console-api.ts` fetches the register, then builds
+`/api/v1/mines/${mineId}/forecast`. It receives the string id and asks for
+`/api/v1/mines/balaghat/forecast`, which the backend cannot resolve:
+
+```
+$ curl -o /dev/null -w "%{http_code}" :3000/api/v1/mines/balaghat/forecast?horizon_days=14
+503
+$ curl -o /dev/null -w "%{http_code}" :3000/api/v1/mines/1/forecast?horizon_days=14
+200
+```
+
+The Next route carries `numericId`, which is the value the backend wants — so
+the data to fix this is already in the payload.
+
+**Pre-existing, verified two ways.** `docs/design/before/console@1280.png`, taken
+from `main` before any redesign work, shows the same ten failures. And:
+
+```
+$ git show 5c817bb:frontend/src/app/api/v1/mines/route.ts | grep -c "id: '"
+10
+$ git diff 5c817bb..HEAD -- frontend/src/app/api/v1/mines/route.ts frontend/src/lib/console-api.ts
+  (no output — this branch changed neither file)
+```
+
+**Why it was invisible before.** The old console collapsed every failure to the
+literal `'err'` and printed "forecast unavailable", which reads like missing
+data. The redesign prints the status code, so the screen now says
+"Forecast unavailable (503)" — and a 503 on every mine is obviously a wiring
+fault rather than absent data. The bug did not appear; it became legible.
+
+**Not fixed here.** The fix touches an API route, and this phase is UI/UX only.
+It is one line at the call site (use `numericId`) or a decision to delete the
+shadowing Next route and let the backend serve the register. Which of those is
+correct is an API question, not a design one.
+
+**Consequence for this PR.** `docs/design/after/console@*.png` shows the console
+in its real current state: correct layout, typography, spacing, provenance
+footer and error handling — with no forecast values, because there are none to
+show. That is the honest screenshot. The design is reviewable; the data is not
+available to it until DEF-1 is fixed.
+
 ## Not backlogged
 
 For the record, these were considered and are **in scope**, handled by the

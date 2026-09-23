@@ -67,7 +67,11 @@ const slug = (r) => (r === '/' ? 'root' : r.replace(/^\//, '').replace(/\//g, '_
         messages.push(`nav: ${String(e.message).slice(0, 120)}`)
       }
       // Let fonts/layout settle without waiting on animation loops.
-      await new Promise((r) => setTimeout(r, 1200))
+      // SETTLE_MS is overridable because /console fetches one forecast per mine
+      // sequentially; with a warm cache that is ~10 x 0.7s, and the default
+      // 1.2s would photograph a screen that is still loading.
+      const SETTLE_MS = Number(process.env.SETTLE_MS || 1200)
+      await new Promise((r) => setTimeout(r, SETTLE_MS))
 
       // Horizontal-overflow check at this width.
       try {
