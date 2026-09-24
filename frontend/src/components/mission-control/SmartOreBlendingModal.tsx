@@ -40,11 +40,16 @@ export default function SmartOreBlendingModal({ mine }: Props) {
           target_mn_min: targetMnMin,
           target_p_max: 0.15,
           target_sio2_max: 6.5,
+          // Illustrative stockpiles. These grades, tonnages and costs are
+          // invented inputs used to exercise the solver — there is no stockpile
+          // register in this system. They were previously labelled with real
+          // mine names ("Balaghat High-Grade SP-1", "Dongri Buzurg Med-Grade
+          // SP-2"), which presented them as those mines' actual inventory.
           stockpiles: [
-            { name: `${mine.name} High-Grade SP-1 (46.2% Mn)`, available_tonnes: 3200, mn_grade_pct: 46.2, p_pct: 0.11, sio2_pct: 4.8, cost_per_tonne_inr: 8200 },
-            { name: 'Dongri Buzurg Med-Grade SP-2 (37.5% Mn)', available_tonnes: 4500, mn_grade_pct: 37.5, p_pct: 0.16, sio2_pct: 7.2, cost_per_tonne_inr: 5400 },
-            { name: 'Ukwa Silico-Mn SP-3 (34.0% Mn)', available_tonnes: 2800, mn_grade_pct: 34.0, p_pct: 0.14, sio2_pct: 8.1, cost_per_tonne_inr: 4100 },
-            { name: 'Tirodi Low-Grade SP-4 (28.5% Mn)', available_tonnes: 2100, mn_grade_pct: 28.5, p_pct: 0.18, sio2_pct: 9.5, cost_per_tonne_inr: 2900 },
+            { name: 'Illustrative SP-1 — high grade', available_tonnes: 3200, mn_grade_pct: 46.2, p_pct: 0.11, sio2_pct: 4.8, cost_per_tonne_inr: 8200 },
+            { name: 'Illustrative SP-2 — medium grade', available_tonnes: 4500, mn_grade_pct: 37.5, p_pct: 0.16, sio2_pct: 7.2, cost_per_tonne_inr: 5400 },
+            { name: 'Illustrative SP-3 — silico-Mn', available_tonnes: 2800, mn_grade_pct: 34.0, p_pct: 0.14, sio2_pct: 8.1, cost_per_tonne_inr: 4100 },
+            { name: 'Illustrative SP-4 — low grade', available_tonnes: 2100, mn_grade_pct: 28.5, p_pct: 0.18, sio2_pct: 9.5, cost_per_tonne_inr: 2900 },
           ],
         }),
       })
@@ -159,10 +164,18 @@ export default function SmartOreBlendingModal({ mine }: Props) {
           </div>
 
           {/* Allocation Breakdown Table */}
-          <div className="ios-glass-inset p-4 space-y-2">
-            <span className="text-xs font-mono font-semibold text-text-primary uppercase tracking-wider block mb-2">
-              Recommended Stockpile Dispatch Allocation
-            </span>
+          <div className="rounded-md border border-border-default bg-surface-2 p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <span className="label">Blend allocation</span>
+              <span className="inline-flex items-center gap-1 rounded-sm border border-status-caution/40 bg-status-caution/10 px-1.5 py-0.5 font-mono text-xs text-status-caution">
+                SYNTHETIC INPUTS
+              </span>
+            </div>
+            <p className="measure mb-3 text-xs text-text-tertiary">
+              The linear program is real and its infeasibility reporting is the point of it, but the
+              stockpiles it solved over are illustrative: this system has no stockpile register, so
+              the tonnages and rupee figures below describe the example, not a mine.
+            </p>
             {blendResult.blend_plan?.map((item: any, idx: number) => (
               <div key={idx} className="flex items-center justify-between text-xs font-mono py-1.5 border-b border-border-subtle last:border-0">
                 <span className="text-text-tertiary">{item.stockpile_name}</span>

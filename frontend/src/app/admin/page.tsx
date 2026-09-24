@@ -566,10 +566,16 @@ export default function AdminDashboard() {
                             type="number"
                             value={mine.targetTonnes}
                             onChange={(e) => {
-                              const val = parseFloat(e.target.value) || 0
+                              // `parseFloat(value) || 0` turned an unparseable
+                              // entry into a plan target of zero, which is a
+                              // valid-looking number that every shortfall
+                              // calculation downstream would use. An entry that
+                              // is not a number is ignored instead.
+                              const parsed = Number.parseFloat(e.target.value)
+                              if (!Number.isFinite(parsed) || parsed < 0) return
                               setMines((prev) => ({
                                 ...prev,
-                                [mine.id]: { ...prev[mine.id], targetTonnes: val },
+                                [mine.id]: { ...prev[mine.id], targetTonnes: parsed },
                               }))
                             }}
                             className="bg-surface-0/80 border border-border-default rounded-lg py-1.5 px-3 text-right text-xs font-mono text-accent focus:outline-none focus:border-accent w-36"

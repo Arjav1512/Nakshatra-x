@@ -38,7 +38,7 @@ ATTRIBUTION_VERSION = "additive-driver-attribution-v1"
 MINE_SOURCE = "MOIL public mine register (coordinates, lease names)"
 
 
-def _drag_model(rainfall_14d: float, downtime_hours: float, blasting_ready: bool):
+def _drag_model(rainfall_14d: float | None, downtime_hours: float, blasting_ready: bool):
     """
     Bounded additive drag model.
 
@@ -47,8 +47,18 @@ def _drag_model(rainfall_14d: float, downtime_hours: float, blasting_ready: bool
     approximation. PRD B-5/B-6 require a fitted forecaster with a probability
     and interval — that is Phase 4; this model is explicitly labelled as having
     no statistical interval.
+
+    `rainfall_14d` may be None when the weather service returned no reading.
+    The weather term is then omitted rather than defaulted: it previously
+    arrived as 0.0 via `or 0.0`, which took the *lowest* drag branch (0.02) and
+    so reported an unmeasured mine as being in better shape than a dry one.
+    Omitting the term keeps the decomposition exact over the terms that were
+    actually assessable, and the caller states that weather was not among them.
     """
-    weather = min(0.35, (rainfall_14d / 150.0) * 0.35) if rainfall_14d > 60 else 0.02
+    if rainfall_14d is None:
+        weather = 0.0
+    else:
+        weather = min(0.35, (rainfall_14d / 150.0) * 0.35) if rainfall_14d > 60 else 0.02
     downtime = min(0.30, (downtime_hours / 40.0) * 0.30)
     blasting = 0.0 if blasting_ready else 0.15
     total = min(0.55, weather + downtime + blasting)
@@ -73,7 +83,12 @@ async def build_mine_telemetry(mine) -> dict:
     live = bool(wx.get("is_live"))
     wrap = measured if live else synthetic
     wx_source = wx.get("source", "unknown")
-    rainfall_14d = float(wx.get("rainfall_14d_mm") or 0.0)
+    # `or 0.0` turned a missing rainfall reading into a measured zero, which is
+    # both a plausible value and the wrong one: no rain and no record are
+    # different states, and downstream this feeds a drag term. None propagates
+    # so the envelope can report the value as unavailable.
+    _rain = wx.get("rainfall_14d_mm")
+    rainfall_14d = float(_rain) if _rain is not None else None
     temp_c = wx.get("avg_temperature_c")
     humidity = wx.get("avg_humidity_pct")
 
@@ -101,7 +116,16 @@ async def build_mine_telemetry(mine) -> dict:
     shortfall_pct = rnd(total_drag * 100, 1)
 
     horizon_days = 14
-    target_tonnes = float(mine.target_tonnes or 0.0)
+    # `or 0.0` gave a mine with no plan target a target of zero, which makes
+    # every figure derived from it meaningless rather than absent: planned
+    # output becomes 0, and a shortfall against a zero target is not a
+    # shortfall. A mine without a target is a register problem, and is raised.
+    if mine.target_tonnes is None:
+        raise ValueError(
+            f"Mine {mine.mine_code} has no target_tonnes; production figures "
+            f"are not computed against an assumed target."
+        )
+    target_tonnes = float(mine.target_tonnes)
     daily_target = target_tonnes / 30.0
     planned = round(daily_target * horizon_days)
     predicted = round(planned * (1 - total_drag))
@@ -211,7 +235,11 @@ async def build_mine_telemetry(mine) -> dict:
         "base_value": 0,
         "waterfall_features": [
             {
-                "feature": f"14-day rainfall ({rainfall_14d} mm, {'measured' if live else 'synthetic'})",
+                "feature": (
+                    f"14-day rainfall ({rainfall_14d} mm, {'measured' if live else 'synthetic'})"
+                    if rainfall_14d is not None
+                    else "14-day rainfall (no reading returned; weather drag not assessed)"
+                ),
                 "shap_value": rnd(w_drag * 100, 1),
                 "is_positive": w_drag > 0,
             },

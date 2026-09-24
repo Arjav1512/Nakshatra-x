@@ -41,14 +41,22 @@ def fetch_open_meteo_telemetry(lat: float, lng: float):
             data = resp.json()
             daily = data.get("daily", {})
             days = daily.get("time", [])
-            sums = [r or 0.0 for r in daily.get("precipitation_sum", [])]
+            # `r or 0.0` counted a day with no record as a measured dry day and
+            # summed it into the 14-day total below.
+            raw_sums = daily.get("precipitation_sum", [])
+            sums = [r for r in raw_sums if r is not None]
+            missing_days = len(raw_sums) - len(sums)
             today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
             split = next((i for i, t in enumerate(days) if t >= today), len(days))
             daily_rain = sums[max(0, split - 14):split]
             rain_14d = round(sum(daily_rain), 1)
-            soil_moist = round((data.get("hourly", {}).get("soil_moisture_0_to_1cm", [0.35])[0] or 0.35) * 100, 1)
-            temp_c = data.get("current", {}).get("temperature_2m", 32.0)
-            humidity = data.get("current", {}).get("relative_humidity_2m", 70.0)
+            # These defaulted to 0.35 soil moisture, 32.0 C and 70% humidity —
+            # plausible central-India values that were indistinguishable from
+            # readings. None means "not returned", and the caller says so.
+            _soil = (data.get("hourly", {}).get("soil_moisture_0_to_1cm") or [None])[0]
+            soil_moist = round(_soil * 100, 1) if _soil is not None else None
+            temp_c = data.get("current", {}).get("temperature_2m")
+            humidity = data.get("current", {}).get("relative_humidity_2m")
             return rain_14d, soil_moist, temp_c, humidity, daily_rain
     except Exception as e:
         print(f"[Warning] Telemetry fallback activated for ({lat}, {lng}): {e}")
