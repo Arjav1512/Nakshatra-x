@@ -11,7 +11,7 @@ export interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
 export function GlassCard({ children, className, ...props }: GlassCardProps) {
   return (
     <div
-      className={clsx( 'relative rounded-md border border-accent/25 bg-[#050A18]/80 p-6  transition-colors duration-300 hover:border-accent/50',
+      className={clsx( 'relative rounded-md border border-accent/25 bg-[var(--color-surface-0)]/80 p-6  transition-colors duration-300 hover:border-accent/50',
         className
       )}
       {...props}
@@ -39,9 +39,9 @@ export function GlassButton({
   const baseStyles = 'relative inline-flex items-center justify-center gap-2 font-mono text-xs font-bold tracking-wider uppercase rounded-md px-5 py-3 transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed select-none'
 
   const variants = {
-    primary: 'bg-[#081329]/90 text-text-primary border border-accent/50 hover:border-accent hover:bg-accent/15 hover:text-accent hover: active:scale-[0.98]',
+    primary: 'bg-[var(--color-surface-1)]/90 text-text-primary border border-accent/50 hover:border-accent hover:bg-accent/15 hover:text-accent hover: active:scale-[0.98]',
     ghost: 'bg-surface-2 text-text-secondary border border-border-default hover:bg-surface-3 hover:text-text-primary hover:border-border-interactive active:scale-[0.98]',
-    danger: 'bg-[#2A080C]/80 text-status-critical border border-status-critical/40 hover:bg-status-critical/20 hover:border-status-critical active:scale-[0.98]',
+    danger: 'bg-[var(--color-surface-1)]/80 text-status-critical border border-status-critical/40 hover:bg-status-critical/20 hover:border-status-critical active:scale-[0.98]',
   }
 
   return (

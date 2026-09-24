@@ -194,7 +194,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#030712] text-text-primary p-4 sm:p-8 font-mono bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,233,0.1),rgba(255,255,255,0))]">
+    <div className="min-h-screen bg-[var(--color-surface-0)] text-text-primary p-4 sm:p-8 font-mono bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,233,0.1),rgba(255,255,255,0))]">
       <div className="max-w-7xl mx-auto">
         {/* ================= TOP COMMANDER HEADER ================= */}
         <header className="border-b border-border-default pb-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">

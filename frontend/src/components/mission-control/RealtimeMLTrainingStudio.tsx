@@ -79,7 +79,7 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
   }, [])
 
   return (
-    <section className="rounded-md border border-border-default bg-[#080d16]/80 p-5">
+    <section className="rounded-md border border-border-default bg-[var(--color-surface-1)]/80 p-5">
       <header className="mb-4">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-accent">
           Prospectivity model card
@@ -101,7 +101,7 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
         </div>
       ) : !m ? (
         <div className="flex items-center gap-2 py-6 text-xs text-text-secondary">
-          <span className="h-3 w-3 animate-spin rounded-full border-2 border-text-tertiary border-t-[#00FF88]" />
+          <span className="h-3 w-3 animate-spin rounded-full border-2 border-text-tertiary border-t-[var(--color-status-nominal)]" />
           Loading validation metrics…
         </div>
       ) : (

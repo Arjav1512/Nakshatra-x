@@ -17,7 +17,7 @@ import {
 
 export default function AboutPage() {
   return (
-    <main className="relative min-h-screen bg-[#030712] text-text-primary pt-24 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden font-sans">
+    <main className="relative min-h-screen bg-[var(--color-surface-0)] text-text-primary pt-24 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden font-sans">
       {/* Ambient Space Dust & Cosmic Radial Sheen */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-gradient-to-tr from-status-critical/15 via-accent/10 to-accent/15 rounded-full blur-[140px] pointer-events-none" />
 

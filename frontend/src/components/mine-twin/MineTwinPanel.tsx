@@ -389,7 +389,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
           </div>
 
           {/* SLEEK MINIMALISTIC 50-YEAR HISTORY (1975-2025) & 2040 FORECAST GRAPH */}
-          <div className="ios-glass-inset p-5 rounded-md border border-border-default space-y-3 relative overflow-hidden bg-[#060D1E]/90">
+          <div className="ios-glass-inset p-5 rounded-md border border-border-default space-y-3 relative overflow-hidden bg-[var(--color-surface-1)]/90">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-default pb-2">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-accent" />
@@ -430,7 +430,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 ))}
 
                 {/* 2026 Boundary vertical line */}
-                <line x1="770" y1="0" x2="770" y2="150" stroke="#FACC15" strokeOpacity="0.4" strokeDasharray="4 4" strokeWidth="1.5" />
+                <line x1="770" y1="0" x2="770" y2="150" stroke="var(--color-status-caution)" strokeOpacity="0.4" strokeDasharray="4 4" strokeWidth="1.5" />
 
                 {(() => {
                   const points = fullTimeline.map((item, index) => {
@@ -457,8 +457,8 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                     <>
                       <defs>
                         <linearGradient id="miniHistArea" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#00FF88" stopOpacity="0.2" />
-                          <stop offset="100%" stopColor="#00FF88" stopOpacity="0.0" />
+                          <stop offset="0%" stopColor="var(--color-status-nominal)" stopOpacity="0.2" />
+                          <stop offset="100%" stopColor="var(--color-status-nominal)" stopOpacity="0.0" />
                         </linearGradient>
                       </defs>
 
@@ -468,7 +468,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                         <path
                           d={historyPath}
                           fill="none"
-                          stroke="#00FF88"
+                          stroke="var(--color-status-nominal)"
                           strokeWidth="2.5"
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -480,7 +480,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                         <path
                           d={forecastPath}
                           fill="none"
-                          stroke="#FACC15"
+                          stroke="var(--color-status-caution)"
                           strokeWidth="2.5"
                           strokeDasharray="5 3"
                           strokeLinecap="round"
@@ -501,15 +501,15 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                               cx={p.x}
                               cy={p.y}
                               r={isHovered ? 6 : p.item.year % 5 === 0 ? 3.5 : 2}
-                              fill={isHovered ? '#FFFFFF' : p.item.isForecast ? '#FACC15' : '#00FF88'}
-                              stroke={isHovered ? (p.item.isForecast ? '#FACC15' : '#00FF88') : 'none'}
+                              fill={isHovered ? 'var(--color-text-primary)' : p.item.isForecast ? 'var(--color-status-caution)' : 'var(--color-status-nominal)'}
+                              stroke={isHovered ? (p.item.isForecast ? 'var(--color-status-caution)' : 'var(--color-status-nominal)') : 'none'}
                               strokeWidth={2}
                             />
                             {(p.item.year % 10 === 0 || p.item.year === 2040) && (
                               <text
                                 x={p.x}
                                 y="148"
-                                fill="#94A3B8"
+                                fill="var(--color-text-tertiary)"
                                 fontSize="8"
                                 fontFamily="monospace"
                                 textAnchor="middle"

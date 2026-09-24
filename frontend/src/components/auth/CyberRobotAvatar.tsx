@@ -15,7 +15,7 @@ export function CyberRobotAvatar({ size = 'md', className = '' }: CyberRobotAvat
 
   return (
     <div
-      className={`relative flex items-center justify-center rounded-full bg-gradient-to-b from-[#051329]/95 via-[#030914]/98 to-surface-0 border-2 border-accent/60  overflow-hidden group select-none ${dimensions} ${className}`}
+      className={`relative flex items-center justify-center rounded-full bg-gradient-to-b from-[var(--color-surface-1)]/95 via-[var(--color-surface-0)]/98 to-surface-0 border-2 border-accent/60  overflow-hidden group select-none ${dimensions} ${className}`}
     >
       {/* Outer Rotating Cyber Energy Ring */}
       <svg
@@ -27,7 +27,7 @@ export function CyberRobotAvatar({ size = 'md', className = '' }: CyberRobotAvat
           cy="50"
           r="46"
           fill="none"
-          stroke="#00FF88"
+          stroke="var(--color-status-nominal)"
           strokeWidth="2"
           strokeDasharray="14 8 20 8"
         />
@@ -36,7 +36,7 @@ export function CyberRobotAvatar({ size = 'md', className = '' }: CyberRobotAvat
           cy="50"
           r="41"
           fill="none"
-          stroke="#38BDF8"
+          stroke="var(--color-accent)"
           strokeWidth="1.5"
           strokeDasharray="4 10"
         />
@@ -52,15 +52,15 @@ export function CyberRobotAvatar({ size = 'md', className = '' }: CyberRobotAvat
           cy="50"
           r="36"
           fill="none"
-          stroke="#F472B6"
+          stroke="var(--color-accent)"
           strokeWidth="1.2"
           strokeDasharray="2 16"
         />
         {/* Orbiting Sparkles */}
-        <circle cx="50" cy="14" r="2.5" fill="#00FF88" />
-        <circle cx="86" cy="50" r="2" fill="#38BDF8" />
-        <circle cx="50" cy="86" r="2.5" fill="#F472B6" />
-        <circle cx="14" cy="50" r="2" fill="#FACC15" />
+        <circle cx="50" cy="14" r="2.5" fill="var(--color-status-nominal)" />
+        <circle cx="86" cy="50" r="2" fill="var(--color-accent)" />
+        <circle cx="50" cy="86" r="2.5" fill="var(--color-accent)" />
+        <circle cx="14" cy="50" r="2" fill="var(--color-status-caution)" />
       </svg>
 
       {/* Rotating & Bobbing Cute Laughing Cyber Robot Face */}
@@ -73,33 +73,33 @@ export function CyberRobotAvatar({ size = 'md', className = '' }: CyberRobotAvat
           <defs>
             {/* Cute Metallic Silver Head Gradient */}
             <linearGradient id="cuteBotSilver" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FFFFFF" />
-              <stop offset="40%" stopColor="#E2E8F0" />
-              <stop offset="85%" stopColor="#94A3B8" />
-              <stop offset="100%" stopColor="#64748B" />
+              <stop offset="0%" stopColor="var(--color-text-primary)" />
+              <stop offset="40%" stopColor="var(--color-text-primary)" />
+              <stop offset="85%" stopColor="var(--color-text-tertiary)" />
+              <stop offset="100%" stopColor="var(--color-text-tertiary)" />
             </linearGradient>
 
             {/* Glowing Cyber Screen Gradient */}
             <linearGradient id="cyberScreen" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#041226" />
-              <stop offset="100%" stopColor="#020814" />
+              <stop offset="0%" stopColor="var(--color-surface-1)" />
+              <stop offset="100%" stopColor="var(--color-surface-0)" />
             </linearGradient>
 
             {/* Cute Pink Blushing Cheek Gradient */}
             <radialGradient id="pinkBlush" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#F472B6" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#F472B6" stopOpacity="0" />
+              <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0" />
             </radialGradient>
           </defs>
 
           {/* Cute Robot Antenna with Wiggling Ball */}
-          <path d="M50 20V8" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" />
-          <circle cx="50" cy="7" r="4.5" fill="#00FF88" className="opacity-75" />
-          <circle cx="50" cy="7" r="4" fill="#00FF88" />
+          <path d="M50 20V8" stroke="var(--color-accent)" strokeWidth="2.5" strokeLinecap="round" />
+          <circle cx="50" cy="7" r="4.5" fill="var(--color-status-nominal)" className="opacity-75" />
+          <circle cx="50" cy="7" r="4" fill="var(--color-status-nominal)" />
 
           {/* Cute Bot Cat/Ears */}
-          <path d="M22 26L10 18L18 34Z" fill="#38BDF8" stroke="#FFFFFF" strokeWidth="1.5" />
-          <path d="M78 26L90 18L82 34Z" fill="#38BDF8" stroke="#FFFFFF" strokeWidth="1.5" />
+          <path d="M22 26L10 18L18 34Z" fill="var(--color-accent)" stroke="var(--color-text-primary)" strokeWidth="1.5" />
+          <path d="M78 26L90 18L82 34Z" fill="var(--color-accent)" stroke="var(--color-text-primary)" strokeWidth="1.5" />
 
           {/* Main Rounded Cute Robot Head Outer Shell */}
           <rect
@@ -109,7 +109,7 @@ export function CyberRobotAvatar({ size = 'md', className = '' }: CyberRobotAvat
             height="58"
             rx="28"
             fill="url(#cuteBotSilver)"
-            stroke="#FFFFFF"
+            stroke="var(--color-text-primary)"
             strokeWidth="2"
           />
 
@@ -121,21 +121,21 @@ export function CyberRobotAvatar({ size = 'md', className = '' }: CyberRobotAvat
             height="44"
             rx="20"
             fill="url(#cyberScreen)"
-            stroke="#38BDF8"
+            stroke="var(--color-accent)"
             strokeWidth="1.5"
           />
 
           {/* Cute Laughing Eyes (Joyful Happy Arcs ^ ^) */}
           <path
             d="M31 40C33 34 41 34 43 40"
-            stroke="#00FF88"
+            stroke="var(--color-status-nominal)"
             strokeWidth="3.5"
             strokeLinecap="round"
             fill="none"
           />
           <path
             d="M57 40C59 34 67 34 69 40"
-            stroke="#00FF88"
+            stroke="var(--color-status-nominal)"
             strokeWidth="3.5"
             strokeLinecap="round"
             fill="none"
@@ -148,12 +148,12 @@ export function CyberRobotAvatar({ size = 'md', className = '' }: CyberRobotAvat
           {/* Open Laughing Happy Mouth (Big Cute Smile D ) */}
           <path
             d="M40 48C40 57 60 57 60 48Z"
-            fill="#38BDF8"
-            stroke="#00FF88"
+            fill="var(--color-accent)"
+            stroke="var(--color-status-nominal)"
             strokeWidth="1.5"
           />
           {/* Cute Bot Tongue / Smile Sparkle */}
-          <path d="M44 52C47 55 53 55 56 52Z" fill="#F472B6" />
+          <path d="M44 52C47 55 53 55 56 52Z" fill="var(--color-accent)" />
 
           {/* Liquid Glass Forehead Highlight Flare */}
           <path

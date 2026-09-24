@@ -274,7 +274,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
                     <div
                       className={`p-3.5 rounded-md ${
                         m.sender === 'user'
-                          ? 'bg-gradient-to-r from-accent to-[#0284C7] text-black font-semibold rounded-br-none'
+                          ? 'bg-gradient-to-r from-accent to-[var(--color-accent)] text-black font-semibold rounded-br-none'
                           : 'bg-surface-3 border border-border-default text-text-primary rounded-bl-none shadow-lg'
                       }`}
                     >
@@ -346,7 +346,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
 
             {/* DYNAMIC AUTO-SUGGEST DROPDOWN OVERLAY */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute bottom-[68px] left-3 right-3 z-50 p-2 rounded-md bg-[#080E1A]/95 border border-accent/40  animate-in slide-in-from-bottom-2 duration-200">
+              <div className="absolute bottom-[68px] left-3 right-3 z-50 p-2 rounded-md bg-[var(--color-surface-1)]/95 border border-accent/40  animate-in slide-in-from-bottom-2 duration-200">
                 <div className="text-xs font-mono text-accent font-bold px-3 py-1 flex items-center gap-1.5 border-b border-border-default mb-1">
                   <Sparkles className="w-3 h-3 text-accent" />
                   <span>Suggested Questions:</span>

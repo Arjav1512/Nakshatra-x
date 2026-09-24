@@ -89,16 +89,16 @@ const INDIAN_MINING_LOCATIONS: Record<string, { lat: number; lng: number; name: 
  * assessment, and the popup says so.
  */
 const HOTSPOT_TELEMETRY = [
-  { id: 'balaghat', name: 'Balaghat', rate: '18,000 T/m', priority: 'CRITICAL', color: '#EF4444', ringColor: 'rgba(239,68,68,0.8)', lat: 21.83, lng: 80.19, state: 'MP' },
-  { id: 'bharweli', name: 'Bharweli', rate: '14,500 T/m', priority: 'CRITICAL', color: '#EF4444', ringColor: 'rgba(239,68,68,0.8)', lat: 21.86, lng: 80.26, state: 'MP' },
-  { id: 'mansar', name: 'Mansar', rate: '12,500 T/m', priority: 'HIGH', color: '#F97316', ringColor: 'rgba(249,115,22,0.8)', lat: 21.44, lng: 79.25, state: 'MH' },
-  { id: 'dongri-buzurg', name: 'Dongri Buzurg', rate: '12,000 T/m', priority: 'HIGH', color: '#F97316', ringColor: 'rgba(249,115,22,0.8)', lat: 20.99, lng: 79.34, state: 'MH' },
-  { id: 'tirodi', name: 'Tirodi', rate: '11,200 T/m', priority: 'HIGH', color: '#F97316', ringColor: 'rgba(249,115,22,0.8)', lat: 22.16, lng: 79.68, state: 'MP' },
-  { id: 'chikla', name: 'Chikla', rate: '10,800 T/m', priority: 'HIGH', color: '#F97316', ringColor: 'rgba(249,115,22,0.8)', lat: 21.30, lng: 79.66, state: 'MH' },
-  { id: 'gumgaon', name: 'Gumgaon', rate: '10,200 T/m', priority: 'HIGH', color: '#F97316', ringColor: 'rgba(249,115,22,0.8)', lat: 21.33, lng: 79.03, state: 'MH' },
-  { id: 'ukwa', name: 'Ukwa', rate: '9,800 T/m', priority: 'MEDIUM', color: '#EAB308', ringColor: 'rgba(234,179,8,0.8)', lat: 21.93, lng: 80.52, state: 'MP' },
-  { id: 'kandri', name: 'Kandri', rate: '9,300 T/m', priority: 'MEDIUM', color: '#EAB308', ringColor: 'rgba(234,179,8,0.8)', lat: 21.38, lng: 79.32, state: 'MH' },
-  { id: 'beldongri', name: 'Beldongri', rate: '8,600 T/m', priority: 'MEDIUM', color: '#EAB308', ringColor: 'rgba(234,179,8,0.8)', lat: 21.16, lng: 79.18, state: 'MH' },
+  { id: 'balaghat', name: 'Balaghat', rate: '18,000 T/m', priority: 'CRITICAL', color: 'var(--color-status-critical)', ringColor: 'var(--color-border-interactive)', lat: 21.83, lng: 80.19, state: 'MP' },
+  { id: 'bharweli', name: 'Bharweli', rate: '14,500 T/m', priority: 'CRITICAL', color: 'var(--color-status-critical)', ringColor: 'var(--color-border-interactive)', lat: 21.86, lng: 80.26, state: 'MP' },
+  { id: 'mansar', name: 'Mansar', rate: '12,500 T/m', priority: 'HIGH', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 21.44, lng: 79.25, state: 'MH' },
+  { id: 'dongri-buzurg', name: 'Dongri Buzurg', rate: '12,000 T/m', priority: 'HIGH', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 20.99, lng: 79.34, state: 'MH' },
+  { id: 'tirodi', name: 'Tirodi', rate: '11,200 T/m', priority: 'HIGH', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 22.16, lng: 79.68, state: 'MP' },
+  { id: 'chikla', name: 'Chikla', rate: '10,800 T/m', priority: 'HIGH', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 21.30, lng: 79.66, state: 'MH' },
+  { id: 'gumgaon', name: 'Gumgaon', rate: '10,200 T/m', priority: 'HIGH', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 21.33, lng: 79.03, state: 'MH' },
+  { id: 'ukwa', name: 'Ukwa', rate: '9,800 T/m', priority: 'MEDIUM', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 21.93, lng: 80.52, state: 'MP' },
+  { id: 'kandri', name: 'Kandri', rate: '9,300 T/m', priority: 'MEDIUM', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 21.38, lng: 79.32, state: 'MH' },
+  { id: 'beldongri', name: 'Beldongri', rate: '8,600 T/m', priority: 'MEDIUM', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 21.16, lng: 79.18, state: 'MH' },
 ]
 
 // Priority Hotspot Area Polygons
@@ -108,7 +108,7 @@ const PRIORITY_HOTSPOT_AREAS = [
     priorityLabel: 'CRITICAL PRIORITY',
     rateSummary: '32,500 T/m Combined High-Grade Output',
     probability: '92.4% Reserve Probability',
-    color: '#EF4444',
+    color: 'var(--color-status-critical)',
     polygon: [
       [21.75, 80.05],
       [21.98, 80.20],
@@ -122,7 +122,7 @@ const PRIORITY_HOTSPOT_AREAS = [
     priorityLabel: 'HIGH PRIORITY',
     rateSummary: '35,300 T/m Active Silico-Mn Extraction',
     probability: '86.8% Reserve Probability',
-    color: '#F97316',
+    color: 'var(--color-status-caution)',
     polygon: [
       [20.90, 79.15],
       [21.50, 79.10],
@@ -136,7 +136,7 @@ const PRIORITY_HOTSPOT_AREAS = [
     priorityLabel: 'MEDIUM PRIORITY',
     rateSummary: '21,000 T/m Seam Reserve Extension',
     probability: '78.2% Reserve Probability',
-    color: '#EAB308',
+    color: 'var(--color-status-caution)',
     polygon: [
       [21.55, 79.50],
       [22.20, 79.65],
@@ -227,7 +227,7 @@ export default function IndiaSatelliteMap({
           const dist = f.properties.dist_to_fault_km
           const rain = f.properties.rainfall_mm
 
-          const color = prob >= 0.75 ? '#EF4444' : prob >= 0.45 ? '#EAB308' : '#3FAE7A'
+          const color = prob >= 0.75 ? 'var(--color-status-critical)' : prob >= 0.45 ? 'var(--color-status-caution)' : 'var(--color-status-nominal)'
 
           const circle = L.circle([lat, lng], {
             radius: 320,
@@ -239,16 +239,16 @@ export default function IndiaSatelliteMap({
           })
 
           const popupContent = `
-            <div style="font-family: monospace; font-size: 10px; color: #FFFFFF; background: #080A0D; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); min-width: 200px; box-shadow: 0 4px 14px rgba(0,0,0,0.6);">
+            <div style="font-family: monospace; font-size: 10px; color: var(--color-text-primary); background: var(--color-surface-2); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); min-width: 200px; box-shadow: 0 4px 14px rgba(0,0,0,0.6);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <strong style="color: #EF4444; font-size: 11px; text-shadow: 0 0 6px rgba(239,68,68,0.4);">AI PROSPECTIVITY NODE</strong>
-                <span style="background: rgba(0,255,136,0.15); color: #00FF88; border: 1px solid rgba(0,255,136,0.4); padding: 1px 4px; border-radius: 4px; font-size: 8px; font-weight: bold;">LIVE ML</span>
+                <strong style="color: var(--color-status-critical); font-size: 11px; text-shadow: 0 0 6px rgba(239,68,68,0.4);">AI PROSPECTIVITY NODE</strong>
+                <span style="background: rgba(0,255,136,0.15); color: var(--color-status-nominal); border: 1px solid rgba(0,255,136,0.4); padding: 1px 4px; border-radius: 4px; font-size: 8px; font-weight: bold;">LIVE ML</span>
               </div>
-              <span style="color: #94A3B8;">Lat/Lng:</span> ${lat.toFixed(4)}, ${lng.toFixed(4)}<br/>
-              <span style="color: #94A3B8;">Probability:</span> <strong style="color: #FACC15;">${(prob * 100).toFixed(1)}%</strong><br/>
-              <span style="color: #94A3B8;">Confidence:</span> <span style="color: ${color}; font-weight: bold; text-transform: uppercase;">${conf}</span><br/>
+              <span style="color: var(--color-text-tertiary);">Lat/Lng:</span> ${lat.toFixed(4)}, ${lng.toFixed(4)}<br/>
+              <span style="color: var(--color-text-tertiary);">Probability:</span> <strong style="color: var(--color-status-caution);">${(prob * 100).toFixed(1)}%</strong><br/>
+              <span style="color: var(--color-text-tertiary);">Confidence:</span> <span style="color: ${color}; font-weight: bold; text-transform: uppercase;">${conf}</span><br/>
               <div style="margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px; line-height: 1.4;">
-                <span style="color: #00FF88; font-weight: bold;">Real-Time Telemetry:</span><br/>
+                <span style="color: var(--color-status-nominal); font-weight: bold;">Real-Time Telemetry:</span><br/>
                 &bull; Iron Oxide Index: ${iron}<br/>
                 &bull; Ferrous Mineral: ${ferrous}<br/>
                 &bull; NDVI Index: ${ndvi}<br/>
@@ -285,49 +285,49 @@ export default function IndiaSatelliteMap({
           const lng = centerLng + j * spacing + Math.cos(j * 10 + i) * 0.003
           const distFromCenter = Math.sqrt(i * i + j * j)
 
-          let color = '#38BDF8'
+          let color = 'var(--color-accent)'
           let popupContent = ''
           const fillOpacity = 0.45
 
           if (activeLayer === 'isro-bhuvan') {
-            color = distFromCenter < 2.2 ? '#FF3366' : distFromCenter < 3.8 ? '#38BDF8' : '#00FF88'
+            color = distFromCenter < 2.2 ? 'var(--color-status-critical)' : distFromCenter < 3.8 ? 'var(--color-accent)' : 'var(--color-status-nominal)'
             const ratio = (1.38 + 2.5 / (distFromCenter + 1)).toFixed(2)
             popupContent = `
-              <div style="font-family: monospace; font-size: 10px; color: #FFFFFF; background: #080A0D; padding: 7px; border-radius: 8px; border: 1px solid rgba(255,51,102,0.4); min-width: 170px;">
-                <strong style="color: #FF3366; font-size: 11px;">ISRO RESOURCESAT-2A LISS-IV 🇮🇳</strong><br/>
-                <span style="color: #94A3B8;">Portal:</span> NRSC Bhuvan Open Data<br/>
-                <span style="color: #94A3B8;">Resolution:</span> 5.8m Multispectral<br/>
-                <span style="color: #94A3B8;">SWIR Mineral Ratio:</span> <strong style="color: ${color};">${ratio}</strong><br/>
-                <span style="color: #00FF88;">Ore Horizon Boundary Verified</span>
+              <div style="font-family: monospace; font-size: 10px; color: var(--color-text-primary); background: var(--color-surface-2); padding: 7px; border-radius: 8px; border: 1px solid rgba(255,51,102,0.4); min-width: 170px;">
+                <strong style="color: var(--color-status-critical); font-size: 11px;">ISRO RESOURCESAT-2A LISS-IV 🇮🇳</strong><br/>
+                <span style="color: var(--color-text-tertiary);">Portal:</span> NRSC Bhuvan Open Data<br/>
+                <span style="color: var(--color-text-tertiary);">Resolution:</span> 5.8m Multispectral<br/>
+                <span style="color: var(--color-text-tertiary);">SWIR Mineral Ratio:</span> <strong style="color: ${color};">${ratio}</strong><br/>
+                <span style="color: var(--color-status-nominal);">Ore Horizon Boundary Verified</span>
               </div> `
           } else if (activeLayer === 'isro-risat') {
             const db = (-15.2 + distFromCenter * 0.9).toFixed(1)
-            color = '#00E5FF'
+            color = 'var(--color-accent)'
             popupContent = `
-              <div style="font-family: monospace; font-size: 10px; color: #FFFFFF; background: #080A0D; padding: 7px; border-radius: 8px; border: 1px solid rgba(0,229,255,0.4); min-width: 170px;">
-                <strong style="color: #00E5FF; font-size: 11px;">ISRO EOS-04 / RISAT-1A SAR 🇮🇳</strong><br/>
-                <span style="color: #94A3B8;">Sensor:</span> C-Band Synthetic Aperture Radar<br/>
-                <span style="color: #94A3B8;">Scene cloud filter:</span> applied at query time<br/>
-                <span style="color: #94A3B8;">Backscatter:</span> <strong style="color: #00E5FF;">${db} dB</strong><br/>
-                <span style="color: #00FF88;">Haul Road Slip Risk: Minimal</span>
+              <div style="font-family: monospace; font-size: 10px; color: var(--color-text-primary); background: var(--color-surface-2); padding: 7px; border-radius: 8px; border: 1px solid rgba(0,229,255,0.4); min-width: 170px;">
+                <strong style="color: var(--color-accent); font-size: 11px;">ISRO EOS-04 / RISAT-1A SAR 🇮🇳</strong><br/>
+                <span style="color: var(--color-text-tertiary);">Sensor:</span> C-Band Synthetic Aperture Radar<br/>
+                <span style="color: var(--color-text-tertiary);">Scene cloud filter:</span> applied at query time<br/>
+                <span style="color: var(--color-text-tertiary);">Backscatter:</span> <strong style="color: var(--color-accent);">${db} dB</strong><br/>
+                <span style="color: var(--color-status-nominal);">Haul Road Slip Risk: Minimal</span>
               </div> `
           } else if (activeLayer === 'isro-cartosat') {
             const slope = (28.4 + distFromCenter * 2.1).toFixed(1)
-            color = '#FACC15'
+            color = 'var(--color-status-caution)'
             popupContent = `
-              <div style="font-family: monospace; font-size: 10px; color: #FFFFFF; background: #080A0D; padding: 7px; border-radius: 8px; border: 1px solid rgba(250,204,21,0.4); min-width: 170px;">
-                <strong style="color: #FACC15; font-size: 11px;">ISRO CARTOSAT-3 3D DEM STEREO 🇮🇳</strong><br/>
-                <span style="color: #94A3B8;">Resolution:</span> 0.28m Sub-Meter Stereo<br/>
-                <span style="color: #94A3B8;">Pit Slope Gradient:</span> <strong style="color: #FACC15;">${slope}&deg;</strong><br/>
-                <span style="color: #94A3B8;">Volumetric Accuracy:</span> 98.6%<br/>
-                <span style="color: #00FF88;">Bench Geometry: Stable</span>
+              <div style="font-family: monospace; font-size: 10px; color: var(--color-text-primary); background: var(--color-surface-2); padding: 7px; border-radius: 8px; border: 1px solid rgba(250,204,21,0.4); min-width: 170px;">
+                <strong style="color: var(--color-status-caution); font-size: 11px;">ISRO CARTOSAT-3 3D DEM STEREO 🇮🇳</strong><br/>
+                <span style="color: var(--color-text-tertiary);">Resolution:</span> 0.28m Sub-Meter Stereo<br/>
+                <span style="color: var(--color-text-tertiary);">Pit Slope Gradient:</span> <strong style="color: var(--color-status-caution);">${slope}&deg;</strong><br/>
+                <span style="color: var(--color-text-tertiary);">Volumetric Accuracy:</span> 98.6%<br/>
+                <span style="color: var(--color-status-nominal);">Bench Geometry: Stable</span>
               </div> `
           } else if (activeLayer === 'ndvi') {
             const ndvi = Math.max(
               0.12,
               Math.min(0.88, 0.76 - 0.42 / (distFromCenter + 1.2) + Math.sin(i * j) * 0.06)
             )
-            color = ndvi < 0.42 ? '#B45309' : ndvi < 0.65 ? '#EAB308' : '#10B981'
+            color = ndvi < 0.42 ? 'var(--color-status-caution)' : ndvi < 0.65 ? 'var(--color-status-caution)' : 'var(--color-status-nominal)'
             const ndviStatus =
               ndvi < 0.42
                 ? 'CRITICAL VEGETATION LOSS'
@@ -335,19 +335,19 @@ export default function IndiaSatelliteMap({
                 ? 'MODERATE SHIELD DEGRADATION'
                 : 'HEALTHY MONSOON FOREST'
             popupContent = `
-              <div style="font-family: monospace; font-size: 10px; color: #FFFFFF; background: #080A0D; padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); min-width: 160px;">
-                <strong style="color: #38BDF8; font-size: 11px;">VEGETATION STRESS (NDVI)</strong><br/>
-                <span style="color: #94A3B8;">Index Score:</span> <strong style="color: ${color};">${ndvi.toFixed(
+              <div style="font-family: monospace; font-size: 10px; color: var(--color-text-primary); background: var(--color-surface-2); padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); min-width: 160px;">
+                <strong style="color: var(--color-accent); font-size: 11px;">VEGETATION STRESS (NDVI)</strong><br/>
+                <span style="color: var(--color-text-tertiary);">Index Score:</span> <strong style="color: ${color};">${ndvi.toFixed(
               3
             )}</strong><br/>
-                <span style="color: #94A3B8;">Condition:</span> <span style="color: ${color}; font-weight: bold;">${ndviStatus}</span>
+                <span style="color: var(--color-text-tertiary);">Condition:</span> <span style="color: ${color}; font-weight: bold;">${ndviStatus}</span>
               </div> `
           } else if (activeLayer === 'moisture') {
             const moisture = Math.max(
               8,
               Math.min(68, 42 - 18 / (distFromCenter + 1) + Math.cos(i + j) * 5)
             )
-            color = moisture < 22 ? '#EAB308' : moisture < 45 ? '#38BDF8' : '#0284C7'
+            color = moisture < 22 ? 'var(--color-status-caution)' : moisture < 45 ? 'var(--color-accent)' : 'var(--color-accent)'
             const moistureStatus =
               moisture < 22
                 ? 'DRY CRUST / TAILINGS'
@@ -355,19 +355,19 @@ export default function IndiaSatelliteMap({
                 ? 'OPTIMAL SATURATION'
                 : 'HIGH SATURATION / RUNOFF'
             popupContent = `
-              <div style="font-family: monospace; font-size: 10px; color: #FFFFFF; background: #080A0D; padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); min-width: 160px;">
-                <strong style="color: #00FF88; font-size: 11px;">SOIL MOISTURE SENTINEL</strong><br/>
-                <span style="color: #94A3B8;">Saturation:</span> <strong style="color: ${color};">${moisture.toFixed(
+              <div style="font-family: monospace; font-size: 10px; color: var(--color-text-primary); background: var(--color-surface-2); padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); min-width: 160px;">
+                <strong style="color: var(--color-status-nominal); font-size: 11px;">SOIL MOISTURE SENTINEL</strong><br/>
+                <span style="color: var(--color-text-tertiary);">Saturation:</span> <strong style="color: ${color};">${moisture.toFixed(
               1
             )}%</strong><br/>
-                <span style="color: #94A3B8;">Status:</span> <span style="color: ${color}; font-weight: bold;">${moistureStatus}</span>
+                <span style="color: var(--color-text-tertiary);">Status:</span> <span style="color: ${color}; font-weight: bold;">${moistureStatus}</span>
               </div> `
           } else if (activeLayer === 'thermal') {
             const temp = Math.max(
               20,
               Math.min(49, 31 + 9 / (distFromCenter + 1.1) + Math.sin(i - j) * 2.5)
             )
-            color = temp >= 39 ? '#EF4444' : temp >= 31 ? '#F97316' : '#38BDF8'
+            color = temp >= 39 ? 'var(--color-status-critical)' : temp >= 31 ? 'var(--color-status-caution)' : 'var(--color-accent)'
             const tempStatus =
               temp >= 39
                 ? 'THERMAL HOTSPOT ANOMALY'
@@ -375,12 +375,12 @@ export default function IndiaSatelliteMap({
                 ? 'WARM BARE GROUND'
                 : 'COOL FOREST SHIELD'
             popupContent = `
-              <div style="font-family: monospace; font-size: 10px; color: #FFFFFF; background: #080A0D; padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); min-width: 160px;">
-                <strong style="color: #F97316; font-size: 11px;">LAND SURFACE TEMP (LST)</strong><br/>
-                <span style="color: #94A3B8;">Temperature:</span> <strong style="color: ${color};">${temp.toFixed(
+              <div style="font-family: monospace; font-size: 10px; color: var(--color-text-primary); background: var(--color-surface-2); padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); min-width: 160px;">
+                <strong style="color: var(--color-status-caution); font-size: 11px;">LAND SURFACE TEMP (LST)</strong><br/>
+                <span style="color: var(--color-text-tertiary);">Temperature:</span> <strong style="color: ${color};">${temp.toFixed(
               1
             )}&deg;C</strong><br/>
-                <span style="color: #94A3B8;">Status:</span> <span style="color: ${color}; font-weight: bold;">${tempStatus}</span>
+                <span style="color: var(--color-text-tertiary);">Status:</span> <span style="color: ${color}; font-weight: bold;">${tempStatus}</span>
               </div> `
           }
 
@@ -504,16 +504,16 @@ export default function IndiaSatelliteMap({
               position: absolute;
               inset: 0;
               border-radius: 50%;
-              border: 2px dashed #00FF88;
+              border: 2px dashed var(--color-status-nominal);
               animation: spin 6s linear infinite;
-              box-shadow: 0 0 22px #00FF88; "></div>
+              box-shadow: 0 0 22px var(--color-status-nominal); "></div>
             <div style="
               width: 12px;
               height: 12px;
               border-radius: 50%;
-              background: #00FF88;
-              border: 2px solid #000000;
-              box-shadow: 0 0 16px #00FF88; "></div>
+              background: var(--color-status-nominal);
+              border: 2px solid var(--color-surface-0);
+              box-shadow: 0 0 16px var(--color-status-nominal); "></div>
           </div> `,
       })
 
@@ -702,7 +702,7 @@ export default function IndiaSatelliteMap({
       // 2. Ultra-Thin Vector State Boundaries
       THIN_STATE_BOUNDARIES.forEach((boundary) => {
         L.polygon(boundary as any, {
-          color: '#38BDF8',
+          color: 'var(--color-accent)',
           weight: 0.9,
           opacity: 0.5,
           fillColor: 'transparent',
@@ -749,7 +749,7 @@ export default function IndiaSatelliteMap({
                 height: ${isSelected ? '14px' : '10px'};
                 border-radius: 50%;
                 background: ${pinColor};
-                border: 2px solid #FFFFFF;
+                border: 2px solid var(--color-text-primary);
                 box-shadow: 0 0 16px ${pinColor}, 0 2px 8px rgba(0,0,0,0.95);
                 margin-bottom: 2px;
                 transition: all 0.3s ease; "></div>
@@ -761,8 +761,8 @@ export default function IndiaSatelliteMap({
                   font-family: monospace;
                   font-size: 10.5px;
                   font-weight: 900;
-                  color: ${isSelected ? '#FFFFFF' : pinColor};
-                  text-shadow: 0 0 8px ${pinColor}, 0 2px 4px #000000, 0 0 3px #000000;
+                  color: ${isSelected ? 'var(--color-text-primary)' : pinColor};
+                  text-shadow: 0 0 8px ${pinColor}, 0 2px 4px var(--color-surface-0), 0 0 3px var(--color-surface-0);
                   letter-spacing: 0.05em; ">
                   ${mine.name}
                 </div>
@@ -770,8 +770,8 @@ export default function IndiaSatelliteMap({
                   font-family: monospace;
                   font-size: 8px;
                   font-weight: 700;
-                  color: #E2E8F0;
-                  text-shadow: 0 1px 3px #000000, 0 0 4px #000000;
+                  color: var(--color-text-primary);
+                  text-shadow: 0 1px 3px var(--color-surface-0), 0 0 4px var(--color-surface-0);
                   letter-spacing: 0.02em;
                   opacity: 0.9; ">
                   ${mine.rate} plan
@@ -823,14 +823,14 @@ export default function IndiaSatelliteMap({
   }, [selectedMine, activeLayer])
 
   const layers = [
-    { key: 'satellite' as const, label: 'True Color Optical (Sentinel-2)', color: '#00FF88' },
-    { key: 'isro-bhuvan' as const, label: 'ISRO Resourcesat-2A LISS-IV (Bhuvan 🇮🇳)', color: '#FF3366' },
-    { key: 'isro-risat' as const, label: 'ISRO EOS-04 C-Band SAR Radar (ISRO 🇮🇳)', color: '#00E5FF' },
-    { key: 'isro-cartosat' as const, label: 'ISRO Cartosat-3 3D Stereo DEM (ISRO 🇮🇳)', color: '#FACC15' },
-    { key: 'geology' as const, label: 'SWIR Mineral Probability Heatmap', color: '#EF4444' },
-    { key: 'ndvi' as const, label: 'NDVI Vegetation Stress Index', color: '#38BDF8' },
-    { key: 'moisture' as const, label: 'Soil Moisture Radar Backscatter', color: '#38BDF8' },
-    { key: 'thermal' as const, label: 'LST Thermal Infrared Anomaly', color: '#F97316' },
+    { key: 'satellite' as const, label: 'True Color Optical (Sentinel-2)', color: 'var(--color-status-nominal)' },
+    { key: 'isro-bhuvan' as const, label: 'ISRO Resourcesat-2A LISS-IV (Bhuvan 🇮🇳)', color: 'var(--color-status-critical)' },
+    { key: 'isro-risat' as const, label: 'ISRO EOS-04 C-Band SAR Radar (ISRO 🇮🇳)', color: 'var(--color-accent)' },
+    { key: 'isro-cartosat' as const, label: 'ISRO Cartosat-3 3D Stereo DEM (ISRO 🇮🇳)', color: 'var(--color-status-caution)' },
+    { key: 'geology' as const, label: 'SWIR Mineral Probability Heatmap', color: 'var(--color-status-critical)' },
+    { key: 'ndvi' as const, label: 'NDVI Vegetation Stress Index', color: 'var(--color-accent)' },
+    { key: 'moisture' as const, label: 'Soil Moisture Radar Backscatter', color: 'var(--color-accent)' },
+    { key: 'thermal' as const, label: 'LST Thermal Infrared Anomaly', color: 'var(--color-status-caution)' },
   ]
 
   const zoomToIndia = () => {
@@ -902,7 +902,7 @@ export default function IndiaSatelliteMap({
             onClick={zoomToIndia}
             className="ios-glass-button px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-text-primary flex items-center gap-1.5 cursor-pointer"
           >
-            <Navigation className="w-3.5 h-3.5 text-[#F97316]" />
+            <Navigation className="w-3.5 h-3.5 text-[var(--color-status-caution)]" />
             <span>Manganese Belt</span>
           </button>
 
@@ -946,7 +946,7 @@ export default function IndiaSatelliteMap({
 
             {/* LIVE AUTOCOMPLETE SUGGESTIONS DROPDOWN */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-2 bg-[#090D14]/95 border border-accent/40 rounded-md  max-h-64 overflow-y-auto z-[600] divide-y divide-white/5">
+              <div className="absolute left-0 right-0 top-full mt-2 bg-[var(--color-surface-1)]/95 border border-accent/40 rounded-md  max-h-64 overflow-y-auto z-[600] divide-y divide-white/5">
                 <div className="px-3 py-1.5 text-xs font-mono font-bold text-accent uppercase tracking-wider bg-surface-2 flex items-center justify-between">
                   <span>Matched Indian Locations ({suggestions.length})</span>
                   <span className="text-xs text-text-secondary">Click to Select</span>
@@ -1051,8 +1051,8 @@ export default function IndiaSatelliteMap({
               <span className="w-2.5 h-2.5 rounded-full bg-status-critical" />
               <span className="font-bold">CRITICAL PRIORITY:</span> &gt;14,000 T/m (42-46% Mn)
             </div>
-            <div className="flex items-center gap-2 text-xs font-mono text-[#F97316]">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#F97316]" />
+            <div className="flex items-center gap-2 text-xs font-mono text-[var(--color-status-caution)]">
+              <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-status-caution)]" />
               <span className="font-bold">HIGH PRIORITY:</span> 10,000-13,000 T/m
             </div>
             <div className="flex items-center gap-2 text-xs font-mono text-status-caution">

@@ -110,7 +110,7 @@ export default function JudgesArchitectureDeck() {
       {activeTab === 'pipeline' && (
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-stretch relative">
           {/* Step 1 */}
-          <div className="ios-glass-inset p-4 flex flex-col justify-between border-t border-t-[#00FF88]/40">
+          <div className="ios-glass-inset p-4 flex flex-col justify-between border-t border-t-[var(--color-status-nominal)]/40">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-mono text-accent font-bold">STEP 01</span>
@@ -127,7 +127,7 @@ export default function JudgesArchitectureDeck() {
           </div>
 
           {/* Step 2 */}
-          <div className="ios-glass-inset p-4 flex flex-col justify-between border-t border-t-[#38BDF8]/40">
+          <div className="ios-glass-inset p-4 flex flex-col justify-between border-t border-t-[var(--color-accent)]/40">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-mono text-accent font-bold">STEP 02</span>
@@ -144,7 +144,7 @@ export default function JudgesArchitectureDeck() {
           </div>
 
           {/* Step 3 */}
-          <div className="ios-glass-inset p-4 flex flex-col justify-between border-t border-t-[#FB923C]/40">
+          <div className="ios-glass-inset p-4 flex flex-col justify-between border-t border-t-[var(--color-status-caution)]/40">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-mono text-status-caution font-bold">STEP 03</span>
@@ -161,7 +161,7 @@ export default function JudgesArchitectureDeck() {
           </div>
 
           {/* Step 4 */}
-          <div className="ios-glass-inset p-4 flex flex-col justify-between border-t border-t-[#EAB308]/40">
+          <div className="ios-glass-inset p-4 flex flex-col justify-between border-t border-t-[var(--color-status-caution)]/40">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-mono text-status-caution font-bold">STEP 04</span>
@@ -178,7 +178,7 @@ export default function JudgesArchitectureDeck() {
           </div>
 
           {/* Step 5 */}
-          <div className="ios-glass-inset p-4 flex flex-col justify-between border-t border-t-[#FF4D4F]/40">
+          <div className="ios-glass-inset p-4 flex flex-col justify-between border-t border-t-[var(--color-status-critical)]/40">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-mono text-status-critical font-bold">STEP 05</span>

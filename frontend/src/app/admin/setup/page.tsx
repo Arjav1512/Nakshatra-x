@@ -111,9 +111,9 @@ export default function AdminSetupPage() {
 
   if (checking) {
     return (
-      <div className="min-h-screen bg-[#030712] flex flex-col items-center justify-center p-4 font-mono text-text-primary">
+      <div className="min-h-screen bg-[var(--color-surface-0)] flex flex-col items-center justify-center p-4 font-mono text-text-primary">
         <div className="relative">
-          <div className="h-16 w-16 rounded-full border-2 border-accent/20 border-t-[#38BDF8] animate-spin" />
+          <div className="h-16 w-16 rounded-full border-2 border-accent/20 border-t-[var(--color-accent)] animate-spin" />
           <Radio className="absolute inset-0 m-auto h-6 w-6 text-accent " />
         </div>
         <p className="mt-4 text-xs tracking-widest text-accent uppercase ">
@@ -124,7 +124,7 @@ export default function AdminSetupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#030712] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,233,0.15),rgba(255,255,255,0))] flex items-center justify-center p-4 font-mono">
+    <div className="min-h-screen bg-[var(--color-surface-0)] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,233,0.15),rgba(255,255,255,0))] flex items-center justify-center p-4 font-mono">
       <div className="max-w-xl w-full">
         {/* Top Floating Badge */}
         <div className="flex items-center justify-center gap-2 mb-4">

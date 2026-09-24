@@ -58,7 +58,7 @@ export default function AdminProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-text-primary p-8 font-mono">
+    <div className="min-h-screen bg-[var(--color-surface-0)] text-text-primary p-8 font-mono">
       <div className="max-w-6xl mx-auto">
         <header className="flex justify-between items-center border-b border-border-default pb-6 mb-8">
           <div className="flex items-center gap-4">
@@ -108,14 +108,14 @@ export default function AdminProfilePage() {
               <Orbit className="animate-spin text-accent h-8 w-8" />
             </div>
           ) : users.length === 0 ? (
-            <div className="bg-[#0A0A0A] border border-border-default rounded-md p-12 text-center">
+            <div className="bg-[var(--color-surface-0)] border border-border-default rounded-md p-12 text-center">
               <Users className="h-12 w-12 text-text-tertiary mx-auto mb-4" />
               <p className="text-text-secondary font-mono text-sm">
                 No users found. Users will appear here after signing in with Google OAuth.
               </p>
             </div>
           ) : (
-            <div className="bg-[#0A0A0A] border border-border-default rounded-md overflow-hidden">
+            <div className="bg-[var(--color-surface-0)] border border-border-default rounded-md overflow-hidden">
               <table className="w-full text-sm text-left">
                 <thead className="bg-surface-2 text-text-tertiary uppercase text-xs">
                   <tr>

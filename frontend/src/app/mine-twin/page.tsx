@@ -85,7 +85,7 @@ export default function MineTwinPage() {
 
           <Link
             href="/production"
-            className="w-full sm:w-auto px-5 py-2.5 rounded-md bg-gradient-to-r from-accent/25 via-[#818CF8]/20 to-[#A855F7]/25 hover:from-accent/40 hover:to-[#A855F7]/40 text-text-primary font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2.5 transition-colors duration-300 cursor-pointer border border-accent/60 hover:border-[#A855F7] hover:  hover:scale-[1.02] active:scale-[0.98]"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-md bg-gradient-to-r from-accent/25 via-[var(--color-accent)]/20 to-[var(--color-accent)]/25 hover:from-accent/40 hover:to-[var(--color-accent)]/40 text-text-primary font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2.5 transition-colors duration-300 cursor-pointer border border-accent/60 hover:border-[var(--color-accent)] hover:  hover:scale-[1.02] active:scale-[0.98]"
           >
             <span className="font-semibold text-text-primary drop-">Page 4: Production Sentinel</span>
             <ArrowRight size={15} className="text-accent" />
