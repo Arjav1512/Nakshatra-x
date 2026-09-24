@@ -27,7 +27,6 @@
     "puppeteer-core": "^25.9.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "reactflow": "^11.11.4",
     "recharts": "^3.10.1",
     "tailwindcss": "^4.3.3",
     "zod": "^4.5.4"
@@ -38,7 +37,6 @@
     "@types/nodemailer": "^8.0.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
-    "@types/three": "^0.185.4",
     "axe-core": "^4.13.0",
     "typescript": "^7.0.2"
   }

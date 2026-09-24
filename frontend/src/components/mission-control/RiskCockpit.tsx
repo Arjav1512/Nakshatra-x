@@ -54,7 +54,7 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
           <p className="label">Risk context</p>
-          <h3 className="mt-1 text-lg font-semibold">{mine.name}</h3>
+          <h2 className="mt-1 text-lg font-semibold">{mine.name}</h2>
         </div>
         {typeof score === 'number' ? (
           <span className="inline-flex items-center gap-1.5 text-sm text-text-secondary">

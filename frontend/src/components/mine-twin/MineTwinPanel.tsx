@@ -202,10 +202,10 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               REAL 50-YR MOIL & IBM DATA &bull; 2040 FORECAST
             </span>
           </div>
-          <h3 className="text-2xl font-semibold text-text-primary tracking-tight flex items-center gap-2 font-sans">
+          <h2 className="text-2xl font-semibold text-text-primary tracking-tight flex items-center gap-2 font-sans">
             <Box className="w-6 h-6 text-accent" />
             MINE TWIN &bull; <span className="text-accent">Live Digital Twin & What-If Operational Simulator</span>
-          </h3>
+          </h2>
           <p className="text-xs font-mono text-text-secondary mt-1 max-w-3xl leading-relaxed">
             Real-time virtual copy of <span className="text-accent font-bold">{selectedMine.name} Mine ({selectedMine.code})</span>. Driven by a synthetic 50-year series generated to the published ingestion contract, with an illustrative forward trajectory. Not statutory disclosures, and not a fitted trajectory model.
           </p>
@@ -226,9 +226,9 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
           <div className="flex items-center justify-between border-b border-border-default pb-2">
             <div className="flex items-center gap-2">
               <Sliders className="w-4 h-4 text-accent" />
-              <h4 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">
+              <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">
                 What-If Parameter Controls
-              </h4>
+              </h3>
             </div>
             <span className="text-xs font-mono text-text-tertiary">4 Variable Vectors</span>
           </div>
@@ -393,9 +393,9 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-default pb-2">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-accent" />
-                <h4 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">
+                <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">
                   50-Year Historical Mining Baseline &bull; <span className="text-status-caution">1975–2040 AI Forecast</span>
-                </h4>
+                </h3>
               </div>
 
               {/* Metric Pill Toggles */}
@@ -548,9 +548,9 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-accent" />
-                <h4 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">
+                <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">
                   7-Day Projected Haulage Output: Baseline vs What-If
-                </h4>
+                </h3>
               </div>
               <div className="flex items-center gap-3 text-xs font-mono">
                 <span className="flex items-center gap-1 text-text-secondary">
@@ -607,10 +607,10 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
       {history.length > 0 && (
         <div className="pt-4 border-t border-border-default space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
               <Database className="w-4 h-4 text-status-caution" />
               <span>Saved Scenario Archives ({history.length} Scenarios Recorded)</span>
-            </h4>
+            </h3>
             <span className="text-xs font-mono text-text-secondary">Encrypted Mission Ledger</span>
           </div>
 

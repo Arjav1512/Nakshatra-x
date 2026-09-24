@@ -65,8 +65,8 @@ export default function MineTwinPage() {
         <div className="space-y-6">
           <div className="flex items-center gap-2">
             <Box className="text-accent" size={20} />
-            <h1 className="text-xl sm:text-2xl font-bold font-sans text-text-primary">
-              DIGITAL TWIN &bull; WHAT-IF OPERATIONAL SCENARIO SIMULATOR
+            <h1 className="text-2xl">
+              Mine twin
             </h1>
           </div>
 

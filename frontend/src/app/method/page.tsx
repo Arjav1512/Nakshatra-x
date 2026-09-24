@@ -66,8 +66,8 @@ export default function EvaluatorPage() {
         <div className="space-y-8">
           <div className="flex items-center gap-2">
             <Cpu className="text-status-caution" size={20} />
-            <h1 className="text-xl sm:text-2xl font-bold font-sans text-text-primary">
-              EXECUTIVE EVALUATOR &bull; MACHINE LEARNING PIPELINE & REAL-TIME TRAINING STUDIO
+            <h1 className="text-2xl">
+              Method and evidence
             </h1>
           </div>
 

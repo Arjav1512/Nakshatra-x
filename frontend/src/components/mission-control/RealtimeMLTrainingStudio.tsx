@@ -81,9 +81,9 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
   return (
     <section className="rounded-md border border-border-default bg-[var(--color-surface-1)]/80 p-5">
       <header className="mb-4">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-accent">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-accent">
           Prospectivity model card
-        </h3>
+        </h2>
         <p className="mt-1 text-xs leading-relaxed text-text-secondary">
           Validated performance of the model behind the prospectivity map
           {mine?.name ? ` (viewing ${mine.name})` : ''}. Training runs offline —

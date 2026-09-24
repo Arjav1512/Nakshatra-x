@@ -81,9 +81,9 @@ export default function SmartOreBlendingModal({ mine }: Props) {
           </span>
         </div>
 
-        <h3 className="text-2xl font-bold text-text-primary tracking-tight">
+        <h2 className="text-2xl font-bold text-text-primary tracking-tight">
           Smart Ore Blending & Grade Optimizer
-        </h3>
+        </h2>
         <p className="text-xs text-text-tertiary mt-1 leading-relaxed">
           When primary mining face suffers shortfall, dynamically solves multi-stockpile blending ratios to guarantee customer contract grade specifications ({targetMnMin}% Mn) with lowest cost.
         </p>
@@ -93,10 +93,11 @@ export default function SmartOreBlendingModal({ mine }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ios-glass-inset p-4">
         <div>
           <div className="flex justify-between text-xs font-mono mb-1.5">
-            <span className="text-text-tertiary">Required Dispatch Volume:</span>
+            <label htmlFor="blend-volume" className="text-text-tertiary">Required dispatch volume:</label>
             <span className="font-bold text-text-primary">{targetTonnes.toLocaleString()} Tonnes</span>
           </div>
           <input
+            id="blend-volume"
             type="range"
             min="1000"
             max="12000"
@@ -109,10 +110,11 @@ export default function SmartOreBlendingModal({ mine }: Props) {
 
         <div>
           <div className="flex justify-between text-xs font-mono mb-1.5">
-            <span className="text-text-tertiary">Contract Min Mn Grade:</span>
+            <label htmlFor="blend-grade" className="text-text-tertiary">Contract minimum Mn grade:</label>
             <span className="font-bold text-status-caution">{targetMnMin}% Mn</span>
           </div>
           <input
+            id="blend-grade"
             type="range"
             min="30.0"
             max="45.0"

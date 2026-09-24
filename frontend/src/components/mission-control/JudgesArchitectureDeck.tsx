@@ -63,9 +63,9 @@ export default function JudgesArchitectureDeck() {
             </span>
             <span className="text-xs font-mono text-text-tertiary">&bull; Smart India Hackathon 2026 Evaluation</span>
           </div>
-          <h3 className="text-2xl font-bold text-text-primary tracking-tight mt-1.5 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-text-primary tracking-tight mt-1.5 flex items-center gap-2">
             Mineral Prospectivity Pipeline & Explainability
-          </h3>
+          </h2>
           <p className="text-xs text-text-tertiary mt-1 leading-relaxed">
             Gradient-boosting model over measured Sentinel-2 band ratios and SRTM terrain, validated leave-one-mine-out (AUC 0.85, 95% CI 0.72–0.95). Maps SURFACE prospectivity only — satellite inputs carry no subsurface information (PRD §2.2).
           </p>
@@ -116,7 +116,7 @@ export default function JudgesArchitectureDeck() {
                 <span className="text-xs font-mono text-accent font-bold">STEP 01</span>
                 <Layers className="w-4 h-4 text-accent" />
               </div>
-              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Dataset Prep</h4>
+              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Dataset Prep</h3>
               <p className="text-xs text-text-tertiary leading-relaxed">
                 Aggregates 10 known GSI-verified manganese mine coordinates and synthesizes 400 regional background nodes.
               </p>
@@ -133,7 +133,7 @@ export default function JudgesArchitectureDeck() {
                 <span className="text-xs font-mono text-accent font-bold">STEP 02</span>
                 <Sparkles className="w-4 h-4 text-accent" />
               </div>
-              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Feature Extraction</h4>
+              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Feature Extraction</h3>
               <p className="text-xs text-text-tertiary leading-relaxed">
                 Applies simulated Sentinel-2 SWIR band ratios, DEM topography formulas, and fault geodesic metrics offline.
               </p>
@@ -150,7 +150,7 @@ export default function JudgesArchitectureDeck() {
                 <span className="text-xs font-mono text-status-caution font-bold">STEP 03</span>
                 <Brain className="w-4 h-4 text-status-caution" />
               </div>
-              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Model Training</h4>
+              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Model Training</h3>
               <p className="text-xs text-text-tertiary leading-relaxed">
                 Trains a Random Forest classifier. Imbalances resolved via balanced class weights to optimize recall.
               </p>
@@ -167,7 +167,7 @@ export default function JudgesArchitectureDeck() {
                 <span className="text-xs font-mono text-status-caution font-bold">STEP 04</span>
                 <GitBranch className="w-4 h-4 text-status-caution" />
               </div>
-              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Grid Inference</h4>
+              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Grid Inference</h3>
               <p className="text-xs text-text-tertiary leading-relaxed">
                 Scores a 725-point spatial grid (~9km spacing) covering the entire Madhya Pradesh - Maharashtra mineral belt.
               </p>
@@ -184,7 +184,7 @@ export default function JudgesArchitectureDeck() {
                 <span className="text-xs font-mono text-status-critical font-bold">STEP 05</span>
                 <Terminal className="w-4 h-4 text-status-critical" />
               </div>
-              <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Export & Render</h4>
+              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Export & Render</h3>
               <p className="text-xs text-text-tertiary leading-relaxed">
                 Saves to GeoJSON and serves dynamically to render color-coded prospectivity beacons onto the Leaflet map.
               </p>
@@ -201,7 +201,7 @@ export default function JudgesArchitectureDeck() {
           <div className="ios-glass-inset p-5 flex flex-col justify-between">
             <div>
               <span className="text-xs font-mono text-text-tertiary uppercase block mb-1">Model Parameters</span>
-              <h4 className="text-2xl font-mono font-semibold text-accent">Random Forest</h4>
+              <h3 className="text-2xl font-mono font-semibold text-accent">Random Forest</h3>
               <p className="text-xs text-text-tertiary mt-2 leading-relaxed">
                 Selected for non-linear feature handling, resilience to spatial collinearity, and zero risk of model gradient explosion.
               </p>
@@ -285,7 +285,7 @@ export default function JudgesArchitectureDeck() {
           <div className="ios-glass-inset p-5 flex flex-col justify-between">
             <div>
               <span className="text-xs font-mono text-text-tertiary uppercase block mb-1">Offline GEE Replacement</span>
-              <h4 className="text-2xl font-mono font-semibold text-status-critical">Zero Cost Sandbox</h4>
+              <h3 className="text-2xl font-mono font-semibold text-status-critical">Zero Cost Sandbox</h3>
               <p className="text-xs text-text-tertiary mt-2 leading-relaxed">
                 Replaces Google Earth Engine APIs by computing terrain slope, elevation, fault distances, and rainfall mathematically.
               </p>
@@ -369,10 +369,10 @@ export default function JudgesArchitectureDeck() {
           </div>
 
           <div>
-            <h4 className="label mb-3 flex items-center gap-1.5">
+            <h3 className="label mb-3 flex items-center gap-1.5">
               <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
               Every figure below is read from the trained model
-            </h4>
+            </h3>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {featureImportances.map((item) => (
                 <Metric

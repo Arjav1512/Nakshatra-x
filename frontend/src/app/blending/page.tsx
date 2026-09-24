@@ -78,8 +78,8 @@ export default function BlendingPage() {
         <div className="space-y-6">
           <div className="flex items-center gap-2">
             <Layers className="text-status-caution" size={20} />
-            <h1 className="text-xl sm:text-2xl font-bold font-sans text-text-primary">
-              STAGE 02 &bull; ORE BLENDING OPTIMIZER & OPERATIONAL RISK COCKPIT
+            <h1 className="text-2xl">
+              Ore blending
             </h1>
           </div>
 
