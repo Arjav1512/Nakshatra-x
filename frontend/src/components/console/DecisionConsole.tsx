@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { type MineRow, fetchForecast, fetchMines, fetchTelemetry } from '@/lib/console-api'
 import { synthetic } from '@/lib/provenance'
 import { type ExportRow, buildCsv, downloadCsv, exportPdf } from '@/lib/console-export'
@@ -63,9 +64,40 @@ const PORTFOLIO_ENV = synthetic(
 export function DecisionConsole() {
   const [mines, setMines] = useState<MineRow[] | null>(null)
   const [minesErr, setMinesErr] = useState<string | null>(null)
+  /**
+   * Console position lives in the URL.
+   *
+   * It used to be React state only, so a specific mine's Track A view — the
+   * prospectivity map included — could not be linked, bookmarked, shared or
+   * restored on reload, and the back button left the console entirely. That was
+   * logged as FEATURE_BACKLOG B-1; it is fixed here because a map nobody can
+   * link to is a map nobody sends anyone.
+   */
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const urlMine = searchParams.get('mine')
+  const urlTrack = searchParams.get('track') === 'a' ? 'A' : 'B'
+
   const [selected, setSelected] = useState<MineRow | null>(null)
-  const [level, setLevel] = useState<Level>('portfolio')
-  const [track, setTrack] = useState<'B' | 'A'>('B')
+  const level: Level = urlMine ? 'mine' : 'portfolio'
+  const track: 'B' | 'A' = urlTrack
+
+  const setPosition = useCallback(
+    (mineId: number | null, nextTrack: 'A' | 'B') => {
+      const q = new URLSearchParams()
+      if (mineId != null) q.set('mine', String(mineId))
+      if (nextTrack === 'A') q.set('track', 'a')
+      const qs = q.toString()
+      router.push(qs ? `/console?${qs}` : '/console', { scroll: false })
+    },
+    [router]
+  )
+
+  const setTrack = useCallback(
+    (t: 'A' | 'B') => setPosition(selected?.id ?? null, t),
+    [selected, setPosition]
+  )
   const [telemetry, setTelemetry] = useState<any>(null)
   const [portfolio, setPortfolio] = useState<Record<number, Cell>>({})
 
@@ -78,6 +110,18 @@ export function DecisionConsole() {
     })
     return () => { alive = false }
   }, [])
+
+  // Deep link: resolve ?mine=<id> against the register once it arrives, so
+  // /console?mine=3&track=a restores that mine's Track A view on a cold load.
+  useEffect(() => {
+    if (!mines) return
+    if (!urlMine) {
+      setSelected(null)
+      return
+    }
+    const found = mines.find((m) => String(m.id) === urlMine) ?? null
+    setSelected(found)
+  }, [mines, urlMine])
 
   // Portfolio risk strip: one forecast per mine. Sequential on purpose — the
   // service layer fits a model per mine and parallel requests would queue anyway.
@@ -111,7 +155,7 @@ export function DecisionConsole() {
     return () => { alive = false }
   }, [selected])
 
-  const openMine = (m: MineRow) => { setSelected(m); setLevel('mine'); setTrack('B') }
+  const openMine = (m: MineRow) => { setSelected(m); setPosition(m.id, 'B') }
 
   const exportRows = useMemo<ExportRow[]>(() => {
     const rows: ExportRow[] = []
@@ -162,7 +206,7 @@ export function DecisionConsole() {
       <div className="no-print flex flex-wrap items-center gap-x-2 gap-y-2 border-b border-border-subtle pb-3 text-sm">
         <button
           type="button"
-          onClick={() => { setLevel('portfolio'); setSelected(null) }}
+          onClick={() => { setSelected(null); setPosition(null, 'B') }}
           className="rounded-md px-1.5 py-0.5 transition-colors duration-[120ms] ease-out hover:bg-surface-2 hover:text-text-primary"
           aria-current={level === 'portfolio' ? 'page' : undefined}
         >
@@ -201,7 +245,7 @@ export function DecisionConsole() {
 
         {telemetry?.data_integrity ? <IntegrityBanner integrity={telemetry.data_integrity} /> : null}
 
-        {level === 'portfolio' ? (
+        {level === 'portfolio' && track === 'B' ? (
           <section>
             <h2 className="label">Portfolio · shortfall risk by mine</h2>
 
@@ -308,6 +352,38 @@ export function DecisionConsole() {
               constraint-checked actions.
             </p>
           </section>
+        ) : null}
+
+        {/*
+          Track A renders at the portfolio level too.
+
+          It takes no mine prop: the prospectivity surface is a regional grid
+          over the whole Sausar belt, not a per-mine view. Gating it behind
+          "pick a mine first" was an artefact of the tab layout, and it put the
+          map three interactions deep for no reason. /console?track=a is now a
+          real destination, which is what the nav entry points at.
+        */}
+        {level === 'portfolio' && track === 'A' ? (
+          <>
+            <nav aria-label="Track" className="no-print flex flex-wrap gap-2">
+              {(['B', 'A'] as const).map((t) => (
+                <button
+                  type="button"
+                  key={t}
+                  onClick={() => setTrack(t)}
+                  aria-pressed={track === t}
+                  className={`rounded-md border px-3 py-1.5 text-sm transition-colors duration-[120ms] ease-out ${
+                    track === t
+                      ? 'border-accent bg-accent-muted text-text-primary'
+                      : 'border-border-default text-text-secondary hover:bg-surface-2 hover:text-text-primary'
+                  }`}
+                >
+                  {t === 'B' ? 'Track B · production risk' : 'Track A · prospectivity'}
+                </button>
+              ))}
+            </nav>
+            <TrackAPanel />
+          </>
         ) : null}
 
         {level === 'mine' && selected ? (

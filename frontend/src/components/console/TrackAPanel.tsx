@@ -124,6 +124,38 @@ export function TrackAPanel() {
         ) : null}
       </header>
 
+      {/*
+        The map leads Track A.
+
+        It used to sit at the very bottom of this panel, below the metric tiles,
+        the caveat panel and the full ranked-target table — 1,521 px down a
+        2,513 px page, reachable only after opening the console, choosing a
+        mine, switching track and scrolling 1.4 screens. It rendered correctly
+        the whole time, which is why no test caught it: a prospectivity surface
+        nobody scrolls to is missing in every sense that matters.
+      */}
+      <div>
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h3 className="label">Prospectivity surface (PRD A-3, D-5)</h3>
+          <p className="text-xs text-text-tertiary">
+            Click any cell to score it against the model
+          </p>
+        </div>
+        <div className="overflow-hidden rounded-md border border-border-default">
+          <IndiaSatelliteMap
+            selectedMine={mapMine}
+            onSelectMine={setMapMine}
+            activeLayer={mapLayer}
+            onChangeLayer={setMapLayer}
+          />
+        </div>
+        <p className="measure mt-2 text-xs text-text-tertiary">
+          The surface scores where prospecting is more likely to be worthwhile from surface geology
+          and terrain. It does not see ore underground, and a cell can be promising and poorly
+          constrained at the same time — the kriging uncertainty below is what separates the two.
+        </p>
+      </div>
+
       {/* --- honest validation, AUC with its CI --- */}
       {mErr ? (
         <Unavailable what="Model metrics" reason={mErr} />
@@ -338,22 +370,6 @@ export function TrackAPanel() {
         ) : null}
       </div>
 
-      <div className="mt-6">
-        <h3 className="label mb-3">Prospectivity surface (PRD A-3, D-5)</h3>
-        <div className="overflow-hidden rounded-md border border-border-default">
-          <IndiaSatelliteMap
-            selectedMine={mapMine}
-            onSelectMine={setMapMine}
-            activeLayer={mapLayer}
-            onChangeLayer={setMapLayer}
-          />
-        </div>
-        <p className="measure mt-2 text-xs text-text-tertiary">
-          The surface scores where prospecting is more likely to be worthwhile from surface geology
-          and terrain. It does not see ore underground, and a cell can be promising and poorly
-          constrained at the same time — the kriging uncertainty above is what separates the two.
-        </p>
-      </div>
     </section>
   )
 }

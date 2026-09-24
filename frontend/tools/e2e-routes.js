@@ -63,6 +63,66 @@ const ROUTES = [
     },
   },
   {
+    // The prospectivity map. The suite passed 89/89 while this was buried
+    // 1,521 px down a sub-tab, so "the route renders" was never the question —
+    // these assertions are about the map being present, sized, tiled, overlaid
+    // and reachable without scrolling.
+    path: '/console?track=a',
+    mustRender: ['Prospectivity surface'],
+    custom: async (page) => {
+      const m = await page.evaluate(() => {
+        const c = document.querySelector('.leaflet-container')
+        if (!c) return null
+        const r = c.getBoundingClientRect()
+        return {
+          height: Math.round(r.height),
+          topFromDocTop: Math.round(r.top + window.scrollY),
+          viewportHeight: window.innerHeight,
+          tilesLoaded: document.querySelectorAll('.leaflet-tile-loaded').length,
+          overlayPaths: document.querySelectorAll('.leaflet-overlay-pane path').length,
+          markers: document.querySelectorAll('.leaflet-marker-icon').length,
+        }
+      })
+      if (!m) return [['leaflet map is present', false, 'no .leaflet-container in the DOM']]
+
+      // A click must reach the real Track A model, not a local fallback.
+      const pred = await page.evaluate(async () => {
+        const res = await fetch('/api/v1/prospectivity/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lat: 21.2, lng: 79.2, live: false }),
+        })
+        if (!res.ok) return { ok: false, status: res.status }
+        const d = await res.json()
+        return {
+          ok: true,
+          score: d.kriged_prospectivity_score,
+          sd: d.uncertainty_sd,
+          model: d.model_version,
+          guardrails: !!d.guardrails,
+        }
+      })
+
+      return [
+        ['map container taller than 300px', m.height > 300, `${m.height}px`],
+        ['at least 8 tiles loaded', m.tilesLoaded >= 8, `${m.tilesLoaded} tiles`],
+        ['prospectivity overlay present', m.overlayPaths > 0, `${m.overlayPaths} paths`],
+        ['mine markers plotted', m.markers >= 5, `${m.markers} markers`],
+        [
+          'map visible without scrolling',
+          m.topFromDocTop < m.viewportHeight,
+          `top ${m.topFromDocTop}px, viewport ${m.viewportHeight}px`,
+        ],
+        ['map click returns a real prediction', pred.ok && typeof pred.score === 'number', JSON.stringify(pred).slice(0, 90)],
+        ['prediction carries kriging uncertainty', typeof pred.sd === 'number', `sd=${pred.sd}`],
+        ['prediction names the model', pred.model === 'track-a-gbt-lomo-v1', String(pred.model)],
+        ['prediction carries guardrails', pred.guardrails === true, ''],
+      ]
+    },
+    // the layers that read no data and were captioned as ISRO measurements
+    mustNotRender: ['Resourcesat', 'Cartosat', 'RISAT', 'Bhuvan', 'Historical Success Ratio', '42-46% Mn'],
+  },
+  {
     path: '/production',
     mustRender: ['Production', 'Shortfall against plan', 'Rainfall'],
     mustNotRender: ['trucksDispatched', 'SCADA', 'STREAMING'],
