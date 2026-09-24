@@ -76,18 +76,29 @@ const INDIAN_MINING_LOCATIONS: Record<string, { lat: number; lng: number; name: 
   delhi: { lat: 28.6139, lng: 77.209, name: 'Ministry of Steel HQ (New Delhi)' },
 }
 
-// 10 MOIL Hotspots Ranked & Color-Coded by Operational Priority
+/**
+ * Map marker metadata.
+ *
+ * Each entry carried `grade: '46.2% Mn'` and similar — an ore grade asserted
+ * for a real MOIL mine. No grade data exists in this system: Track A produces a
+ * prospectivity score, explicitly not a grade or a reserve (PRD §2.4), and the
+ * ingestion contract has no assay entity populated. Those figures are gone.
+ *
+ * `rate` is the register's plan target relabelled, so it is named as the plan
+ * target here. `priority` is an ordering by that target, not an operational
+ * assessment, and the popup says so.
+ */
 const HOTSPOT_TELEMETRY = [
-  { id: 'balaghat', name: 'Balaghat', rate: '18,000 T/m', grade: '46.2% Mn', priority: 'CRITICAL', color: '#EF4444', ringColor: 'rgba(239,68,68,0.8)', lat: 21.83, lng: 80.19, state: 'MP' },
-  { id: 'bharweli', name: 'Bharweli', rate: '14,500 T/m', grade: '42.0% Mn', priority: 'CRITICAL', color: '#EF4444', ringColor: 'rgba(239,68,68,0.8)', lat: 21.86, lng: 80.26, state: 'MP' },
-  { id: 'mansar', name: 'Mansar', rate: '12,500 T/m', grade: '38.0% Mn', priority: 'HIGH', color: '#F97316', ringColor: 'rgba(249,115,22,0.8)', lat: 21.44, lng: 79.25, state: 'MH' },
-  { id: 'dongri-buzurg', name: 'Dongri Buzurg', rate: '12,000 T/m', grade: '37.5% Mn', priority: 'HIGH', color: '#F97316', ringColor: 'rgba(249,115,22,0.8)', lat: 20.99, lng: 79.34, state: 'MH' },
-  { id: 'tirodi', name: 'Tirodi', rate: '11,200 T/m', grade: '35.5% Mn', priority: 'HIGH', color: '#F97316', ringColor: 'rgba(249,115,22,0.8)', lat: 22.16, lng: 79.68, state: 'MP' },
-  { id: 'chikla', name: 'Chikla', rate: '10,800 T/m', grade: '36.0% Mn', priority: 'HIGH', color: '#F97316', ringColor: 'rgba(249,115,22,0.8)', lat: 21.30, lng: 79.66, state: 'MH' },
-  { id: 'gumgaon', name: 'Gumgaon', rate: '10,200 T/m', grade: '35.0% Mn', priority: 'HIGH', color: '#F97316', ringColor: 'rgba(249,115,22,0.8)', lat: 21.33, lng: 79.03, state: 'MH' },
-  { id: 'ukwa', name: 'Ukwa', rate: '9,800 T/m', grade: '34.0% Mn', priority: 'MEDIUM', color: '#EAB308', ringColor: 'rgba(234,179,8,0.8)', lat: 21.93, lng: 80.52, state: 'MP' },
-  { id: 'kandri', name: 'Kandri', rate: '9,300 T/m', grade: '33.5% Mn', priority: 'MEDIUM', color: '#EAB308', ringColor: 'rgba(234,179,8,0.8)', lat: 21.38, lng: 79.32, state: 'MH' },
-  { id: 'beldongri', name: 'Beldongri', rate: '8,600 T/m', grade: '32.0% Mn', priority: 'MEDIUM', color: '#EAB308', ringColor: 'rgba(234,179,8,0.8)', lat: 21.16, lng: 79.18, state: 'MH' },
+  { id: 'balaghat', name: 'Balaghat', rate: '18,000 T/m', priority: 'CRITICAL', color: '#EF4444', ringColor: 'rgba(239,68,68,0.8)', lat: 21.83, lng: 80.19, state: 'MP' },
+  { id: 'bharweli', name: 'Bharweli', rate: '14,500 T/m', priority: 'CRITICAL', color: '#EF4444', ringColor: 'rgba(239,68,68,0.8)', lat: 21.86, lng: 80.26, state: 'MP' },
+  { id: 'mansar', name: 'Mansar', rate: '12,500 T/m', priority: 'HIGH', color: '#F97316', ringColor: 'rgba(249,115,22,0.8)', lat: 21.44, lng: 79.25, state: 'MH' },
+  { id: 'dongri-buzurg', name: 'Dongri Buzurg', rate: '12,000 T/m', priority: 'HIGH', color: '#F97316', ringColor: 'rgba(249,115,22,0.8)', lat: 20.99, lng: 79.34, state: 'MH' },
+  { id: 'tirodi', name: 'Tirodi', rate: '11,200 T/m', priority: 'HIGH', color: '#F97316', ringColor: 'rgba(249,115,22,0.8)', lat: 22.16, lng: 79.68, state: 'MP' },
+  { id: 'chikla', name: 'Chikla', rate: '10,800 T/m', priority: 'HIGH', color: '#F97316', ringColor: 'rgba(249,115,22,0.8)', lat: 21.30, lng: 79.66, state: 'MH' },
+  { id: 'gumgaon', name: 'Gumgaon', rate: '10,200 T/m', priority: 'HIGH', color: '#F97316', ringColor: 'rgba(249,115,22,0.8)', lat: 21.33, lng: 79.03, state: 'MH' },
+  { id: 'ukwa', name: 'Ukwa', rate: '9,800 T/m', priority: 'MEDIUM', color: '#EAB308', ringColor: 'rgba(234,179,8,0.8)', lat: 21.93, lng: 80.52, state: 'MP' },
+  { id: 'kandri', name: 'Kandri', rate: '9,300 T/m', priority: 'MEDIUM', color: '#EAB308', ringColor: 'rgba(234,179,8,0.8)', lat: 21.38, lng: 79.32, state: 'MH' },
+  { id: 'beldongri', name: 'Beldongri', rate: '8,600 T/m', priority: 'MEDIUM', color: '#EAB308', ringColor: 'rgba(234,179,8,0.8)', lat: 21.16, lng: 79.18, state: 'MH' },
 ]
 
 // Priority Hotspot Area Polygons
@@ -763,7 +774,7 @@ export default function IndiaSatelliteMap({
                   text-shadow: 0 1px 3px #000000, 0 0 4px #000000;
                   letter-spacing: 0.02em;
                   opacity: 0.9; ">
-                  ${mine.rate} &bull; ${mine.grade}
+                  ${mine.rate} plan
                 </div>
               </div>
             </div> `,
@@ -1100,19 +1111,21 @@ export default function IndiaSatelliteMap({
                   color: currentHotspotMeta.color,
                 }}
               >
-                {currentHotspotMeta.priority} PRIORITY
+                {currentHotspotMeta.priority} PLAN TARGET
               </span>
             </div>
 
             <div className="space-y-2 text-xs font-mono pt-1.5 border-t border-border-default">
               <div className="flex justify-between text-text-tertiary">
-                <span>Monthly Target Rate:</span>
+                <span>Plan target (register):</span>
                 <span className="font-bold text-text-primary">{currentHotspotMeta.rate}</span>
               </div>
-              <div className="flex justify-between text-text-tertiary">
-                <span>Estimated Ore Grade:</span>
-                <span className="font-bold" style={{ color: currentHotspotMeta.color }}>{currentHotspotMeta.grade}</span>
-              </div>
+              {/*
+                An "Estimated Ore Grade" row sat here showing a per-mine Mn
+                percentage from the literal table above. No grade data exists:
+                Track A outputs a prospectivity score, which PRD §2.4 is
+                explicit is not a grade and not a reserve.
+              */}
               <div className="flex justify-between text-text-tertiary">
                 <span>Coordinates:</span>
                 <span className="text-accent">{selectedMine.lat}&deg;N, {selectedMine.lng}&deg;E</span>
