@@ -28,7 +28,6 @@ export type Scenario = {
   baseline_production_t: number
   recovery_t: number
   risk_delta: number
-  confidence: number
   created_at: string
 }
 
@@ -61,12 +60,10 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
     predicted: number
     recovery: number
     riskDelta: number
-    confidence: number
   } | null>({
     predicted: 16620,
     recovery: 2420,
     riskDelta: -0.05,
-    confidence: 94,
   })
 
   const [history, setHistory] = useState<Scenario[]>([])
@@ -140,7 +137,6 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
           predicted: data.predicted,
           recovery: data.recovery,
           riskDelta: data.riskDelta,
-          confidence: data.confidence,
         })
         setHistory(data.scenarios || [])
       }
@@ -159,7 +155,6 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
         predicted: pred,
         recovery: rec,
         riskDelta: -0.05,
-        confidence: 92,
       })
     } finally {
       setLoading(false)
@@ -374,12 +369,22 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               <span className="text-xs font-mono text-status-caution">&bull; Extra Tonnes Gained</span>
             </div>
 
-            <div className="ios-glass-inset p-4 space-y-1 border border-accent/30 bg-accent/5">
-              <span className="text-xs font-mono text-accent uppercase font-bold">Twin Confidence</span>
-              <div className="text-xl font-bold font-mono text-accent">
-                {simResult?.confidence || 94}%
-              </div>
-              <span className="text-xs font-mono text-accent">&bull; High Precision ML</span>
+            {/*
+              A "Twin Confidence" tile used to sit here showing
+              `simResult?.confidence || 94`% under the label "High Precision ML".
+              The endpoint's confidence was min(96, max(72, 90 - |delay| * 1.4 ...)),
+              and when it was absent this fell back to the literal 94. Nothing
+              about a fixed-multiplier calculator supports a confidence, so it
+              reports none — and says what it is instead.
+            */}
+            <div className="rounded-md border border-border-default bg-surface-1 p-4">
+              <span className="label">What this is</span>
+              <p className="measure mt-2 text-xs text-text-secondary">
+                A deterministic what-if over fixed multipliers that are stated assumptions, not
+                fitted coefficients. It compares options against each other. It is not a forecast
+                and carries no uncertainty — the validated forecaster, with its interval and
+                backtest, is on the console.
+              </p>
             </div>
           </div>
 
