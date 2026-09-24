@@ -180,7 +180,7 @@ export function UserNav() {
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 rounded-md bg-white hover:bg-slate-100 text-slate-900 font-sans font-semibold text-xs transition-colors shadow-md cursor-pointer group"
+                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 rounded-md bg-white hover:bg-text-primary text-slate-900 font-sans font-semibold text-xs transition-colors shadow-md cursor-pointer group"
               >
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                   <path
@@ -208,7 +208,7 @@ export function UserNav() {
                 type="button"
                 onClick={handleGithubLogin}
                 disabled={actionLoading === 'github'}
-                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 rounded-md bg-[#24292F] hover:bg-[#1B1F23] border border-border-interactive text-text-primary font-sans font-semibold text-xs transition-colors shadow-md cursor-pointer group disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 rounded-md bg-surface-3 hover:bg-[#1B1F23] border border-border-interactive text-text-primary font-sans font-semibold text-xs transition-colors shadow-md cursor-pointer group disabled:opacity-50"
               >
                 {actionLoading === 'github' ? (
                   <Loader2 size={15} className="animate-spin text-text-primary" />
@@ -242,9 +242,9 @@ export function UserNav() {
                   setMenuOpen(false)
                   router.push('/login')
                 }}
-                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md bg-surface-2 hover:bg-white/10 text-text-secondary text-xs font-mono transition-colors cursor-pointer border border-border-subtle"
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md bg-surface-2 hover:bg-surface-3 text-text-secondary text-xs font-mono transition-colors cursor-pointer border border-border-subtle"
               >
-                <Mail size={13} className="text-[#38BDF8]" />
+                <Mail size={13} className="text-accent" />
                 <span>Or Sign in with Email OTP &rarr;</span>
               </button>
             </div>

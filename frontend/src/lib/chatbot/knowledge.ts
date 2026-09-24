@@ -32,7 +32,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['what', 'is', 'nakshatra', 'project', 'about', 'overview', 'discovery', 'hidden', 'summary'],
     question: 'How does NAKSHATRA-X discover hidden manganese reserves?',
     answer:
-      "NAKSHATRA-X combines Sentinel-2 SWIR satellite absorption bands (11/12 & 4/2) with 10,829 GSI deep borehole core logs using 3D Ordinary Kriging interpolation. Satellites identify surface alteration anomalies; physics and geostatistical math calculate depth and grade—slashing blind exploratory drilling costs by up to 60% (saving ₹2.25 Crores per mineral block)!",
+      "It does not discover reserves, and the distinction matters. Track A ranks where prospecting is more likely to be worthwhile, from Sentinel-2 L2A band ratios and SRTM terrain, with a per-cell kriging uncertainty. Validated leave-one-mine-out, it scores AUC 0.85 with a 95% interval of 0.72-0.95 on ten positive sites — and spectral features alone reach only 0.60, so the geological signal is thinner than the headline. There are no GSI borehole core logs in this system: GSI Bhukosh was unreachable, so lithology is omitted rather than substituted. No drilling-cost saving is claimed; nothing here has been measured against real exploration outcomes.",
     actionButton: {
       label: 'View 3D Lithology Seam Block Map',
       type: 'borehole',
@@ -44,7 +44,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['mission', 'goal', 'objective', 'motive', 'why', 'future', 'india', 'self-reliant', 'atmanirbhar', '300mt'],
     question: 'What is our core national vision and mission?',
     answer:
-      "Our mission is to achieve 100% manganese self-reliance for India and power the National Steel Policy target of 300 Million Tonnes of Steel by 2030. By eliminating ₹4,000 Crores of foreign manganese imports and protecting domestic mines from monsoon disruptions, NAKSHATRA-X turns raw space intelligence into over ₹1,200 Crores of annual national profit.",
+      "To give MOIL planners two things they can act on: where prospecting is more likely to pay off, and where production is likely to fall short in the next days to months — each with its uncertainty and its source stated. It is decision support for a qualified person, not an autonomous system, and it produces no statutory reserve figures. It makes no claim about import substitution, national profit or self-reliance: this project has no cost model, and its operational data is synthetic, so any rupee figure would be invented.",
   },
   {
     id: 'k3',
@@ -52,7 +52,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['monsoon', 'flooding', 'shortfall', 'prevent', 'weather', 'dewatering', 'haul road', 'rain', 'pumps', 'scada'],
     question: 'How do we prevent monsoon pit flooding and operational shortfall?',
     answer:
-      "We connect directly to ISRO MOSDAC radar precipitation telemetry. When rainfall exceeds 20mm/hr within 15 km, our backend sends automated MQTT/Modbus triggers to SCADA dewatering pumps 30 minutes before water reaches haulage ramps. This prevents 45 days of monsoon downtime—saving ₹380 Crores across Indian PSUs.",
+      "Rainfall is measured, not controlled. The system reads 14-day precipitation from NASA POWER and Open-Meteo for each mine's coordinates, and rainfall is a covariate in the Track B shortfall forecaster — so heavy monsoon rain shows up as a higher P(shortfall) and as a driver in the attribution breakdown. From there it can raise an operational alert for a person to act on. There is no connection to MOSDAC radar, no MQTT or Modbus, and no SCADA control of pumps: actuating plant equipment is PRD §4 non-goal 2, and this codebase does not do it. No rupee saving is claimed — nothing here has been measured against real MOIL operations.",
     actionButton: {
       label: 'Broadcast Emergency Dewatering Dispatch',
       type: 'dewatering',
@@ -64,7 +64,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['blend', 'blending', 'stockpile', 'scipy', 'grade', 'target', 'spec', 'simplex', 'linear', 'optimization'],
     question: 'How does the SciPy Ore Blending Optimization work?',
     answer:
-      "Our SciPy Simplex Linear Programming (LP) solver calculates the mathematically optimal multi-stockpile blend ratio (e.g., 60% Grade-A + 40% Low-grade dump) in under 200 milliseconds. This guarantees export contracts always hit ≥42.0% Mn purity, eliminating 100% of grade penalty deductions and saving ₹2.8 Crores per million tonnes.",
+      "A SciPy HiGHS linear program finds a least-cost blend of the available stockpiles that satisfies the grade constraints you set. When no blend can satisfy them it reports the problem as infeasible and says which constraint cannot be met, rather than returning a nearest-miss — that honesty about infeasibility is the point of using an LP. It guarantees nothing about export contracts, eliminates no penalties, and saves no stated amount: the stockpile figures it optimises over are synthetic, so any monetary result would describe the generator rather than a mine.",
     actionButton: {
       label: 'Apply Blending Ratios to Stockpile Dispatch',
       type: 'blending',
@@ -104,7 +104,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['profit', 'roi', 'money', 'crore', 'savings', 'payback', 'cost', 'economics', 'financial'],
     question: 'What is the exact financial ROI and profit generated by NAKSHATRA-X?',
     answer:
-      "NAKSHATRA-X delivers a payback period of under 60 days by plugging 3 major multi-crore drains:\n• ₹650 Cr saved by substituting low-grade ore with AI-optimized 42%+ blend (cutting imports)\n• ₹380 Cr protected by preventing 45-day monsoon pit flooding\n• ₹170 Cr saved in exploratory drilling CAPEX and dumper fuel optimization\nTotal annual national impact: Over ₹1,200 Crores in pure value.",
+      "None is calculated, and the previous figures here were invented. An ROI needs three things this project does not have: MOIL's real production and cost data (proprietary, PRD §8.2 — the operational data here is synthetic), a validated causal link from a recommendation to an outcome, and a deployment long enough to measure one. What can be shown instead is measured: the forecaster beats a seasonal-naive baseline at 11.67% MAPE against 14.81%, and its 80% prediction intervals cover 81.2% of held-out actuals. Those are properties of the model on this dataset, not of anyone's balance sheet.",
   },
   {
     id: 'k9',
@@ -112,7 +112,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['twin', 'mine twin', 'simulator', 'flight simulator', 'dispatch', 'truck', 'dumper', 'fuel', 'shovel'],
     question: 'How does the 3D Mine Twin Simulator optimize daily shift operations?',
     answer:
-      "The Mine Twin acts as a digital flight simulator running discrete-event optimization. It synchronizes excavator cycle times and dumper arrival queues to eliminate truck idling—cutting diesel burn by 11.4% (saving ₹55 Lakhs/year for 20 dumpers) and recovering +2,420 extra metric tonnes of ore per quarter worth ₹1.02 Crores.",
+      "It presents a per-mine view of production against plan over synthetic operational data generated to the published ingestion contract, and the page labels it as synthetic. It is not a discrete-event simulator, it does not model excavator cycles or dumper queues, and it controls no equipment. The diesel, tonnage and rupee figures previously quoted here were invented — there is no fuel model in this system.",
   },
   {
     id: 'k10',
@@ -136,7 +136,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['safety', 'insar', 'landslide', 'slope', 'stability', 'wall', 'collapse', 'radar', 'danger'],
     question: 'How does InSAR satellite radar protect miners from fatal slope landslides?',
     answer:
-      "InSAR radar measures millimeter-level phase shifts in open-pit rock faces. If bench subsidence exceeds safety thresholds, the system triggers audio-visual alarms 4 to 6 hours before a slope failure occurs—preventing fatal casualties and avoiding ₹8–12 Crores in excavator and equipment destruction.",
+      "It does not. InSAR subsidence monitoring is requirement A-9, and it is not implemented — PRD §10 defers it past Phase 1. There is no slope-stability model, no subsidence measurement and no alarm path in this system, so it should not be relied on for anyone's safety. The satellite data this project does use is Sentinel-2 optical imagery for surface geology and NASA POWER for weather; neither can see bench movement. Treating an absent capability as present is exactly the failure mode the guardrails exist to prevent.",
   },
   {
     id: 'k13',
@@ -188,7 +188,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['mine twin', '3d twin', 'dumper', 'excavator', 'fuel burn', 'cycle time', 'simulation'],
     question: 'What is the 3D Mine Twin Digital Simulator (Page 3 /mine-twin)?',
     answer:
-      "The Mine Twin is a 3D Canvas flight simulator for open-pit operations. It models shovel cycle times (-340m RL pit floor to surface winder), dumper dispatch queues, and fuel burn optimization—cutting diesel consumption by 11.4% (saving ₹55 Lakhs/yr per fleet) and recovering +2,420 tonnes of ore per quarter.",
+      "A per-mine production view over synthetic operational data, labelled as synthetic on the page. It is not a 3D simulator and models no shovel cycles, dispatch queues or fuel burn — there is no equipment model in this system at all. The diesel and tonnage figures previously stated here were invented.",
   },
   {
     id: 'k19',
@@ -196,7 +196,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['production', 'sentinel', 'pumps', 'dewatering', 'scada', 'haul road', 'interlock'],
     question: 'How does Production Sentinel (Page 4 /production) work?',
     answer:
-      "Production Sentinel monitors pit wall InSAR radar sensors and haul road precipitation in real-time. When rainfall exceeds 20mm/hr, it transmits automatic MQTT interlock signals to perimeter pumps #4 & #7—preventing pit drowning and keeping haul roads operational during heavy monsoons.",
+      "It shows the Track B production picture for a mine: recent output against plan, the shortfall forecast and its drivers, and an activity feed over synthetic operational data — which the page labels as simulated. There are no InSAR sensors, no MQTT interlocks and no pumps under its control; that description belonged to a system that was never built. Rainfall reaches it as a measured weather covariate, not as a control signal.",
     actionButton: {
       label: 'Broadcast Emergency Dewatering Dispatch',
       type: 'dewatering',
@@ -208,7 +208,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['ore blending', 'blending', 'stockpile', 'scipy', 'simplex', 'grade', '42%'],
     question: 'How does Ore Blending Optimization (Page 5 /blending) work?',
     answer:
-      "The Ore Blending module uses a SciPy Simplex Linear Programming (LP) solver to combine high-grade ore (SP-1) with low-grade dump material (SP-2/SP-3). In <200ms, it locks target specs (≥42% Mn purity), eliminating 100% of grade penalty deductions and saving ₹2.8 Crores per million tonnes exported.",
+      "A SciPy HiGHS linear program combines the available stockpiles into a least-cost blend subject to the grade constraints you set. Its most useful behaviour is reporting infeasibility: when no blend can meet the constraints it says so and names the binding one, instead of returning a near miss that looks like a solution. It locks no specs, eliminates no penalties and saves no stated amount — the stockpile figures are synthetic, so a monetary result would describe the generator, not a mine.",
     actionButton: {
       label: 'Run Simplex Ore Blending Solver',
       type: 'blending',

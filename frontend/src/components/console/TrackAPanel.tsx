@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { derived, measured } from '@/lib/provenance'
 import {
   type DrillTargetsResponse, type TrackAMetrics,
@@ -8,6 +9,45 @@ import {
 } from '@/lib/console-api'
 import { cividis } from '@/lib/colormap'
 import { Metric } from './Evidence'
+import type { LayerType } from '@/components/mission-control/IndiaSatelliteMap'
+import type { MineInfo } from '@/components/mission-control/types'
+
+/**
+ * The prospectivity map.
+ *
+ * It lived on /features/[id], which this stage redirects to /console. Track A
+ * is where a prospectivity surface belongs, and putting it here also closes the
+ * gap READINESS records against D-5: ranked targets existed only as a table,
+ * never plotted.
+ *
+ * Loaded dynamically because it pulls in Leaflet, which has no business in the
+ * bundle for anyone who opens Track B and never switches.
+ */
+const IndiaSatelliteMap = dynamic(
+  () => import('@/components/mission-control/IndiaSatelliteMap'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[420px] w-full rounded-md border border-border-default bg-surface-2">
+        <span className="sr-only">Loading map</span>
+      </div>
+    ),
+  }
+)
+
+/** Balaghat — PRD §13 Q4 names it the pilot; the map's own selector changes it. */
+const DEFAULT_MAP_MINE: MineInfo = {
+  id: 'balaghat',
+  numericId: 1,
+  name: 'Balaghat',
+  code: 'MOIL-BAL-01',
+  state: 'MP',
+  lat: 21.83,
+  lng: 80.19,
+  zone: 'Central India',
+  targetTonnes: 18000,
+  currentProduction: 0,
+}
 
 /**
  * Track A — prospectivity (PRD A-3, A-4, A-5, A-7, D-1, D-5).
@@ -42,6 +82,8 @@ function Spinner({ label }: { label: string }) {
 }
 
 export function TrackAPanel() {
+  const [mapMine, setMapMine] = useState<MineInfo>(DEFAULT_MAP_MINE)
+  const [mapLayer, setMapLayer] = useState<LayerType>('prospectivity' as LayerType)
   const [metrics, setMetrics] = useState<TrackAMetrics | null>(null)
   const [mErr, setMErr] = useState<string | null>(null)
   const [targets, setTargets] = useState<DrillTargetsResponse | null>(null)
@@ -249,11 +291,22 @@ export function TrackAPanel() {
               env={derived(probe.kriged_prospectivity_score, 'score 0-1', 'Ordinary kriging over measured observations', {
                 model_version: probe.model_version,
                 method: probe.uncertainty_basis,
-                uncertainty: {
-                  plus_minus: Number(probe.uncertainty_sd?.toFixed(3) ?? 0),
-                  confidence: 0.68,
-                  basis: `Kriging standard deviation; variogram range ${Math.round((probe.variogram?.range_m ?? 0) / 1000)} km.`,
-                },
+                // `?? 0` here reported an uncertainty of ZERO when the kriging
+                // standard deviation was missing — the single most misleading
+                // value available, since it claims the estimate is exact. An
+                // absent spread is now "not quantified", which is what Metric
+                // renders when `uncertainty` is undefined.
+                uncertainty:
+                  probe.uncertainty_sd != null
+                    ? {
+                        plus_minus: Number(probe.uncertainty_sd.toFixed(3)),
+                        confidence: 0.68,
+                        basis:
+                          probe.variogram?.range_m != null
+                            ? `Kriging standard deviation; variogram range ${Math.round(probe.variogram.range_m / 1000)} km.`
+                            : 'Kriging standard deviation; variogram range not reported.',
+                      }
+                    : undefined,
               })}
             />
             {probe.direct_model_score != null ? (
@@ -278,11 +331,28 @@ export function TrackAPanel() {
         ) : null}
 
         {probe?.guardrails ? (
-          <div className="mt-3 space-y-1 rounded-md border border-border-default bg-black/20 p-2 text-xs leading-snug text-text-secondary">
-            <p>⛔ {probe.guardrails.no_subsurface_detection}</p>
-            <p>⛔ {probe.guardrails.not_a_reserve}</p>
+          <div className="mt-3 space-y-1 rounded-md border border-border-default bg-surface-1 p-3 text-xs leading-snug text-text-secondary">
+            <p>{probe.guardrails.no_subsurface_detection}</p>
+            <p>{probe.guardrails.not_a_reserve}</p>
           </div>
         ) : null}
+      </div>
+
+      <div className="mt-6">
+        <h3 className="label mb-3">Prospectivity surface (PRD A-3, D-5)</h3>
+        <div className="overflow-hidden rounded-md border border-border-default">
+          <IndiaSatelliteMap
+            selectedMine={mapMine}
+            onSelectMine={setMapMine}
+            activeLayer={mapLayer}
+            onChangeLayer={setMapLayer}
+          />
+        </div>
+        <p className="measure mt-2 text-xs text-text-tertiary">
+          The surface scores where prospecting is more likely to be worthwhile from surface geology
+          and terrain. It does not see ore underground, and a cell can be promising and poorly
+          constrained at the same time — the kriging uncertainty above is what separates the two.
+        </p>
       </div>
     </section>
   )

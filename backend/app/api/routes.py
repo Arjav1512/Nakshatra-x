@@ -347,7 +347,7 @@ async def upload_operational_csv(file: UploadFile = File(...)):
 from app.ml.blending_optimizer import optimize_ore_blend
 from app.ml.geostat_kriging import compute_borehole_spatial_model
 from app.services.alert_dispatch import dispatch_operational_alert, get_active_dispatched_alerts
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class BlendingRequest(BaseModel):
     target_tonnes: float = 5000.0
@@ -377,25 +377,43 @@ async def optimize_blending_endpoint(req: BlendingRequest):
 # ============================================================
 
 class BoreholeItem(BaseModel):
+    """
+    A borehole assay interval.
+
+    Every field is required. `fe_pct`, `sio2_pct`, `recovery_pct` and
+    `density_t_m3` previously defaulted to 8.0, 6.0, 88.0 and 3.8 — plausible
+    manganese values — so a caller who omitted them still received a full grade
+    and tonnage analysis. Tonnage is `thickness x area x density x recovery`,
+    which meant in-situ tonnes could be computed from two numbers nobody
+    measured, and the result was indistinguishable from a real one.
+
+    An assay that was not taken is not an assay. Omitting a field is now a 422.
+    """
+
     hole_id: str
     x: float
     y: float
     depth_from_m: float
     depth_to_m: float
     mn_pct: float
-    fe_pct: float = 8.0
-    sio2_pct: float = 6.0
-    recovery_pct: float = 88.0
-    density_t_m3: float = 3.8
+    fe_pct: float
+    sio2_pct: float
+    recovery_pct: float
+    density_t_m3: float
 
 class BoreholeAnalysisRequest(BaseModel):
-    mine_id: int = 1
-    boreholes: list[BoreholeItem] = [
-        {"hole_id": "BH-BAL-101", "x": 100.0, "y": 150.0, "depth_from_m": 45.0, "depth_to_m": 82.0, "mn_pct": 44.5, "fe_pct": 7.2, "sio2_pct": 5.1, "recovery_pct": 92.0, "density_t_m3": 3.9},
-        {"hole_id": "BH-BAL-102", "x": 150.0, "y": 200.0, "depth_from_m": 50.0, "depth_to_m": 94.0, "mn_pct": 41.8, "fe_pct": 8.0, "sio2_pct": 5.8, "recovery_pct": 89.0, "density_t_m3": 3.8},
-        {"hole_id": "BH-BAL-103", "x": 200.0, "y": 180.0, "depth_from_m": 60.0, "depth_to_m": 110.0, "mn_pct": 38.6, "fe_pct": 9.1, "sio2_pct": 6.9, "recovery_pct": 86.0, "density_t_m3": 3.7},
-        {"hole_id": "BH-BAL-104", "x": 250.0, "y": 220.0, "depth_from_m": 40.0, "depth_to_m": 78.0, "mn_pct": 46.0, "fe_pct": 6.5, "sio2_pct": 4.5, "recovery_pct": 94.0, "density_t_m3": 4.0},
-    ]
+    """
+    `boreholes` is required and must be non-empty.
+
+    This previously defaulted to four fully-specified boreholes
+    (BH-BAL-101..104, Mn 38.6-46.0%). Calling the endpoint with an empty body
+    therefore returned a complete in-situ tonnage and grade-band analysis for
+    assays that do not exist, attributed to mine 1. Defaults that are also
+    measurements are fabrications with a schema around them.
+    """
+
+    mine_id: int
+    boreholes: list[BoreholeItem] = Field(..., min_length=1)
 
 @router.post("/analyze-borehole-drill")
 async def analyze_borehole_drill_endpoint(req: BoreholeAnalysisRequest):

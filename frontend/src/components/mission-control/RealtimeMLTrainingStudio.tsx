@@ -79,12 +79,12 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
   }, [])
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#080d16]/80 p-5">
+    <section className="rounded-md border border-border-default bg-[var(--color-surface-1)]/80 p-5">
       <header className="mb-4">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-[#00FF88]">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-accent">
           Prospectivity model card
-        </h3>
-        <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+        </h2>
+        <p className="mt-1 text-xs leading-relaxed text-text-secondary">
           Validated performance of the model behind the prospectivity map
           {mine?.name ? ` (viewing ${mine.name})` : ''}. Training runs offline —
           this panel reports results, it does not fit models.
@@ -92,49 +92,49 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
       </header>
 
       {err ? (
-        <div className="rounded-lg border border-rose-500/30 bg-rose-500/5 p-3 text-xs">
-          <p className="font-semibold text-rose-300">Metrics unavailable</p>
-          <p className="mt-1 leading-snug text-slate-400">{err}</p>
-          <p className="mt-1 leading-snug text-slate-500">
+        <div className="rounded-lg border border-status-critical/30 bg-status-critical/5 p-3 text-xs">
+          <p className="font-semibold text-status-critical">Metrics unavailable</p>
+          <p className="mt-1 leading-snug text-text-secondary">{err}</p>
+          <p className="mt-1 leading-snug text-text-tertiary">
             No figure is shown rather than a placeholder one.
           </p>
         </div>
       ) : !m ? (
-        <div className="flex items-center gap-2 py-6 text-xs text-slate-400">
-          <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-600 border-t-[#00FF88]" />
+        <div className="flex items-center gap-2 py-6 text-xs text-text-secondary">
+          <span className="h-3 w-3 animate-spin rounded-full border-2 border-text-tertiary border-t-[var(--color-status-nominal)]" />
           Loading validation metrics…
         </div>
       ) : (
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400">
+            <div className="rounded-lg border border-border-default bg-surface-2 p-3">
+              <p className="text-xs uppercase tracking-wider text-text-secondary">
                 Leave-one-mine-out AUC
               </p>
-              <p className="mt-1 font-mono text-2xl text-white">{m.lomo.auc.toFixed(2)}</p>
-              <p className="mt-0.5 font-mono text-[10px] text-slate-500">
+              <p className="mt-1 font-mono text-2xl text-text-primary">{m.lomo.auc.toFixed(2)}</p>
+              <p className="mt-0.5 font-mono text-xs text-text-tertiary">
                 95% CI [{m.lomo.auc_ci95[0]}, {m.lomo.auc_ci95[1]}]
               </p>
             </div>
-            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400">
+            <div className="rounded-lg border border-border-default bg-surface-2 p-3">
+              <p className="text-xs uppercase tracking-wider text-text-secondary">
                 Spectral features alone
               </p>
-              <p className="mt-1 font-mono text-2xl text-white">
+              <p className="mt-1 font-mono text-2xl text-text-primary">
                 {m.ablation_lomo_auc.spectral_only?.toFixed(2)}
               </p>
-              <p className="mt-0.5 text-[10px] text-slate-500">the geological claim in isolation</p>
+              <p className="mt-0.5 text-xs text-text-tertiary">the geological claim in isolation</p>
             </div>
-            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400">Validation set</p>
-              <p className="mt-1 font-mono text-2xl text-white">{m.n_samples}</p>
-              <p className="mt-0.5 text-[10px] text-slate-500">
+            <div className="rounded-lg border border-border-default bg-surface-2 p-3">
+              <p className="text-xs uppercase tracking-wider text-text-secondary">Validation set</p>
+              <p className="mt-1 font-mono text-2xl text-text-primary">{m.n_samples}</p>
+              <p className="mt-0.5 text-xs text-text-tertiary">
                 measured points · {m.lomo.per_fold.length} deposits held out
               </p>
             </div>
           </div>
 
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/[0.07] p-3 text-[11px] leading-relaxed text-amber-100">
+          <div className="rounded-lg border border-status-caution/30 bg-status-caution/[0.07] p-3 text-xs leading-relaxed text-status-caution">
             <p className="font-semibold">Read this before quoting the number</p>
             <p className="mt-1">{m.honest_note}</p>
             <p className="mt-1">{m.ablation_note}</p>
@@ -142,7 +142,7 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
           </div>
 
           <div>
-            <p className="mb-1.5 text-[10px] uppercase tracking-wider text-slate-400">
+            <p className="mb-1.5 text-xs uppercase tracking-wider text-text-secondary">
               Feature importance — {m.features.length} features, none derived from distance to a
               known mine
             </p>
@@ -151,14 +151,14 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
                 .sort((a, b) => b[1] - a[1])
                 .map(([name, imp]) => (
                   <div key={name} className="flex items-center gap-2">
-                    <span className="w-44 shrink-0 font-mono text-[10px] text-slate-400">{name}</span>
-                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/5">
+                    <span className="w-44 shrink-0 font-mono text-xs text-text-secondary">{name}</span>
+                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-2">
                       <div
-                        className="h-full rounded-full bg-[#00FF88]/70"
+                        className="h-full rounded-full bg-accent/70"
                         style={{ width: `${Math.min(100, imp * 100 * 2)}%` }}
                       />
                     </div>
-                    <span className="w-12 shrink-0 text-right font-mono text-[10px] text-slate-400">
+                    <span className="w-12 shrink-0 text-right font-mono text-xs text-text-secondary">
                       {imp.toFixed(3)}
                     </span>
                   </div>
@@ -166,26 +166,26 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
             </div>
           </div>
 
-          <details className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
-            <summary className="cursor-pointer text-[10px] uppercase tracking-wider text-slate-400">
+          <details className="rounded-lg border border-border-default bg-surface-2 p-3">
+            <summary className="cursor-pointer text-xs uppercase tracking-wider text-text-secondary">
               per held-out deposit
             </summary>
-            <table className="mt-2 w-full text-[11px]">
-              <thead className="text-slate-500">
-                <tr className="border-b border-white/10 text-left">
+            <table className="mt-2 w-full text-xs">
+              <thead className="text-text-tertiary">
+                <tr className="border-b border-border-default text-left">
                   <th className="py-1 font-normal">Deposit</th>
                   <th className="py-1 font-normal">Score</th>
                   <th className="py-1 font-normal">Above % of fold negatives</th>
                 </tr>
               </thead>
-              <tbody className="font-mono text-slate-300">
+              <tbody className="font-mono text-text-secondary">
                 {m.lomo.per_fold.map((f) => (
-                  <tr key={f.held_out_mine} className="border-b border-white/5">
+                  <tr key={f.held_out_mine} className="border-b border-border-subtle">
                     <td className="py-1">{f.held_out_mine}</td>
-                    <td className={`py-1 ${f.mine_score < 0.35 ? 'text-rose-300' : 'text-emerald-300'}`}>
+                    <td className={`py-1 ${f.mine_score < 0.35 ? 'text-status-critical' : 'text-status-nominal'}`}>
                       {f.mine_score.toFixed(3)}
                     </td>
-                    <td className="py-1 text-slate-400">
+                    <td className="py-1 text-text-secondary">
                       {Math.round(f.percentile_vs_negatives * 100)}%
                     </td>
                   </tr>
@@ -194,7 +194,7 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
             </table>
           </details>
 
-          <p className="text-[10px] leading-snug text-slate-500">
+          <p className="text-xs leading-snug text-text-tertiary">
             {m.model_version} · validated {m.validation} · random-split AUC{' '}
             {m.random_split_auc_for_contrast} shown only for contrast. ⛔ {m.guardrail}
           </p>

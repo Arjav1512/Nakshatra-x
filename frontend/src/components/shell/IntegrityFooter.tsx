@@ -40,7 +40,7 @@ export default function IntegrityFooter() {
             About
           </Link>
           <Link
-            href="/evaluator"
+            href="/method"
             className="text-text-secondary transition-colors duration-[120ms] ease-out hover:text-text-primary"
           >
             Method &amp; evidence

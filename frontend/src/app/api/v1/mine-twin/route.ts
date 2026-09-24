@@ -11,6 +11,16 @@ type SimInput = {
   currentRisk?: number
 }
 
+/**
+ * Scenario multipliers.
+ *
+ * These are stated assumptions, not fitted coefficients: no data was used to
+ * derive them and they describe no measured mine. The endpoint is a
+ * deterministic what-if calculator, which is useful for comparing options
+ * against each other and useless as a prediction. The validated forecaster is
+ * nakshatra-gbt-cqr-v1, served from /api/v1/mines/{id}/forecast with a
+ * published backtest.
+ */
 const SHIFT_BONUS: Record<string, number> = {
   '04-10': 1.18,
   '06-14': 1.06,
@@ -49,7 +59,6 @@ let IN_MEMORY_SCENARIOS: any[] = [
     baseline_production_t: 14200,
     recovery_t: 2420,
     risk_delta: -0.05,
-    confidence: 94,
     created_at: new Date(Date.now() - 3600000).toISOString(),
   },
   {
@@ -64,7 +73,6 @@ let IN_MEMORY_SCENARIOS: any[] = [
     baseline_production_t: 12200,
     recovery_t: 1650,
     risk_delta: -0.02,
-    confidence: 88,
     created_at: new Date(Date.now() - 7200000).toISOString(),
   },
 ]
@@ -80,7 +88,20 @@ export async function POST(req: NextRequest) {
 
     const multiplier = shiftFactor * blastFactor * redeployFactor * toleranceFactor
 
-    const baseProd = body.baselineProduction || 14200
+    // `body.baselineProduction || 14200` silently substituted a literal
+    // baseline when the caller sent none, so every derived figure below rested
+    // on a number nobody supplied. The baseline is now required.
+    const baseProd = body.baselineProduction
+    if (typeof baseProd !== 'number' || !Number.isFinite(baseProd) || baseProd <= 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'baselineProduction is required and must be a positive number.',
+          note: 'Every figure this endpoint returns is derived from the baseline, so it is not defaulted.',
+        },
+        { status: 400 }
+      )
+    }
     const predicted = Math.round(baseProd * multiplier)
     const recovery = predicted - baseProd
 
@@ -93,13 +114,12 @@ export async function POST(req: NextRequest) {
         ? -0.05
         : -0.03
 
-    const confidence = Math.min(
-      96,
-      Math.max(
-        72,
-        90 - Math.abs(body.blastingDelayHours) * 1.4 + (body.redeploy === 'none' ? 0 : 2)
-      )
-    )
+    // `confidence` used to be reported here as
+    //     min(96, max(72, 90 - |blastingDelayHours| * 1.4 + (redeploy ? 2 : 0)))
+    // which is not a confidence: no interval, no validation, and the 72/96
+    // bounds and 1.4 coefficient were picked to make the number look plausible.
+    // A scenario calculator with fixed multipliers has no uncertainty to
+    // report, so it reports none.
 
     const newScenario = {
       id: `scen-${Date.now()}`,
@@ -113,7 +133,6 @@ export async function POST(req: NextRequest) {
       baseline_production_t: baseProd,
       recovery_t: recovery,
       risk_delta: riskDelta,
-      confidence,
       created_at: new Date().toISOString(),
     }
 
@@ -121,10 +140,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      model_note:
+        'Deterministic what-if calculator over fixed multipliers that are stated assumptions, ' +
+        'not fitted coefficients. Not a forecast, and no uncertainty is reported because none ' +
+        'is computed. The validated forecaster is nakshatra-gbt-cqr-v1.',
       predicted,
       recovery,
       riskDelta,
-      confidence,
       scenario: newScenario,
       scenarios: IN_MEMORY_SCENARIOS,
     })

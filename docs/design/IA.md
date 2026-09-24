@@ -212,15 +212,51 @@ mine" tells a user what they are looking at; "Orbital Console Login" does not.
 
 ---
 
-## 8. Sequencing
+## 8. Sequencing — both stages complete
 
-| Stage | IA work |
-|---|---|
-| **1** (this branch) | App shell with the new nav; `/` and `/console` on it. Redirects and route renames **not yet applied** — old routes keep working untouched. |
-| **2** (after approval) | Redirects, the `/evaluator` → `/method` rename, `loading.tsx` and `not-found.tsx`, and every remaining route moved onto the shell. |
+| Stage | IA work | Status |
+|---|---|---|
+| **1** | App shell with the new nav; `/` and `/console` on it. No URL changed. | merged (PR #12) |
+| **2** | Redirects, the `/evaluator` → `/method` rename, `loading.tsx` and `not-found.tsx`, and every remaining route on the shell. | this branch |
 
-Splitting it this way means Stage 1 changes no URL. The visual direction can be
-reviewed without any link in `docs/DEMO.md` behaving differently.
+Splitting it this way meant Stage 1 changed no URL, so the visual direction
+could be reviewed without any link in `docs/DEMO.md` behaving differently.
+
+### What Stage 2 applied
+
+All six redirects are live as 308s in `next.config.js`, verified in a browser by
+`npm run test:routes`:
+
+```
+/dashboard    -> /login     308
+/preview      -> /login     308
+/features     -> /console   308
+/features/:id -> /console   308
+/loading      -> /          308
+/evaluator    -> /method    308
+```
+
+`app/loading.tsx` and `app/not-found.tsx` now exist; `app/error.tsx` was
+rewritten. Route count went from 19 to 14 plus three state files.
+
+### One addition to the plan
+
+The prospectivity map moved into the console's **Track A** panel. It was not in
+the original route map because it was reachable only from `/features/[id]`,
+which §5.3 redirects — so consolidating without rehoming it would have silently
+dropped the map. Track A is where a prospectivity surface belongs, and this also
+closes the gap `READINESS.md` records against **D-5**: ranked drill targets
+existed only as a table and were never plotted.
+
+### One capability removed, deliberately
+
+`HistoricalForecastModal` was opened only from `/features/[id]` and
+`MissionControlDashboard`, both removed here, so it became unreachable. It
+rendered an illustrative synthetic trajectory from `/api/v1/historical-forecasts`
+— explicitly not the validated forecaster — beside a provenance block naming
+MOIL, IBM, GSI and IMD. The console already carries the real forecast with its
+published backtest, so the weaker and more confusable of the two is gone rather
+than rehomed. This is the only capability this redesign removes.
 
 ---
 

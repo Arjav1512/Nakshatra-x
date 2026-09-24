@@ -18,10 +18,12 @@ const CHROME =
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 
 const ALL_ROUTES = [
-  '/', '/console', '/dashboard', '/production', '/blending', '/mine-twin',
-  '/flood-alert', '/evaluator', '/features', '/features/1', '/preview',
-  '/about', '/login', '/loading', '/admin', '/admin/login', '/admin/setup',
-  '/admin/profile', '/auth/callback',
+  // Route set after the Stage 2 consolidation (docs/design/IA.md §5).
+  // /dashboard, /preview, /features, /features/:id, /loading and /evaluator
+  // are now 308 redirects and are covered by tools/e2e-routes.js instead.
+  '/', '/console', '/production', '/blending', '/mine-twin', '/flood-alert',
+  '/method', '/about', '/login', '/admin', '/admin/login', '/admin/setup',
+  '/admin/profile', '/auth/callback', '/nope-does-not-exist',
 ]
 
 function arg(name, fallback) {

@@ -1,14 +1,21 @@
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { requireAdmin } from '@/lib/auth'
 
 export async function GET() {
-  const cookieStore = await cookies()
-  const isAdmin = cookieStore.get('admin_session')?.value === 'true'
-
-  if (!isAdmin) {
+  // This authorised on `admin_session === 'true'`. That cookie is issued as a
+  // non-authoritative UI hint — /api/admin/auth says so in as many words — and
+  // httpOnly stops a script *reading* a cookie, not writing one, so the check
+  // was satisfiable from the browser console. It is the same forgeable-cookie
+  // defect this project already fixed once; `requireAdmin` (the signed-token
+  // check written at that time, in lib/auth.ts) had simply never been wired in
+  // here.
+  if (!(await requireAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const cookieStore = await cookies()
 
   const usersList: any[] = []
   const seenIds = new Set<string>()

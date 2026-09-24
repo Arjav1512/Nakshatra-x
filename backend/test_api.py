@@ -76,11 +76,20 @@ def test_full_pipeline():
     print(f"✓ Blend Infeasibility Honesty: correctly reported infeasible — {infeasible_res.get('message')}")
 
     # 7. Real Case 2: Core Drill Borehole 3D Spatial Estimation
+    #
+    # This payload used to omit fe_pct, sio2_pct and density_t_m3 and still
+    # receive a full tonnage and grade analysis, because the schema defaulted
+    # them to 6.0, 8.0 and 3.8. In-situ tonnage is
+    # thickness x area x density x recovery, so the headline number was partly
+    # a function of a density nobody measured. The fields are now required, and
+    # a complete assay is what a real borehole record carries.
     borehole_payload = {
         "mine_id": 1,
         "boreholes": [
-            {"hole_id": "BH-BAL-101", "x": 100.0, "y": 150.0, "depth_from_m": 45.0, "depth_to_m": 82.0, "mn_pct": 44.5, "recovery_pct": 92.0},
-            {"hole_id": "BH-BAL-102", "x": 150.0, "y": 200.0, "depth_from_m": 50.0, "depth_to_m": 94.0, "mn_pct": 41.8, "recovery_pct": 89.0},
+            {"hole_id": "BH-BAL-101", "x": 100.0, "y": 150.0, "depth_from_m": 45.0, "depth_to_m": 82.0,
+             "mn_pct": 44.5, "fe_pct": 7.2, "sio2_pct": 5.1, "recovery_pct": 92.0, "density_t_m3": 3.9},
+            {"hole_id": "BH-BAL-102", "x": 150.0, "y": 200.0, "depth_from_m": 50.0, "depth_to_m": 94.0,
+             "mn_pct": 41.8, "fe_pct": 8.0, "sio2_pct": 5.8, "recovery_pct": 89.0, "density_t_m3": 3.8},
         ]
     }
     res = client.post("/api/v1/analyze-borehole-drill", json=borehole_payload)
@@ -90,6 +99,34 @@ def test_full_pipeline():
     # Guardrail: no statutory reserve class may be emitted.
     assert "unfc_classification" not in borehole_res, "Statutory UNFC class must not be returned"
     assert borehole_res.get("classification_note"), "Grade band must carry its non-statutory note"
+    # No fabricated confidence: the old response carried
+    # geostatistical_confidence_pct = min(96, recovery*0.95 + n_holes*1.5).
+    assert "geostatistical_confidence_pct" not in borehole_res, (
+        "A confidence with no interval behind it must not be returned"
+    )
+
+    # An incomplete assay must be rejected, not inferred.
+    incomplete = {
+        "mine_id": 1,
+        "boreholes": [
+            {"hole_id": "BH-BAL-103", "x": 200.0, "y": 180.0, "depth_from_m": 60.0,
+             "depth_to_m": 110.0, "mn_pct": 38.6, "recovery_pct": 86.0},
+        ],
+    }
+    res = client.post("/api/v1/analyze-borehole-drill", json=incomplete)
+    assert res.status_code == 422, (
+        "A borehole missing density and the other assay fields must be rejected, "
+        f"not completed from defaults (got {res.status_code}: {res.text[:200]})"
+    )
+    print("✓ Borehole assay completeness: incomplete assay rejected with 422")
+
+    # An empty request must not fall back to a built-in borehole set.
+    res = client.post("/api/v1/analyze-borehole-drill", json={})
+    assert res.status_code == 422, (
+        "An empty request used to return a full analysis of four invented "
+        f"boreholes (got {res.status_code})"
+    )
+    print("✓ Borehole defaults: empty request rejected with 422")
 
     # 8. Real Case 3: Operational Alert Dispatcher
     alert_payload = {

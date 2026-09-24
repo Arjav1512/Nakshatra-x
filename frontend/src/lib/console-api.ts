@@ -174,7 +174,15 @@ export interface DrillTargetsResponse {
 export interface TrackAMetrics {
   model_version: string
   validation: string
-  lomo: { auc: number; average_precision: number; auc_ci95: [number, number]; n_out_of_fold: number; per_fold: any[] }
+  lomo: {
+    auc: number
+    average_precision: number
+    base_rate: number
+    auc_ci95: [number, number]
+    n_out_of_fold: number
+    per_fold: any[]
+  }
+  n_samples: number
   ablation_lomo_auc: Record<string, number>
   random_split_auc_for_contrast: number
   feature_importance: Record<string, number>

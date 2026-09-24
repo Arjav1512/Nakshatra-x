@@ -87,7 +87,7 @@ CACHE_DIR = Path(__file__).resolve().parents[1] / "outputs" / "feature_cache"
 @dataclass
 class SceneRef:
     scene_id: str
-    cloud_cover: float
+    cloud_cover: float | None
     datetime: str
     assets: dict
 
@@ -118,7 +118,17 @@ def find_scene(lat: float, lng: float, max_cloud: float = 12.0,
         f = feats[0]
         return SceneRef(
             scene_id=f["id"],
-            cloud_cover=float(f["properties"].get("eo:cloud_cover", 0.0)),
+            # A missing eo:cloud_cover defaulted to 0.0 — the BEST possible
+            # value — so a scene whose cloud fraction was unknown passed any
+            # cloud filter as if it were pristine. This project cites "max cloud
+            # 1.0%" as evidence that its Sentinel-2 reads are clean, and that
+            # claim is only meaningful if unknown is not silently counted as
+            # zero. None propagates and the caller treats it as unusable.
+            cloud_cover=(
+                float(f["properties"]["eo:cloud_cover"])
+                if f["properties"].get("eo:cloud_cover") is not None
+                else None
+            ),
             datetime=str(f["properties"].get("datetime", "")),
             assets={b: f["assets"][b]["href"] for b in BANDS if b in f["assets"]},
         )
@@ -211,7 +221,17 @@ def fetch_terrain(points: Sequence[tuple[float, float]],
             q = "|".join(f"{a:.6f},{b:.6f}" for a, b in part)
             r = client.get(DEM_API, params={"locations": q})
             r.raise_for_status()
-            elev += [float(x["elevation"] or 0.0) for x in r.json()["results"]]
+            # `or 0.0` put a point at sea level when the DEM returned no
+            # elevation. Balaghat works at roughly 383 m, and slope is derived
+            # from three elevations per point, so one silent zero corrupts the
+            # terrain features for that point rather than omitting it.
+            for x in r.json()["results"]:
+                if x.get("elevation") is None:
+                    raise ValueError(
+                        f"DEM returned no elevation for a queried point; "
+                        f"terrain features are not computed from an assumed 0 m."
+                    )
+                elev.append(float(x["elevation"]))
             time.sleep(1.1)  # be polite to a free public API
         for i, (lat, lng) in enumerate(points):
             z0, zlat, zlng = elev[3 * i], elev[3 * i + 1], elev[3 * i + 2]
@@ -242,6 +262,12 @@ def build_point_features(lat: float, lng: float, terrain: dict,
     scene = find_scene(lat, lng, client=client)
     if scene is None:
         return None
+    if scene.cloud_cover is None:
+        # Unknown cloud fraction. This used to default to 0.0 — the best
+        # possible value — so the scene passed every cloud filter. The dataset's
+        # "max cloud 1.0%" property, which test_track_a asserts, is only
+        # meaningful if unknown is excluded rather than counted as pristine.
+        return None
     sr = read_reflectance(scene, lat, lng, client=client)
     if not sr or any(b not in sr for b in BANDS):
         return None
@@ -261,6 +287,8 @@ def build_point_features(lat: float, lng: float, terrain: dict,
         "reflectance": {k: round(v, 5) for k, v in sr.items()},
         "scene_id": scene.scene_id,
         "scene_datetime": scene.datetime,
+        # A scene whose cloud fraction is unknown cannot support the "max cloud
+        # 1.0%" claim that test_track_a asserts, so it is not used at all.
         "cloud_cover_pct": round(scene.cloud_cover, 2),
         "source": "Sentinel-2 L2A via Microsoft Planetary Computer; SRTM 30m via OpenTopoData",
         "is_synthetic": False,

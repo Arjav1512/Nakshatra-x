@@ -15,18 +15,12 @@ export const FALLBACK_MINES: MineInfo[] = [
   { id: 'balaghat', numericId: 1, name: 'Balaghat', code: 'MOIL-BAL-01', state: 'MP', lat: 21.83, lng: 80.19, zone: 'Central India', targetTonnes: 18000, currentProduction: 16800 },
 ]
 
-export async function fetchMines(): Promise<MineInfo[]> {
-  try {
-    const res = await fetch('/api/admin/mines', { cache: 'no-store' })
-    if (res.ok) {
-      const data = await res.json()
-      return Object.values(data)
-    }
-  } catch (err) {
-    console.warn('Failed to fetch dynamic mines:', err)
-  }
-  return FALLBACK_MINES
-}
+/*
+ * `fetchMines()` stood here. It read /api/admin/mines, which served a JSON file
+ * that nothing else in the system consumed, and it was imported by nobody — the
+ * console and /production both use fetchMines from lib/console-api, which
+ * proxies FastAPI's register. Removed with that route.
+ */
 
 export const MOIL_MINES = FALLBACK_MINES // Kept for synchronous fallback if needed
 
