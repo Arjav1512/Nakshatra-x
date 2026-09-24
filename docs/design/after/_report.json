@@ -1,9 +1,157 @@
 [
   {
-    "route": "/console",
-    "status": 200,
+    "route": "/",
+    "status": 304,
     "consoleIssues": [
       "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/console",
+    "status": 200,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/production",
+    "status": 200,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/blending",
+    "status": 304,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/mine-twin",
+    "status": 304,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/flood-alert",
+    "status": 304,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/method",
+    "status": 304,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/about",
+    "status": 304,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/login",
+    "status": 200,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/admin",
+    "status": 304,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/admin/login",
+    "status": 304,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/admin/setup",
+    "status": 304,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/admin/profile",
+    "status": 304,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/auth/callback",
+    "status": 304,
+    "consoleIssues": [
+      "error: [AUTH CALLBACK ERROR]: Error: No valid Supabase user session was returned. Please try logging in again.",
+      "error: [AUTH CALLBACK ERROR]: Error: No valid Supabase user session was returned. Please try logging in again.",
+      "error: [AUTH CALLBACK ERROR]: Error: No valid Supabase user session was returned. Please try logging in again.",
+      "error: [AUTH CALLBACK ERROR]: Error: No valid Supabase user session was returned. Please try logging in again."
     ],
     "horizontalOverflow": {
       "375": false,

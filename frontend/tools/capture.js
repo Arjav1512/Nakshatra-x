@@ -19,9 +19,11 @@ const CHROME =
 const WIDTHS = [375, 768, 1280, 1920]
 
 const ROUTES = [
-  '/', '/console', '/dashboard', '/production', '/blending', '/mine-twin',
-  '/flood-alert', '/evaluator', '/features', '/features/1', '/preview',
-  '/about', '/login', '/loading', '/admin', '/admin/login', '/admin/setup',
+  // Route set after the Stage 2 consolidation (docs/design/IA.md §5).
+  // /dashboard, /preview, /features, /features/:id, /loading and /evaluator are
+  // now 308 redirects; tools/e2e-routes.js asserts those.
+  '/', '/console', '/production', '/blending', '/mine-twin', '/flood-alert',
+  '/method', '/about', '/login', '/admin', '/admin/login', '/admin/setup',
   '/admin/profile', '/auth/callback',
 ]
 

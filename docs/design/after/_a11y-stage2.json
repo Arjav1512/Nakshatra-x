@@ -1,0 +1,77 @@
+[
+  {
+    "route": "/",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/console",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/production",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/blending",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/mine-twin",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/flood-alert",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/method",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/about",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/login",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/admin",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/admin/login",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/admin/setup",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/admin/profile",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/auth/callback",
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/nope-does-not-exist",
+    "violations": [],
+    "seriousOrCritical": 0
+  }
+]
