@@ -50,9 +50,6 @@ export default function AdminDashboard() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   // Mining Operations State
-  const [mines, setMines] = useState<Record<string, MineInfo>>({})
-  const [loadingMines, setLoadingMines] = useState(false)
-  const [savingMines, setSavingMines] = useState(false)
 
   // Auth / Admin Status
   const [adminInfo, setAdminInfo] = useState<any>(null)
@@ -64,7 +61,6 @@ export default function AdminDashboard() {
       return
     }
     fetchUserData()
-    fetchMines()
     fetchAdminStatus()
   }, [router])
 
@@ -93,20 +89,6 @@ export default function AdminDashboard() {
     }
   }
 
-  const fetchMines = async () => {
-    setLoadingMines(true)
-    try {
-      const res = await fetch('/api/admin/mines')
-      if (res.ok) {
-        const data = await res.json()
-        setMines(data)
-      }
-    } catch {
-      // Ignored
-    } finally {
-      setLoadingMines(false)
-    }
-  }
 
   const handleLogout = async () => {
     try {
@@ -173,25 +155,6 @@ export default function AdminDashboard() {
     document.body.removeChild(link)
   }
 
-  const handleSaveMines = async () => {
-    setSavingMines(true)
-    try {
-      const res = await fetch('/api/admin/mines', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mines),
-      })
-      if (res.ok) {
-        alert('Mining telemetry and operations updated successfully.')
-      } else {
-        alert('Failed to save operations.')
-      }
-    } catch {
-      alert('Error updating operations.')
-    } finally {
-      setSavingMines(false)
-    }
-  }
 
   return (
     <div className="min-h-screen bg-[var(--color-surface-0)] text-text-primary p-4 sm:p-8 font-mono bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,233,0.1),rgba(255,255,255,0))]">
@@ -228,7 +191,6 @@ export default function AdminDashboard() {
             <button type="button"
               onClick={() => {
                 fetchUserData()
-                fetchMines()
               }}
               className="flex items-center gap-2 bg-surface-2 hover:bg-surface-3 text-text-primary px-3.5 py-2 rounded-md border border-border-default hover:border-accent/40 text-xs transition-colors cursor-pointer"
             >
@@ -525,67 +487,29 @@ export default function AdminDashboard() {
           </section>
         )}
 
-        {/* ================= TAB 2: MINING OPERATIONS CRUD ================= */}
+        {/* ================= TAB 2: MINING OPERATIONS ================= */}
         {activeTab === 'operations' && (
-          <section className="space-y-4 animate-in fade-in">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                <Pickaxe className="text-accent" size={18} /> Active Mining Operations Management
-              </h2>
-              <button type="button"
-                onClick={handleSaveMines}
-                disabled={savingMines}
-                className="flex items-center gap-2 bg-accent/20 hover:bg-accent/30 text-accent px-4 py-2 rounded-md border border-accent/40 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
-              >
-                <Save size={14} />
-                <span>{savingMines ? 'Saving...' : 'Save Operations Target'}</span>
-              </button>
-            </div>
-
-            <div className="bg-surface-1/90 border border-border-default rounded-md overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs text-left">
-                  <thead className="bg-surface-2 text-text-secondary uppercase text-xs">
-                    <tr>
-                      <th className="px-6 py-4">Site Name</th>
-                      <th className="px-6 py-4">State</th>
-                      <th className="px-6 py-4">Latitude</th>
-                      <th className="px-6 py-4">Longitude</th>
-                      <th className="px-6 py-4 text-right">Target (Tonnes/mo)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {Object.values(mines).map((mine) => (
-                      <tr key={mine.id} className="hover:bg-surface-2 transition-colors">
-                        <td className="px-6 py-4 font-bold text-text-primary">{mine.name}</td>
-                        <td className="px-6 py-4 text-text-secondary">{mine.state}</td>
-                        <td className="px-6 py-4 text-text-secondary font-mono">{mine.lat}</td>
-                        <td className="px-6 py-4 text-text-secondary font-mono">{mine.lng}</td>
-                        <td className="px-6 py-4 text-right">
-                          <input
-                            type="number"
-                            value={mine.targetTonnes}
-                            onChange={(e) => {
-                              // `parseFloat(value) || 0` turned an unparseable
-                              // entry into a plan target of zero, which is a
-                              // valid-looking number that every shortfall
-                              // calculation downstream would use. An entry that
-                              // is not a number is ignored instead.
-                              const parsed = Number.parseFloat(e.target.value)
-                              if (!Number.isFinite(parsed) || parsed < 0) return
-                              setMines((prev) => ({
-                                ...prev,
-                                [mine.id]: { ...prev[mine.id], targetTonnes: parsed },
-                              }))
-                            }}
-                            className="bg-surface-0/80 border border-border-default rounded-lg py-1.5 px-3 text-right text-xs font-mono text-accent focus:outline-none focus:border-accent w-36"
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+          <section className="space-y-4">
+            <h2 className="text-lg font-semibold text-text-primary">Mining operations</h2>
+            <div className="rounded-md border border-border-default bg-surface-2 p-5">
+              <p className="measure text-sm text-text-secondary">
+                The plan-target editor that stood here has been removed. It read and wrote
+                <code className="mx-1 font-mono text-xs">src/data/mines.json</code>, a file that
+                nothing else in the system consumed — and it reported &ldquo;updated
+                successfully&rdquo; for a write no screen would ever reflect.
+              </p>
+              <p className="measure mt-3 text-sm text-text-secondary">
+                Since DEF-1 the authoritative register is FastAPI&rsquo;s, proxied at
+                <code className="mx-1 font-mono text-xs">/api/v1/mines</code>. That register has no
+                update endpoint, and the file this editor wrote used the slug-keyed shape that
+                caused DEF-1 in the first place, so restoring it as a live source would
+                reintroduce the defect rather than fix it.
+              </p>
+              <p className="measure mt-3 text-sm text-text-tertiary">
+                Editing plan targets needs a register write path on the service layer, with its own
+                authorisation and an audit trail. That is a backend capability to design, not a
+                form to re-point.
+              </p>
             </div>
           </section>
         )}
