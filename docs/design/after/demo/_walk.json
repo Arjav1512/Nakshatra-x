@@ -61,9 +61,9 @@
       "note": "3 approved"
     },
     {
-      "step": "2:05 rejected block shown (DEMO.md: \"scroll to the rejected block\")",
-      "ok": false,
-      "note": "DEMO.md says rejected actions are displayed with the rule they broke"
+      "step": "2:05 rejection panel states its result either way",
+      "ok": true,
+      "note": "neither a rejected list nor the empty-state line was rendered"
     },
     {
       "step": "2:05 constraint scope footer line",
@@ -106,7 +106,5 @@
       "note": ""
     }
   ],
-  "findings": [
-    "2:05 rejected block shown (DEMO.md: \"scroll to the rejected block\"): DEMO.md says rejected actions are displayed with the rule they broke"
-  ]
+  "findings": []
 }

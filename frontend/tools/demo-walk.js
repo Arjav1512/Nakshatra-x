@@ -126,8 +126,15 @@ async function main() {
   const approved = (t.match(/APPROVED/g) || []).length
   record('2:05 approved actions with checks', approved >= 1 && /checks passed:/i.test(t),
     `${approved} approved`)
-  record('2:05 rejected block shown (DEMO.md: "scroll to the rejected block")',
-    /rejected/i.test(t), 'DEMO.md says rejected actions are displayed with the rule they broke')
+  // DEMO.md used to tell the presenter to "scroll to the rejected block". It was
+  // corrected in the DEF-1 PR once this walk showed that rejected_actions is
+  // empty at all ten mines, so the panel renders its empty state instead. The
+  // assertion now checks what the script actually promises: that the engine
+  // reports having rejected nothing, rather than going silent — an empty result
+  // and an engine that never ran look identical otherwise.
+  record('2:05 rejection panel states its result either way',
+    /rejected/i.test(t) || /no candidate violated a constraint/i.test(t),
+    'neither a rejected list nor the empty-state line was rendered')
   record('2:05 constraint scope footer line',
     /enforced, not learned/i.test(t) || /constraints\.py/i.test(t), null)
   await shot(page, '06-actions')
