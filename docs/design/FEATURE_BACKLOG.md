@@ -130,6 +130,70 @@ unknown".
 
 ---
 
+## B-5 — The map's layer switcher needs real layers
+
+**Removed in the map-restoration PR:** six of the map's eight layers read no
+data. `ndvi`, `moisture`, `thermal`, `isro-bhuvan`, `isro-risat` and
+`isro-cartosat` generated a 9×9 grid of circles around the selected mine from
+`sin()`/`cos()` of the loop indices, then captioned each cell with a source and
+a measurement:
+
+> ISRO RESOURCESAT-2A LISS-IV · Portal: NRSC Bhuvan Open Data ·
+> Resolution: 5.8m Multispectral · SWIR Mineral Ratio: 2.19 ·
+> **Ore Horizon Boundary Verified**
+
+None of it existed. Bhuvan and MOSDAC are not sources of this project, and "Ore
+Horizon Boundary Verified" is a claim about ore that nothing here can make.
+
+**The switcher itself is kept as a feature.** What went is the fake data behind
+six of its entries, not the capability. Two real layers remain: the ESRI World
+Imagery base and the prospectivity grid with its kriging uncertainty.
+
+**Requirement for Part B.** Restore the switcher to a useful set of layers, each
+generated from the same pipeline that produces the landing page's data-stack
+assets — so a layer exists on the map only if a real raster exists for it:
+
+| Candidate layer | Source it must come from |
+|---|---|
+| Sentinel-2 true colour | Planetary Computer L2A, the bands `sentinel_features.py` already reads |
+| Iron-oxide band ratio | B04/B02, already computed as a model feature |
+| DEM slope | SRTM, already computed as a model feature |
+| Prospectivity probability | `/api/v1/prospectivity` — already live on the map |
+| Kriging uncertainty | the variance surface behind `uncertainty_sd` |
+
+Rules carried from the redesign brief: a layer that cannot be produced from real
+data is not added, each layer states its source, date and whether it is measured
+or synthetic, and no layer is captioned with a measurement it did not make.
+
+## B-6 — Rendered-page provenance guard
+
+**Deferred from Part A; this is the first item of Part B.** Stated plainly
+because it is a scope decision, not an oversight.
+
+Every integrity sweep so far has been grep-based, and grep keeps missing things.
+The map's six fabricated layers survived the Phase 8 fabrication sweep *and*
+Stage 2's silent-default sweep, because their numbers were produced at render
+time by `sin()` and never appeared as literals in the source. They were found by
+looking at the screen.
+
+The structural fix is to check the rendered page rather than the source:
+
+1. Every element that renders a data value carries `data-provenance` — `Metric`
+   already sets `data-metric` on its value node, so the hook is half-built.
+2. An e2e check visits every route, collects visible numeric text, and fails on
+   any data-shaped number (`%`, `t`, `mm`, `km`, `°`, a probability, a score)
+   that is not inside a `data-provenance` element.
+3. A short allowlist covers genuine chrome — dates, pagination, version strings
+   — each entry justified.
+4. Revert-proofed in a worktree against a commit that still has the fabricated
+   layers; it must fail there.
+
+**Why it is not in Part A.** Part A restores the map and is a bug fix. This
+guard touches every value-rendering component, needs a numeric scanner tuned
+across sixteen routes, and needs its own revert-proof — it would triple the map
+PR and delay the fix it is meant to protect. Part B is where the surfaces are
+being rewritten anyway, which is the right moment to attach the attribute.
+
 ---
 
 # Defects found during the redesign

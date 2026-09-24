@@ -29,6 +29,10 @@ type NavItem = { label: string; href: string; children?: { label: string; href: 
  */
 const NAV: NavItem[] = [
   { label: 'Console', href: '/console' },
+  // Track A's prospectivity surface. It had no navigation entry at all: the map
+  // was reachable only by opening the console, picking a mine, switching tab and
+  // scrolling past the drill-target table. Nothing in the product named it.
+  { label: 'Prospectivity', href: '/console?track=a' },
   { label: 'Production', href: '/production' },
   {
     label: 'Operations',
@@ -42,16 +46,23 @@ const NAV: NavItem[] = [
   { label: 'Method', href: '/method' },
 ]
 
-function isActive(pathname: string, item: NavItem) {
+function isActive(pathname: string, search: string, item: NavItem) {
   const hrefs = item.children ? item.children.map((c) => c.href) : [item.href]
-  return hrefs.some((h) => pathname === h || pathname.startsWith(`${h}/`))
+  return hrefs.some((h) => {
+    const [hPath, hQuery] = h.split('?')
+    if (pathname !== hPath && !pathname.startsWith(`${hPath}/`)) return false
+    // /console and /console?track=a are different destinations in the same
+    // route, so the query has to take part in the active check or both light up.
+    if (hQuery) return search.includes(hQuery)
+    return !search.includes('track=a')
+  })
 }
 
 const LINK_BASE =
   'rounded-md px-3 py-2 text-sm transition-colors duration-[120ms] ease-out ' +
   'hover:bg-surface-2 hover:text-text-primary'
 
-function OperationsMenu({ item, pathname }: { item: NavItem; pathname: string }) {
+function OperationsMenu({ item, pathname, search }: { item: NavItem; pathname: string; search: string }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const menuId = useId()
@@ -83,7 +94,7 @@ function OperationsMenu({ item, pathname }: { item: NavItem; pathname: string })
         className={clsx(
           LINK_BASE,
           'inline-flex items-center gap-1',
-          isActive(pathname, item) ? 'text-text-primary' : 'text-text-secondary'
+          isActive(pathname, search, item) ? 'text-text-primary' : 'text-text-secondary'
         )}
       >
         {item.label}
@@ -116,6 +127,21 @@ function OperationsMenu({ item, pathname }: { item: NavItem; pathname: string })
 
 export default function AppBar() {
   const pathname = usePathname() || '/'
+
+  /**
+   * The query string, read after mount rather than through useSearchParams.
+   *
+   * useSearchParams in a component rendered by the root layout opts every
+   * statically rendered page into a client-side bailout — the build fails on
+   * /about with "should be wrapped in a suspense boundary". Nav highlighting is
+   * a progressive enhancement, so it is fine for it to settle on hydration;
+   * wrapping the whole bar in Suspense to get it one paint earlier would cost a
+   * fallback flash on every static page.
+   */
+  const [search, setSearch] = useState('')
+  useEffect(() => {
+    setSearch(window.location.search.replace(/^\?/, ''))
+  }, [pathname])
   const [drawerOpen, setDrawerOpen] = useState(false)
   const drawerId = useId()
 
@@ -142,15 +168,15 @@ export default function AppBar() {
         <nav aria-label="Primary" className="ml-4 hidden items-center gap-1 md:flex">
           {NAV.map((item) =>
             item.children ? (
-              <OperationsMenu key={item.label} item={item} pathname={pathname} />
+              <OperationsMenu key={item.label} item={item} pathname={pathname} search={search} />
             ) : (
               <Link
                 key={item.href}
                 href={item.href}
-                aria-current={isActive(pathname, item) ? 'page' : undefined}
+                aria-current={isActive(pathname, search, item) ? 'page' : undefined}
                 className={clsx(
                   LINK_BASE,
-                  isActive(pathname, item) ? 'text-text-primary' : 'text-text-secondary'
+                  isActive(pathname, search, item) ? 'text-text-primary' : 'text-text-secondary'
                 )}
               >
                 {item.label}
@@ -219,10 +245,10 @@ export default function AppBar() {
               ) : (
                 <Link
                   href={item.href}
-                  aria-current={isActive(pathname, item) ? 'page' : undefined}
+                  aria-current={isActive(pathname, search, item) ? 'page' : undefined}
                   className={clsx(
                     'block rounded-md px-3 py-2 text-base transition-colors duration-[120ms] ease-out hover:bg-surface-2',
-                    isActive(pathname, item) ? 'text-text-primary' : 'text-text-secondary'
+                    isActive(pathname, search, item) ? 'text-text-primary' : 'text-text-secondary'
                   )}
                 >
                   {item.label}

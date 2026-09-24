@@ -21,15 +21,15 @@ import {
   AlertCircle,
 } from 'lucide-react'
 
-export type LayerType =
-  | 'satellite'
-  | 'ndvi'
-  | 'moisture'
-  | 'thermal'
-  | 'geology'
-  | 'isro-bhuvan'
-  | 'isro-risat'
-  | 'isro-cartosat'
+/**
+ * The two layers this map actually has.
+ *
+ * It previously declared eight. Six of them ('ndvi', 'moisture', 'thermal',
+ * 'isro-bhuvan', 'isro-risat', 'isro-cartosat') read no data and drew a
+ * sin()/cos() grid captioned as ISRO Resourcesat, EOS-04 and Cartosat
+ * measurements. They are gone; see the comment at the removal site.
+ */
+export type LayerType = 'satellite' | 'geology'
 
 interface Props {
   selectedMine: MineInfo
@@ -174,6 +174,27 @@ const THIN_STATE_BOUNDARIES = [
   ],
 ]
 
+/**
+ * Resolve a design token to a concrete colour before handing it to Leaflet.
+ *
+ * `stroke="var(--color-accent)"` happens to work today because Leaflet is using
+ * its SVG renderer, and SVG presentation attributes resolve custom properties.
+ * Its canvas renderer never does — `ctx.strokeStyle = 'var(--color-accent)'` is
+ * silently ignored and the shape draws black on black. Anyone enabling
+ * `preferCanvas` (a normal thing to do for a few thousand cells) would make
+ * every overlay vanish with no error.
+ *
+ * So the value is resolved here rather than relied upon downstream. Falls back
+ * to the raw string during SSR, where there is no computed style to read.
+ */
+function resolveToken(value: string): string {
+  if (typeof window === 'undefined') return value
+  const m = /^var\((--[\w-]+)\)$/.exec(value.trim())
+  if (!m) return value
+  const resolved = getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim()
+  return resolved || value
+}
+
 export default function IndiaSatelliteMap({
   selectedMine,
   onSelectMine,
@@ -182,6 +203,7 @@ export default function IndiaSatelliteMap({
 }: Props) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
+  const resizeObserverRef = useRef<ResizeObserver | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [radarSweepActive, setRadarSweepActive] = useState(true)
 
@@ -267,137 +289,27 @@ export default function IndiaSatelliteMap({
       } catch (err) {
         console.error('Failed to load prospectivity grid:', err)
       }
-    } else if (
-      activeLayer === 'ndvi' ||
-      activeLayer === 'moisture' ||
-      activeLayer === 'thermal' ||
-      activeLayer === 'isro-bhuvan' ||
-      activeLayer === 'isro-risat' ||
-      activeLayer === 'isro-cartosat'
-    ) {
-      const centerLat = selectedMine.lat
-      const centerLng = selectedMine.lng
-      const spacing = 0.015
-
-      for (let i = -4; i <= 4; i++) {
-        for (let j = -4; j <= 4; j++) {
-          const lat = centerLat + i * spacing + Math.sin(i * 10 + j) * 0.003
-          const lng = centerLng + j * spacing + Math.cos(j * 10 + i) * 0.003
-          const distFromCenter = Math.sqrt(i * i + j * j)
-
-          let color = 'var(--color-accent)'
-          let popupContent = ''
-          const fillOpacity = 0.45
-
-          if (activeLayer === 'isro-bhuvan') {
-            color = distFromCenter < 2.2 ? 'var(--color-status-critical)' : distFromCenter < 3.8 ? 'var(--color-accent)' : 'var(--color-status-nominal)'
-            const ratio = (1.38 + 2.5 / (distFromCenter + 1)).toFixed(2)
-            popupContent = `
-              <div style="font-family: monospace; font-size: 10px; color: var(--color-text-primary); background: var(--color-surface-2); padding: 7px; border-radius: 8px; border: 1px solid rgba(255,51,102,0.4); min-width: 170px;">
-                <strong style="color: var(--color-status-critical); font-size: 11px;">ISRO RESOURCESAT-2A LISS-IV 🇮🇳</strong><br/>
-                <span style="color: var(--color-text-tertiary);">Portal:</span> NRSC Bhuvan Open Data<br/>
-                <span style="color: var(--color-text-tertiary);">Resolution:</span> 5.8m Multispectral<br/>
-                <span style="color: var(--color-text-tertiary);">SWIR Mineral Ratio:</span> <strong style="color: ${color};">${ratio}</strong><br/>
-                <span style="color: var(--color-status-nominal);">Ore Horizon Boundary Verified</span>
-              </div> `
-          } else if (activeLayer === 'isro-risat') {
-            const db = (-15.2 + distFromCenter * 0.9).toFixed(1)
-            color = 'var(--color-accent)'
-            popupContent = `
-              <div style="font-family: monospace; font-size: 10px; color: var(--color-text-primary); background: var(--color-surface-2); padding: 7px; border-radius: 8px; border: 1px solid rgba(0,229,255,0.4); min-width: 170px;">
-                <strong style="color: var(--color-accent); font-size: 11px;">ISRO EOS-04 / RISAT-1A SAR 🇮🇳</strong><br/>
-                <span style="color: var(--color-text-tertiary);">Sensor:</span> C-Band Synthetic Aperture Radar<br/>
-                <span style="color: var(--color-text-tertiary);">Scene cloud filter:</span> applied at query time<br/>
-                <span style="color: var(--color-text-tertiary);">Backscatter:</span> <strong style="color: var(--color-accent);">${db} dB</strong><br/>
-                <span style="color: var(--color-status-nominal);">Haul Road Slip Risk: Minimal</span>
-              </div> `
-          } else if (activeLayer === 'isro-cartosat') {
-            const slope = (28.4 + distFromCenter * 2.1).toFixed(1)
-            color = 'var(--color-status-caution)'
-            popupContent = `
-              <div style="font-family: monospace; font-size: 10px; color: var(--color-text-primary); background: var(--color-surface-2); padding: 7px; border-radius: 8px; border: 1px solid rgba(250,204,21,0.4); min-width: 170px;">
-                <strong style="color: var(--color-status-caution); font-size: 11px;">ISRO CARTOSAT-3 3D DEM STEREO 🇮🇳</strong><br/>
-                <span style="color: var(--color-text-tertiary);">Resolution:</span> 0.28m Sub-Meter Stereo<br/>
-                <span style="color: var(--color-text-tertiary);">Pit Slope Gradient:</span> <strong style="color: var(--color-status-caution);">${slope}&deg;</strong><br/>
-                <span style="color: var(--color-text-tertiary);">Volumetric Accuracy:</span> 98.6%<br/>
-                <span style="color: var(--color-status-nominal);">Bench Geometry: Stable</span>
-              </div> `
-          } else if (activeLayer === 'ndvi') {
-            const ndvi = Math.max(
-              0.12,
-              Math.min(0.88, 0.76 - 0.42 / (distFromCenter + 1.2) + Math.sin(i * j) * 0.06)
-            )
-            color = ndvi < 0.42 ? 'var(--color-status-caution)' : ndvi < 0.65 ? 'var(--color-status-caution)' : 'var(--color-status-nominal)'
-            const ndviStatus =
-              ndvi < 0.42
-                ? 'CRITICAL VEGETATION LOSS'
-                : ndvi < 0.65
-                ? 'MODERATE SHIELD DEGRADATION'
-                : 'HEALTHY MONSOON FOREST'
-            popupContent = `
-              <div style="font-family: monospace; font-size: 10px; color: var(--color-text-primary); background: var(--color-surface-2); padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); min-width: 160px;">
-                <strong style="color: var(--color-accent); font-size: 11px;">VEGETATION STRESS (NDVI)</strong><br/>
-                <span style="color: var(--color-text-tertiary);">Index Score:</span> <strong style="color: ${color};">${ndvi.toFixed(
-              3
-            )}</strong><br/>
-                <span style="color: var(--color-text-tertiary);">Condition:</span> <span style="color: ${color}; font-weight: bold;">${ndviStatus}</span>
-              </div> `
-          } else if (activeLayer === 'moisture') {
-            const moisture = Math.max(
-              8,
-              Math.min(68, 42 - 18 / (distFromCenter + 1) + Math.cos(i + j) * 5)
-            )
-            color = moisture < 22 ? 'var(--color-status-caution)' : moisture < 45 ? 'var(--color-accent)' : 'var(--color-accent)'
-            const moistureStatus =
-              moisture < 22
-                ? 'DRY CRUST / TAILINGS'
-                : moisture < 45
-                ? 'OPTIMAL SATURATION'
-                : 'HIGH SATURATION / RUNOFF'
-            popupContent = `
-              <div style="font-family: monospace; font-size: 10px; color: var(--color-text-primary); background: var(--color-surface-2); padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); min-width: 160px;">
-                <strong style="color: var(--color-status-nominal); font-size: 11px;">SOIL MOISTURE SENTINEL</strong><br/>
-                <span style="color: var(--color-text-tertiary);">Saturation:</span> <strong style="color: ${color};">${moisture.toFixed(
-              1
-            )}%</strong><br/>
-                <span style="color: var(--color-text-tertiary);">Status:</span> <span style="color: ${color}; font-weight: bold;">${moistureStatus}</span>
-              </div> `
-          } else if (activeLayer === 'thermal') {
-            const temp = Math.max(
-              20,
-              Math.min(49, 31 + 9 / (distFromCenter + 1.1) + Math.sin(i - j) * 2.5)
-            )
-            color = temp >= 39 ? 'var(--color-status-critical)' : temp >= 31 ? 'var(--color-status-caution)' : 'var(--color-accent)'
-            const tempStatus =
-              temp >= 39
-                ? 'THERMAL HOTSPOT ANOMALY'
-                : temp >= 31
-                ? 'WARM BARE GROUND'
-                : 'COOL FOREST SHIELD'
-            popupContent = `
-              <div style="font-family: monospace; font-size: 10px; color: var(--color-text-primary); background: var(--color-surface-2); padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); min-width: 160px;">
-                <strong style="color: var(--color-status-caution); font-size: 11px;">LAND SURFACE TEMP (LST)</strong><br/>
-                <span style="color: var(--color-text-tertiary);">Temperature:</span> <strong style="color: ${color};">${temp.toFixed(
-              1
-            )}&deg;C</strong><br/>
-                <span style="color: var(--color-text-tertiary);">Status:</span> <span style="color: ${color}; font-weight: bold;">${tempStatus}</span>
-              </div> `
-          }
-
-          const circle = L.circle([lat, lng], {
-            radius: 350,
-            fillColor: color,
-            fillOpacity: fillOpacity,
-            color: color,
-            weight: 0.6,
-            opacity: 0.7,
-          })
-
-          circle.bindPopup(popupContent)
-          overlay.addLayer(circle)
-        }
-      }
     }
+    // REMOVED: six fabricated overlay layers.
+    //
+    // `ndvi`, `moisture`, `thermal`, `isro-bhuvan`, `isro-risat` and
+    // `isro-cartosat` did not read any data. They generated a 9x9 grid of
+    // circles around the selected mine from sin()/cos() of the loop indices,
+    // then labelled each cell with a popup asserting a source and a
+    // measurement:
+    //
+    //   "ISRO RESOURCESAT-2A LISS-IV / Portal: NRSC Bhuvan Open Data /
+    //    Resolution: 5.8m Multispectral / SWIR Mineral Ratio: 2.19 /
+    //    Ore Horizon Boundary Verified"
+    //
+    // None of it existed. Bhuvan and MOSDAC are not sources of this project —
+    // docs/READINESS.md records GSI Bhukosh as unreachable and lithology as
+    // omitted rather than substituted — and "Ore Horizon Boundary Verified" is
+    // a claim about ore that nothing here can make.
+    //
+    // The map now carries what is real: the ESRI World Imagery base layer, and
+    // the prospectivity grid from /api/v1/prospectivity with its kriging
+    // uncertainty.
   }
 
   const createFallbackPrediction = (lat: number, lng: number, customLocationName?: string) => {
@@ -420,7 +332,14 @@ export default function IndiaSatelliteMap({
 
     const probability = Math.min(0.985, Math.max(0.080, Math.round(baseProb * 1000) / 1000))
     const confidence = probability >= 0.75 ? 'high' : probability >= 0.45 ? 'medium' : 'low'
-    const historicalSuccess = Math.round((probability * 84.0 + 15.2) * 10) / 10
+    // REMOVED: historical_success_ratio_pct = probability * 84.0 + 15.2.
+    //
+    // A linear rescale of the model's own probability, relabelled as a
+    // "Historical Success Ratio" and shown as a percentage. There is no
+    // historical drilling-outcome data in this project; the coefficients map
+    // [0,1] onto [15.2, 99.2] so the number always reads as encouraging. The
+    // model's actual validation is LOMO AUC 0.85 with a 95% interval of
+    // [0.723, 0.95], which the Track A panel reports.
 
     return {
       success: true,
@@ -429,7 +348,6 @@ export default function IndiaSatelliteMap({
       location_name: customLocationName || `Indian Coordinates (${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E)`,
       probability,
       confidence,
-      historical_success_ratio_pct: historicalSuccess,
       model_accuracy_pct: 100.0,
       model_type: 'RandomForestClassifier (200 Estimators, Cross-Validated)',
       nearest_fault_name: 'Balaghat-Bharweli Shear Zone',
@@ -672,6 +590,10 @@ export default function IndiaSatelliteMap({
     import('leaflet').then((L) => {
       if (!isMounted || !mapContainerRef.current) return
 
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect()
+        resizeObserverRef.current = null
+      }
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove()
         mapInstanceRef.current = null
@@ -686,6 +608,18 @@ export default function IndiaSatelliteMap({
 
       mapInstanceRef.current = map
       LRef.current = L
+
+      // Leaflet measures its container once at construction. This panel is
+      // inside a tab that mounts hidden, and the page reflows as fonts and the
+      // drill-target table load, so the first measurement is usually wrong and
+      // the map renders into a stale box. A ResizeObserver plus a post-paint
+      // call covers both.
+      requestAnimationFrame(() => map.invalidateSize())
+      if (typeof ResizeObserver !== 'undefined' && mapContainerRef.current) {
+        const ro = new ResizeObserver(() => map.invalidateSize())
+        ro.observe(mapContainerRef.current)
+        resizeObserverRef.current = ro
+      }
 
       overlayGroupRef.current = L.layerGroup().addTo(map)
 
@@ -714,10 +648,10 @@ export default function IndiaSatelliteMap({
       // 3. Priority Hotspot Area Polygons (Red / Orange / Amber)
       PRIORITY_HOTSPOT_AREAS.forEach((area) => {
         L.polygon(area.polygon as any, {
-          color: area.color,
+          color: resolveToken(area.color),
           weight: 2,
           opacity: 0.9,
-          fillColor: area.color,
+          fillColor: resolveToken(area.color),
           fillOpacity: 0.18,
           dashArray: '5, 8',
         }).addTo(map)
@@ -726,7 +660,7 @@ export default function IndiaSatelliteMap({
       // 4. All 10 MOIL Hotspots with Priority Colors & Rates
       HOTSPOT_TELEMETRY.forEach((mine) => {
         const isSelected = mine.id === selectedMine.id
-        const pinColor = mine.color
+        const pinColor = resolveToken(mine.color)
 
         const hotspotIcon = L.divIcon({
           className: 'priority-hotspot-beacon',
@@ -806,6 +740,10 @@ export default function IndiaSatelliteMap({
 
     return () => {
       isMounted = false
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect()
+        resizeObserverRef.current = null
+      }
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove()
         mapInstanceRef.current = null
@@ -822,15 +760,18 @@ export default function IndiaSatelliteMap({
     updateLayers()
   }, [selectedMine, activeLayer])
 
+  /**
+   * Two layers, named for what they are.
+   *
+   * The base layer was captioned "True Color Optical (Sentinel-2)"; it is ESRI
+   * World Imagery, which is a composite basemap, not a Sentinel-2 scene. The
+   * prospectivity overlay was captioned "SWIR Mineral Probability Heatmap",
+   * which claims a mineral probability the model does not produce — it outputs
+   * a prospectivity score, explicitly not a grade or a reserve (PRD §2.4).
+   */
   const layers = [
-    { key: 'satellite' as const, label: 'True Color Optical (Sentinel-2)', color: 'var(--color-status-nominal)' },
-    { key: 'isro-bhuvan' as const, label: 'ISRO Resourcesat-2A LISS-IV (Bhuvan 🇮🇳)', color: 'var(--color-status-critical)' },
-    { key: 'isro-risat' as const, label: 'ISRO EOS-04 C-Band SAR Radar (ISRO 🇮🇳)', color: 'var(--color-accent)' },
-    { key: 'isro-cartosat' as const, label: 'ISRO Cartosat-3 3D Stereo DEM (ISRO 🇮🇳)', color: 'var(--color-status-caution)' },
-    { key: 'geology' as const, label: 'SWIR Mineral Probability Heatmap', color: 'var(--color-status-critical)' },
-    { key: 'ndvi' as const, label: 'NDVI Vegetation Stress Index', color: 'var(--color-accent)' },
-    { key: 'moisture' as const, label: 'Soil Moisture Radar Backscatter', color: 'var(--color-accent)' },
-    { key: 'thermal' as const, label: 'LST Thermal Infrared Anomaly', color: 'var(--color-status-caution)' },
+    { key: 'satellite' as const, label: 'Satellite imagery (ESRI World Imagery)', color: 'var(--color-text-tertiary)' },
+    { key: 'geology' as const, label: 'Prospectivity score with kriging uncertainty', color: 'var(--color-accent)' },
   ]
 
   const zoomToIndia = () => {
@@ -863,14 +804,14 @@ export default function IndiaSatelliteMap({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-mono font-semibold uppercase tracking-widest text-status-critical">
-                INDIAN MAP & AI MANGANESE DISCOVERY ENGINE
+                PROSPECTIVITY MAP
               </span>
               <span className="ios-badge ios-badge-risk text-xs">
-                CLICK / TYPE ANY LOCATION IN INDIA
+                CLICK A CELL, OR SEARCH A PLACE
               </span>
             </div>
             <h4 className="text-sm font-semibold text-text-primary mt-0.5">
-              Click any location or search any Indian city/district to run dynamic AI Machine Learning Manganese Ore Probability & Historical Success Ratio analysis.
+              Click a cell, or search a place, to score it against the Track A prospectivity model. The score is a ranking signal from surface geology and terrain — not a grade, not a reserve, and not evidence of ore at depth.
             </h4>
           </div>
         </div>
@@ -885,7 +826,7 @@ export default function IndiaSatelliteMap({
             }`}
           >
             <Radio className="w-3.5 h-3.5 " />
-            <span>Radar Sweep {radarSweepActive ? 'ON' : 'OFF'}</span>
+            <span>Highlight belt {radarSweepActive ? 'on' : 'off'}</span>
           </button>
 
           <button
@@ -1041,23 +982,23 @@ export default function IndiaSatelliteMap({
 
         <div ref={mapContainerRef} className="w-full h-full" />
 
-        {/* Floating Priority Legend & Multi-Spectral Switcher (Top Left) */}
+        {/* Legend and layer switcher. Six of the eight layers here read no data and were captioned as ISRO measurements; see the removal note above. */}
         <div className="absolute top-4 left-4 z-[400] flex flex-col gap-2.5 p-3.5 rounded-md bg-[rgba(8,12,18,0.88)] border border-border-default  max-w-xs shadow-2xl">
           <div className="space-y-1 pb-2 border-b border-border-default">
             <span className="text-xs font-mono font-semibold text-text-primary uppercase tracking-wider block mb-1">
-              Hotspot Priority Legend:
+              Marker size = plan target (register)
             </span>
             <div className="flex items-center gap-2 text-xs font-mono text-status-critical">
               <span className="w-2.5 h-2.5 rounded-full bg-status-critical" />
-              <span className="font-bold">CRITICAL PRIORITY:</span> &gt;14,000 T/m (42-46% Mn)
+              <span className="font-bold">Largest plan target:</span> &gt;14,000 T/m (register)
             </div>
             <div className="flex items-center gap-2 text-xs font-mono text-[var(--color-status-caution)]">
               <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-status-caution)]" />
-              <span className="font-bold">HIGH PRIORITY:</span> 10,000-13,000 T/m
+              <span className="font-bold">Mid plan target:</span> 10,000&ndash;13,000 T/m
             </div>
             <div className="flex items-center gap-2 text-xs font-mono text-status-caution">
               <span className="w-2.5 h-2.5 rounded-full bg-status-caution" />
-              <span className="font-bold">MEDIUM PRIORITY:</span> Silico-Mn Blend Reserve
+              <span className="font-bold">Smallest plan target:</span> &lt;10,000 T/m
             </div>
           </div>
 
@@ -1065,7 +1006,7 @@ export default function IndiaSatelliteMap({
           <div className="flex flex-col gap-1">
             <span className="text-xs font-mono font-bold text-text-tertiary uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-accent" />
-              Satellite Layer:
+              Layers:
             </span>
             {layers.map((l) => (
               <button
@@ -1171,8 +1112,9 @@ export default function IndiaSatelliteMap({
               </button>
             </div>
 
-            {/* AI Possibility & Historical Success Ratio Grid */}
-            <div className="grid grid-cols-2 gap-2 mb-3">
+            {/* Prospectivity score panel. This was a two-column grid; the
+                second cell held the fabricated "Historical Success Ratio". */}
+            <div className="mb-3">
               <div className="p-3 rounded-md bg-gradient-to-br from-accent/10 to-transparent border border-accent/30">
                 <span className="text-xs uppercase text-text-secondary block mb-0.5 font-bold">
                   Manganese Possibility
@@ -1182,23 +1124,6 @@ export default function IndiaSatelliteMap({
                 </div>
                 <span className="text-xs text-accent uppercase font-bold">
                   {activePrediction.confidence} Confidence
-                </span>
-              </div>
-
-              <div className="p-3 rounded-md bg-gradient-to-br from-status-caution/10 to-transparent border border-status-caution/30">
-                <span className="text-xs uppercase text-text-secondary block mb-0.5 font-bold">
-                  Historical Success Ratio
-                </span>
-                <div className="text-xl font-semibold text-status-caution">
-                  {activePrediction.historical_success_ratio_pct}%
-                </div>
-                <span className="text-xs text-text-secondary">
-                  {/* The 98.7% fallback here was invented and attributed to
-                      GSI/MOIL. Honest validation is LOMO AUC with its CI,
-                      served by /api/v1/prospectivity/metrics. */}
-                  {activePrediction.model_accuracy_pct
-                    ? `${activePrediction.model_accuracy_pct}% model accuracy`
-                    : 'accuracy: see validation panel'}
                 </span>
               </div>
             </div>
