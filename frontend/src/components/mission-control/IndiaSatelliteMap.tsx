@@ -982,11 +982,11 @@ export default function IndiaSatelliteMap({
 
         <div ref={mapContainerRef} className="w-full h-full" />
 
-        {/* Floating Priority Legend & Multi-Spectral Switcher (Top Left) */}
+        {/* Legend and layer switcher. Six of the eight layers here read no data and were captioned as ISRO measurements; see the removal note above. */}
         <div className="absolute top-4 left-4 z-[400] flex flex-col gap-2.5 p-3.5 rounded-md bg-[rgba(8,12,18,0.88)] border border-border-default  max-w-xs shadow-2xl">
           <div className="space-y-1 pb-2 border-b border-border-default">
             <span className="text-xs font-mono font-semibold text-text-primary uppercase tracking-wider block mb-1">
-              Hotspot Priority Legend:
+              Marker size = plan target (register)
             </span>
             <div className="flex items-center gap-2 text-xs font-mono text-status-critical">
               <span className="w-2.5 h-2.5 rounded-full bg-status-critical" />
@@ -1006,7 +1006,7 @@ export default function IndiaSatelliteMap({
           <div className="flex flex-col gap-1">
             <span className="text-xs font-mono font-bold text-text-tertiary uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-accent" />
-              Satellite Layer:
+              Layers:
             </span>
             {layers.map((l) => (
               <button
