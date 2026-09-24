@@ -44,6 +44,33 @@ function Unavailable({ what, reason }: { what: string; reason: string }) {
   )
 }
 
+
+/**
+ * Describe the window a forecast actually covers.
+ *
+ * The header said "horizon 14 d", which reads as "the next 14 days" — and the
+ * forecast is served from a committed artifact whose window is fixed at
+ * generation time. On any day after that, "the next 14 days" is simply false.
+ * The origin and the real dates are shown instead, and a window that has
+ * already ended says so rather than presenting stale figures as a plan.
+ */
+function describeWindow(origin: string, start: string, end: string) {
+  const fmt = (iso: string) =>
+    new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      timeZone: 'UTC',
+    })
+  const today = new Date().toISOString().slice(0, 10)
+  const ended = end < today
+  const started = start <= today
+  return {
+    text: `forecast from ${fmt(origin)}, covering ${fmt(start)} – ${fmt(end)}`,
+    ended,
+    inProgress: started && !ended,
+  }
+}
+
 export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: string }) {
   const [forecast, setForecast] = useState<ForecastResponse | null>(null)
   const [fErr, setFErr] = useState<string | null>(null)
@@ -88,11 +115,51 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
         </h2>
         {forecast ? (
           <p className="font-mono text-xs text-text-tertiary">
-            {forecast.model_version} · origin {forecast.forecast_origin} · horizon{' '}
-            {forecast.horizon_days} d
+            {forecast.model_version} ·{' '}
+            {describeWindow(
+              forecast.forecast_origin,
+              forecast.window.start,
+              forecast.window.end
+            ).text}
           </p>
         ) : null}
       </header>
+
+      {forecast
+        ? (() => {
+            const w = describeWindow(
+              forecast.forecast_origin,
+              forecast.window.start,
+              forecast.window.end
+            )
+            return (
+              <div className="rounded-md border border-border-default bg-surface-1 p-3">
+                <p className="measure text-xs text-text-secondary">
+                  {w.ended ? (
+                    <>
+                      <strong className="font-medium text-status-caution">
+                        This forecast&rsquo;s window has already ended.
+                      </strong>{' '}
+                      It covers {w.text.replace('forecast from ', 'the period from ')}, which is in
+                      the past. The figures below are what the model predicted for that window, not
+                      a plan for today.
+                    </>
+                  ) : (
+                    <>
+                      Figures below cover a fixed window — {w.text} — not a rolling &ldquo;next 14
+                      days&rdquo;. It is served from a stored artifact
+                      {forecast.artifact_age_hours != null
+                        ? `, generated ${forecast.artifact_age_hours.toFixed(1)} h ago`
+                        : ''}
+                      , so it is a computed prediction rather than a live reading. The weather panel
+                      beside it is measured live and carries its own vintage.
+                    </>
+                  )}
+                </p>
+              </div>
+            )
+          })()
+        : null}
 
       {/* --- D-3 shortfall risk, D-2 trends --- */}
       {fErr ? (

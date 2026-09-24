@@ -31,7 +31,10 @@ type Level = 'portfolio' | 'mine'
  * Distinguishing a *warming* backend from a broken one needs a signal the API
  * does not yet send; that is logged in FEATURE_BACKLOG.md B-2, not faked here.
  */
-type Cell = { shortfall: number; p: number } | { error: string; status: number } | null
+type Cell =
+  | { shortfall: number; p: number }
+  | { error: string; status: number; warming?: { eta_seconds: number } }
+  | null
 
 const isFailure = (c: Cell): c is { error: string; status: number } =>
   c !== null && 'error' in c
@@ -141,7 +144,7 @@ export function DecisionConsole() {
                 shortfall: r.data.portfolio.expected_shortfall_tonnes,
                 p: Math.max(0, ...r.data.grades.map((g) => g.shortfall.p_shortfall)),
               }
-            : { error: r.error, status: r.status },
+            : { error: r.error, status: r.status, warming: r.warming ? { eta_seconds: r.warming.eta_seconds } : undefined },
         }))
       }
     })()
@@ -307,12 +310,24 @@ export function DecisionConsole() {
                               <span className="sr-only">Computing forecast</span>
                             </div>
                           ) : isFailure(v) ? (
-                            /* A backend that answered and one that could not be
-                               reached are different problems; say which. */
-                            <p className="mt-3 flex min-h-6 items-center text-sm text-status-unknown">
-                              {v.status === 0
-                                ? 'Forecast unreachable — no response from the service.'
-                                : `Forecast unavailable (${v.status}).`}
+                            /* Warming, unreachable and broken are three different
+                               states. Collapsing them is what made a cold backend
+                               report failure (FEATURE_BACKLOG B-2). */
+                            <p className="mt-3 flex min-h-6 items-center gap-1.5 text-sm text-text-secondary">
+                              {v.warming ? (
+                                <>
+                                  <Skeleton className="h-3 w-3 rounded-full" />
+                                  Computing — about {Math.round(v.warming.eta_seconds)}s
+                                </>
+                              ) : v.status === 0 ? (
+                                <span className="text-status-unknown">
+                                  Forecast unreachable — no response from the service.
+                                </span>
+                              ) : (
+                                <span className="text-status-unknown">
+                                  Forecast unavailable ({v.status}).
+                                </span>
+                              )}
                             </p>
                           ) : (
                             <div className="mt-3 flex min-h-6 flex-wrap items-center gap-x-3 gap-y-1.5">

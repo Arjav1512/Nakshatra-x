@@ -95,10 +95,14 @@ def _plan_target(mine_code: str, grade: str, start: date, end: date) -> float:
     return total
 
 
-def forecast_mine(mine_code: str, horizon_days: int = 14, grade: str | None = None) -> dict:
+def compute_forecast(mine_code: str, horizon_days: int = 14, grade: str | None = None) -> dict:
     """
-    Per-mine, per-grade forecast with prediction intervals and
-    P(cumulative < plan target).
+    Fit and forecast. EXPENSIVE — about 42 s per mine, and the first call in a
+    process also generates the 58,083-row synthetic dataset.
+
+    This must never be called on a request path. It is invoked only by the
+    warmer in forecast_store, which bounds concurrency and guarantees one flight
+    per mine. `forecast_mine` below is the read-only server.
     """
     st = _state()
     origin = st["end"]
@@ -184,6 +188,15 @@ def forecast_mine(mine_code: str, horizon_days: int = 14, grade: str | None = No
         ),
     }
 
+
+from app.api.forecast_store import (
+    Warming,
+    eta_seconds,
+    is_fresh,
+    read_artifact,
+    status as store_status,
+    warm,
+)
 
 BACKTEST_CACHE_DIR = Path(__file__).resolve().parents[2] / "artifacts" / "backtests"
 
@@ -283,8 +296,13 @@ def recommend_actions(mine_code: str, horizon_days: int = 14) -> dict:
     action that violates a constraint is removed, and the rejection is reported
     separately so the reasoning stays auditable.
     """
-    st = _state()
+    # Forecast first, deliberately. It reads an artifact and raises Warming if
+    # the mine is not ready, so an unwarmed mine costs one file stat. _state()
+    # below generates the 58,083-row dataset on first call in a process; doing
+    # it before the readiness check would pay that cost for a request that is
+    # about to 503 anyway.
     fx = forecast_mine(mine_code, horizon_days=horizon_days)
+    st = _state()
     engine = ConstraintEngine(st["mines"])
     ctx = st["mines"].get(mine_code)
     origin = st["end"]
@@ -370,3 +388,41 @@ def recommend_actions(mine_code: str, horizon_days: int = 14) -> dict:
             "(PRD C-5). Rejections are listed with their reason."
         ),
     }
+
+
+# ---------------------------------------------------------------------------
+# Serving path
+# ---------------------------------------------------------------------------
+
+def forecast_mine(mine_code: str, horizon_days: int = 14, grade: str | None = None) -> dict:
+    """
+    Serve a persisted forecast. Never computes.
+
+    Read order: process memory -> artifact on disk -> raise Warming.
+
+    Raising rather than computing is the point of this change. A request that
+    computes is a request that holds a connection for 42 s, cannot be cancelled
+    when the client leaves, and duplicates work its neighbour is already doing.
+    A request that reports "warming" costs nothing and tells the caller what to
+    do next.
+    """
+    cached = read_artifact(mine_code, horizon_days)
+    if cached is not None:
+        if grade:
+            cached = dict(cached)
+            cached["grades"] = [g for g in cached.get("grades", []) if g.get("grade") == grade]
+        return cached
+
+    # Not on disk. Make sure exactly one flight is producing it, then report.
+    warm(mine_code, horizon_days, compute_forecast)
+    eta, queued = eta_seconds(mine_code, horizon_days)
+    raise Warming(mine_code, eta, queued)
+
+
+def warm_forecast(mine_code: str, horizon_days: int = 14):
+    """Start (or join) the flight for this mine. Returns its Future."""
+    return warm(mine_code, horizon_days, compute_forecast)
+
+
+def forecast_status(mine_codes: list[str], horizon_days: int = 14) -> dict:
+    return store_status(mine_codes, horizon_days)

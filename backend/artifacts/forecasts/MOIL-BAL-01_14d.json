@@ -1,0 +1,10 @@
+{
+  "mine_code": "MOIL-BAL-01",
+  "grades": [],
+  "vintage": "2026-09-24T18:22:22.281761+00:00",
+  "artifact_identity": {
+    "model_version": "nakshatra-gbt-cqr-v1",
+    "generator_seed": 20260921,
+    "code_fingerprint": "e5443d2cd729af68"
+  }
+}

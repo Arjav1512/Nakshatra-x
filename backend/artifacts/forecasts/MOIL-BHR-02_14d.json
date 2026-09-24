@@ -1,0 +1,585 @@
+{
+  "mine_code": "MOIL-BHR-02",
+  "model_version": "nakshatra-gbt-cqr-v1",
+  "baseline_version": "seasonal-naive-365-v1",
+  "forecast_origin": "2026-09-20",
+  "window": {
+    "start": "2026-09-21",
+    "end": "2026-10-04"
+  },
+  "horizon_days": 14,
+  "interval": {
+    "nominal_coverage": 0.8,
+    "quantiles": [
+      0.1,
+      0.5,
+      0.9
+    ]
+  },
+  "grades": [
+    {
+      "grade": "blast_furnace",
+      "plan_target_tonnes": 1798.0,
+      "shortfall": {
+        "p_shortfall": 0.9955,
+        "expected_cumulative_tonnes": 1646.9,
+        "p10_cumulative_tonnes": 1577.2,
+        "p90_cumulative_tonnes": 1719.0,
+        "target_tonnes": 1798.0,
+        "expected_shortfall_tonnes": 151.2,
+        "method": "Monte Carlo over per-day lognormal predictive distributions matched to model quantiles",
+        "n_simulations": 4000,
+        "assumption": "Days are independent given the covariates. Persistent shocks would widen the true distribution, so this probability is conservative."
+      },
+      "baseline_cumulative_tonnes": 1582.1,
+      "trajectory": [
+        {
+          "horizon_days": 1,
+          "date": "2026-09-21",
+          "p10_tonnes": 107.5,
+          "median_tonnes": 118.3,
+          "p90_tonnes": 132.6,
+          "baseline_tonnes": 108.3
+        },
+        {
+          "horizon_days": 2,
+          "date": "2026-09-22",
+          "p10_tonnes": 105.9,
+          "median_tonnes": 119.8,
+          "p90_tonnes": 134.3,
+          "baseline_tonnes": 115.8
+        },
+        {
+          "horizon_days": 3,
+          "date": "2026-09-23",
+          "p10_tonnes": 106.8,
+          "median_tonnes": 122.0,
+          "p90_tonnes": 134.6,
+          "baseline_tonnes": 111.0
+        },
+        {
+          "horizon_days": 4,
+          "date": "2026-09-24",
+          "p10_tonnes": 108.5,
+          "median_tonnes": 121.1,
+          "p90_tonnes": 142.9,
+          "baseline_tonnes": 122.5
+        },
+        {
+          "horizon_days": 5,
+          "date": "2026-09-25",
+          "p10_tonnes": 108.4,
+          "median_tonnes": 119.5,
+          "p90_tonnes": 139.7,
+          "baseline_tonnes": 106.5
+        },
+        {
+          "horizon_days": 6,
+          "date": "2026-09-26",
+          "p10_tonnes": 102.6,
+          "median_tonnes": 117.6,
+          "p90_tonnes": 144.2,
+          "baseline_tonnes": 103.2
+        },
+        {
+          "horizon_days": 7,
+          "date": "2026-09-27",
+          "p10_tonnes": 105.0,
+          "median_tonnes": 117.2,
+          "p90_tonnes": 145.2,
+          "baseline_tonnes": 110.6
+        },
+        {
+          "horizon_days": 8,
+          "date": "2026-09-28",
+          "p10_tonnes": 104.7,
+          "median_tonnes": 107.8,
+          "p90_tonnes": 146.7,
+          "baseline_tonnes": 121.9
+        },
+        {
+          "horizon_days": 9,
+          "date": "2026-09-29",
+          "p10_tonnes": 104.2,
+          "median_tonnes": 109.7,
+          "p90_tonnes": 144.5,
+          "baseline_tonnes": 115.0
+        },
+        {
+          "horizon_days": 10,
+          "date": "2026-09-30",
+          "p10_tonnes": 97.3,
+          "median_tonnes": 114.2,
+          "p90_tonnes": 142.9,
+          "baseline_tonnes": 101.8
+        },
+        {
+          "horizon_days": 11,
+          "date": "2026-10-01",
+          "p10_tonnes": 102.5,
+          "median_tonnes": 116.7,
+          "p90_tonnes": 144.9,
+          "baseline_tonnes": 108.0
+        },
+        {
+          "horizon_days": 12,
+          "date": "2026-10-02",
+          "p10_tonnes": 102.5,
+          "median_tonnes": 117.0,
+          "p90_tonnes": 151.6,
+          "baseline_tonnes": 123.3
+        },
+        {
+          "horizon_days": 13,
+          "date": "2026-10-03",
+          "p10_tonnes": 103.9,
+          "median_tonnes": 115.0,
+          "p90_tonnes": 149.3,
+          "baseline_tonnes": 121.5
+        },
+        {
+          "horizon_days": 14,
+          "date": "2026-10-04",
+          "p10_tonnes": 103.4,
+          "median_tonnes": 117.8,
+          "p90_tonnes": 148.0,
+          "baseline_tonnes": 112.6
+        }
+      ]
+    },
+    {
+      "grade": "dioxide",
+      "plan_target_tonnes": 224.8,
+      "shortfall": {
+        "p_shortfall": 0.6885,
+        "expected_cumulative_tonnes": 213.0,
+        "p10_cumulative_tonnes": 180.3,
+        "p90_cumulative_tonnes": 248.3,
+        "target_tonnes": 224.8,
+        "expected_shortfall_tonnes": 11.7,
+        "method": "Monte Carlo over per-day lognormal predictive distributions matched to model quantiles",
+        "n_simulations": 4000,
+        "assumption": "Days are independent given the covariates. Persistent shocks would widen the true distribution, so this probability is conservative."
+      },
+      "baseline_cumulative_tonnes": 194.5,
+      "trajectory": [
+        {
+          "horizon_days": 1,
+          "date": "2026-09-21",
+          "p10_tonnes": 11.6,
+          "median_tonnes": 13.6,
+          "p90_tonnes": 25.7,
+          "baseline_tonnes": 13.0
+        },
+        {
+          "horizon_days": 2,
+          "date": "2026-09-22",
+          "p10_tonnes": 12.2,
+          "median_tonnes": 14.3,
+          "p90_tonnes": 32.7,
+          "baseline_tonnes": 14.3
+        },
+        {
+          "horizon_days": 3,
+          "date": "2026-09-23",
+          "p10_tonnes": 12.6,
+          "median_tonnes": 14.5,
+          "p90_tonnes": 25.5,
+          "baseline_tonnes": 12.9
+        },
+        {
+          "horizon_days": 4,
+          "date": "2026-09-24",
+          "p10_tonnes": 11.8,
+          "median_tonnes": 14.5,
+          "p90_tonnes": 33.3,
+          "baseline_tonnes": 14.3
+        },
+        {
+          "horizon_days": 5,
+          "date": "2026-09-25",
+          "p10_tonnes": 11.6,
+          "median_tonnes": 14.4,
+          "p90_tonnes": 25.6,
+          "baseline_tonnes": 12.5
+        },
+        {
+          "horizon_days": 6,
+          "date": "2026-09-26",
+          "p10_tonnes": 9.7,
+          "median_tonnes": 13.1,
+          "p90_tonnes": 26.0,
+          "baseline_tonnes": 13.1
+        },
+        {
+          "horizon_days": 7,
+          "date": "2026-09-27",
+          "p10_tonnes": 8.9,
+          "median_tonnes": 12.8,
+          "p90_tonnes": 26.1,
+          "baseline_tonnes": 13.8
+        },
+        {
+          "horizon_days": 8,
+          "date": "2026-09-28",
+          "p10_tonnes": 7.7,
+          "median_tonnes": 12.7,
+          "p90_tonnes": 34.0,
+          "baseline_tonnes": 15.0
+        },
+        {
+          "horizon_days": 9,
+          "date": "2026-09-29",
+          "p10_tonnes": 8.4,
+          "median_tonnes": 13.3,
+          "p90_tonnes": 34.3,
+          "baseline_tonnes": 14.4
+        },
+        {
+          "horizon_days": 10,
+          "date": "2026-09-30",
+          "p10_tonnes": 8.4,
+          "median_tonnes": 13.3,
+          "p90_tonnes": 25.7,
+          "baseline_tonnes": 12.7
+        },
+        {
+          "horizon_days": 11,
+          "date": "2026-10-01",
+          "p10_tonnes": 8.7,
+          "median_tonnes": 13.9,
+          "p90_tonnes": 25.6,
+          "baseline_tonnes": 13.2
+        },
+        {
+          "horizon_days": 12,
+          "date": "2026-10-02",
+          "p10_tonnes": 9.1,
+          "median_tonnes": 14.2,
+          "p90_tonnes": 34.9,
+          "baseline_tonnes": 16.1
+        },
+        {
+          "horizon_days": 13,
+          "date": "2026-10-03",
+          "p10_tonnes": 9.6,
+          "median_tonnes": 14.5,
+          "p90_tonnes": 35.3,
+          "baseline_tonnes": 15.2
+        },
+        {
+          "horizon_days": 14,
+          "date": "2026-10-04",
+          "p10_tonnes": 9.1,
+          "median_tonnes": 13.8,
+          "p90_tonnes": 34.4,
+          "baseline_tonnes": 14.0
+        }
+      ]
+    },
+    {
+      "grade": "ferro_manganese",
+      "plan_target_tonnes": 1873.0,
+      "shortfall": {
+        "p_shortfall": 0.9998,
+        "expected_cumulative_tonnes": 1665.7,
+        "p10_cumulative_tonnes": 1590.2,
+        "p90_cumulative_tonnes": 1742.9,
+        "target_tonnes": 1873.0,
+        "expected_shortfall_tonnes": 207.3,
+        "method": "Monte Carlo over per-day lognormal predictive distributions matched to model quantiles",
+        "n_simulations": 4000,
+        "assumption": "Days are independent given the covariates. Persistent shocks would widen the true distribution, so this probability is conservative."
+      },
+      "baseline_cumulative_tonnes": 1632.1,
+      "trajectory": [
+        {
+          "horizon_days": 1,
+          "date": "2026-09-21",
+          "p10_tonnes": 110.0,
+          "median_tonnes": 122.1,
+          "p90_tonnes": 139.2,
+          "baseline_tonnes": 108.7
+        },
+        {
+          "horizon_days": 2,
+          "date": "2026-09-22",
+          "p10_tonnes": 107.4,
+          "median_tonnes": 126.1,
+          "p90_tonnes": 142.3,
+          "baseline_tonnes": 118.5
+        },
+        {
+          "horizon_days": 3,
+          "date": "2026-09-23",
+          "p10_tonnes": 104.1,
+          "median_tonnes": 122.9,
+          "p90_tonnes": 141.2,
+          "baseline_tonnes": 103.1
+        },
+        {
+          "horizon_days": 4,
+          "date": "2026-09-24",
+          "p10_tonnes": 110.1,
+          "median_tonnes": 133.4,
+          "p90_tonnes": 152.4,
+          "baseline_tonnes": 124.0
+        },
+        {
+          "horizon_days": 5,
+          "date": "2026-09-25",
+          "p10_tonnes": 110.5,
+          "median_tonnes": 117.8,
+          "p90_tonnes": 148.7,
+          "baseline_tonnes": 105.0
+        },
+        {
+          "horizon_days": 6,
+          "date": "2026-09-26",
+          "p10_tonnes": 108.7,
+          "median_tonnes": 116.9,
+          "p90_tonnes": 154.1,
+          "baseline_tonnes": 114.8
+        },
+        {
+          "horizon_days": 7,
+          "date": "2026-09-27",
+          "p10_tonnes": 107.2,
+          "median_tonnes": 115.8,
+          "p90_tonnes": 153.8,
+          "baseline_tonnes": 110.6
+        },
+        {
+          "horizon_days": 8,
+          "date": "2026-09-28",
+          "p10_tonnes": 106.4,
+          "median_tonnes": 109.1,
+          "p90_tonnes": 152.8,
+          "baseline_tonnes": 124.9
+        },
+        {
+          "horizon_days": 9,
+          "date": "2026-09-29",
+          "p10_tonnes": 107.0,
+          "median_tonnes": 109.3,
+          "p90_tonnes": 151.6,
+          "baseline_tonnes": 124.5
+        },
+        {
+          "horizon_days": 10,
+          "date": "2026-09-30",
+          "p10_tonnes": 104.7,
+          "median_tonnes": 110.5,
+          "p90_tonnes": 144.2,
+          "baseline_tonnes": 110.2
+        },
+        {
+          "horizon_days": 11,
+          "date": "2026-10-01",
+          "p10_tonnes": 105.1,
+          "median_tonnes": 113.7,
+          "p90_tonnes": 150.2,
+          "baseline_tonnes": 107.1
+        },
+        {
+          "horizon_days": 12,
+          "date": "2026-10-02",
+          "p10_tonnes": 105.1,
+          "median_tonnes": 118.6,
+          "p90_tonnes": 154.9,
+          "baseline_tonnes": 137.2
+        },
+        {
+          "horizon_days": 13,
+          "date": "2026-10-03",
+          "p10_tonnes": 107.3,
+          "median_tonnes": 117.5,
+          "p90_tonnes": 157.4,
+          "baseline_tonnes": 122.9
+        },
+        {
+          "horizon_days": 14,
+          "date": "2026-10-04",
+          "p10_tonnes": 104.8,
+          "median_tonnes": 116.9,
+          "p90_tonnes": 157.9,
+          "baseline_tonnes": 120.4
+        }
+      ]
+    },
+    {
+      "grade": "silico_manganese",
+      "plan_target_tonnes": 3596.1,
+      "shortfall": {
+        "p_shortfall": 0.9988,
+        "expected_cumulative_tonnes": 3266.0,
+        "p10_cumulative_tonnes": 3129.9,
+        "p90_cumulative_tonnes": 3405.4,
+        "target_tonnes": 3596.1,
+        "expected_shortfall_tonnes": 330.1,
+        "method": "Monte Carlo over per-day lognormal predictive distributions matched to model quantiles",
+        "n_simulations": 4000,
+        "assumption": "Days are independent given the covariates. Persistent shocks would widen the true distribution, so this probability is conservative."
+      },
+      "baseline_cumulative_tonnes": 3148.7,
+      "trajectory": [
+        {
+          "horizon_days": 1,
+          "date": "2026-09-21",
+          "p10_tonnes": 195.1,
+          "median_tonnes": 230.1,
+          "p90_tonnes": 250.2,
+          "baseline_tonnes": 207.0
+        },
+        {
+          "horizon_days": 2,
+          "date": "2026-09-22",
+          "p10_tonnes": 194.6,
+          "median_tonnes": 233.2,
+          "p90_tonnes": 248.9,
+          "baseline_tonnes": 228.2
+        },
+        {
+          "horizon_days": 3,
+          "date": "2026-09-23",
+          "p10_tonnes": 195.1,
+          "median_tonnes": 236.3,
+          "p90_tonnes": 257.0,
+          "baseline_tonnes": 217.5
+        },
+        {
+          "horizon_days": 4,
+          "date": "2026-09-24",
+          "p10_tonnes": 196.3,
+          "median_tonnes": 241.8,
+          "p90_tonnes": 264.0,
+          "baseline_tonnes": 250.4
+        },
+        {
+          "horizon_days": 5,
+          "date": "2026-09-25",
+          "p10_tonnes": 195.4,
+          "median_tonnes": 234.6,
+          "p90_tonnes": 256.1,
+          "baseline_tonnes": 202.6
+        },
+        {
+          "horizon_days": 6,
+          "date": "2026-09-26",
+          "p10_tonnes": 193.0,
+          "median_tonnes": 239.9,
+          "p90_tonnes": 263.5,
+          "baseline_tonnes": 204.5
+        },
+        {
+          "horizon_days": 7,
+          "date": "2026-09-27",
+          "p10_tonnes": 195.8,
+          "median_tonnes": 232.8,
+          "p90_tonnes": 272.6,
+          "baseline_tonnes": 227.5
+        },
+        {
+          "horizon_days": 8,
+          "date": "2026-09-28",
+          "p10_tonnes": 193.7,
+          "median_tonnes": 213.0,
+          "p90_tonnes": 264.2,
+          "baseline_tonnes": 248.7
+        },
+        {
+          "horizon_days": 9,
+          "date": "2026-09-29",
+          "p10_tonnes": 194.7,
+          "median_tonnes": 217.9,
+          "p90_tonnes": 263.1,
+          "baseline_tonnes": 214.5
+        },
+        {
+          "horizon_days": 10,
+          "date": "2026-09-30",
+          "p10_tonnes": 190.5,
+          "median_tonnes": 227.9,
+          "p90_tonnes": 259.8,
+          "baseline_tonnes": 204.0
+        },
+        {
+          "horizon_days": 11,
+          "date": "2026-10-01",
+          "p10_tonnes": 193.0,
+          "median_tonnes": 231.9,
+          "p90_tonnes": 265.2,
+          "baseline_tonnes": 214.7
+        },
+        {
+          "horizon_days": 12,
+          "date": "2026-10-02",
+          "p10_tonnes": 196.4,
+          "median_tonnes": 237.9,
+          "p90_tonnes": 281.1,
+          "baseline_tonnes": 266.9
+        },
+        {
+          "horizon_days": 13,
+          "date": "2026-10-03",
+          "p10_tonnes": 195.1,
+          "median_tonnes": 229.2,
+          "p90_tonnes": 278.1,
+          "baseline_tonnes": 238.3
+        },
+        {
+          "horizon_days": 14,
+          "date": "2026-10-04",
+          "p10_tonnes": 195.5,
+          "median_tonnes": 235.0,
+          "p90_tonnes": 278.0,
+          "baseline_tonnes": 223.8
+        }
+      ]
+    }
+  ],
+  "portfolio": {
+    "plan_target_tonnes": 7491.8,
+    "expected_cumulative_tonnes": 6791.6,
+    "expected_shortfall_tonnes": 700.2
+  },
+  "provenance": {
+    "forecast": {
+      "value": 6791.6,
+      "unit": "tonnes",
+      "source": "Trained on synthetic operational data generated to the published ingestion contract (docs/INGESTION_CONTRACT.md). MOIL's real production, equipment and blasting records are proprietary (PRD 8.2). Metrics describe the model's behaviour on this dataset, not MOIL's operations.",
+      "source_kind": "synthetic",
+      "vintage": "2026-09-24T18:15:29.006752+00:00",
+      "model_version": "nakshatra-gbt-cqr-v1",
+      "uncertainty": null,
+      "is_synthetic": true,
+      "is_live": false,
+      "method": "Per-mine quantile gradient boosting with conformalised prediction intervals; grade is a model feature. Features use only information available at the forecast origin."
+    },
+    "plan_target": {
+      "value": 7491.8,
+      "unit": "tonnes",
+      "source": "Trained on synthetic operational data generated to the published ingestion contract (docs/INGESTION_CONTRACT.md). MOIL's real production, equipment and blasting records are proprietary (PRD 8.2). Metrics describe the model's behaviour on this dataset, not MOIL's operations.",
+      "source_kind": "synthetic",
+      "vintage": "2026-09-24T18:15:29.006759+00:00",
+      "model_version": "nakshatra-synthetic-v1",
+      "uncertainty": null,
+      "is_synthetic": true,
+      "is_live": false
+    }
+  },
+  "data_integrity": {
+    "contains_synthetic": true,
+    "live_sources_ok": true,
+    "degraded_reason": null,
+    "staleness_seconds": null,
+    "notice": "MIXED \u2014 weather is measured live; operational figures are synthetic (MOIL operational data is proprietary) and are labelled per field."
+  },
+  "guardrail": "Decision support for production planning. Not a statutory reserve statement, and not a commitment.",
+  "vintage": "2026-09-24T18:15:29.006824+00:00",
+  "artifact_identity": {
+    "model_version": "nakshatra-gbt-cqr-v1",
+    "generator_seed": 20260921,
+    "code_fingerprint": "e5443d2cd729af68"
+  }
+}
