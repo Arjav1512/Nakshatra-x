@@ -89,3 +89,7 @@ yarn-error.log*
 *.sw?
 .vercel
 .env*
+
+# Runtime lock + test-fixture artifacts; only the ten real mines are committed.
+backend/artifacts/forecasts/.warm.lock
+backend/artifacts/forecasts/MOIL-ABANDON_*.json

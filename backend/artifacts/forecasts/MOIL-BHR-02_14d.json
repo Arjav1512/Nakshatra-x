@@ -549,7 +549,7 @@
       "unit": "tonnes",
       "source": "Trained on synthetic operational data generated to the published ingestion contract (docs/INGESTION_CONTRACT.md). MOIL's real production, equipment and blasting records are proprietary (PRD 8.2). Metrics describe the model's behaviour on this dataset, not MOIL's operations.",
       "source_kind": "synthetic",
-      "vintage": "2026-09-24T18:15:29.006752+00:00",
+      "vintage": "2026-09-25T03:50:49.510638+00:00",
       "model_version": "nakshatra-gbt-cqr-v1",
       "uncertainty": null,
       "is_synthetic": true,
@@ -561,7 +561,7 @@
       "unit": "tonnes",
       "source": "Trained on synthetic operational data generated to the published ingestion contract (docs/INGESTION_CONTRACT.md). MOIL's real production, equipment and blasting records are proprietary (PRD 8.2). Metrics describe the model's behaviour on this dataset, not MOIL's operations.",
       "source_kind": "synthetic",
-      "vintage": "2026-09-24T18:15:29.006759+00:00",
+      "vintage": "2026-09-25T03:50:49.510655+00:00",
       "model_version": "nakshatra-synthetic-v1",
       "uncertainty": null,
       "is_synthetic": true,
@@ -576,10 +576,16 @@
     "notice": "MIXED \u2014 weather is measured live; operational figures are synthetic (MOIL operational data is proprietary) and are labelled per field."
   },
   "guardrail": "Decision support for production planning. Not a statutory reserve statement, and not a commitment.",
-  "vintage": "2026-09-24T18:15:29.006824+00:00",
+  "vintage": "2026-09-25T03:50:49.510727+00:00",
   "artifact_identity": {
     "model_version": "nakshatra-gbt-cqr-v1",
     "generator_seed": 20260921,
-    "code_fingerprint": "e5443d2cd729af68"
+    "data_end_date": "2026-09-20",
+    "code_fingerprint": "d6986e1c4e1c02d4",
+    "library_versions": {
+      "numpy": "2.2.0",
+      "pydantic": "2.13.5",
+      "sklearn": "1.6.0"
+    }
   }
 }

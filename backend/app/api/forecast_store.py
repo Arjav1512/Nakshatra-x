@@ -28,10 +28,12 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import fcntl
 import threading
 import time
 from contextlib import contextmanager
+from functools import lru_cache
 from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
@@ -49,26 +51,11 @@ STALE_AFTER_HOURS = 24.0
 # started starving the event loop.
 MAX_WARM_WORKERS = int(os.environ.get("NAKSHATRA_WARM_WORKERS", "2"))
 
-# Threads per fit.
-#
-# numpy/scikit-learn thread across all cores by default. Two warm workers each
-# doing that oversubscribes the machine: during earlier runs uvicorn sat at
-# 845% CPU with a load average of 98.7, and a request that normally takes 42 s
-# took 300 s — not because the work grew, but because nothing could get
-# scheduled. Capping per-fit threads leaves headroom for the event loop, so
-# /mines and artifact reads stay fast while warming runs.
-#
-# Set before numpy is imported anywhere, which is why this module is imported
-# early by app.main.
-FIT_THREADS = os.environ.get("NAKSHATRA_FIT_THREADS", "2")
-for _var in (
-    "OMP_NUM_THREADS",
-    "OPENBLAS_NUM_THREADS",
-    "MKL_NUM_THREADS",
-    "NUMEXPR_NUM_THREADS",
-    "VECLIB_MAXIMUM_THREADS",
-):
-    os.environ.setdefault(_var, FIT_THREADS)
+# Threads per fit are capped in `app/__init__.py`, which is the only module
+# guaranteed to run before numpy is imported whatever the entry point. See the
+# comment there: setting OMP_NUM_THREADS after numpy has loaded does nothing,
+# and this module is not imported first by every entry point.
+from app import FIT_THREADS  # noqa: E402  (re-exported for /readyz)
 
 # Rough per-mine fit cost, used only to give a waiting client an ETA.
 EST_FIT_SECONDS = 45.0
@@ -83,38 +70,165 @@ EST_FIT_SECONDS = 45.0
 # possible to serve last month's model under this month's label, which would be
 # worse than being slow. Identity is checked, not assumed.
 
+# The three entry points into the forecast. Everything they import, directly or
+# transitively, is part of the forecast's code.
+FORECAST_ROOT_MODULES = (
+    "app.api.track_b",
+    "app.ml.forecaster",
+    "app.ingestion.generator",
+)
+
+# Import names that do not match their distribution name on PyPI.
+_DISTRIBUTION_ALIASES = {"sklearn": "scikit-learn"}
+
+_PACKAGE_ROOT = Path(__file__).resolve().parents[1]   # .../app
+
+
+def _module_file(dotted: str, root: Path) -> Path | None:
+    """Resolve `app.ml.forecaster` to a file inside this package, or None."""
+    if dotted != "app" and not dotted.startswith("app."):
+        return None
+    rel = dotted.split(".")[1:]
+    if not rel:
+        return root / "__init__.py"
+    module = root.joinpath(*rel).with_suffix(".py")
+    if module.exists():
+        return module
+    package = root.joinpath(*rel) / "__init__.py"
+    return package if package.exists() else None
+
+
+def _imports_of(path: Path) -> list[str]:
+    """Dotted module names imported by this file (absolute imports only)."""
+    import ast
+
+    try:
+        tree = ast.parse(path.read_text(), filename=str(path))
+    except (OSError, SyntaxError):
+        return []
+    names: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            names.extend(a.name for a in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+            # `from app.ingestion import generator` imports a module, not a name,
+            # so both readings are followed; the resolver drops whichever is not
+            # a file.
+            names.append(node.module)
+            names.extend(f"{node.module}.{a.name}" for a in node.names)
+    return names
+
+
+@lru_cache(maxsize=8)
+def _walk_forecast_imports(root: Path | None = None) -> tuple[tuple[Path, ...], frozenset[str]]:
+    """
+    (files in the forecast's import chain, third-party top-level modules it uses).
+
+    Cached on `root`. Every request checks artifact identity, and identity needs
+    the fingerprint; without the cache that meant parsing eight files with `ast`
+    and hashing them on each call. Measured cost of getting this wrong: p95 on
+    /forecast went from 1.5 ms to 58.8 ms, and /mines under ten concurrent
+    forecasts from 14 ms to 186 ms. Source cannot change inside a running
+    process, so caching costs nothing and a restart is the invalidation.
+
+    Walked statically from the source, not from `sys.modules`: the set of
+    imported modules at runtime depends on what else the process has touched,
+    and a fingerprint that changes depending on whether pytest imported
+    something would be worse than no fingerprint at all.
+    """
+    root = root or _PACKAGE_ROOT
+    seen: set[str] = set()
+    files: dict[str, Path] = {}
+    third_party: set[str] = set()
+    queue = list(FORECAST_ROOT_MODULES)
+    while queue:
+        dotted = queue.pop()
+        if dotted in seen:
+            continue
+        seen.add(dotted)
+        path = _module_file(dotted, root)
+        if path is None:
+            continue
+        files[dotted] = path
+        for name in _imports_of(path):
+            if name.startswith("app.") or name == "app":
+                queue.append(name)
+            else:
+                # Not `root` — that name is the package root in this scope.
+                top = name.split(".")[0]
+                if top not in sys.stdlib_module_names:
+                    third_party.add(top)
+    return tuple(sorted(set(files.values()))), frozenset(third_party)
+
+
+@lru_cache(maxsize=8)
+def _library_versions(root: Path) -> tuple[tuple[str, str], ...]:
+    """
+    Versions of the third-party libraries the forecast chain imports.
+
+    scikit-learn's gradient-boosting output is not guaranteed stable across
+    minor versions, and numpy/pandas changes move the inputs. An artifact
+    produced under different versions is a different artifact.
+    """
+    from importlib.metadata import PackageNotFoundError, version
+
+    _, third_party = _walk_forecast_imports(root)
+    out: list[tuple[str, str]] = []
+    for name in sorted(third_party):
+        dist = _DISTRIBUTION_ALIASES.get(name, name)
+        try:
+            out.append((name, version(dist)))
+        except PackageNotFoundError:
+            out.append((name, "unknown"))
+    return tuple(out)
+
+
+def library_versions() -> dict[str, str]:
+    """Versions of the third-party libraries the forecast chain imports."""
+    return dict(_library_versions(_PACKAGE_ROOT))
+
+
 def code_fingerprint() -> str:
     """
-    Hash of the sources that determine a forecast's numbers.
+    Hash of every module in the forecast's import chain.
 
-    Deliberately narrow: the forecaster, the conformal wrapper and the data
-    generator. Hashing the whole package would invalidate every artifact on an
-    unrelated edit, and people who see spurious invalidations start ignoring
-    them.
+    This started as three hand-picked files, which is exactly the kind of list
+    that goes stale silently: a change to `app/ml/constraints.py` or
+    `app/ingestion/schemas.py` moves the numbers and left the fingerprint —
+    and therefore the committed artifacts — unchanged. The chain is walked
+    instead, so a new import is covered the moment it is written.
+
+    The path is hashed alongside the bytes, so moving a file counts as a change.
     """
+    return _code_fingerprint(_PACKAGE_ROOT)
+
+
+@lru_cache(maxsize=8)
+def _code_fingerprint(root: Path) -> str:
     import hashlib
 
-    root = Path(__file__).resolve().parents[1]
-    files = [
-        root / "ml" / "forecaster.py",
-        root / "ingestion" / "generator.py",
-        root / "api" / "track_b.py",
-    ]
+    files, _ = _walk_forecast_imports(root)
     h = hashlib.sha256()
-    for f in sorted(files):
-        if f.exists():
-            h.update(f.read_bytes())
+    for f in files:
+        h.update(str(f.relative_to(root)).encode())
+        h.update(b"\0")
+        h.update(f.read_bytes())
     return h.hexdigest()[:16]
 
 
 def artifact_identity() -> dict[str, Any]:
-    from app.ingestion.generator import DEFAULT_SEED
+    from app.ingestion.generator import DEFAULT_SEED, resolve_data_end_date
     from app.ml.forecaster import MODEL_VERSION
 
     return {
         "model_version": MODEL_VERSION,
         "generator_seed": DEFAULT_SEED,
+        # The forecast origin is the last day of actuals, so the end date decides
+        # which window the artifact covers. An artifact generated for a different
+        # end date describes a different fortnight and must not be served here.
+        "data_end_date": resolve_data_end_date().isoformat(),
         "code_fingerprint": code_fingerprint(),
+        "library_versions": library_versions(),
     }
 
 
@@ -329,23 +443,34 @@ def status(mine_codes: list[str], horizon_days: int = 14) -> dict[str, Any]:
         path = artifact_path(code, horizon_days)
         exists = path.exists()
         age = round(_age_hours(path), 2) if exists else None
-        fresh = bool(exists and age is not None and age <= STALE_AFTER_HOURS)
+
+        # Identity is checked here, not only in read_artifact.
+        #
+        # This used to derive `fresh` from the file's mtime alone, so an
+        # artifact produced by an older model was reported `ready` by /readyz
+        # while /forecast refused to serve it — the readiness endpoint claiming
+        # a green demo that the forecast endpoint would not deliver. Whatever
+        # decides "servable" has to be the same in both places.
+        #
+        # Why the distinction is surfaced: "present but from another model" is a
+        # different problem from "present but old", and they need different
+        # fixes.
+        identity_ok, identity_reason = (True, None)
+        if exists:
+            try:
+                identity_ok, identity_reason = identity_matches(json.loads(path.read_text()))
+            except (json.JSONDecodeError, OSError) as exc:
+                identity_ok, identity_reason = False, f"unreadable: {exc}"
+
+        fresh = bool(
+            exists and identity_ok and age is not None and age <= STALE_AFTER_HOURS
+        )
         if fresh:
             ready += 1
         k = _key(code, horizon_days)
         with _LOCK:
             warming = k in _INFLIGHT
             failure = dict(_FAILED.get(k) or {})
-
-        # Why an artifact that exists is not fresh matters to whoever is reading
-        # this: "present but from another model" is a different problem from
-        # "present but old".
-        identity_ok, identity_reason = (True, None)
-        if exists and not fresh:
-            try:
-                identity_ok, identity_reason = identity_matches(json.loads(path.read_text()))
-            except (json.JSONDecodeError, OSError) as exc:
-                identity_ok, identity_reason = False, f"unreadable: {exc}"
 
         if fresh:
             state = "ready"

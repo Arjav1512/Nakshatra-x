@@ -35,6 +35,40 @@ def client():
         yield c
 
 
+@pytest.fixture(scope="session", autouse=True)
+def committed_artifacts_are_not_modified_by_this_suite():
+    """
+    Structural guard: no test may write into the committed artifacts directory.
+
+    One test did, through a race (see test_single_flight_shares_one_computation),
+    and the damage reached a commit. Fixing that one test is necessary and not
+    sufficient — the next test to forget a tmp_path would do it again, silently,
+    and the only symptom would be a demo mine with no numbers. This fails the
+    run instead.
+    """
+    import hashlib
+
+    def digest():
+        out = {}
+        for f in sorted(fs.FORECAST_DIR.glob("*.json")):
+            out[f.name] = hashlib.sha256(f.read_bytes()).hexdigest()
+        return out
+
+    before = digest()
+    yield
+    after = digest()
+    changed = sorted(
+        set(before) ^ set(after)
+        | {k for k in set(before) & set(after) if before[k] != after[k]}
+    )
+    assert not changed, (
+        "the test suite modified committed artifacts: "
+        + ", ".join(changed)
+        + " — a test is missing `monkeypatch.setattr(fs, 'FORECAST_DIR', tmp_path)`, "
+        "or is not waiting for its flight to finish before the patch is undone"
+    )
+
+
 # ---------------------------------------------------------------------------
 # Artifacts match the code that is running
 # ---------------------------------------------------------------------------
@@ -65,6 +99,54 @@ def test_committed_artifacts_match_current_code():
     )
 
 
+def test_committed_artifacts_are_complete_forecasts():
+    """
+    An artifact that passes the identity check can still be empty.
+
+    This is not hypothetical. The committed artifact for MOIL-BAL-01 — the first
+    mine in the demo — was `{"mine_code": ..., "grades": [], ...}` with a valid
+    identity block: the abandon test's stub payload, written into the real
+    artifacts directory before that test was given a tmp_path, and then
+    committed. It would have been served as a complete forecast, and the console
+    would have rendered Balaghat with no grades and no trajectory.
+
+    Identity says "this came from our code". It says nothing about whether the
+    code produced anything. Both have to be checked.
+    """
+    problems = []
+    for code in MINE_CODES:
+        d = json.loads(fs.artifact_path(code, 14).read_text())
+        grades = d.get("grades") or []
+        if not grades:
+            problems.append(f"{code}: no grades")
+            continue
+        for field in ("forecast_origin", "window", "model_version", "portfolio", "provenance"):
+            if not d.get(field):
+                problems.append(f"{code}: missing {field}")
+        w = d.get("window") or {}
+        if not (w.get("start") and w.get("end")):
+            problems.append(f"{code}: window {w!r}")
+        for g in grades:
+            traj = g.get("trajectory") or []
+            if len(traj) != d.get("horizon_days", 14):
+                problems.append(f"{code}/{g.get('grade')}: {len(traj)} trajectory points")
+            if not all(p.get("date") for p in traj):
+                problems.append(f"{code}/{g.get('grade')}: a trajectory point has no date")
+    assert not problems, "incomplete committed artifacts:\n  " + "\n  ".join(problems)
+
+
+def test_no_stub_or_test_artifacts_are_committed():
+    """Only the ten real mines. A fixture that reaches this directory is a bug."""
+    import subprocess
+
+    tracked = subprocess.run(
+        ["git", "ls-files", "backend/artifacts/forecasts/"],
+        cwd=str(REPO), capture_output=True, text=True, check=True,
+    ).stdout.split()
+    names = sorted(Path(t).name for t in tracked)
+    assert names == sorted(f"{c}_14d.json" for c in MINE_CODES), names
+
+
 def test_artifact_with_wrong_fingerprint_is_not_served(tmp_path, monkeypatch):
     """An artifact from other code must be refused, not served under this label."""
     monkeypatch.setattr(fs, "FORECAST_DIR", tmp_path)
@@ -76,6 +158,102 @@ def test_artifact_with_wrong_fingerprint_is_not_served(tmp_path, monkeypatch):
     (tmp_path / "X_14d.json").write_text(json.dumps(payload))
     assert fs.read_artifact("X", 14) is None
     assert fs.is_fresh("X", 14) is False
+
+
+def _still_served() -> list[str]:
+    """Mine codes whose committed artifact `read_artifact` will still hand out."""
+    return [c for c in MINE_CODES if fs.read_artifact(c, 14) is not None]
+
+
+def test_fingerprint_covers_the_whole_import_chain():
+    """
+    The fingerprint was three hand-picked files: forecaster, generator, track_b.
+
+    That list was wrong the day it was written — `constraints.py` gates every
+    recommendation and `schemas.py` defines the rows the generator emits, and a
+    change to either moves the numbers while leaving the fingerprint, and so
+    every committed artifact, untouched. The chain is walked now; this asserts
+    it reaches past the original three.
+    """
+    files, third_party = fs._walk_forecast_imports()
+    names = {f.name for f in files}
+    for expected in ("forecaster.py", "generator.py", "track_b.py",
+                     "constraints.py", "schemas.py", "backtest.py", "provenance.py"):
+        assert expected in names, f"{expected} missing from the forecast import chain: {sorted(names)}"
+    # The libraries whose output the artifact actually depends on.
+    assert {"numpy", "sklearn"} <= third_party, third_party
+
+
+def test_library_versions_are_recorded():
+    versions = fs.library_versions()
+    assert versions.get("sklearn") and versions["sklearn"] != "unknown"
+    assert versions.get("numpy") and versions["numpy"] != "unknown"
+    assert fs.artifact_identity()["library_versions"] == versions
+
+
+def test_data_end_date_is_a_parameter_with_a_committed_default(monkeypatch):
+    from app.ingestion import generator as gen
+
+    monkeypatch.delenv(gen.DATA_END_DATE_ENV, raising=False)
+    assert gen.resolve_data_end_date() == gen.DEFAULT_DATA_END_DATE
+
+    monkeypatch.setenv(gen.DATA_END_DATE_ENV, "2027-01-31")
+    assert gen.resolve_data_end_date().isoformat() == "2027-01-31"
+    assert gen.SyntheticDataset().end.isoformat() == "2027-01-31"
+
+    monkeypatch.setenv(gen.DATA_END_DATE_ENV, "not-a-date")
+    with pytest.raises(ValueError):
+        gen.resolve_data_end_date()
+
+
+@pytest.mark.parametrize("component", [
+    "model_version", "generator_seed", "data_end_date",
+    "code_fingerprint", "library_versions",
+])
+def test_changing_any_identity_component_marks_every_artifact_stale(component, monkeypatch, tmp_path):
+    """
+    Each part of the identity, on its own, must invalidate all ten artifacts.
+
+    Not "should be caught by review" — the whole point of committing artifacts
+    is that nobody looks at them again. If any one of these can change without
+    the artifacts being refused, the demo serves an old model's forecast under
+    the current label.
+    """
+    import shutil
+
+    assert _still_served() == MINE_CODES, "precondition: all ten artifacts match current code"
+
+    if component == "model_version":
+        monkeypatch.setattr("app.ml.forecaster.MODEL_VERSION", "nakshatra-gbt-cqr-v99")
+    elif component == "generator_seed":
+        monkeypatch.setattr("app.ingestion.generator.DEFAULT_SEED", 12345)
+    elif component == "data_end_date":
+        monkeypatch.setenv("NAKSHATRA_DATA_END_DATE", "2026-12-31")
+    elif component == "library_versions":
+        monkeypatch.setattr(fs, "library_versions", lambda: {"numpy": "0.0.0", "sklearn": "0.0.0"})
+    elif component == "code_fingerprint":
+        # Edit a copy of the package, never the real tree, and edit a file that
+        # was NOT in the original hand-picked three.
+        pkg = tmp_path / "app"
+        shutil.copytree(fs._PACKAGE_ROOT, pkg)
+        target = pkg / "ml" / "constraints.py"
+        before = fs.code_fingerprint()
+        target.write_text(target.read_text() + "\n# a change to a gating rule\n")
+        monkeypatch.setattr(fs, "_PACKAGE_ROOT", pkg)
+        assert fs.code_fingerprint() != before, "editing a chain module did not move the fingerprint"
+
+    still_served = _still_served()
+    assert still_served == [], (
+        f"changing {component} left {len(still_served)} artifacts being served: {still_served}"
+    )
+    assert all(fs.is_fresh(c, 14) is False for c in MINE_CODES)
+
+    st = fs.status(MINE_CODES, 14)
+    assert st["ready"] is False
+    assert st["mines_ready"] == 0, st
+    mismatched = [m for m in st["mines"] if m.get("identity_mismatch")]
+    assert len(mismatched) == len(MINE_CODES), st
+    assert all(m["status"] in {"stale", "warming"} for m in st["mines"]), st
 
 
 # ---------------------------------------------------------------------------
@@ -127,6 +305,64 @@ def test_skip_warm_is_test_only_and_absent_from_shipped_config():
 
 
 # ---------------------------------------------------------------------------
+# CPU oversubscription
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("entry_point", [
+    "app.ingestion.generator",   # what the batch tool and test_track_b import first
+    "app.api.track_b",
+    "app.main",
+])
+def test_thread_caps_apply_before_numpy_on_every_entry_point(entry_point):
+    """
+    The caps must be in place whatever imports the package first.
+
+    They were set at the top of `forecast_store`, which `app.main` imports
+    first — so the API was capped and nothing else was. `app/api/track_b.py`
+    imports the generator (and numpy with it) at line 18 and `forecast_store`
+    at line 192, so `python -m app.api.batch forecast` and `pytest
+    test_track_b.py` both loaded numpy uncapped. Measured before the fix: one
+    pytest process at 849% CPU on an 8-core laptop.
+
+    OpenMP reads these when its library loads, i.e. on `import numpy`. Setting
+    them afterwards silently does nothing, which is why this is asserted in a
+    subprocess at import time rather than by reading os.environ in-process.
+    """
+    import subprocess
+    import sys as _sys
+
+    code = (
+        f"import {entry_point}; import os; "
+        "print(os.environ.get('OMP_NUM_THREADS'), os.environ.get('OPENBLAS_NUM_THREADS'))"
+    )
+    env = {k: v for k, v in os.environ.items() if k not in {
+        "OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
+        "NUMEXPR_NUM_THREADS", "VECLIB_MAXIMUM_THREADS",
+    }}
+    out = subprocess.run(
+        [_sys.executable, "-c", code], cwd=str(Path(__file__).resolve().parent),
+        capture_output=True, text=True, env=env, timeout=180,
+    )
+    assert out.returncode == 0, out.stderr[-2000:]
+    omp, openblas = out.stdout.strip().split()
+    assert omp == "2" and openblas == "2", f"{entry_point} left threads uncapped: {out.stdout!r}"
+
+
+def test_caps_are_set_in_the_package_init_not_a_submodule():
+    """
+    Structural: a package __init__ is the only module guaranteed to run before
+    any app.* submodule. If these move back into a submodule, some entry point
+    will bypass them again and nothing will say so.
+    """
+    import app
+
+    src = Path(app.__file__).read_text()
+    for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
+        assert var in src, f"{var} is not capped in app/__init__.py"
+    assert app.FIT_THREADS
+
+
+# ---------------------------------------------------------------------------
 # Single-flight, failure handling, backoff
 # ---------------------------------------------------------------------------
 
@@ -145,10 +381,19 @@ def test_single_flight_shares_one_computation(monkeypatch, tmp_path):
         futures = [pool.submit(fs.warm, "MOIL-BAL-01", 14, slow_compute) for _ in range(10)]
         time.sleep(0.3)
         gate.set()
-        for f in futures:
-            f.result(timeout=20)
+        # `fs.warm` RETURNS a Future; the outer future resolves to it the moment
+        # warm() has registered the flight. Waiting only on the outer futures
+        # therefore returns while the computation is still running — and this
+        # test then ended, monkeypatch restored the real FORECAST_DIR, and the
+        # flight wrote its stub payload into the committed artifacts. That is
+        # how MOIL-BAL-01 came to be committed as `{"grades": []}`.
+        inner = [f.result(timeout=20) for f in futures]
+        for flight in inner:
+            flight.result(timeout=20)
 
     assert len(calls) == 1, f"expected 1 computation for 10 callers, got {len(calls)}"
+    # The write landed in tmp_path, not in the repo.
+    assert (tmp_path / "MOIL-BAL-01_14d.json").exists()
 
 
 def test_failed_computation_clears_inflight_and_backs_off(monkeypatch, tmp_path):

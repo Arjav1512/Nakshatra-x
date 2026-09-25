@@ -25,6 +25,84 @@ Open **http://localhost:3000/console**.
 > closed rather than signing cookies with a guessable key. The console itself
 > does not need auth.
 
+### The day before — regenerate the forecast artifacts
+
+**Do this once, the day before the demo.** It takes about four minutes and it is
+the difference between a forecast that covers next fortnight and one that covers
+a fortnight that has already been and gone.
+
+```bash
+cd backend && NAKSHATRA_DATA_END_DATE=$(date +%F) python -m app.api.batch forecast
+```
+
+Measured: 26 s per mine, 260.6 s for all ten, on an 8-core laptop with the default
+two fit threads. It prints the window it generated; check the dates before you
+trust it.
+
+**Why this step exists.** A forecast's origin is the last day of actuals, and the
+synthetic generator's end date is a committed constant — it has to be, or the
+dataset would change overnight and no artifact would be reproducible. The
+consequence is that the committed artifacts cover a window fixed at the date in
+`DEFAULT_DATA_END_DATE` (currently 2026-09-20, so 21 Sep – 4 Oct 2026). On any
+later day that window is in the past.
+
+Nothing shifts the displayed dates without regenerating the forecast. If you skip
+this step the console says so in plain words — *"This forecast's window has
+already ended"* — rather than presenting a stale fortnight as a plan. That is
+survivable; it is not what you want on stage. `docs/DECISIONS.md` D-030 records
+why it works this way.
+
+Regenerating changes the artifact identity, so `git status` will show the ten
+files as modified. Commit them or don't, as you prefer — but do not edit them.
+
+### Pre-flight — run this before every demo
+
+Three commands, in order. Do not start talking until all three are green.
+
+```bash
+# 1. Backend. One worker, and do not set NAKSHATRA_SKIP_WARM.
+cd backend && python -m uvicorn app.main:app --port 8000
+
+# 2. Wait for readiness — every mine must report "ready".
+#    Committed artifacts make this near-instant (measured: 1.34 s from launch).
+until curl -sf http://localhost:8000/api/v1/readyz >/dev/null; do sleep 1; done
+curl -s http://localhost:8000/api/v1/readyz | python3 -m json.tool | head -20
+
+# 3. Frontend, then the browser checks.
+cd frontend && npm run test:e2e && npm run test:dates
+```
+
+`npm run test:dates` is the one that catches a forgotten regeneration: it asserts
+the console shows the forecast's real origin and window dates, marks the forecast
+as not live, and never implies a rolling fortnight.
+
+What the two states look like, so you can recognise them from the back of a
+room: `docs/evidence/console-forecast-ready.png` (artifacts present — dated
+window, LIVE badges on weather, SYNTHETIC and DERIVED on model output) and
+`docs/evidence/console-forecast-warming.png` (cold backend — "Computing forecast
+— about 32s", with the queue depth). The warming state is blue, not red: a
+backend that is still computing is not a broken one.
+
+`/readyz` returns 503 until every mine has a usable forecast artifact, and names
+any mine that is `warming` or `failed` with the reason. It is the difference
+between "give it another minute" and "something is broken" — worth thirty
+seconds before an audience rather than finding out in front of one.
+
+**Where the demo backend runs.** On a machine that stays awake: the laptop you
+are presenting from, or an always-on host. Not a free-tier service that sleeps —
+a cold container has no artifacts warmed in memory, and while it rebuilds them
+the console shows every mine as "Computing". The artifacts are committed
+precisely so a fresh process is fast, but a *sleeping* host still pays process
+start plus whatever the platform charges for waking up.
+
+**One worker.** `--workers 4` is fine but unnecessary here; a file lock means
+only one process warms, and the others serve. Single-worker keeps the logs
+readable.
+
+**Never set `NAKSHATRA_SKIP_WARM=1`.** It disables startup warming and exists
+only so a test can measure a genuinely cold backend. `test_demo_hardening.py`
+asserts it appears in no shipped config.
+
 ### Check the console actually works before you present
 
 With both processes up:
@@ -43,14 +121,11 @@ register keyed by slug meant the console could not render a single number, while
 every API-level check stayed green because they all used numeric ids. Run this,
 not curl, to know the demo will work.
 
-The first forecast for each mine costs roughly 40 s cold and a few milliseconds
-warm. **Warm the cache before presenting**, or the portfolio will still be
-filling in while you talk:
-
-```bash
-for i in $(seq 1 10); do curl -s -o /dev/null \
-  "http://localhost:8000/api/v1/mines/$i/forecast"; done
-```
+There is no cache to warm by hand any more. A request never computes a forecast:
+it serves a committed artifact (measured p95 1.5 ms) or answers 503 `warming`
+with an ETA, and the console shows a "Computing" state rather than an error. The
+curl loop that used to live here — ten sequential requests to force the fits —
+was a workaround for computation happening inside requests, and that is gone.
 
 ---
 

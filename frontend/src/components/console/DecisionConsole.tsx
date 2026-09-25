@@ -423,7 +423,7 @@ export function DecisionConsole() {
 
             {/* face/section level (D-6) */}
             {track === 'B' && telemetry ? (
-              <section>
+              <section data-testid="live-conditions" data-panel-live="true">
                 <h2 className="label">{selected.name} · conditions</h2>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   {[

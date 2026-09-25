@@ -8,6 +8,13 @@ artifact and reports how old it is.
 
     python -m app.api.batch backtest              # all mines
     python -m app.api.batch backtest MOIL-BAL-01  # one mine
+    python -m app.api.batch forecast              # all forecast artifacts
+
+The forecast window follows the last day of generated actuals. That date is a
+parameter with a committed default; override it at generation time to move the
+window (docs/DECISIONS.md, docs/DEMO.md):
+
+    NAKSHATRA_DATA_END_DATE=2026-11-30 python -m app.api.batch forecast
 
 Suggested cron (nightly, after the data refresh):
 
@@ -52,6 +59,16 @@ def run_forecasts(codes: list[str] | None = None, horizon_days: int = 14) -> int
     from app.api.routes import DEFAULT_MINES
     from app.api.track_b import compute_forecast
     from app.api.forecast_store import write_artifact, artifact_path
+
+    from app.ingestion.generator import resolve_data_end_date
+    from datetime import timedelta
+
+    end = resolve_data_end_date()
+    print(
+        f"  data end date {end.isoformat()} (NAKSHATRA_DATA_END_DATE) — "
+        f"forecasts will cover {(end + timedelta(days=1)).isoformat()} to "
+        f"{(end + timedelta(days=horizon_days)).isoformat()}"
+    )
 
     targets = codes or [m["mine_code"] for m in DEFAULT_MINES]
     for i, code in enumerate(targets, 1):
