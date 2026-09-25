@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { fetchForecast } from '@/lib/console-api'
 import type { MineInfo } from '@/components/mission-control/types'
 import {
   HISTORICAL_DATABASE_1977_2026,
@@ -56,15 +57,18 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   const [tolerance, setTolerance] = useState<10 | 20 | 30>(20)
 
   // Simulation State
+  // Null until a simulation has actually run.
+  //
+  // This used to be seeded with {predicted: 16620, recovery: 2420,
+  // riskDelta: -0.05}, so the screen showed a complete "Digital Twin Result"
+  // before anyone had pressed the button — three numbers presented as the
+  // output of a simulation that had not happened.
   const [simResult, setSimResult] = useState<{
     predicted: number
     recovery: number
     riskDelta: number
-  } | null>({
-    predicted: 16620,
-    recovery: 2420,
-    riskDelta: -0.05,
-  })
+  } | null>(null)
+  const [simError, setSimError] = useState<string | null>(null)
 
   const [history, setHistory] = useState<Scenario[]>([])
   const [loading, setLoading] = useState(false)
@@ -74,7 +78,10 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   const [chartMetric, setChartMetric] = useState<'production' | 'reserves' | 'grade'>('production')
   const [activeHoverYear, setActiveHoverYear] = useState<number | null>(2025)
 
-  // Combined real 50-year historical dataset (1977-2025) and 2040 AI forecast
+  // Combined SYNTHETIC 1977-2026 history and the illustrative 2026-2040
+  // trajectory. Neither is MOIL's record: operational data is proprietary
+  // (PRD 8.2) and `historical-database.ts` labels both as synthetic. The
+  // comment here called it "real", which the screen then repeated.
   const fullTimeline = [
     ...HISTORICAL_DATABASE_1977_2026.map((d) => ({
       year: d.year,
@@ -116,6 +123,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
 
   const runSimulation = async () => {
     setLoading(true)
+    setSimError(null)
     try {
       const res = await fetch('/api/v1/mine-twin', {
         method: 'POST',
@@ -138,28 +146,68 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
           recovery: data.recovery,
           riskDelta: data.riskDelta,
         })
+        setSimError(null)
         setHistory(data.scenarios || [])
+      } else {
+        setSimResult(null)
+        setSimError(`The simulation service answered ${res.status}.`)
       }
-    } catch {
-      const mult =
-        (shift === '04-10' ? 1.18 : shift === '06-14' ? 1.06 : 0.92) *
-        (blastDelay === 0 ? 1.0 : blastDelay === 6 ? 0.93 : 0.84) *
-        (redeploy === 'none' ? 1.0 : redeploy === '1-crusher' ? 1.07 : 1.12) *
-        (tolerance === 10 ? 0.96 : tolerance === 20 ? 0.99 : 1.01)
-
-      const baseProd = selectedMine.currentProduction || 14200
-      const pred = Math.round(baseProd * mult)
-      const rec = pred - baseProd
-
-      setSimResult({
-        predicted: pred,
-        recovery: rec,
-        riskDelta: -0.05,
-      })
+    } catch (err: any) {
+      // Report the failure. Do not invent a result.
+      //
+      // This branch used to compute a "simulation" in the browser from
+      // hardcoded multipliers (1.18 / 1.06 / 0.92 …) and render it through the
+      // same cards as a real backend result, with nothing on screen to
+      // distinguish the two. A number the model did not produce must not be
+      // shown as though it did (PRD N-6).
+      setSimResult(null)
+      setSimError(err?.message || 'The simulation service could not be reached.')
     } finally {
       setLoading(false)
     }
   }
+
+  // The daily chart below shows the real Track B forecast for this mine.
+  //
+  // It used to be `Math.sin(i * 1.2) * 120` around a scalar — seven bars of
+  // invented daily output labelled "Projected Haulage Output", which is the
+  // same fabrication pattern as the map's six removed layers and survived the
+  // same three sweeps for the same reason: the numbers existed only at render
+  // time. The forecaster already produces a dated daily trajectory with a
+  // seasonal-naive baseline, so the chart shows that instead.
+  const [trajectory, setTrajectory] = useState<
+    { date: string; median: number; baseline: number }[] | null
+  >(null)
+  const [trajectoryState, setTrajectoryState] = useState<'loading' | 'ready' | 'warming' | 'error'>('loading')
+  const [forecastMeta, setForecastMeta] = useState<{ model: string; origin: string } | null>(null)
+
+  useEffect(() => {
+    let alive = true
+    setTrajectory(null)
+    setTrajectoryState('loading')
+    fetchForecast(selectedMine.numericId ?? 1).then((r) => {
+      if (!alive) return
+      if (!r.ok) {
+        setTrajectoryState(r.warming ? 'warming' : 'error')
+        return
+      }
+      // Sum the per-grade trajectories: the chart is mine-level output.
+      const byDate = new Map<string, { median: number; baseline: number }>()
+      for (const g of r.data.grades ?? []) {
+        for (const pt of g.trajectory ?? []) {
+          const cur = byDate.get(pt.date) ?? { median: 0, baseline: 0 }
+          cur.median += pt.median_tonnes
+          cur.baseline += pt.baseline_tonnes
+          byDate.set(pt.date, cur)
+        }
+      }
+      setTrajectory([...byDate.entries()].sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, v]) => ({ date, median: v.median, baseline: v.baseline })))
+      setForecastMeta({ model: r.data.model_version, origin: r.data.forecast_origin })
+      setTrajectoryState('ready')
+    })
+    return () => { alive = false }
+  }, [selectedMine.numericId])
 
   const loadHistory = async () => {
     try {
@@ -175,15 +223,14 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
     loadHistory()
   }, [])
 
-  const baselineProd = selectedMine.currentProduction || 14200
-  const predictedProd = simResult?.predicted || 16620
-  const recoveryVal = simResult?.recovery || 2420
-
-  const forecastDays = Array.from({ length: 7 }, (_, i) => {
-    const dayBase = Math.round(baselineProd / 7 + (Math.sin(i * 1.2) * 120))
-    const dayPred = Math.round(predictedProd / 7 + (Math.cos(i * 1.1) * 150))
-    return { day: `Day ${i + 1}`, base: dayBase, pred: dayPred }
-  })
+  // `|| 14200`, `|| 16620` and `|| 2420` used to stand here. Each one turned a
+  // missing value into a plausible number, and `|| 0` would have fired on a
+  // legitimate zero as well. A value that is not there is rendered as not
+  // there.
+  const baselineProd = selectedMine.currentProduction ?? null
+  const predictedProd = simResult?.predicted ?? null
+  const recoveryVal = simResult?.recovery ?? null
+  const riskDelta = simResult?.riskDelta ?? null
 
   return (
     <div className="ios-glass-card p-6 border border-border-interactive rounded-md space-y-6 shadow-2xl relative overflow-hidden">
@@ -345,28 +392,43 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
         <div className="lg:col-span-7 space-y-5">
           {/* Key Simulation Outcome Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="ios-glass-inset p-4 space-y-1 border border-border-default">
+            <div
+              className="ios-glass-inset p-4 space-y-1 border border-border-default"
+              data-provenance="reference"
+            >
               <span className="text-xs font-mono text-text-secondary uppercase">Baseline Plan</span>
               <div className="text-xl font-bold font-mono text-text-primary">
-                {baselineProd.toLocaleString()} T
+                {baselineProd !== null ? `${baselineProd.toLocaleString()} T` : '—'}
               </div>
-              <span className="text-xs font-mono text-text-secondary">&bull; Current Mining Plan</span>
+              <span className="text-xs font-mono text-text-secondary">&bull; Mine register</span>
             </div>
 
-            <div className="ios-glass-inset p-4 space-y-1 border border-accent/30 bg-accent/5">
+            <div
+              className="ios-glass-inset p-4 space-y-1 border border-accent/30 bg-accent/5"
+              data-provenance={predictedProd !== null ? 'synthetic' : 'unavailable'}
+            >
               <span className="text-xs font-mono text-accent uppercase font-bold">Predicted Output</span>
-              <div className="text-xl font-bold font-mono text-accent drop-">
-                {predictedProd.toLocaleString()} T
+              <div className="text-xl font-bold font-mono text-accent">
+                {predictedProd !== null ? `${predictedProd.toLocaleString()} T` : 'not run'}
               </div>
-              <span className="text-xs font-mono text-accent font-bold">&bull; Digital Twin Result</span>
+              <span className="text-xs font-mono text-accent font-bold">
+                {predictedProd !== null ? '\u2022 Simulation result' : '\u2022 Run the simulation'}
+              </span>
             </div>
 
-            <div className="ios-glass-inset p-4 space-y-1 border border-status-caution/30 bg-status-caution/5">
+            <div
+              className="ios-glass-inset p-4 space-y-1 border border-status-caution/30 bg-status-caution/5"
+              data-provenance={recoveryVal !== null ? 'derived' : 'unavailable'}
+            >
               <span className="text-xs font-mono text-status-caution uppercase font-bold">Net Recovery</span>
-              <div className="text-xl font-bold font-mono text-status-caution drop-">
-                {recoveryVal >= 0 ? `+${recoveryVal.toLocaleString()}` : recoveryVal.toLocaleString()} T
+              <div className="text-xl font-bold font-mono text-status-caution">
+                {recoveryVal === null
+                  ? 'not run'
+                  : `${recoveryVal >= 0 ? '+' : ''}${recoveryVal.toLocaleString()} T`}
               </div>
-              <span className="text-xs font-mono text-status-caution">&bull; Extra Tonnes Gained</span>
+              <span className="text-xs font-mono text-status-caution">
+                {recoveryVal !== null ? '\u2022 vs baseline' : '\u2022 Run the simulation'}
+              </span>
             </div>
 
             {/*
@@ -528,7 +590,10 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
 
             {/* Minimal Active Year Inspection Badge */}
             {activeHoverRecord && (
-              <div className="flex flex-wrap items-center justify-between text-xs font-mono pt-2 border-t border-border-default text-text-secondary">
+              <div
+                className="flex flex-wrap items-center justify-between text-xs font-mono pt-2 border-t border-border-default text-text-secondary"
+                data-provenance="synthetic"
+              >
                 <div className="flex items-center gap-2">
                   <span className="text-text-primary font-bold">Year {activeHoverRecord.year}:</span>
                   <span className="text-accent font-bold">
@@ -543,63 +608,137 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
             )}
           </div>
 
-          {/* Animated 7-Day Forecast Comparison Bar Chart */}
-          <div className="ios-glass-inset p-5 rounded-md border border-border-default space-y-3">
-            <div className="flex items-center justify-between">
+          {/* Daily forecast trajectory — the real Track B artifact, not a shape */}
+          <div
+            className="ios-glass-inset p-5 rounded-md border border-border-default space-y-3"
+            data-provenance={trajectoryState === 'ready' ? 'synthetic' : 'unavailable'}
+            data-provenance-model={forecastMeta?.model}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-accent" />
                 <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">
-                  7-Day Projected Haulage Output: Baseline vs What-If
+                  Daily forecast · {selectedMine.name}
                 </h3>
               </div>
               <div className="flex items-center gap-3 text-xs font-mono">
-                <span className="flex items-center gap-1 text-text-secondary">
-                  <span className="w-2.5 h-2.5 rounded bg-text-tertiary inline-block" /> Current
-                </span>
                 <span className="flex items-center gap-1 text-accent font-bold">
-                  <span className="w-2.5 h-2.5 rounded bg-accent inline-block" /> What-If
+                  <span className="w-2.5 h-2.5 rounded bg-accent inline-block" /> forecast median
+                </span>
+                <span className="flex items-center gap-1 text-text-secondary">
+                  <span className="w-2.5 h-2.5 rounded bg-text-tertiary inline-block" /> seasonal-naive
                 </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-7 gap-2 pt-2 items-end h-32">
-              {forecastDays.map((d, idx) => {
-                const maxVal = Math.max(...forecastDays.map((f) => f.pred))
-                const baseH = Math.round((d.base / maxVal) * 100)
-                const predH = Math.round((d.pred / maxVal) * 100)
-                return (
-                  <div key={idx} className="flex flex-col items-center gap-1.5 h-full justify-end">
-                    <div className="w-full flex items-end justify-center gap-1 h-24">
-                      <div
-                        style={{ height: `${baseH}%` }}
-                        className="w-1.5 sm:w-3 bg-text-tertiary rounded-t-sm transition-colors duration-500"
-                        title={`Baseline: ${d.base} T`}
-                      />
-                      <div
-                        style={{ height: `${predH}%` }}
-                        className="w-1.5 sm:w-3 bg-accent rounded-t-sm transition-colors duration-500"
-                        title={`What-If: ${d.pred} T`}
-                      />
-                    </div>
-                    <span className="text-xs font-mono text-text-secondary">{d.day}</span>
-                  </div>
-                )
-              })}
-            </div>
+            {trajectoryState === 'ready' && trajectory ? (
+              <>
+                <p className="text-xs text-text-secondary">
+                  {forecastMeta ? (
+                    <>
+                      {forecastMeta.model} · forecast from {forecastMeta.origin}, covering{' '}
+                      {trajectory[0]?.date} to {trajectory[trajectory.length - 1]?.date}. Synthetic
+                      operational data (PRD §8.2), not a measurement.
+                    </>
+                  ) : null}
+                </p>
+                <div className="grid gap-1 pt-2 items-end h-32"
+                     style={{ gridTemplateColumns: `repeat(${trajectory.length}, minmax(0, 1fr))` }}>
+                  {trajectory.map((d) => {
+                    const peak = Math.max(...trajectory.map((f) => Math.max(f.median, f.baseline)), 1)
+                    const medianH = Math.round((d.median / peak) * 100)
+                    const baseH = Math.round((d.baseline / peak) * 100)
+                    return (
+                      <div key={d.date} className="flex flex-col items-center gap-1.5 h-full justify-end">
+                        <div className="w-full flex items-end justify-center gap-0.5 h-24">
+                          <div
+                            style={{ height: `${medianH}%` }}
+                            className="w-1.5 bg-accent rounded-t-sm"
+                            title={`${d.date} · forecast median ${Math.round(d.median).toLocaleString()} t`}
+                          />
+                          <div
+                            style={{ height: `${baseH}%` }}
+                            className="w-1.5 bg-text-tertiary rounded-t-sm"
+                            title={`${d.date} · seasonal-naive ${Math.round(d.baseline).toLocaleString()} t`}
+                          />
+                        </div>
+                        <span className="text-[10px] font-mono text-text-secondary">
+                          {d.date.slice(8)}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </>
+            ) : trajectoryState === 'warming' ? (
+              <p className="py-8 text-center text-xs text-accent" role="status">
+                Computing this mine&rsquo;s forecast in the background — the chart appears when it
+                finishes.
+              </p>
+            ) : trajectoryState === 'loading' ? (
+              <p className="py-8 text-center text-xs text-text-secondary">Loading the forecast…</p>
+            ) : (
+              <p className="py-8 text-center text-xs text-text-secondary">
+                No forecast is available for this mine, so no daily chart is drawn. A shape without
+                a forecast behind it would not be a forecast.
+              </p>
+            )}
           </div>
 
-          {/* AI Executive Recommendation Directive */}
-          <div className="p-4 rounded-md bg-gradient-to-r from-[rgba(0,255,136,0.15)] to-[rgba(56,189,248,0.15)] border border-accent/40 flex items-start gap-3">
+          {/* Simulation summary — only after a simulation has produced one */}
+          {simError ? (
+            <div className="p-4 rounded-md border border-status-critical/30 bg-status-critical/5 flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-status-critical shrink-0 mt-0.5" />
+              <div>
+                <div className="text-xs font-mono text-status-critical font-bold uppercase tracking-wider">
+                  Simulation unavailable
+                </div>
+                <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">
+                  {simError} No result is shown, because a number this screen invented would be
+                  indistinguishable from one the model produced.
+                </p>
+              </div>
+            </div>
+          ) : recoveryVal === null ? (
+            <div className="p-4 rounded-md border border-border-default bg-surface-2 flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-text-tertiary shrink-0 mt-0.5" />
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Set the shift window, blast delay and redeployment above, then run the simulation.
+                Nothing is shown here until it returns a result.
+              </p>
+            </div>
+          ) : (
+          <div
+            className="p-4 rounded-md bg-gradient-to-r from-[rgba(0,255,136,0.15)] to-[rgba(56,189,248,0.15)] border border-accent/40 flex items-start gap-3"
+            data-provenance="derived"
+          >
             <Sparkles className="w-5 h-5 text-accent shrink-0 mt-0.5" />
             <div>
               <div className="text-xs font-mono text-accent font-bold uppercase tracking-wider">
-                Digital Twin Operational Directive:
+                Simulation result
               </div>
               <p className="text-xs text-text-primary font-sans mt-0.5 leading-relaxed">
-                Shifting haulage to <span className="text-accent font-bold">{shift}</span> with <span className="text-accent font-bold">{redeploy.toUpperCase()}</span> redeployment will recover <span className="text-status-caution font-bold">+{recoveryVal.toLocaleString()} Tonnes</span> of high-grade Mn output while lowering risk by <span className="text-accent font-bold">5%</span>. Recommended for MOIL board review.
+                Shifting haulage to <span className="text-accent font-bold">{shift}</span> with{' '}
+                <span className="text-accent font-bold">{redeploy.toUpperCase()}</span> redeployment
+                changes output by{' '}
+                <span className="text-status-caution font-bold">
+                  {recoveryVal >= 0 ? '+' : ''}{recoveryVal.toLocaleString()} t
+                </span>{' '}
+                against the register baseline
+                {riskDelta !== null ? (
+                  <>
+                    , with a modelled shortfall-risk change of{' '}
+                    <span className="text-accent font-bold">
+                      {(riskDelta * 100).toFixed(1)} pp
+                    </span>
+                  </>
+                ) : null}
+                . Simulated on synthetic operational data (PRD §8.2) — decision support, not a
+                commitment.
               </p>
             </div>
           </div>
+          )}
         </div>
       </div>
 
@@ -619,6 +758,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               <div
                 key={s.id}
                 onClick={() => setComparedScenario(s)}
+                data-provenance="derived"
                 className={`ios-glass-inset p-3.5 rounded-md border transition-colors cursor-pointer hover:border-accent/50 ${
                   comparedScenario?.id === s.id
                     ? 'border-accent bg-accent/10'

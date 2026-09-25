@@ -197,7 +197,14 @@ export function TrackAPanel() {
             />
           </div>
 
-          <div className="rounded-md border border-status-caution/30 bg-status-caution/[0.07] p-3 text-xs leading-relaxed text-status-caution">
+          <div
+            className="rounded-md border border-status-caution/30 bg-status-caution/[0.07] p-3 text-xs leading-relaxed text-status-caution"
+            // Every figure in this block, including the ones inside the prose,
+            // comes from /api/v1/prospectivity/metrics — the ablation note and
+            // the contrast AUC are fields, not copy. B-6 reads this.
+            data-provenance="derived"
+            data-provenance-model={metrics.model_version}
+          >
             <p className="font-semibold">What this number does and does not support</p>
             <p className="mt-1">{metrics.ablation_note}</p>
             <p className="mt-1">{metrics.lithology_note}</p>
@@ -221,11 +228,19 @@ export function TrackAPanel() {
           <Spinner label="Ranking candidates…" />
         ) : (
           <>
-            <p className="mb-2 font-mono text-xs text-text-tertiary">
+            <p
+              className="mb-2 font-mono text-xs text-text-tertiary"
+              data-provenance="derived"
+              data-provenance-model={targets.model_version}
+            >
               {targets.n_candidates.toLocaleString()} candidate cells · {targets.n_observations} measured
               observations · {targets.ranked_by}
             </p>
-            <div className="overflow-x-auto">
+            <div
+              className="overflow-x-auto"
+              data-provenance="derived"
+              data-provenance-model={targets.model_version}
+            >
               <table className="w-full min-w-[520px] text-xs">
                 <thead className="text-text-tertiary">
                   <tr className="border-b border-border-default text-left">
@@ -261,7 +276,7 @@ export function TrackAPanel() {
                 </tbody>
               </table>
             </div>
-            <details className="mt-2">
+            <details className="mt-2" data-provenance="derived" data-provenance-model={targets.model_version}>
               <summary className="cursor-pointer text-xs uppercase tracking-wider text-text-tertiary hover:text-text-secondary">
                 evidence for rank 1
               </summary>

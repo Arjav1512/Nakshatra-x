@@ -707,7 +707,7 @@ export default function IndiaSatelliteMap({
                   color: var(--color-text-primary);
                   text-shadow: 0 1px 3px var(--color-surface-0), 0 0 4px var(--color-surface-0);
                   letter-spacing: 0.02em;
-                  opacity: 0.9; ">
+                  opacity: 0.9; " data-provenance="reference">
                   ${mine.rate} plan
                 </div>
               </div>
@@ -984,7 +984,7 @@ export default function IndiaSatelliteMap({
 
         {/* Legend and layer switcher. Six of the eight layers here read no data and were captioned as ISRO measurements; see the removal note above. */}
         <div className="absolute top-4 left-4 z-[400] flex flex-col gap-2.5 p-3.5 rounded-md bg-[rgba(8,12,18,0.88)] border border-border-default  max-w-xs shadow-2xl">
-          <div className="space-y-1 pb-2 border-b border-border-default">
+          <div className="space-y-1 pb-2 border-b border-border-default" data-provenance="reference">
             <span className="text-xs font-mono font-semibold text-text-primary uppercase tracking-wider block mb-1">
               Marker size = plan target (register)
             </span>
@@ -1012,6 +1012,7 @@ export default function IndiaSatelliteMap({
               <button
                 type="button"
                 key={l.key}
+                data-layer-button={l.key}
                 onClick={() => onChangeLayer(l.key)}
                 className={`px-3 py-1 rounded-md text-left text-xs font-mono transition-colors flex items-center justify-between gap-3 cursor-pointer ${
                   activeLayer === l.key
@@ -1056,7 +1057,10 @@ export default function IndiaSatelliteMap({
               </span>
             </div>
 
-            <div className="space-y-2 text-xs font-mono pt-1.5 border-t border-border-default">
+            <div
+              className="space-y-2 text-xs font-mono pt-1.5 border-t border-border-default"
+              data-provenance="reference"
+            >
               <div className="flex justify-between text-text-tertiary">
                 <span>Plan target (register):</span>
                 <span className="font-bold text-text-primary">{currentHotspotMeta.rate}</span>
@@ -1211,6 +1215,7 @@ export default function IndiaSatelliteMap({
               style={{
                 backgroundColor: selectedMine.id === m.id ? m.color : undefined,
               }}
+              data-provenance="reference"
             >
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: m.color }} />
               {m.name} ({m.rate})

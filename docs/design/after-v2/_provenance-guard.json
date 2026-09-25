@@ -1,0 +1,166 @@
+{
+  "base": "http://localhost:3002",
+  "routes": [
+    {
+      "route": "/console",
+      "attributed": 0,
+      "violations": [
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        },
+        {
+          "text": "100% FREE ON-DEVICE",
+          "attributed": false,
+          "where": "span.ios-badge.ios-badge-live < div.flex.items-center < div"
+        }
+      ]
+    }
+  ]
+}

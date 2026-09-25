@@ -198,6 +198,8 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
               <div
                 className="rounded-md border border-border-default bg-surface-1 p-3"
                 data-testid="forecast-provenance"
+                data-provenance="synthetic"
+                data-provenance-model={forecast.model_version}
                 data-forecast-live="false"
                 data-forecast-origin={forecast.forecast_origin}
                 data-window-start={forecast.window.start}
@@ -317,6 +319,8 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                     key={g.grade}
                     onClick={() => setGrade(g.grade)}
                     aria-pressed={on}
+                    data-provenance="derived"
+                    data-provenance-model={forecast.model_version}
                     className={`rounded-md border px-3 py-2 text-left text-xs transition-colors ${
                       on ? 'border-accent/60 bg-accent/10' : 'border-border-default bg-surface-2 hover:border-border-interactive'
                     }`}
@@ -508,7 +512,12 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
         ) : (
           <div className="space-y-2">
             {recs.approved_actions.map((a) => (
-              <div key={a.id} className="rounded-md border border-status-nominal/30 bg-status-nominal/[0.06] p-3">
+              <div
+                key={a.id}
+                data-provenance="derived"
+                data-provenance-model={recs.constraint_engine.version}
+                className="rounded-md border border-status-nominal/30 bg-status-nominal/[0.06] p-3"
+              >
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <span className="text-xs font-medium text-status-nominal">{a.description}</span>
                   <span className="font-mono text-xs uppercase tracking-wider text-status-nominal">
@@ -533,7 +542,11 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             ))}
 
             {recs.rejected_actions.length ? (
-              <div className="rounded-md border border-status-critical/30 bg-status-critical/[0.06] p-3">
+              <div
+                className="rounded-md border border-status-critical/30 bg-status-critical/[0.06] p-3"
+                data-provenance="derived"
+                data-provenance-model={recs.constraint_engine.version}
+              >
                 <p className="text-xs font-medium text-status-critical">
                   Rejected by the constraint engine — never shown as options
                 </p>
