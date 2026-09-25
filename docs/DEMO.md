@@ -150,6 +150,12 @@ to show: ten portfolio cards each with a probability and a provenance badge, the
 drill-down chain through forecast, per-grade breakdown, backtest and
 constraint-checked actions, and zero 5xx responses. Expect `PASS — 18/18`.
 
+**The backtest no longer needs a click.** It is read from the artifact on load,
+so the figures are on screen when you arrive at Balaghat. On the other nine mines
+the panel says *"Validated on the pilot mine (Balaghat)"* and links to it — that
+is a designed state, not a failure, and nothing there can start a 216 s
+computation.
+
 It exists because of DEF-1 (`docs/DECISIONS.md` D-028): a duplicate mine
 register keyed by slug meant the console could not render a single number, while
 every API-level check stayed green because they all used numeric ids. Run this,
