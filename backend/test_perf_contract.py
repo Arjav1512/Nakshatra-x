@@ -50,13 +50,24 @@ def test_backtest_serves_from_artifact_not_recompute():
 
 
 def test_backtest_refuses_to_block_when_no_artifact():
-    """A missing artifact must 503 with instructions, not block for minutes."""
+    """
+    A missing artifact must answer immediately, not block for minutes.
+
+    It now raises the typed `NoBacktest` rather than a bare ValueError, and
+    carries the mines that *do* have one. A mine without a backtest is a scope
+    decision — a full run is 216 s and belongs in the batch — so the console
+    shows a designed state pointing at the pilot instead of an error, and the
+    route answers 404 rather than 503: this will never become available on a
+    retry, which is what 503 would promise.
+    """
     try:
         track_b.backtest_mine("MOIL-DOES-NOT-EXIST", allow_compute=False)
-        raise AssertionError("expected ValueError for a mine with no artifact")
-    except ValueError as exc:
-        assert "batch" in str(exc).lower(), str(exc)
-    print("✓ Missing artifact raises with batch instructions rather than computing inline")
+        raise AssertionError("expected NoBacktest for a mine with no artifact")
+    except track_b.NoBacktest as exc:
+        assert exc.mine_code == "MOIL-DOES-NOT-EXIST"
+        assert "MOIL-BAL-01" in exc.pilots, exc.pilots
+        assert "validated on" in str(exc).lower(), str(exc)
+    print("✓ Missing artifact raises NoBacktest naming the pilot, rather than computing inline")
 
 
 def test_ttl_cache_single_flights_and_expires():
