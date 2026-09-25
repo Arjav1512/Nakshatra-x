@@ -6,13 +6,43 @@
  * UI renders "unavailable" with the reason, per PRD N-6.
  */
 
-export type Result<T> = { ok: true; data: T } | { ok: false; error: string; status: number }
+export type Result<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string; status: number; warming?: WarmingInfo }
+
+/**
+ * A 503 that means "computing", not "broken".
+ *
+ * FEATURE_BACKLOG B-2 recorded that the two were indistinguishable: every
+ * failure collapsed to one message, so a cold backend reported the same thing
+ * as a broken one. The backend now answers cold forecasts with
+ * {status: "warming", eta_seconds} and a Retry-After header.
+ */
+export interface WarmingInfo {
+  mine_code: string
+  eta_seconds: number
+  queued_ahead: number
+  detail: string
+}
 
 async function get<T>(path: string, timeoutMs = 60000): Promise<Result<T>> {
   try {
     const res = await fetch(path, { cache: 'no-store', signal: AbortSignal.timeout(timeoutMs) })
     const body = await res.json().catch(() => null)
     if (!res.ok) {
+      if (res.status === 503 && body?.status === 'warming') {
+        return {
+          ok: false,
+          status: 503,
+          error: String(body.detail || 'warming'),
+          warming: {
+            mine_code: String(body.mine_code ?? ''),
+            eta_seconds: Number(body.eta_seconds ?? 0),
+            queued_ahead: Number(body.queued_ahead ?? 0),
+            detail: String(body.detail ?? ''),
+          },
+        }
+      }
       const detail =
         (body && (body.note || body.detail || body.error)) || `request failed (${res.status})`
       return { ok: false, error: String(detail), status: res.status }
@@ -81,6 +111,12 @@ export interface ForecastResponse {
     expected_shortfall_tonnes: number
   }
   provenance: Record<string, any>
+  /** Set when the response came from a persisted artifact rather than memory. */
+  served_from?: string
+  artifact_age_hours?: number
+  artifact_stale?: boolean
+  vintage?: string
+  artifact_identity?: { model_version: string; generator_seed: number; code_fingerprint: string }
   data_integrity: any
   guardrail: string
 }

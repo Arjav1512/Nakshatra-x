@@ -7,6 +7,7 @@ import {
 import { derived, reference, synthetic } from '@/lib/provenance'
 import {
   type BacktestResponse, type ForecastResponse, type RecommendationsResponse,
+  type WarmingInfo,
   fetchBacktest, fetchForecast, fetchRecommendations,
 } from '@/lib/console-api'
 import { Metric } from './Evidence'
@@ -44,30 +45,118 @@ function Unavailable({ what, reason }: { what: string; reason: string }) {
   )
 }
 
+
+/**
+ * A backend that is still computing is not a broken one.
+ *
+ * A 503 used to land here as `Unavailable` — red border, "Forecast
+ * unavailable" — which is the wrong thing to tell someone whose backend is
+ * working exactly as designed. The portfolio cards already distinguished the
+ * two; this panel did not, so drilling into a warming mine looked like a
+ * failure. The wait is bounded and stated, and the panel retries on its own.
+ */
+function WarmingState({ what, warming, attempt }: { what: string; warming: WarmingInfo; attempt: number }) {
+  const eta = Math.max(1, Math.round(warming.eta_seconds))
+  return (
+    <div
+      className="rounded-md border border-accent/30 bg-accent-muted p-3 text-xs"
+      data-testid="forecast-warming"
+      role="status"
+    >
+      <p className="flex items-center gap-2 font-semibold text-accent">
+        <span className="h-3 w-3 animate-spin rounded-full border-2 border-accent/30 border-t-accent" />
+        Computing {what.toLowerCase()} — about {eta}s
+      </p>
+      <p className="measure mt-1 leading-snug text-text-secondary">
+        This mine has no stored forecast yet, so one is being computed in the
+        background. Nothing is wrong; the figures appear here when it finishes.
+        {warming.queued_ahead > 0
+          ? ` ${warming.queued_ahead} other mine${warming.queued_ahead === 1 ? '' : 's'} queued ahead.`
+          : ''}
+        {attempt > 1 ? ` Checked ${attempt} times.` : ''}
+      </p>
+    </div>
+  )
+}
+
+
+/**
+ * Describe the window a forecast actually covers.
+ *
+ * The header said "horizon 14 d", which a reader takes as a fortnight starting
+ * today. It is not: the forecast comes from a committed artifact whose window
+ * was fixed when it was generated, so on any later day that reading is false.
+ * The origin and the real dates are shown instead, and a window that has
+ * already ended says so rather than presenting stale figures as a plan.
+ */
+function describeWindow(origin: string, start: string, end: string) {
+  const fmt = (iso: string) =>
+    new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      timeZone: 'UTC',
+    })
+  const today = new Date().toISOString().slice(0, 10)
+  const ended = end < today
+  const started = start <= today
+  return {
+    text: `forecast from ${fmt(origin)}, covering ${fmt(start)} – ${fmt(end)}`,
+    span: `${fmt(start)} – ${fmt(end)}`,
+    from: fmt(origin),
+    ended,
+    inProgress: started && !ended,
+  }
+}
+
 export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: string }) {
   const [forecast, setForecast] = useState<ForecastResponse | null>(null)
   const [fErr, setFErr] = useState<string | null>(null)
+  const [fWarm, setFWarm] = useState<WarmingInfo | null>(null)
+  const [attempt, setAttempt] = useState(0)
   const [recs, setRecs] = useState<RecommendationsResponse | null>(null)
   const [rErr, setRErr] = useState<string | null>(null)
+  const [rWarm, setRWarm] = useState<WarmingInfo | null>(null)
   const [backtest, setBacktest] = useState<BacktestResponse | null>(null)
   const [bErr, setBErr] = useState<string | null>(null)
   const [btLoading, setBtLoading] = useState(false)
   const [grade, setGrade] = useState<string | null>(null)
 
+  /**
+   * Fetch, and if the backend says "warming", come back for it.
+   *
+   * Fixed 8 s, and only while the backend is still reporting warming — it stops
+   * on success and on any other error. The point of the warmer is that one fit
+   * runs per mine; a page that hammered the endpoint would not start a second
+   * one, but it would fill the log and hide a real failure behind noise.
+   */
   useEffect(() => {
     let live = true
-    setForecast(null); setFErr(null); setRecs(null); setRErr(null)
+    let timer: ReturnType<typeof setTimeout> | undefined
+    setForecast(null); setFErr(null); setFWarm(null); setAttempt(0)
+    setRecs(null); setRErr(null); setRWarm(null)
     setBacktest(null); setBErr(null); setGrade(null)
 
-    fetchForecast(mineId).then((r) => {
-      if (!live) return
-      r.ok ? setForecast(r.data) : setFErr(r.error)
-    })
-    fetchRecommendations(mineId).then((r) => {
-      if (!live) return
-      r.ok ? setRecs(r.data) : setRErr(r.error)
-    })
-    return () => { live = false }
+    const poll = (n: number) => {
+      fetchForecast(mineId).then((r) => {
+        if (!live) return
+        setAttempt(n)
+        if (r.ok) { setForecast(r.data); setFWarm(null); setFErr(null); return }
+        if (r.warming) {
+          setFWarm(r.warming); setFErr(null)
+          timer = setTimeout(() => poll(n + 1), 8000)
+          return
+        }
+        setFErr(r.error); setFWarm(null)
+      })
+      fetchRecommendations(mineId).then((r) => {
+        if (!live) return
+        if (r.ok) { setRecs(r.data); setRWarm(null); setRErr(null); return }
+        if (r.warming) { setRWarm(r.warming); setRErr(null); return }
+        setRErr(r.error); setRWarm(null)
+      })
+    }
+    poll(1)
+    return () => { live = false; if (timer) clearTimeout(timer) }
   }, [mineId])
 
   const runBacktest = async () => {
@@ -88,17 +177,68 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
         </h2>
         {forecast ? (
           <p className="font-mono text-xs text-text-tertiary">
-            {forecast.model_version} · origin {forecast.forecast_origin} · horizon{' '}
-            {forecast.horizon_days} d
+            {forecast.model_version} ·{' '}
+            {describeWindow(
+              forecast.forecast_origin,
+              forecast.window.start,
+              forecast.window.end
+            ).text}
           </p>
         ) : null}
       </header>
 
+      {forecast
+        ? (() => {
+            const w = describeWindow(
+              forecast.forecast_origin,
+              forecast.window.start,
+              forecast.window.end
+            )
+            return (
+              <div
+                className="rounded-md border border-border-default bg-surface-1 p-3"
+                data-testid="forecast-provenance"
+                data-forecast-live="false"
+                data-forecast-origin={forecast.forecast_origin}
+                data-window-start={forecast.window.start}
+                data-window-end={forecast.window.end}
+                data-window-ended={String(w.ended)}
+              >
+                <p className="measure text-xs text-text-secondary">
+                  {w.ended ? (
+                    <>
+                      <strong className="font-medium text-status-caution">
+                        This forecast&rsquo;s window has already ended.
+                      </strong>{' '}
+                      It covers {w.span}, forecast from {w.from}, which is in the past. The figures
+                      below are what the model predicted for that window, not a plan for today.
+                      Regenerate the artifacts to forecast from today (docs/DEMO.md).
+                    </>
+                  ) : (
+                    <>
+                      Figures below cover one fixed fortnight — {w.text} — set when the artifact was
+                      generated. It is not a window that rolls forward with today&rsquo;s date. It is
+                      served from a stored artifact
+                      {forecast.artifact_age_hours != null
+                        ? `, generated ${forecast.artifact_age_hours.toFixed(1)} h ago`
+                        : ''}
+                      , so it is a computed prediction rather than a live reading. The conditions
+                      panel above is measured live and carries its own vintage.
+                    </>
+                  )}
+                </p>
+              </div>
+            )
+          })()
+        : null}
+
       {/* --- D-3 shortfall risk, D-2 trends --- */}
-      {fErr ? (
+      {fWarm ? (
+        <WarmingState what="Forecast" warming={fWarm} attempt={attempt} />
+      ) : fErr ? (
         <Unavailable what="Forecast" reason={fErr} />
       ) : !forecast ? (
-        <Spinner label={`Forecasting ${mineName}…`} />
+        <Spinner label={`Loading ${mineName}…`} />
       ) : (
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -359,7 +499,9 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
         <p className="mb-2 text-xs uppercase tracking-wider text-text-secondary">
           Corrective actions (PRD C-1..C-5) — every action constraint-checked
         </p>
-        {rErr ? (
+        {rWarm ? (
+          <WarmingState what="Recommendations" warming={rWarm} attempt={attempt} />
+        ) : rErr ? (
           <Unavailable what="Recommendations" reason={rErr} />
         ) : !recs ? (
           <Spinner label="Generating and constraint-checking actions…" />

@@ -313,3 +313,163 @@ exercised the path the browser actually takes: fetch the register, then use the
 id it returns. The regression test added with this fix (`npm run test:e2e`)
 drives the console in a real browser precisely so that a green API check can no
 longer stand in for a working screen.
+
+## D-029 — A request never computes a forecast; it serves an artifact or says "warming"
+
+`/forecast` fitted a model inside the request. Four consequences, all observed:
+a cold request took ~42 s; the request held its `Depends(get_db)` session for
+the whole fit, so ten concurrent forecasts held ten idle connections and
+`/mines` failed with `QueuePool limit of size 5 overflow 10 reached`; abandoned
+requests kept computing, so repeated runs piled work onto the process until load
+average reached 98.7 and a 42 s fit took 300 s; and two requests for the same
+mine fitted the same model twice.
+
+The rule is now absolute: **no forecast is computed on a request path.** A
+request reads a persisted artifact or returns 503 `{status: "warming", eta}`.
+Computation happens in a bounded background pool with one flight per mine.
+
+The ten artifacts are committed (176 KB) because the generator is seeded and the
+fit is deterministic, so a committed artifact is reproducible from the committed
+tree rather than a snapshot of one lucky run. A freshly started backend serves
+every mine in milliseconds.
+
+**A bigger pool was not the fix.** The SQLite branch of `session.py` never
+applied the configured `pool_size: 20` — it was set only on the else-branch — so
+SQLite quietly ran on SQLAlchemy's default of 5. That is now corrected, but the
+correction is the belt: the braces are that no request holds a session across a
+computation (`resolve_mine_code` reads two strings and closes).
+
+**Thread caps, not more workers.** Two warm workers each threading numpy and
+scikit-learn across all cores oversubscribed the machine. Capping per-fit
+threads (`OMP_NUM_THREADS` and friends, set before numpy is imported) took a fit
+from 42 s to 24 s and left the event loop schedulable, so `/mines` stays
+responsive while warming runs.
+
+## D-030 — The synthetic end date is a generation-time parameter, not `date.today()`
+
+A forecast's origin is the last day of generated actuals, so one constant
+decides the window every committed artifact covers. Two requirements pull
+against each other:
+
+* **Reproducibility.** A committed artifact must be reproducible from the
+  committed tree. `date.today()` would change the dataset — and therefore every
+  forecast — overnight, on its own, with nothing in git to show for it.
+* **Honesty on demo day.** A window fixed at a past date is a past window, and
+  the UI must not present it as "the next 14 days".
+
+**Chosen: a parameter with a committed default.** `DEFAULT_DATA_END_DATE`
+(2026-09-20) is the committed value; `NAKSHATRA_DATA_END_DATE` overrides it at
+*generation* time. Generation stays deterministic given (seed, end date), and
+both are recorded in the artifact identity, so an artifact generated for a
+different end date is refused rather than relabelled. The demo pre-flight
+regenerates the day before (`docs/DEMO.md`, ~4 minutes for ten mines).
+
+The rejected alternative was to label the forecast as a fixed reference scenario
+and leave the dates alone. It is honest, and it is what the UI falls back to when
+nobody regenerates — but a decision-support tool demonstrating a window that
+ended last month invites the obvious question, and "that's a reference scenario"
+is a weaker answer than a current one.
+
+**The dates are never shifted without regenerating the forecast.** The console
+reads the artifact's own `forecast_origin` and `window`, prints them
+("forecast from 20 Sep, covering 21 Sep – 4 Oct"), and when the window has
+passed says so in as many words instead of showing the figures as a plan.
+
+## D-031 — Artifact identity covers the whole import chain, not a hand-picked list
+
+Committed artifacts are only safe if they are provably the product of the code
+that is running. The first version hashed three files — forecaster, generator,
+`track_b` — which was already wrong when it was written: `constraints.py` gates
+every recommendation and `schemas.py` defines the rows the generator emits, and
+a change to either moves the numbers while leaving the fingerprint, and so the
+committed artifacts, untouched.
+
+Identity is now `{model_version, generator_seed, data_end_date, code_fingerprint,
+library_versions}`, where the fingerprint hashes every module reachable from the
+three entry points (currently eight files) and `library_versions` records the
+third-party packages that chain imports — numpy, scikit-learn, pydantic.
+scikit-learn's gradient-boosting output is not guaranteed stable across minor
+versions, so the version is part of what produced the numbers. pandas is *not*
+listed because the forecast chain does not import it; the list is derived from
+the imports rather than typed by hand, which is the point.
+
+The chain is walked statically from the source with `ast`, not read from
+`sys.modules`: the modules present at runtime depend on what else the process has
+touched, and a fingerprint that changed depending on whether pytest had imported
+something would be worse than none.
+
+A mismatch means the artifact is refused by `read_artifact`, reported by
+`/readyz` with the reason, and recomputed by the warmer. It is never served under
+the current `model_version`.
+
+**One inconsistency this found.** `status()` derived freshness from the file's
+mtime alone, so an artifact produced by an older model was reported `ready` by
+`/readyz` while `/forecast` refused to serve it — the readiness endpoint
+promising a green demo the forecast endpoint would not deliver. Both now apply
+the same test.
+
+## D-032 — A backend that is still computing is not an unreachable one
+
+The screenshot asked for as evidence of the warming state showed the opposite:
+against a genuinely cold backend the console said **"Forecast unavailable — the
+FastAPI service layer could not be reached."** The backend had been reached. It
+had answered, correctly and quickly, with
+
+```
+HTTP/1.1 503  retry-after: 38
+{"status":"warming","mine_code":"MOIL-BAL-01","eta_seconds":38.5,"queued_ahead":8, ...}
+```
+
+`fetchFromBackend` collapsed every non-2xx into a single error string, so the
+Next proxy never saw `status: "warming"` and emitted its own 503 with a fixed
+note. Two things were wrong with that. The user was told the system was broken
+when it was working as designed — and the note was a claim about the world that
+the response in hand contradicted, which is the same failure mode as a
+fabricated number, in prose.
+
+`BackendResult` now carries the upstream `status` and parsed `body`;
+`warmingPassthrough()` returns the backend's own answer with its `Retry-After`;
+and the degraded note distinguishes "answered N" from "could not be reached".
+
+`TrackBPanel` renders a warming state — accent-coloured, with the ETA and the
+queue depth — and polls every 8 s until it resolves. The portfolio cards already
+did this; drilling into a warming mine did not, so the one screen most likely to
+be open during a cold start was the one that called it a failure.
+
+Evidence: `docs/evidence/console-forecast-warming.png` (cold backend),
+`docs/evidence/console-forecast-ready.png` (committed artifacts).
+
+## D-033 — Artifacts are checked for completeness, not only for identity
+
+Regenerating the artifacts revealed that the committed forecast for MOIL-BAL-01
+— the first mine in the demo — was
+
+```json
+{"mine_code": "MOIL-BAL-01", "grades": [], "artifact_identity": {...}}
+```
+
+an empty stub with a *valid* identity block. It would have been served as a
+complete forecast, and the console would have rendered Balaghat with no grades,
+no trajectory and no shortfall.
+
+It came from `test_single_flight_shares_one_computation`. That test waits on the
+futures returned by `pool.submit(fs.warm, ...)` — but `warm()` *returns* a
+Future, so the outer future resolves the moment the flight is registered, not
+when it finishes. The test ended, `monkeypatch` restored the real
+`FORECAST_DIR`, and the still-running flight wrote its stub payload into the
+committed artifacts. The same race had already left a `MOIL-ABANDON_14d.json`
+in the repository, and the runtime `.warm.lock` was tracked as well.
+
+Three changes, because fixing the one test is necessary and not sufficient:
+
+1. The test waits on the inner flights, inside the patched scope.
+2. A session-scoped autouse fixture hashes the artifacts directory before and
+   after the run and fails if anything changed. The next test to forget a
+   `tmp_path` fails loudly instead of silently corrupting the demo.
+3. `test_committed_artifacts_are_complete_forecasts` checks every artifact has
+   grades, a window, an origin and a full-length dated trajectory. Identity says
+   "this came from our code"; it says nothing about whether the code produced
+   anything.
+
+`.warm.lock` and `MOIL-ABANDON_*.json` are now untracked and ignored, and a test
+asserts the directory tracks exactly the ten real mines.

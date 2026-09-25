@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from sqlalchemy.orm import Session
-from app.db.session import get_db
+from app.db.session import get_db, resolve_mine_code
 from app.models.mine import MineSite
 from app.schemas.mine import MineCreate, MineResponse
 from app.services.nasa_power import fetch_weather_signal
 from app.services.satellite import query_sentinel_stac
-from app.api.track_b import backtest_mine, forecast_mine, recommend_actions
+from app.api.track_b import backtest_mine, forecast_mine, forecast_status, recommend_actions, warm_forecast
+from app.api.forecast_store import Warming
+from fastapi.responses import JSONResponse
 from app.ml.prospectivity import model_metrics, predict_point, rank_drill_targets
 from app.api.telemetry import build_mine_telemetry
 from app.services.recommendations import generate_action_recommendations
@@ -17,6 +19,47 @@ import csv
 import io
 
 router = APIRouter(prefix="/api/v1")
+
+
+def _mine_code_or_404(mine_id: int) -> tuple[str, str]:
+    """
+    Resolve mine_id -> (code, name) and release the DB connection immediately.
+
+    These three routes used `Depends(get_db)`, which holds a session for the
+    whole request. On /forecast that meant holding a connection across a ~42 s
+    model fit that never touched the database — ten concurrent forecasts held
+    ten idle connections and /mines could not get one.
+    """
+    resolved = resolve_mine_code(mine_id)
+    if resolved is None:
+        raise HTTPException(status_code=404, detail="Mine not found")
+    return resolved
+
+
+def _warming_response(exc: Warming) -> JSONResponse:
+    """
+    503 that says what is happening and when to come back.
+
+    A bare 503 is indistinguishable from a broken service — that ambiguity is
+    what FEATURE_BACKLOG B-2 recorded, and what made the console report failure
+    while it was merely cold.
+    """
+    return JSONResponse(
+        status_code=503,
+        headers={"Retry-After": str(max(1, int(exc.eta_seconds)))},
+        content={
+            "status": "warming",
+            "mine_code": exc.mine_code,
+            "eta_seconds": round(exc.eta_seconds, 1),
+            "queued_ahead": exc.queued,
+            "detail": (
+                f"The forecast for {exc.mine_code} is being computed. This is a "
+                f"cold start, not a failure — retry in about "
+                f"{exc.eta_seconds:.0f}s, or poll /api/v1/readyz."
+            ),
+        },
+    )
+
 
 DEFAULT_MINES = [
     {"mine_code": "MOIL-BAL-01", "name": "Balaghat", "state": "Madhya Pradesh", "latitude": 21.83, "longitude": 80.19, "zone": "Central India", "target_tonnes": 18000.0},
@@ -57,6 +100,27 @@ def health():
         ],
         "telemetry_sources": ["Copernicus Sentinel-2 L2A", "NASA POWER Daily Meteorology", "USGS Landsat-8"]
     }
+
+@router.get("/healthz")
+def healthz():
+    """Liveness only: the process is up and serving. Never touches the DB."""
+    return {"status": "ok"}
+
+
+@router.get("/readyz")
+def readyz():
+    """
+    Readiness: can this process serve a forecast for every mine right now?
+
+    Liveness and readiness are separate on purpose. The process answers /healthz
+    within milliseconds of starting, long before any artifact exists; a load
+    balancer that used liveness as readiness would send traffic to a backend
+    that can only reply "warming".
+    """
+    codes = [m["mine_code"] for m in DEFAULT_MINES]
+    st = forecast_status(codes)
+    return JSONResponse(status_code=200 if st["ready"] else 503, content=st)
+
 
 @router.get("/mines")
 def list_mines(db: Session = Depends(get_db)):
@@ -101,14 +165,19 @@ async def mine_telemetry(mine_id: int, db: Session = Depends(get_db)):
 
 @router.get("/mines/{mine_id}/forecast")
 def track_b_forecast(mine_id: int, horizon_days: int = Query(14, ge=1, le=60),
-                     grade: str | None = None, db: Session = Depends(get_db)):
-    """Per-mine per-grade forecast with intervals and P(cumulative < target). PRD B-5, B-6."""
-    ensure_seed_mines(db)
-    mine = db.get(MineSite, mine_id)
-    if not mine:
-        raise HTTPException(status_code=404, detail="Mine not found")
+                     grade: str | None = None):
+    """
+    Per-mine per-grade forecast with intervals and P(cumulative < target).
+    PRD B-5, B-6.
+
+    Serves a persisted artifact. It never fits a model — see
+    app/api/forecast_store.py for why.
+    """
+    mine_code, _ = _mine_code_or_404(mine_id)
     try:
-        return forecast_mine(mine.mine_code, horizon_days=horizon_days, grade=grade)
+        return forecast_mine(mine_code, horizon_days=horizon_days, grade=grade)
+    except Warming as exc:
+        return _warming_response(exc)
     except ValueError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
 
@@ -116,8 +185,7 @@ def track_b_forecast(mine_id: int, horizon_days: int = Query(14, ge=1, le=60),
 @router.get("/mines/{mine_id}/backtest")
 def track_b_backtest(mine_id: int, span_days: int = Query(150, ge=60, le=400),
                      step_days: int = Query(14, ge=7, le=60),
-                     compute: bool = Query(False),
-                     db: Session = Depends(get_db)):
+                     compute: bool = Query(False)):
     """
     Rolling-origin backtest: MAPE and interval coverage vs baseline.
     PRD B-10, N-8.
@@ -127,27 +195,22 @@ def track_b_backtest(mine_id: int, span_days: int = Query(150, ge=60, le=400),
     nightly batch (N-2): `python -m app.api.batch backtest`. Pass
     `?compute=true` to force an on-demand re-run, which N-2 also calls for.
     """
-    ensure_seed_mines(db)
-    mine = db.get(MineSite, mine_id)
-    if not mine:
-        raise HTTPException(status_code=404, detail="Mine not found")
+    mine_code, _ = _mine_code_or_404(mine_id)
     try:
-        return backtest_mine(mine.mine_code, span_days=span_days,
+        return backtest_mine(mine_code, span_days=span_days,
                              step_days=step_days, allow_compute=compute)
     except ValueError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
 
 
 @router.get("/mines/{mine_id}/recommendations")
-def track_b_recommendations(mine_id: int, horizon_days: int = Query(14, ge=1, le=60),
-                            db: Session = Depends(get_db)):
+def track_b_recommendations(mine_id: int, horizon_days: int = Query(14, ge=1, le=60)):
     """Constraint-gated corrective actions. PRD C-1..C-5."""
-    ensure_seed_mines(db)
-    mine = db.get(MineSite, mine_id)
-    if not mine:
-        raise HTTPException(status_code=404, detail="Mine not found")
+    mine_code, _ = _mine_code_or_404(mine_id)
     try:
-        return recommend_actions(mine.mine_code, horizon_days=horizon_days)
+        return recommend_actions(mine_code, horizon_days=horizon_days)
+    except Warming as exc:
+        return _warming_response(exc)
     except ValueError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
 

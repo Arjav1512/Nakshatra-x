@@ -8,6 +8,13 @@ artifact and reports how old it is.
 
     python -m app.api.batch backtest              # all mines
     python -m app.api.batch backtest MOIL-BAL-01  # one mine
+    python -m app.api.batch forecast              # all forecast artifacts
+
+The forecast window follows the last day of generated actuals. That date is a
+parameter with a committed default; override it at generation time to move the
+window (docs/DECISIONS.md, docs/DEMO.md):
+
+    NAKSHATRA_DATA_END_DATE=2026-11-30 python -m app.api.batch forecast
 
 Suggested cron (nightly, after the data refresh):
 
@@ -41,14 +48,53 @@ def run_backtests(codes: list[str] | None = None) -> int:
     return failures
 
 
+def run_forecasts(codes: list[str] | None = None, horizon_days: int = 14) -> int:
+    """
+    Generate every forecast artifact, sequentially.
+
+    The generator is seeded, so this is reproducible: the same commit produces
+    byte-identical forecasts. That is what makes committing the artifacts
+    honest rather than a snapshot of one lucky run.
+    """
+    from app.api.routes import DEFAULT_MINES
+    from app.api.track_b import compute_forecast
+    from app.api.forecast_store import write_artifact, artifact_path
+
+    from app.ingestion.generator import resolve_data_end_date
+    from datetime import timedelta
+
+    end = resolve_data_end_date()
+    print(
+        f"  data end date {end.isoformat()} (NAKSHATRA_DATA_END_DATE) — "
+        f"forecasts will cover {(end + timedelta(days=1)).isoformat()} to "
+        f"{(end + timedelta(days=horizon_days)).isoformat()}"
+    )
+
+    targets = codes or [m["mine_code"] for m in DEFAULT_MINES]
+    for i, code in enumerate(targets, 1):
+        t0 = time.time()
+        payload = compute_forecast(code, horizon_days=horizon_days)
+        path = write_artifact(code, horizon_days, payload)
+        print(f"  [{i}/{len(targets)}] {code}: {time.time() - t0:.1f}s -> {path.name}")
+    return 0
+
+
 def main(argv: list[str]) -> int:
-    if len(argv) < 2 or argv[1] != "backtest":
+    if len(argv) < 2 or argv[1] not in ("backtest", "forecast"):
         print(__doc__)
+        print("\nusage: python -m app.api.batch {backtest|forecast} [MINE_CODE ...]")
         return 2
+
     codes = argv[2:] or None
-    print(f"Computing backtests for {len(codes) if codes else len(MINES)} mine(s)…")
     started = time.time()
-    failures = run_backtests(codes)
+
+    if argv[1] == "forecast":
+        print(f"Computing forecasts for {len(codes) if codes else 10} mine(s)…")
+        failures = run_forecasts(codes)
+    else:
+        print(f"Computing backtests for {len(codes) if codes else len(MINES)} mine(s)…")
+        failures = run_backtests(codes)
+
     print(f"Done in {time.time() - started:.1f}s · {failures} failure(s)")
     return 1 if failures else 0
 

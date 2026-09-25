@@ -52,6 +52,7 @@ per PRD §13 Q5.
 from __future__ import annotations
 
 import math
+import os
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from typing import Iterator
@@ -73,6 +74,45 @@ from app.ingestion.schemas import (
 
 GENERATOR_SOURCE = "nakshatra-synthetic-v1"
 DEFAULT_SEED = 20260921
+
+# The last day of generated actuals.
+#
+# WHY THIS IS A PARAMETER AND NOT A CALL TO date.today()
+# ------------------------------------------------------
+# A forecast's origin is the last day of actuals, so this constant decides the
+# window every committed artifact covers. Two properties are in tension:
+#
+#   * Reproducibility. A committed artifact has to be reproducible from the
+#     committed tree, which rules out `date.today()` — the dataset, and with it
+#     every forecast, would change on its own overnight.
+#   * Honesty on demo day. A window fixed at this date is in the past by any
+#     later date, and presenting a past window as "the next 14 days" is a lie
+#     the UI would tell on our behalf.
+#
+# Resolution (docs/DECISIONS.md, 2026-09-25): the end date is an explicit
+# parameter with a committed default, overridable at *generation* time via
+# NAKSHATRA_DATA_END_DATE. Generation stays deterministic given (seed, end
+# date), both of which are recorded in the artifact identity, so an artifact
+# generated for a different end date is refused rather than relabelled. The
+# demo pre-flight regenerates with the current date (docs/DEMO.md).
+#
+# The dates are never shifted without regenerating the forecast. The UI reads
+# the artifact's own window and says plainly when it has passed.
+DEFAULT_DATA_END_DATE = date(2026, 9, 20)
+DATA_END_DATE_ENV = "NAKSHATRA_DATA_END_DATE"
+
+
+def resolve_data_end_date() -> date:
+    """The configured end of actuals: the env override, else the committed default."""
+    raw = os.environ.get(DATA_END_DATE_ENV, "").strip()
+    if not raw:
+        return DEFAULT_DATA_END_DATE
+    try:
+        return date.fromisoformat(raw)
+    except ValueError as exc:
+        raise ValueError(
+            f"{DATA_END_DATE_ENV}={raw!r} is not an ISO date (YYYY-MM-DD)"
+        ) from exc
 
 # Public anchor: MOIL produces roughly 1.1-1.3 Mt of manganese ore a year.
 ANNUAL_TOTAL_TONNES = 1_200_000.0
@@ -155,7 +195,7 @@ class SyntheticDataset:
 
     def __init__(self, seed: int = DEFAULT_SEED, start: date | None = None, end: date | None = None):
         self.seed = seed
-        self.end = end or date(2026, 9, 20)
+        self.end = end or resolve_data_end_date()
         self.start = start or (self.end - timedelta(days=365 * 3))
         self._rng = np.random.default_rng(seed)
 
