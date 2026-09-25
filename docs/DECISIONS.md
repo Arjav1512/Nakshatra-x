@@ -473,3 +473,56 @@ Three changes, because fixing the one test is necessary and not sufficient:
 
 `.warm.lock` and `MOIL-ABANDON_*.json` are now untracked and ignored, and a test
 asserts the directory tracks exactly the ten real mines.
+
+## D-034 — One dataset identity, shared by every artifact derived from it
+
+D-030 made the synthetic end date a generation-time parameter and put it in the
+forecast artifacts' identity. That fixed the forecasts and left a gap: the
+backtest artifact recorded only `data_window_end` — no seed, no fingerprint, no
+library versions — and the exported sample CSVs recorded only the seed, though
+every row in them carries a date out of the generated window.
+
+So the three kinds could disagree. Regenerate forecasts for a new end date and
+the committed backtest still claims `MAPE 11.67%` from the old dataset, the
+samples still describe the old three years, and a screen showing a forecast next
+to that MAPE compares two datasets under one label. **Nothing in the numbers
+would look wrong.** That is the whole reason this is a test and not a convention.
+
+`generator.dataset_identity()` is now the shared contract —
+`{generator, contract_version, generator_seed, data_end_date}` — carried by all
+three kinds. `forecast_store.artifact_identity()` extends it with the per-kind
+`model_version`, `code_fingerprint` and `library_versions`.
+
+**One command regenerates everything**: `python -m app.api.batch all` — samples,
+forecasts, then the committed backtests — from one resolved end date, verifying
+agreement at the end and printing the identity it used. `batch check` answers the
+same question without regenerating, and `/readyz` checks it at runtime: a mine
+whose artifact disagrees is reported `stale`, not `ready`, and the endpoint is
+503.
+
+**Backtests are regenerated for the mines that have a committed artifact**, read
+from disk rather than from a list in the code, so the command stays correct when
+that set changes. One backtest costs 216 s, so regenerating all ten would be 36
+minutes of work for artifacts nothing serves — a mine without one already gets a
+clear 503, which is the designed behaviour (the route defaults to
+`compute=false`, and the console never overrides it).
+
+**Track A is deliberately excluded.** Its model is trained on real Sentinel-2 and
+SRTM data, not on the synthetic generator, so it has no seed or end date to agree
+on. Forcing one onto it would be a fiction, and the consistency report says so
+rather than leaving the absence to be guessed at.
+
+**Rollback.** The previous set is committed in git, which is the fallback:
+`git checkout -- backend/artifacts data/synthetic`. Every artifact — forecasts,
+backtests and now the sample CSVs — is written to a temporary file and renamed
+into place, so a crashed regeneration leaves the previous artifact intact rather
+than a truncated one. `batch all` prints the rollback command if verification
+fails.
+
+**A measurement worth recording.** One `batch all` run took **5.8 hours** instead
+of the usual 8 minutes, because macOS `mediaanalysisd` had been at 211% CPU for
+seventeen hours. The output was byte-identical — same MAPE, same baseline, same
+coverage — which is a useful demonstration that the pipeline is deterministic,
+and a reminder that the standing "measure in a quiet environment" rule applies to
+the machine's own background work, not only to ours. `docs/DEMO.md` now says to
+check for this before regenerating.

@@ -1,501 +1,501 @@
 contract_version,is_synthetic,source,ingested_at,mine_code,equipment_id,equipment_type,event_type,started_at,ended_at,downtime_hours,failure_mode
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.278683,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2023-10-22T00:00:00,2023-10-23T02:04:53.892840,26.08,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.279275,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2024-07-13T01:00:00,2024-07-13T06:41:06.905628,5.69,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.279419,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,scheduled_maintenance,2025-02-15T08:00:00,2025-02-15T10:36:34.590294,2.61,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.279435,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,scheduled_maintenance,2025-03-04T13:00:00,2025-03-04T22:26:21.560612,9.44,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.279549,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2025-08-27T20:00:00,2025-08-27T23:57:03.145751,3.95,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.279560,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2025-09-03T20:00:00,2025-09-04T10:12:12.938487,14.2,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.279675,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2026-03-01T14:00:00,2026-03-01T21:12:57.887538,7.22,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.279718,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2026-05-01T04:00:00,2026-05-01T18:24:20.968803,14.41,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.279724,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2026-05-02T05:00:00,2026-05-02T20:53:12.283822,15.89,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.279736,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2026-05-14T20:00:00,2026-05-15T03:40:45.681853,7.68,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.279751,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2026-05-31T02:00:00,2026-05-31T07:12:01.070913,5.2,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.279788,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2026-07-23T13:00:00,2026-07-23T21:07:18.544501,8.12,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.279822,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2026-09-02T11:00:00,2026-09-02T17:31:04.143878,6.52,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.279849,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,breakdown,2023-10-03T14:00:00,2023-10-04T04:17:17.495676,14.29,bit wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.279885,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,breakdown,2023-11-24T14:00:00,2023-11-25T04:12:38.048154,14.21,bit wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.279900,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,scheduled_maintenance,2023-12-11T12:00:00,2023-12-11T14:24:24.282175,2.41,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.280022,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,breakdown,2024-06-20T02:00:00,2024-06-20T07:23:15.001830,5.39,rod breakage
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.280268,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,breakdown,2025-07-24T02:00:00,2025-07-25T14:48:02.466781,36.8,rod breakage
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.280275,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,breakdown,2025-07-27T07:00:00,2025-07-27T17:57:56.654301,10.97,compressor fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.280418,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,scheduled_maintenance,2026-03-15T02:00:00,2026-03-15T07:53:06.899268,5.89,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.280431,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,breakdown,2026-03-28T08:00:00,2026-03-28T18:38:11.850811,10.64,bit wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.280615,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2024-01-14T07:00:00,2024-01-14T11:06:17.028571,4.1,jam
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.280636,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,scheduled_maintenance,2024-02-10T03:00:00,2024-02-10T17:10:51.182301,14.18,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.280710,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2024-06-03T08:00:00,2024-06-03T10:29:21.853215,2.49,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.280719,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2024-06-10T14:00:00,2024-06-10T21:17:30.686513,7.29,bearing failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.280758,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2024-08-05T15:00:00,2024-08-05T18:18:06.061393,3.3,bearing failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.280795,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2024-09-27T07:00:00,2024-09-28T02:39:52.482294,19.66,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.280828,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2024-11-11T06:00:00,2024-11-11T08:22:06.488047,2.37,jam
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.280937,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2025-05-02T01:00:00,2025-05-02T12:49:05.521832,11.82,jam
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281039,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2025-10-03T13:00:00,2025-10-04T14:02:39.128023,25.04,jam
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281097,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2025-12-21T19:00:00,2025-12-22T04:42:40.209968,9.71,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281128,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2026-01-26T10:00:00,2026-01-27T15:09:07.720831,29.15,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281207,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,scheduled_maintenance,2026-05-19T15:00:00,2026-05-19T19:33:43.830220,4.56,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281241,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2026-06-27T02:00:00,2026-06-27T12:20:13.917421,10.34,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281279,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2026-08-16T11:00:00,2026-08-17T07:45:56.940652,20.77,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281492,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,breakdown,2024-07-09T01:00:00,2024-07-10T02:55:10.650989,25.92,bit wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281519,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,breakdown,2024-08-15T07:00:00,2024-08-15T16:41:15.295313,9.69,rod breakage
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281620,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,breakdown,2025-01-22T02:00:00,2025-01-22T16:27:02.377823,14.45,rod breakage
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281664,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,breakdown,2025-03-27T15:00:00,2025-03-28T06:47:16.770528,15.79,bit wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281670,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,scheduled_maintenance,2025-03-30T14:00:00,2025-03-30T17:59:59.335073,4.0,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281694,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,scheduled_maintenance,2025-05-01T04:00:00,2025-05-01T08:17:40.218013,4.29,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281717,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,breakdown,2025-05-31T19:00:00,2025-06-01T02:24:48.112510,7.41,compressor fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281751,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,breakdown,2025-07-16T05:00:00,2025-07-16T15:55:39.997523,10.93,compressor fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281763,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,scheduled_maintenance,2025-07-31T08:00:00,2025-07-31T14:36:17.557083,6.6,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.281785,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,breakdown,2025-08-23T00:00:00,2025-08-23T06:03:44.924828,6.06,rod breakage
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.282127,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2024-01-30T09:00:00,2024-01-30T21:23:53.282146,12.4,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.282148,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,scheduled_maintenance,2024-02-23T13:00:00,2024-02-23T17:28:58.059501,4.48,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.282175,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2024-03-27T18:00:00,2024-03-28T10:20:12.368103,16.34,misalignment
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.282199,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2024-04-22T04:00:00,2024-04-23T18:00:34.163099,38.01,misalignment
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.282393,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2025-01-29T05:00:00,2025-01-29T16:25:30.440184,11.43,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.282454,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2025-04-30T03:00:00,2025-04-30T09:55:30.788257,6.93,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.282464,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2025-05-07T10:00:00,2025-05-07T18:09:20.836047,8.16,misalignment
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.282488,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,scheduled_maintenance,2025-06-07T07:00:00,2025-06-07T08:01:58.279506,1.03,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.282506,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2025-06-29T13:00:00,2025-06-30T06:46:23.008899,17.77,misalignment
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.282656,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,scheduled_maintenance,2026-02-26T16:00:00,2026-02-26T19:19:48.338062,3.33,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.282692,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,scheduled_maintenance,2026-04-20T16:00:00,2026-04-20T20:45:03.656173,4.75,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.282742,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2026-06-27T06:00:00,2026-06-27T15:24:26.786317,9.41,idler seizure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.282881,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2024-01-12T19:00:00,2024-01-13T03:27:04.678310,8.45,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.282911,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2024-02-22T12:00:00,2024-02-22T21:35:52.574161,9.6,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.282984,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2024-06-13T13:00:00,2024-06-13T19:37:45.908032,6.63,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283012,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2024-07-17T13:00:00,2024-07-18T00:24:52.890799,11.41,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283028,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,scheduled_maintenance,2024-08-04T11:00:00,2024-08-04T13:19:30.488759,2.33,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283065,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2024-09-22T06:00:00,2024-09-22T07:00:04.045715,1.0,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283109,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,scheduled_maintenance,2024-11-19T11:00:00,2024-11-19T17:14:35.934189,6.24,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283125,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2024-12-04T02:00:00,2024-12-04T08:47:24.610480,6.79,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283199,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2025-03-16T02:00:00,2025-03-16T21:55:26.584602,19.92,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283262,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2025-06-12T08:00:00,2025-06-12T16:46:07.770851,8.77,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283291,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2025-07-19T16:00:00,2025-07-19T22:24:47.709044,6.41,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283319,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2025-08-23T11:00:00,2025-08-23T17:25:58.225333,6.43,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283494,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2026-05-22T20:00:00,2026-05-23T04:17:15.859075,8.29,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283512,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,scheduled_maintenance,2026-06-14T14:00:00,2026-06-14T20:46:30.541980,6.78,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283689,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,breakdown,2024-03-02T14:00:00,2024-03-03T05:10:28.837144,15.17,boom pin wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283837,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,breakdown,2024-10-06T14:00:00,2024-10-07T06:11:13.062142,16.19,track failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283861,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,scheduled_maintenance,2024-11-05T12:00:00,2024-11-05T16:42:33.696271,4.71,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283871,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,scheduled_maintenance,2024-11-14T10:00:00,2024-11-14T16:18:12.580263,6.3,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283912,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,scheduled_maintenance,2025-01-10T15:00:00,2025-01-10T21:44:55.760574,6.75,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.283953,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,breakdown,2025-03-10T06:00:00,2025-03-10T15:49:02.699624,9.82,boom pin wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.284016,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,scheduled_maintenance,2025-06-15T00:00:00,2025-06-15T10:52:19.791696,10.87,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.284133,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,scheduled_maintenance,2025-12-07T15:00:00,2025-12-08T01:09:25.717715,10.16,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.284148,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,breakdown,2025-12-23T13:00:00,2025-12-23T20:38:41.072483,7.64,boom pin wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.284392,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,scheduled_maintenance,2023-12-20T18:00:00,2023-12-20T20:50:07.858817,2.84,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.284400,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,breakdown,2023-12-24T19:00:00,2023-12-24T23:44:21.820924,4.74,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.284442,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,breakdown,2024-02-24T09:00:00,2024-02-25T01:26:24.843031,16.44,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.284561,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,scheduled_maintenance,2024-08-22T19:00:00,2024-08-22T21:04:04.534737,2.07,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.284601,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,breakdown,2024-10-13T14:00:00,2024-10-14T11:16:05.250627,21.27,axle fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.284766,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,scheduled_maintenance,2025-06-13T02:00:00,2025-06-13T22:15:05.187921,20.25,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.284817,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,breakdown,2025-08-22T14:00:00,2025-08-23T13:20:18.379825,23.34,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.284946,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,breakdown,2026-03-06T11:00:00,2026-03-06T18:15:42.976132,7.26,axle fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.284967,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,scheduled_maintenance,2026-04-02T06:00:00,2026-04-02T09:43:05.462305,3.72,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285118,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2023-11-22T12:00:00,2023-11-22T15:12:35.708164,3.21,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285141,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2023-12-19T01:00:00,2023-12-19T08:48:36.445732,7.81,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285157,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2024-01-04T12:00:00,2024-01-04T16:55:12.884077,4.92,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285217,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2024-03-27T16:00:00,2024-03-28T02:02:54.338888,10.05,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285249,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2024-05-05T03:00:00,2024-05-05T10:18:05.229979,7.3,misalignment
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285261,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2024-05-15T16:00:00,2024-05-16T13:23:13.514033,21.39,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285291,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2024-06-19T10:00:00,2024-06-20T02:41:03.164245,16.68,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285323,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2024-07-30T02:00:00,2024-07-31T06:42:47.448873,28.71,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285335,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2024-08-09T19:00:00,2024-08-10T10:37:52.694538,15.63,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285505,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2025-04-30T11:00:00,2025-04-30T20:15:47.347122,9.26,misalignment
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285567,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2025-07-27T01:00:00,2025-07-27T08:33:04.825859,7.55,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285573,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2025-07-28T11:00:00,2025-07-28T13:09:36.594295,2.16,idler seizure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285617,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2025-09-26T20:00:00,2025-09-27T01:56:39.950465,5.94,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285638,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2025-10-21T21:00:00,2025-10-22T01:22:20.771006,4.37,idler seizure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285663,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2025-11-16T21:00:00,2025-11-17T04:49:03.287987,7.82,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285716,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2026-01-27T00:00:00,2026-01-27T08:21:33.136899,8.36,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285825,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2026-07-01T21:00:00,2026-07-02T10:26:52.620099,13.45,idler seizure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285847,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2026-07-27T01:00:00,2026-07-27T11:35:58.977038,10.6,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285880,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2026-09-10T01:00:00,2026-09-10T02:53:25.263646,1.89,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.285889,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2026-09-17T16:00:00,2026-09-17T16:28:26.122362,0.47,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.286041,MOIL-BAL-01,MOIL-BAL-01-EXC-10,excavator,breakdown,2024-05-05T14:00:00,2024-05-05T18:03:26.867931,4.06,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.286098,MOIL-BAL-01,MOIL-BAL-01-EXC-10,excavator,breakdown,2024-07-23T12:00:00,2024-07-23T21:26:09.727608,9.44,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.286117,MOIL-BAL-01,MOIL-BAL-01-EXC-10,excavator,scheduled_maintenance,2024-08-12T17:00:00,2024-08-13T01:24:00.420984,8.4,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.286524,MOIL-BAL-01,MOIL-BAL-01-EXC-10,excavator,breakdown,2026-04-28T13:00:00,2026-04-29T02:01:16.265804,13.02,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.286748,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2024-03-22T14:00:00,2024-03-23T00:01:59.495957,10.03,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.286814,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2024-06-22T01:00:00,2024-06-22T17:21:33.018547,16.36,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.286838,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,scheduled_maintenance,2024-07-21T15:00:00,2024-07-21T17:32:59.106178,2.55,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.286849,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2024-07-31T16:00:00,2024-08-01T15:10:53.211856,23.18,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.286910,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2024-10-26T02:00:00,2024-10-26T22:25:45.558214,20.43,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.286945,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2024-12-15T05:00:00,2024-12-15T20:23:27.458831,15.39,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.287057,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,scheduled_maintenance,2025-05-31T12:00:00,2025-06-01T06:51:08.622953,18.85,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.287201,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,scheduled_maintenance,2025-06-09T07:00:00,2025-06-09T18:13:47.956585,11.23,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.287288,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2025-10-10T08:00:00,2025-10-10T14:41:41.186861,6.69,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.287413,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2026-04-13T06:00:00,2026-04-15T04:47:04.141227,46.78,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.287421,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2026-04-18T18:00:00,2026-04-19T09:04:22.829179,15.07,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.287452,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2026-05-31T17:00:00,2026-06-01T04:52:00.436641,11.87,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.287499,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,scheduled_maintenance,2026-08-10T18:00:00,2026-08-10T23:00:23.176010,5.01,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.287676,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2024-04-09T17:00:00,2024-04-10T06:39:04.669860,13.65,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.287743,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2024-06-20T12:00:00,2024-06-20T20:43:07.570565,8.72,boom pin wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.287941,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2025-04-10T18:00:00,2025-04-10T21:56:42.136175,3.95,track failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288018,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2025-07-31T05:00:00,2025-07-31T09:17:17.098989,4.29,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288029,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2025-08-09T21:00:00,2025-08-10T03:57:09.324575,6.95,track failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288045,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2025-08-25T15:00:00,2025-08-26T00:07:11.895584,9.12,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288064,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2025-09-12T20:00:00,2025-09-13T10:57:30.393185,14.96,track failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288204,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2026-04-05T00:00:00,2026-04-05T00:45:48.146551,0.76,boom pin wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288222,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2026-04-26T09:00:00,2026-04-26T15:06:41.770135,6.11,boom pin wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288229,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2026-04-29T19:00:00,2026-04-30T06:33:48.422405,11.56,boom pin wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288268,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,scheduled_maintenance,2026-06-22T16:00:00,2026-06-22T22:26:18.988794,6.44,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288495,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2024-06-04T10:00:00,2024-06-04T13:57:31.222108,3.96,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288500,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2024-06-06T12:00:00,2024-06-07T11:04:02.929829,23.07,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288526,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2024-07-09T05:00:00,2024-07-09T14:46:58.633504,9.78,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288557,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2024-08-18T21:00:00,2024-08-19T09:31:16.240946,12.52,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288587,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2024-09-27T05:00:00,2024-09-27T06:13:57.615745,1.23,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288597,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,breakdown,2024-10-05T20:00:00,2024-10-06T01:58:09.705032,5.97,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288766,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2025-06-07T12:00:00,2025-06-07T15:58:07.267356,3.97,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288807,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,breakdown,2025-07-30T19:00:00,2025-07-31T20:40:48.880594,25.68,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288839,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2025-09-11T01:00:00,2025-09-11T09:55:24.084374,8.92,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288889,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2025-11-20T06:00:00,2025-11-20T08:13:53.040932,2.23,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.288942,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,breakdown,2026-02-06T21:00:00,2026-02-07T07:07:32.302265,10.13,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289039,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,breakdown,2026-07-01T01:00:00,2026-07-01T07:14:26.777108,6.24,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289089,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,breakdown,2026-08-28T16:00:00,2026-08-29T18:22:58.315034,26.38,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289151,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2023-11-20T02:00:00,2023-11-21T05:15:34.362827,27.26,axle fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289175,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2023-12-19T11:00:00,2023-12-19T17:05:28.364881,6.09,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289227,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2024-02-26T07:00:00,2024-02-26T20:34:12.715689,13.57,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289302,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,scheduled_maintenance,2024-06-12T14:00:00,2024-06-13T02:15:58.889437,12.27,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289351,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,scheduled_maintenance,2024-08-19T01:00:00,2024-08-19T14:35:36.057806,13.59,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289360,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2024-08-26T16:00:00,2024-08-26T21:46:17.986017,5.77,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289367,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2024-08-28T03:00:00,2024-08-28T13:46:02.789842,10.77,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289434,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2024-11-27T08:00:00,2024-11-27T18:24:40.836423,10.41,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289602,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,scheduled_maintenance,2025-08-09T06:00:00,2025-08-09T12:07:08.466993,6.12,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289609,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2025-08-12T09:00:00,2025-08-12T11:01:57.434690,2.03,axle fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289657,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2025-10-17T15:00:00,2025-10-17T19:03:48.314379,4.06,axle fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289694,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2025-12-04T08:00:00,2025-12-04T14:52:51.293907,6.88,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289707,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2025-12-16T04:00:00,2025-12-16T22:42:41.268465,18.71,axle fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289750,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2026-02-10T16:00:00,2026-02-10T19:20:37.429190,3.34,axle fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289800,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,scheduled_maintenance,2026-04-20T16:00:00,2026-04-21T10:19:43.751140,18.33,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289860,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2026-07-12T02:00:00,2026-07-12T04:04:27.626227,2.07,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289869,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,scheduled_maintenance,2026-07-19T05:00:00,2026-07-19T17:01:36.269358,12.03,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289879,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2026-07-28T17:00:00,2026-07-28T22:27:20.321960,5.46,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289903,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,scheduled_maintenance,2026-08-29T14:00:00,2026-08-29T23:54:14.052173,9.9,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289909,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,scheduled_maintenance,2026-09-02T01:00:00,2026-09-02T05:51:24.781336,4.86,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289971,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,scheduled_maintenance,2023-11-30T02:00:00,2023-11-30T03:11:54.625436,1.2,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.289997,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2024-01-02T07:00:00,2024-01-02T11:52:27.308340,4.87,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290108,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2024-06-02T11:00:00,2024-06-02T13:49:04.671338,2.82,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290144,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,scheduled_maintenance,2024-07-21T10:00:00,2024-07-21T11:15:24.654420,1.26,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290191,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,scheduled_maintenance,2024-09-23T06:00:00,2024-09-23T06:56:18.221298,0.94,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290284,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2025-01-30T08:00:00,2025-01-30T11:11:10.025045,3.19,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290329,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2025-03-30T15:00:00,2025-03-30T19:30:38.312718,4.51,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290352,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2025-04-26T21:00:00,2025-04-26T22:46:03.743259,1.77,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290441,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2025-09-08T06:00:00,2025-09-08T13:13:10.388001,7.22,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290456,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2025-09-25T16:00:00,2025-09-25T16:37:36.377422,0.63,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290629,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,scheduled_maintenance,2026-06-12T15:00:00,2026-06-12T20:27:09.869861,5.45,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290638,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2026-06-17T12:00:00,2026-06-17T18:43:55.020892,6.73,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290658,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2026-07-11T04:00:00,2026-07-11T18:10:15.350136,14.17,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290669,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,scheduled_maintenance,2026-07-21T19:00:00,2026-07-22T03:11:56.998283,8.2,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290695,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2026-08-21T16:00:00,2026-08-22T07:13:59.162109,15.23,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290706,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2026-08-31T18:00:00,2026-08-31T19:30:48.768530,1.51,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290901,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2024-06-10T08:00:00,2024-06-10T08:07:06.699764,0.12,compressor fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.290948,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,scheduled_maintenance,2024-08-19T17:00:00,2024-08-19T23:42:01.881472,6.7,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.291125,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,scheduled_maintenance,2025-05-05T01:00:00,2025-05-05T07:11:46.488657,6.2,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.291142,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2025-05-22T19:00:00,2025-05-23T10:27:06.390391,15.45,rod breakage
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.291161,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2025-06-13T03:00:00,2025-06-14T00:56:17.510275,21.94,compressor fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.291192,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,scheduled_maintenance,2025-07-23T16:00:00,2025-07-24T16:25:14.323773,24.42,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.291206,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2025-08-05T13:00:00,2025-08-06T05:38:39.155156,16.64,bit wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.291245,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2025-09-25T12:00:00,2025-09-25T15:52:26.627836,3.87,rod breakage
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.291262,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,scheduled_maintenance,2025-10-14T00:00:00,2025-10-14T12:54:36.261047,12.91,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.291295,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2025-11-25T03:00:00,2025-11-26T04:28:33.264065,25.48,rod breakage
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.291355,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2026-02-16T08:00:00,2026-02-17T00:02:15.133961,16.04,compressor fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.291380,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,scheduled_maintenance,2026-03-18T03:00:00,2026-03-18T04:30:12.841075,1.5,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.291414,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2026-05-01T04:00:00,2026-05-02T13:39:14.658672,33.65,compressor fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.291669,MOIL-BHR-02,MOIL-BHR-02-SHO-01,shovel,scheduled_maintenance,2024-05-04T00:00:00,2024-05-04T06:12:41.986792,6.21,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.291688,MOIL-BHR-02,MOIL-BHR-02-SHO-01,shovel,breakdown,2024-05-24T00:00:00,2024-05-24T15:25:54.810727,15.43,track failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.291922,MOIL-BHR-02,MOIL-BHR-02-SHO-01,shovel,breakdown,2025-05-07T13:00:00,2025-05-08T09:42:02.449124,20.7,boom pin wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.291956,MOIL-BHR-02,MOIL-BHR-02-SHO-01,shovel,breakdown,2025-06-25T19:00:00,2025-06-26T18:50:22.128813,23.84,track failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292098,MOIL-BHR-02,MOIL-BHR-02-SHO-01,shovel,scheduled_maintenance,2026-01-25T05:00:00,2026-01-25T10:00:38.054809,5.01,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292207,MOIL-BHR-02,MOIL-BHR-02-SHO-01,shovel,scheduled_maintenance,2026-07-03T09:00:00,2026-07-03T21:27:43.482535,12.46,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292231,MOIL-BHR-02,MOIL-BHR-02-SHO-01,shovel,breakdown,2026-08-01T05:00:00,2026-08-02T11:55:53.127687,30.93,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292307,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2023-11-08T01:00:00,2023-11-08T09:49:21.534818,8.82,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292325,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,scheduled_maintenance,2023-11-29T05:00:00,2023-11-29T06:48:04.149411,1.8,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292337,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,scheduled_maintenance,2023-12-12T02:00:00,2023-12-12T11:18:34.436202,9.31,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292427,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2024-04-21T08:00:00,2024-04-21T18:50:43.096799,10.85,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292436,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,scheduled_maintenance,2024-05-01T16:00:00,2024-05-02T01:30:45.025925,9.51,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292441,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2024-05-02T17:00:00,2024-05-03T05:16:35.763663,12.28,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292457,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2024-05-14T09:00:00,2024-05-14T19:03:11.813955,10.05,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292483,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2024-06-18T17:00:00,2024-06-18T21:07:50.653106,4.13,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292616,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2024-12-27T13:00:00,2024-12-27T20:58:37.968356,7.98,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292630,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2025-01-10T05:00:00,2025-01-10T21:06:58.725151,16.12,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292669,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2025-03-01T15:00:00,2025-03-01T20:01:18.833481,5.02,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292690,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2025-03-25T12:00:00,2025-03-25T21:10:33.927511,9.18,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292738,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2025-05-28T04:00:00,2025-05-28T08:41:38.301816,4.69,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292787,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2025-07-30T03:00:00,2025-07-30T11:27:02.148367,8.45,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292813,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,scheduled_maintenance,2025-09-02T11:00:00,2025-09-02T13:51:38.335580,2.86,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.292955,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,scheduled_maintenance,2026-03-29T16:00:00,2026-03-29T18:38:50.053021,2.65,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293046,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,scheduled_maintenance,2026-08-06T13:00:00,2026-08-06T17:32:34.091342,4.54,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293104,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2023-10-24T01:00:00,2023-10-24T04:18:20.428321,3.31,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293126,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,scheduled_maintenance,2023-11-18T15:00:00,2023-11-18T23:23:33.142932,8.39,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293153,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2023-12-21T08:00:00,2023-12-21T17:36:51.942628,9.61,boom pin wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293303,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2024-07-25T00:00:00,2024-07-25T08:19:59.763239,8.33,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293318,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,scheduled_maintenance,2024-08-11T05:00:00,2024-08-11T14:44:27.249233,9.74,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293342,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2024-09-06T14:00:00,2024-09-07T00:17:03.745325,10.28,boom pin wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293367,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2024-10-06T13:00:00,2024-10-07T05:03:20.433220,16.06,boom pin wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293391,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,scheduled_maintenance,2024-11-03T19:00:00,2024-11-04T07:48:52.920456,12.81,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293408,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2024-11-22T08:00:00,2024-11-22T17:59:58.663773,10.0,boom pin wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293479,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2025-02-27T03:00:00,2025-02-27T14:56:51.954486,11.95,track failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293556,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2025-06-14T03:00:00,2025-06-14T07:16:44.354027,4.28,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293583,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2025-07-16T17:00:00,2025-07-17T00:00:11.753838,7.0,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293610,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2025-08-19T04:00:00,2025-08-19T10:07:30.894404,6.13,boom pin wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293647,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,scheduled_maintenance,2025-10-06T09:00:00,2025-10-06T18:54:03.573015,9.9,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293689,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2025-12-01T01:00:00,2025-12-01T13:44:56.933573,12.75,boom pin wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293821,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,scheduled_maintenance,2026-06-08T21:00:00,2026-06-09T08:47:25.526079,11.79,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.293913,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,scheduled_maintenance,2023-10-20T03:00:00,2023-10-20T14:17:58.427397,11.3,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.294027,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,breakdown,2024-04-07T03:00:00,2024-04-07T17:55:36.400986,14.93,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.294285,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,scheduled_maintenance,2025-04-20T09:00:00,2025-04-20T15:27:53.451475,6.46,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.294300,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,scheduled_maintenance,2025-05-06T19:00:00,2025-05-07T04:48:51.866308,9.81,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.294314,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,breakdown,2025-05-20T20:00:00,2025-05-20T23:22:32.071377,3.38,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.294339,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,scheduled_maintenance,2025-06-20T02:00:00,2025-06-20T06:03:59.966714,4.07,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.294472,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,breakdown,2026-01-06T06:00:00,2026-01-06T16:39:55.283873,10.67,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.294489,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,breakdown,2026-01-24T21:00:00,2026-01-25T14:45:27.121417,17.76,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.294578,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,scheduled_maintenance,2026-05-21T21:00:00,2026-05-21T22:24:33.476077,1.41,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.294602,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,breakdown,2026-06-18T15:00:00,2026-06-19T00:46:55.250775,9.78,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.294616,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,breakdown,2026-07-01T10:00:00,2026-07-02T00:48:47.483550,14.81,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.294632,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,breakdown,2026-07-15T19:00:00,2026-07-16T16:34:21.616135,21.57,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.294873,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,breakdown,2024-07-02T10:00:00,2024-07-03T05:43:51.370628,19.73,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.294886,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,breakdown,2024-07-12T21:00:00,2024-07-13T00:41:59.757089,3.7,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.294894,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,breakdown,2024-07-16T00:00:00,2024-07-16T09:11:44.468419,9.2,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.294926,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,breakdown,2024-08-26T01:00:00,2024-08-26T23:06:48.325018,22.11,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.295131,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,scheduled_maintenance,2025-06-21T01:00:00,2025-06-21T01:32:52.557381,0.55,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.295182,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,scheduled_maintenance,2025-08-30T10:00:00,2025-08-30T17:27:54.087754,7.47,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.295264,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,breakdown,2025-12-24T16:00:00,2025-12-25T11:41:13.755252,19.69,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.295304,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,breakdown,2026-02-14T13:00:00,2026-02-15T06:16:11.735004,17.27,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.295345,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,scheduled_maintenance,2026-04-10T20:00:00,2026-04-10T22:47:26.771846,2.79,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.295484,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2023-11-05T09:00:00,2023-11-05T18:47:47.953542,9.8,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.295509,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2023-12-04T00:00:00,2023-12-04T07:13:32.939258,7.23,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.295557,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2024-02-06T04:00:00,2024-02-06T12:02:38.134643,8.04,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.295572,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,scheduled_maintenance,2024-02-23T10:00:00,2024-02-24T21:27:38.144239,35.46,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.295605,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,scheduled_maintenance,2024-04-05T09:00:00,2024-04-05T15:36:47.004081,6.61,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.295630,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2024-05-05T14:00:00,2024-05-06T00:27:45.973491,10.46,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.295684,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2024-07-17T02:00:00,2024-07-17T03:14:19.977582,1.24,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.295936,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2025-07-26T18:00:00,2025-07-28T06:51:44.256918,36.86,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.295974,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2025-09-16T06:00:00,2025-09-16T18:32:48.598146,12.55,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.296080,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2026-02-12T16:00:00,2026-02-13T10:22:13.169996,18.37,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.296149,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2026-05-18T03:00:00,2026-05-18T22:25:35.076726,19.43,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.296157,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2026-05-22T12:00:00,2026-05-23T02:56:42.498311,14.95,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.296186,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,scheduled_maintenance,2026-06-28T04:00:00,2026-06-28T09:42:59.665617,5.72,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.296395,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2024-04-24T17:00:00,2024-04-24T17:03:38.951099,0.06,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.296505,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2024-09-28T17:00:00,2024-09-29T05:29:53.238088,12.5,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.296612,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2025-02-28T18:00:00,2025-03-01T00:56:10.000171,6.94,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.296640,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2025-04-02T10:00:00,2025-04-02T15:35:31.015878,5.59,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.296687,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2025-06-05T19:00:00,2025-06-06T06:42:28.302639,11.71,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.296714,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2025-07-07T05:00:00,2025-07-07T09:29:23.068419,4.49,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.296764,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2025-09-13T07:00:00,2025-09-13T09:50:21.270893,2.84,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.296966,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,scheduled_maintenance,2026-07-04T07:00:00,2026-07-04T21:52:11.176802,14.87,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.296975,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2026-07-07T04:00:00,2026-07-07T17:07:21.932321,13.12,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.296981,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2026-07-09T09:00:00,2026-07-09T22:00:52.530622,13.01,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.296994,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2026-07-22T11:00:00,2026-07-22T19:23:27.675907,8.39,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.297001,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,scheduled_maintenance,2026-07-26T17:00:00,2026-07-26T21:18:44.543475,4.31,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.297486,MOIL-BHR-02,MOIL-BHR-02-DRI-08,drill,breakdown,2025-07-15T01:00:00,2025-07-15T18:49:27.941176,17.82,compressor fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.297520,MOIL-BHR-02,MOIL-BHR-02-DRI-08,drill,breakdown,2025-08-28T19:00:00,2025-08-29T04:04:20.640983,9.07,bit wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.297548,MOIL-BHR-02,MOIL-BHR-02-DRI-08,drill,breakdown,2025-09-30T10:00:00,2025-09-30T14:06:41.791335,4.11,rod breakage
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.297620,MOIL-BHR-02,MOIL-BHR-02-DRI-08,drill,scheduled_maintenance,2026-01-10T10:00:00,2026-01-10T16:18:40.296316,6.31,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.297692,MOIL-BHR-02,MOIL-BHR-02-DRI-08,drill,breakdown,2026-04-20T14:00:00,2026-04-21T07:00:24.694916,17.01,compressor fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.297800,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2023-09-23T01:00:00,2023-09-23T12:01:53.417088,11.03,transmission fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.297861,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2023-12-15T01:00:00,2023-12-15T07:49:38.374851,6.83,brake wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.297919,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2024-03-05T15:00:00,2024-03-05T19:41:03.597416,4.68,tyre failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.297969,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,scheduled_maintenance,2024-05-22T14:00:00,2024-05-22T22:49:13.337147,8.82,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.298044,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2024-09-05T20:00:00,2024-09-06T08:49:06.538885,12.82,tyre failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.298058,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,scheduled_maintenance,2024-09-20T11:00:00,2024-09-20T18:18:11.454173,7.3,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.298090,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,scheduled_maintenance,2024-11-01T00:00:00,2024-11-01T05:03:02.632402,5.05,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.298281,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,scheduled_maintenance,2025-08-04T03:00:00,2025-08-04T05:54:55.818469,2.92,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.298301,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2025-08-27T16:00:00,2025-08-27T20:26:57.134175,4.45,brake wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.298325,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2025-09-25T02:00:00,2025-09-25T04:55:31.009325,2.93,tyre failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.298391,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2025-12-25T20:00:00,2025-12-26T00:43:55.025275,4.73,brake wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.298396,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,scheduled_maintenance,2025-12-28T07:00:00,2025-12-28T09:35:16.897948,2.59,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.298403,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2025-12-31T16:00:00,2026-01-02T08:56:57.087764,40.95,brake wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.298548,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2026-08-06T12:00:00,2026-08-06T21:10:12.313476,9.17,brake wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.298602,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,scheduled_maintenance,2023-10-17T01:00:00,2023-10-17T05:33:31.102565,4.56,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.298709,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2024-03-16T09:00:00,2024-03-16T15:12:44.801910,6.21,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.298797,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2024-07-19T07:00:00,2024-07-20T06:18:39.688683,23.31,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.298936,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2025-02-06T08:00:00,2025-02-06T10:40:02.891365,2.67,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299022,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,scheduled_maintenance,2025-06-08T18:00:00,2025-06-08T19:29:57.603440,1.5,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299057,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,scheduled_maintenance,2025-07-13T01:00:00,2025-07-13T02:42:09.408553,1.7,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299069,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2025-07-24T01:00:00,2025-07-24T10:10:31.349159,9.18,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299084,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,scheduled_maintenance,2025-08-09T10:00:00,2025-08-09T15:09:31.338476,5.16,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299137,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2025-10-18T12:00:00,2025-10-19T16:42:35.654106,28.71,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299146,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2025-10-24T05:00:00,2025-10-24T12:28:25.868651,7.47,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299176,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,scheduled_maintenance,2025-12-02T00:00:00,2025-12-02T01:06:15.287812,1.1,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299305,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2026-06-04T11:00:00,2026-06-05T06:38:02.964915,19.63,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299340,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2026-07-19T07:00:00,2026-07-19T19:39:04.717083,12.65,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299385,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2026-09-18T03:00:00,2026-09-18T10:45:42.940725,7.76,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299414,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,breakdown,2023-10-23T14:00:00,2023-10-23T18:03:25.527938,4.06,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299460,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,breakdown,2023-12-22T04:00:00,2023-12-22T14:55:50.849930,10.93,idler seizure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299549,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,breakdown,2024-04-25T09:00:00,2024-04-25T21:17:11.917723,12.29,misalignment
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299752,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,breakdown,2025-02-13T09:00:00,2025-02-13T17:35:36.030558,8.59,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299851,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,breakdown,2025-07-04T15:00:00,2025-07-04T19:04:31.084570,4.08,idler seizure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.299909,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,scheduled_maintenance,2025-09-23T08:00:00,2025-09-23T20:58:36.870478,12.98,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.300081,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,scheduled_maintenance,2026-06-02T08:00:00,2026-06-02T11:37:03.021745,3.62,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.300094,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,breakdown,2026-06-14T15:00:00,2026-06-14T18:26:32.011718,3.44,idler seizure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.300253,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,breakdown,2024-01-28T20:00:00,2024-01-29T08:27:15.785263,12.45,brake wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.300380,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,scheduled_maintenance,2024-07-29T02:00:00,2024-07-29T11:53:13.091107,9.89,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.300392,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,breakdown,2024-08-09T15:00:00,2024-08-10T15:34:43.829943,24.58,brake wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.300403,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,scheduled_maintenance,2024-08-21T11:00:00,2024-08-21T21:26:27.030891,10.44,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.300455,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,breakdown,2024-11-07T09:00:00,2024-11-07T11:48:36.064669,2.81,tyre failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.300499,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,scheduled_maintenance,2025-01-07T15:00:00,2025-01-07T20:26:27.988325,5.44,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.300519,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,breakdown,2025-01-24T18:00:00,2025-01-25T01:59:16.842950,7.99,transmission fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.300562,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,breakdown,2025-03-23T08:00:00,2025-03-23T14:11:26.277797,6.19,transmission fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.300859,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,breakdown,2026-06-06T04:00:00,2026-06-06T09:47:27.842524,5.79,tyre failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.300876,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,scheduled_maintenance,2026-06-25T01:00:00,2026-06-25T13:42:18.345591,12.71,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.300914,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,scheduled_maintenance,2026-08-18T09:00:00,2026-08-18T14:13:51.165145,5.23,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301045,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,scheduled_maintenance,2024-02-29T18:00:00,2024-02-29T19:24:45.980928,1.41,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301086,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,scheduled_maintenance,2024-04-24T00:00:00,2024-04-24T04:51:49.726850,4.86,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301149,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,scheduled_maintenance,2024-07-22T11:00:00,2024-07-22T16:18:55.802823,5.32,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301162,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,scheduled_maintenance,2024-08-05T18:00:00,2024-08-06T04:44:35.340413,10.74,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301169,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,breakdown,2024-08-08T21:00:00,2024-08-09T12:24:33.943370,15.41,rod breakage
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301179,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,scheduled_maintenance,2024-08-15T07:00:00,2024-08-15T10:38:02.548138,3.63,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301348,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,breakdown,2025-04-18T19:00:00,2025-04-19T22:15:31.771384,27.26,rod breakage
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301384,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,scheduled_maintenance,2025-06-05T21:00:00,2025-06-05T23:16:44.574823,2.28,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301400,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,breakdown,2025-06-21T07:00:00,2025-06-21T11:26:24.423553,4.44,compressor fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301465,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,breakdown,2025-09-20T08:00:00,2025-09-20T20:57:40.508905,12.96,bit wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301640,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,breakdown,2026-06-02T02:00:00,2026-06-02T11:03:40.451841,9.06,rod breakage
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301652,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,breakdown,2026-06-13T14:00:00,2026-06-14T15:00:32.351127,25.01,compressor fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301667,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,breakdown,2026-06-28T01:00:00,2026-06-28T06:54:26.054422,5.91,rod breakage
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301824,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2024-02-11T20:00:00,2024-02-12T18:01:47.918973,22.03,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301852,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2024-03-17T01:00:00,2024-03-17T09:47:15.769555,8.79,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301891,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2024-05-08T13:00:00,2024-05-08T18:20:18.005490,5.34,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301914,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,scheduled_maintenance,2024-06-04T15:00:00,2024-06-05T02:08:25.510958,11.14,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301958,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2024-08-01T00:00:00,2024-08-01T20:13:00.910340,20.22,motor trip
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.301999,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2024-09-26T15:00:00,2024-09-26T20:59:27.543085,5.99,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302022,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,scheduled_maintenance,2024-10-24T04:00:00,2024-10-24T10:03:38.265877,6.06,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302083,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,scheduled_maintenance,2025-01-17T13:00:00,2025-01-17T22:03:06.709998,9.05,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302163,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2025-05-06T19:00:00,2025-05-07T03:49:02.231875,8.82,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302257,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2025-09-17T21:00:00,2025-09-18T00:49:19.256882,3.82,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302330,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,scheduled_maintenance,2025-12-28T08:00:00,2025-12-28T23:15:27.051315,15.26,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302365,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2026-02-11T02:00:00,2026-02-11T10:49:29.657675,8.82,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302443,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2026-05-28T18:00:00,2026-05-29T06:37:09.002775,12.62,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302472,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2026-07-03T00:00:00,2026-07-03T10:45:01.275011,10.75,impeller wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302509,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2026-08-21T04:00:00,2026-08-22T00:16:53.538216,20.28,seal failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302526,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,scheduled_maintenance,2026-09-09T11:00:00,2026-09-09T13:58:14.061661,2.97,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302562,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,scheduled_maintenance,2023-10-12T12:00:00,2023-10-13T05:49:27.038339,17.82,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302740,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2024-06-24T14:00:00,2024-06-24T21:42:24.251175,7.71,misalignment
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302765,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2024-07-24T03:00:00,2024-07-24T22:44:13.307837,19.74,idler seizure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302792,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,scheduled_maintenance,2024-08-27T00:00:00,2024-08-27T10:38:48.302476,10.65,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302819,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2024-09-29T15:00:00,2024-09-30T02:00:18.576895,11.01,idler seizure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302873,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2024-12-10T03:00:00,2024-12-11T11:49:48.911785,32.83,misalignment
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.302961,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2025-04-11T17:00:00,2025-04-12T13:11:41.592481,20.19,misalignment
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303008,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2025-06-13T02:00:00,2025-06-13T05:24:15.501849,3.4,idler seizure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303029,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,scheduled_maintenance,2025-07-06T21:00:00,2025-07-07T12:25:06.834144,15.42,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303047,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2025-07-25T00:00:00,2025-07-25T20:00:21.443167,20.01,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303093,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,scheduled_maintenance,2025-09-27T00:00:00,2025-09-27T01:39:49.742014,1.66,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303115,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2025-10-23T04:00:00,2025-10-24T18:26:57.524390,38.45,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303166,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,scheduled_maintenance,2026-01-01T16:00:00,2026-01-02T02:17:00.019770,10.28,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303207,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2026-02-23T13:00:00,2026-02-23T15:27:05.094390,2.45,misalignment
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303258,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2026-05-03T03:00:00,2026-05-03T05:27:40.367111,2.46,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303305,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,scheduled_maintenance,2026-07-07T15:00:00,2026-07-07T22:53:02.932807,7.88,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303350,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,scheduled_maintenance,2026-09-07T10:00:00,2026-09-07T22:28:23.661491,12.47,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303528,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,scheduled_maintenance,2024-05-22T09:00:00,2024-05-22T13:27:38.418715,4.46,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303617,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2024-09-25T01:00:00,2024-09-25T05:29:33.795571,4.49,bearing failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303738,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2025-03-07T14:00:00,2025-03-07T19:07:48.516563,5.13,jam
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303825,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2025-07-09T10:00:00,2025-07-09T17:22:33.871862,7.38,jam
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303834,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2025-07-15T13:00:00,2025-07-16T03:13:45.808185,14.23,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303908,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2025-10-29T03:00:00,2025-10-29T15:04:18.143256,12.07,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303935,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2025-12-04T09:00:00,2025-12-04T17:51:02.815610,8.85,bearing failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.303975,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,scheduled_maintenance,2026-02-01T04:00:00,2026-02-01T08:47:06.676168,4.79,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304001,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2026-03-03T04:00:00,2026-03-03T10:20:15.911335,6.34,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304109,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2026-08-03T01:00:00,2026-08-03T21:42:19.183878,20.71,bearing failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304231,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2024-01-23T06:00:00,2024-01-23T13:40:32.960908,7.68,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304250,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,scheduled_maintenance,2024-02-14T15:00:00,2024-02-15T00:49:49.008325,9.83,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304268,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2024-03-03T18:00:00,2024-03-05T01:43:55.452323,31.73,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304317,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2024-05-08T03:00:00,2024-05-08T11:00:51.686428,8.01,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304331,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,scheduled_maintenance,2024-05-22T19:00:00,2024-05-23T00:25:53.611784,5.43,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304369,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2024-07-01T18:00:00,2024-07-01T21:50:15.045930,3.84,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304385,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,scheduled_maintenance,2024-07-19T13:00:00,2024-07-19T14:47:50.414553,1.8,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304406,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2024-08-13T19:00:00,2024-08-14T12:01:24.364133,17.02,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304483,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2024-12-06T06:00:00,2024-12-07T06:45:10.626835,24.75,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304591,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2025-05-09T05:00:00,2025-05-09T22:08:36.185626,17.14,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304634,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2025-07-04T17:00:00,2025-07-05T05:29:35.995588,12.49,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304645,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2025-07-13T08:00:00,2025-07-13T14:44:48.813521,6.75,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304820,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2026-03-16T12:00:00,2026-03-17T12:39:46.783798,24.66,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304858,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2026-04-25T13:00:00,2026-04-26T04:35:54.209511,15.6,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304908,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2026-06-30T14:00:00,2026-06-30T22:42:16.611929,8.7,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304926,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2026-07-21T04:00:00,2026-07-21T19:49:35.552978,15.83,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304938,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2026-08-03T05:00:00,2026-08-05T01:55:34.056157,44.93,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304944,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2026-08-05T07:00:00,2026-08-05T15:16:24.032607,8.27,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.304955,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2026-08-15T15:00:00,2026-08-15T22:57:16.491710,7.95,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305073,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2024-01-29T01:00:00,2024-01-29T02:58:53.207608,1.98,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305171,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2024-06-15T02:00:00,2024-06-15T09:27:14.197970,7.45,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305194,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2024-07-12T11:00:00,2024-07-12T19:33:23.422173,8.56,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305301,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2024-12-09T04:00:00,2024-12-09T13:44:06.125807,9.74,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305318,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2024-12-28T20:00:00,2024-12-29T21:06:12.941466,25.1,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305493,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2025-09-08T11:00:00,2025-09-08T15:53:08.015945,4.89,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305502,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,scheduled_maintenance,2025-09-15T10:00:00,2025-09-15T12:27:59.735702,2.47,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305581,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,scheduled_maintenance,2025-12-31T00:00:00,2025-12-31T10:05:58.233961,10.1,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305622,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2026-02-22T09:00:00,2026-02-22T15:29:56.289566,6.5,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305693,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2026-06-02T06:00:00,2026-06-02T12:29:56.056446,6.5,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305698,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2026-06-03T16:00:00,2026-06-04T13:08:44.482888,21.15,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305722,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2026-07-01T16:00:00,2026-07-02T00:32:52.243398,8.55,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305776,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,scheduled_maintenance,2026-09-15T10:00:00,2026-09-15T10:45:39.992708,0.76,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305832,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2023-11-24T02:00:00,2023-11-24T08:32:07.080191,6.54,bearing failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305927,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2024-04-05T01:00:00,2024-04-05T13:22:22.772950,12.37,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.305937,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2024-04-12T03:00:00,2024-04-12T16:58:33.046871,13.98,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306004,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2024-07-14T20:00:00,2024-07-15T04:29:43.374703,8.5,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306025,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2024-08-08T01:00:00,2024-08-08T08:25:36.326163,7.43,jam
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306048,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2024-09-04T06:00:00,2024-09-04T07:54:11.681742,1.9,jam
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306055,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2024-09-07T01:00:00,2024-09-07T11:28:45.622529,10.48,jam
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306215,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2025-04-23T20:00:00,2025-04-24T05:49:02.493595,9.82,bearing failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306261,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2025-06-25T13:00:00,2025-06-25T20:45:22.983464,7.76,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306271,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2025-07-03T10:00:00,2025-07-03T13:37:03.202419,3.62,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306284,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2025-07-17T11:00:00,2025-07-17T12:11:20.072279,1.19,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306328,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2025-09-11T21:00:00,2025-09-12T02:55:32.878486,5.93,jam
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306476,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2026-04-16T16:00:00,2026-04-16T23:39:50.397859,7.66,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306491,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2026-05-01T15:00:00,2026-05-01T18:41:41.638185,3.69,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306499,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2026-05-08T13:00:00,2026-05-08T15:26:10.091420,2.44,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306567,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2026-08-13T11:00:00,2026-08-13T22:11:12.412854,11.19,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306648,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,scheduled_maintenance,2023-12-05T13:00:00,2023-12-05T23:30:44.486991,10.51,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306663,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,scheduled_maintenance,2023-12-21T16:00:00,2023-12-22T02:11:13.532727,10.19,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306725,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,breakdown,2024-03-16T20:00:00,2024-03-17T06:35:05.226312,10.58,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306769,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,breakdown,2024-05-13T11:00:00,2024-05-14T06:00:11.419285,19.0,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306796,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,scheduled_maintenance,2024-06-17T00:00:00,2024-06-17T12:31:29.841046,12.52,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306809,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,breakdown,2024-06-28T12:00:00,2024-06-28T20:46:48.340011,8.78,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306840,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,scheduled_maintenance,2024-08-08T09:00:00,2024-08-08T11:36:49.692504,2.61,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.306987,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,scheduled_maintenance,2025-03-12T00:00:00,2025-03-12T16:17:26.882485,16.29,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.307046,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,breakdown,2025-06-03T04:00:00,2025-06-03T05:38:05.932409,1.63,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.307084,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,breakdown,2025-07-23T17:00:00,2025-07-23T21:05:16.847516,4.09,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.307095,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,scheduled_maintenance,2025-08-03T11:00:00,2025-08-03T15:11:15.857708,4.19,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.307105,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,scheduled_maintenance,2025-08-10T18:00:00,2025-08-10T20:10:58.990273,2.18,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.307199,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,breakdown,2025-12-23T10:00:00,2025-12-23T12:34:20.082612,2.57,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.307412,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,breakdown,2023-10-30T02:00:00,2023-10-30T16:23:46.901937,14.4,bucket tooth loss
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.307521,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,breakdown,2024-03-30T08:00:00,2024-03-30T15:43:18.199540,7.72,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.307658,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,scheduled_maintenance,2024-10-17T13:00:00,2024-10-17T19:10:47.983690,6.18,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.307718,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,scheduled_maintenance,2025-01-08T17:00:00,2025-01-09T09:42:22.130653,16.71,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.307734,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,scheduled_maintenance,2025-01-26T05:00:00,2025-01-26T06:56:53.557515,1.95,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.307745,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,scheduled_maintenance,2025-02-06T16:00:00,2025-02-06T19:09:39.274963,3.16,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.307798,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,breakdown,2025-04-19T04:00:00,2025-04-19T11:04:59.650035,7.08,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.307971,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,scheduled_maintenance,2026-01-01T20:00:00,2026-01-02T01:51:59.954015,5.87,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.308063,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,breakdown,2026-05-11T18:00:00,2026-05-12T18:27:11.225875,24.45,engine overheat
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.308103,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,scheduled_maintenance,2026-07-03T04:00:00,2026-07-03T08:54:04.275387,4.9,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.308137,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,scheduled_maintenance,2026-08-18T14:00:00,2026-08-18T18:35:28.209512,4.59,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.308146,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,breakdown,2026-08-23T13:00:00,2026-08-23T17:41:11.670545,4.69,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.308195,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,breakdown,2023-10-27T02:00:00,2023-10-27T16:44:03.116199,14.73,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.308319,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,scheduled_maintenance,2024-04-20T08:00:00,2024-04-20T12:53:52.248845,4.9,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.308466,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,breakdown,2024-11-20T06:00:00,2024-11-20T07:45:59.517774,1.77,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.308489,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,breakdown,2024-12-16T06:00:00,2024-12-16T21:50:17.752912,15.84,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.308500,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,scheduled_maintenance,2024-12-27T11:00:00,2024-12-27T13:55:39.146943,2.93,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.308551,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,breakdown,2025-03-06T04:00:00,2025-03-06T06:51:42.880118,2.86,jam
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.308649,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,scheduled_maintenance,2025-07-23T04:00:00,2025-07-23T15:47:19.528766,11.79,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.308721,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,breakdown,2025-11-02T15:00:00,2025-11-02T19:36:56.863224,4.62,bearing failure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.308853,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,breakdown,2026-05-09T01:00:00,2026-05-09T06:54:20.488411,5.91,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.308865,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,breakdown,2026-05-21T15:00:00,2026-05-21T21:02:50.085212,6.05,liner wear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.309017,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,scheduled_maintenance,2023-12-27T05:00:00,2023-12-27T11:49:47.758398,6.83,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.309237,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,breakdown,2024-11-04T10:00:00,2024-11-04T15:59:26.574406,5.99,misalignment
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.309279,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,scheduled_maintenance,2024-12-31T20:00:00,2025-01-01T01:09:49.767148,5.16,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.309294,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,scheduled_maintenance,2025-01-15T03:00:00,2025-01-15T20:33:15.375522,17.55,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.309371,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,breakdown,2025-05-03T16:00:00,2025-05-04T00:23:17.205894,8.39,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.309433,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,breakdown,2025-07-28T12:00:00,2025-07-28T15:37:34.062996,3.63,idler seizure
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.309606,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,breakdown,2026-04-04T16:00:00,2026-04-05T00:24:23.730692,8.41,misalignment
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.309647,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,breakdown,2026-05-28T17:00:00,2026-05-28T18:30:19.367908,1.51,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.309692,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,breakdown,2026-07-27T12:00:00,2026-07-28T08:37:22.271901,20.62,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.309709,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,breakdown,2026-08-15T11:00:00,2026-08-15T22:08:59.009269,11.15,belt tear
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.309726,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,scheduled_maintenance,2026-09-04T07:00:00,2026-09-04T22:47:42.824946,15.8,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.309760,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,breakdown,2023-10-15T00:00:00,2023-10-16T06:02:58.271172,30.05,axle fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.309867,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,scheduled_maintenance,2024-03-18T17:00:00,2024-03-19T01:34:33.471943,8.58,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.309915,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,scheduled_maintenance,2024-05-22T14:00:00,2024-05-23T00:02:09.907442,10.04,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.310193,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,breakdown,2025-07-04T15:00:00,2025-07-05T07:18:30.737429,16.31,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.310212,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,breakdown,2025-07-26T11:00:00,2025-07-26T13:20:30.017722,2.34,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.310241,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,breakdown,2025-08-29T13:00:00,2025-08-29T16:37:48.178438,3.63,hydraulic leak
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.310276,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,scheduled_maintenance,2025-10-14T14:00:00,2025-10-15T08:38:50.378895,18.65,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.310313,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,scheduled_maintenance,2025-12-02T14:00:00,2025-12-02T18:45:14.989577,4.75,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.310354,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,breakdown,2026-01-25T08:00:00,2026-01-25T23:07:56.313316,15.13,axle fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.310408,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,breakdown,2026-04-09T10:00:00,2026-04-10T00:22:48.540892,14.38,axle fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.310435,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,scheduled_maintenance,2026-05-13T19:00:00,2026-05-13T20:59:52.319096,2.0,
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.310472,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,breakdown,2026-06-28T13:00:00,2026-06-28T19:13:08.278903,6.22,axle fault
-1.0.0,True,nakshatra-synthetic-v1,2026-09-21T13:00:24.310489,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,scheduled_maintenance,2026-07-18T09:00:00,2026-07-18T20:22:00.297846,11.37,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.090406,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2023-10-22T00:00:00,2023-10-23T02:04:53.892840,26.08,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.090755,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2024-07-13T01:00:00,2024-07-13T06:41:06.905628,5.69,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.090906,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,scheduled_maintenance,2025-02-15T08:00:00,2025-02-15T10:36:34.590294,2.61,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.090923,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,scheduled_maintenance,2025-03-04T13:00:00,2025-03-04T22:26:21.560612,9.44,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091037,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2025-08-27T20:00:00,2025-08-27T23:57:03.145751,3.95,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091048,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2025-09-03T20:00:00,2025-09-04T10:12:12.938487,14.2,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091167,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2026-03-01T14:00:00,2026-03-01T21:12:57.887538,7.22,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091213,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2026-05-01T04:00:00,2026-05-01T18:24:20.968803,14.41,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091220,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2026-05-02T05:00:00,2026-05-02T20:53:12.283822,15.89,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091234,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2026-05-14T20:00:00,2026-05-15T03:40:45.681853,7.68,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091249,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2026-05-31T02:00:00,2026-05-31T07:12:01.070913,5.2,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091288,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2026-07-23T13:00:00,2026-07-23T21:07:18.544501,8.12,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091319,MOIL-BAL-01,MOIL-BAL-01-PUM-01,pump,breakdown,2026-09-02T11:00:00,2026-09-02T17:31:04.143878,6.52,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091345,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,breakdown,2023-10-03T14:00:00,2023-10-04T04:17:17.495676,14.29,bit wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091383,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,breakdown,2023-11-24T14:00:00,2023-11-25T04:12:38.048154,14.21,bit wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091398,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,scheduled_maintenance,2023-12-11T12:00:00,2023-12-11T14:24:24.282175,2.41,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091528,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,breakdown,2024-06-20T02:00:00,2024-06-20T07:23:15.001830,5.39,rod breakage
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091804,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,breakdown,2025-07-24T02:00:00,2025-07-25T14:48:02.466781,36.8,rod breakage
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091813,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,breakdown,2025-07-27T07:00:00,2025-07-27T17:57:56.654301,10.97,compressor fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091961,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,scheduled_maintenance,2026-03-15T02:00:00,2026-03-15T07:53:06.899268,5.89,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.091974,MOIL-BAL-01,MOIL-BAL-01-DRI-02,drill,breakdown,2026-03-28T08:00:00,2026-03-28T18:38:11.850811,10.64,bit wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.092177,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2024-01-14T07:00:00,2024-01-14T11:06:17.028571,4.1,jam
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.092200,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,scheduled_maintenance,2024-02-10T03:00:00,2024-02-10T17:10:51.182301,14.18,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.092283,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2024-06-03T08:00:00,2024-06-03T10:29:21.853215,2.49,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.092292,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2024-06-10T14:00:00,2024-06-10T21:17:30.686513,7.29,bearing failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.092335,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2024-08-05T15:00:00,2024-08-05T18:18:06.061393,3.3,bearing failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.092373,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2024-09-27T07:00:00,2024-09-28T02:39:52.482294,19.66,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.092407,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2024-11-11T06:00:00,2024-11-11T08:22:06.488047,2.37,jam
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.092528,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2025-05-02T01:00:00,2025-05-02T12:49:05.521832,11.82,jam
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.092638,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2025-10-03T13:00:00,2025-10-04T14:02:39.128023,25.04,jam
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.092696,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2025-12-21T19:00:00,2025-12-22T04:42:40.209968,9.71,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.092726,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2026-01-26T10:00:00,2026-01-27T15:09:07.720831,29.15,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.092807,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,scheduled_maintenance,2026-05-19T15:00:00,2026-05-19T19:33:43.830220,4.56,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.092839,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2026-06-27T02:00:00,2026-06-27T12:20:13.917421,10.34,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.092874,MOIL-BAL-01,MOIL-BAL-01-CRU-03,crusher,breakdown,2026-08-16T11:00:00,2026-08-17T07:45:56.940652,20.77,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.093101,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,breakdown,2024-07-09T01:00:00,2024-07-10T02:55:10.650989,25.92,bit wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.093131,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,breakdown,2024-08-15T07:00:00,2024-08-15T16:41:15.295313,9.69,rod breakage
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.093246,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,breakdown,2025-01-22T02:00:00,2025-01-22T16:27:02.377823,14.45,rod breakage
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.093296,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,breakdown,2025-03-27T15:00:00,2025-03-28T06:47:16.770528,15.79,bit wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.093302,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,scheduled_maintenance,2025-03-30T14:00:00,2025-03-30T17:59:59.335073,4.0,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.093328,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,scheduled_maintenance,2025-05-01T04:00:00,2025-05-01T08:17:40.218013,4.29,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.093354,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,breakdown,2025-05-31T19:00:00,2025-06-01T02:24:48.112510,7.41,compressor fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.093390,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,breakdown,2025-07-16T05:00:00,2025-07-16T15:55:39.997523,10.93,compressor fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.093404,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,scheduled_maintenance,2025-07-31T08:00:00,2025-07-31T14:36:17.557083,6.6,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.093426,MOIL-BAL-01,MOIL-BAL-01-DRI-04,drill,breakdown,2025-08-23T00:00:00,2025-08-23T06:03:44.924828,6.06,rod breakage
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.093788,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2024-01-30T09:00:00,2024-01-30T21:23:53.282146,12.4,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.093809,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,scheduled_maintenance,2024-02-23T13:00:00,2024-02-23T17:28:58.059501,4.48,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.093838,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2024-03-27T18:00:00,2024-03-28T10:20:12.368103,16.34,misalignment
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.093861,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2024-04-22T04:00:00,2024-04-23T18:00:34.163099,38.01,misalignment
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094056,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2025-01-29T05:00:00,2025-01-29T16:25:30.440184,11.43,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094123,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2025-04-30T03:00:00,2025-04-30T09:55:30.788257,6.93,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094133,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2025-05-07T10:00:00,2025-05-07T18:09:20.836047,8.16,misalignment
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094159,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,scheduled_maintenance,2025-06-07T07:00:00,2025-06-07T08:01:58.279506,1.03,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094180,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2025-06-29T13:00:00,2025-06-30T06:46:23.008899,17.77,misalignment
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094351,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,scheduled_maintenance,2026-02-26T16:00:00,2026-02-26T19:19:48.338062,3.33,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094392,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,scheduled_maintenance,2026-04-20T16:00:00,2026-04-20T20:45:03.656173,4.75,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094443,MOIL-BAL-01,MOIL-BAL-01-CON-05,conveyor,breakdown,2026-06-27T06:00:00,2026-06-27T15:24:26.786317,9.41,idler seizure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094584,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2024-01-12T19:00:00,2024-01-13T03:27:04.678310,8.45,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094617,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2024-02-22T12:00:00,2024-02-22T21:35:52.574161,9.6,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094697,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2024-06-13T13:00:00,2024-06-13T19:37:45.908032,6.63,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094725,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2024-07-17T13:00:00,2024-07-18T00:24:52.890799,11.41,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094741,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,scheduled_maintenance,2024-08-04T11:00:00,2024-08-04T13:19:30.488759,2.33,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094778,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2024-09-22T06:00:00,2024-09-22T07:00:04.045715,1.0,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094822,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,scheduled_maintenance,2024-11-19T11:00:00,2024-11-19T17:14:35.934189,6.24,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094837,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2024-12-04T02:00:00,2024-12-04T08:47:24.610480,6.79,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094910,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2025-03-16T02:00:00,2025-03-16T21:55:26.584602,19.92,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.094974,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2025-06-12T08:00:00,2025-06-12T16:46:07.770851,8.77,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.095004,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2025-07-19T16:00:00,2025-07-19T22:24:47.709044,6.41,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.095033,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2025-08-23T11:00:00,2025-08-23T17:25:58.225333,6.43,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.095221,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,breakdown,2026-05-22T20:00:00,2026-05-23T04:17:15.859075,8.29,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.095240,MOIL-BAL-01,MOIL-BAL-01-EXC-06,excavator,scheduled_maintenance,2026-06-14T14:00:00,2026-06-14T20:46:30.541980,6.78,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.095422,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,breakdown,2024-03-02T14:00:00,2024-03-03T05:10:28.837144,15.17,boom pin wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.095574,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,breakdown,2024-10-06T14:00:00,2024-10-07T06:11:13.062142,16.19,track failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.095598,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,scheduled_maintenance,2024-11-05T12:00:00,2024-11-05T16:42:33.696271,4.71,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.095608,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,scheduled_maintenance,2024-11-14T10:00:00,2024-11-14T16:18:12.580263,6.3,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.095651,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,scheduled_maintenance,2025-01-10T15:00:00,2025-01-10T21:44:55.760574,6.75,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.095695,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,breakdown,2025-03-10T06:00:00,2025-03-10T15:49:02.699624,9.82,boom pin wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.095765,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,scheduled_maintenance,2025-06-15T00:00:00,2025-06-15T10:52:19.791696,10.87,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.095885,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,scheduled_maintenance,2025-12-07T15:00:00,2025-12-08T01:09:25.717715,10.16,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.095901,MOIL-BAL-01,MOIL-BAL-01-SHO-07,shovel,breakdown,2025-12-23T13:00:00,2025-12-23T20:38:41.072483,7.64,boom pin wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.096148,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,scheduled_maintenance,2023-12-20T18:00:00,2023-12-20T20:50:07.858817,2.84,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.096156,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,breakdown,2023-12-24T19:00:00,2023-12-24T23:44:21.820924,4.74,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.096203,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,breakdown,2024-02-24T09:00:00,2024-02-25T01:26:24.843031,16.44,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.096328,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,scheduled_maintenance,2024-08-22T19:00:00,2024-08-22T21:04:04.534737,2.07,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.096368,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,breakdown,2024-10-13T14:00:00,2024-10-14T11:16:05.250627,21.27,axle fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.096535,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,scheduled_maintenance,2025-06-13T02:00:00,2025-06-13T22:15:05.187921,20.25,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.096587,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,breakdown,2025-08-22T14:00:00,2025-08-23T13:20:18.379825,23.34,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.096723,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,breakdown,2026-03-06T11:00:00,2026-03-06T18:15:42.976132,7.26,axle fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.096746,MOIL-BAL-01,MOIL-BAL-01-LOA-08,loader,scheduled_maintenance,2026-04-02T06:00:00,2026-04-02T09:43:05.462305,3.72,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.096907,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2023-11-22T12:00:00,2023-11-22T15:12:35.708164,3.21,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.096930,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2023-12-19T01:00:00,2023-12-19T08:48:36.445732,7.81,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.096945,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2024-01-04T12:00:00,2024-01-04T16:55:12.884077,4.92,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097005,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2024-03-27T16:00:00,2024-03-28T02:02:54.338888,10.05,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097037,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2024-05-05T03:00:00,2024-05-05T10:18:05.229979,7.3,misalignment
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097048,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2024-05-15T16:00:00,2024-05-16T13:23:13.514033,21.39,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097077,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2024-06-19T10:00:00,2024-06-20T02:41:03.164245,16.68,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097109,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2024-07-30T02:00:00,2024-07-31T06:42:47.448873,28.71,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097122,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2024-08-09T19:00:00,2024-08-10T10:37:52.694538,15.63,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097311,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2025-04-30T11:00:00,2025-04-30T20:15:47.347122,9.26,misalignment
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097377,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2025-07-27T01:00:00,2025-07-27T08:33:04.825859,7.55,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097382,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2025-07-28T11:00:00,2025-07-28T13:09:36.594295,2.16,idler seizure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097427,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2025-09-26T20:00:00,2025-09-27T01:56:39.950465,5.94,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097448,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2025-10-21T21:00:00,2025-10-22T01:22:20.771006,4.37,idler seizure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097471,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2025-11-16T21:00:00,2025-11-17T04:49:03.287987,7.82,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097523,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2026-01-27T00:00:00,2026-01-27T08:21:33.136899,8.36,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097633,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,breakdown,2026-07-01T21:00:00,2026-07-02T10:26:52.620099,13.45,idler seizure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097655,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2026-07-27T01:00:00,2026-07-27T11:35:58.977038,10.6,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097689,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2026-09-10T01:00:00,2026-09-10T02:53:25.263646,1.89,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097698,MOIL-BAL-01,MOIL-BAL-01-CON-09,conveyor,scheduled_maintenance,2026-09-17T16:00:00,2026-09-17T16:28:26.122362,0.47,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097859,MOIL-BAL-01,MOIL-BAL-01-EXC-10,excavator,breakdown,2024-05-05T14:00:00,2024-05-05T18:03:26.867931,4.06,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097920,MOIL-BAL-01,MOIL-BAL-01-EXC-10,excavator,breakdown,2024-07-23T12:00:00,2024-07-23T21:26:09.727608,9.44,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.097937,MOIL-BAL-01,MOIL-BAL-01-EXC-10,excavator,scheduled_maintenance,2024-08-12T17:00:00,2024-08-13T01:24:00.420984,8.4,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.098365,MOIL-BAL-01,MOIL-BAL-01-EXC-10,excavator,breakdown,2026-04-28T13:00:00,2026-04-29T02:01:16.265804,13.02,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.098594,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2024-03-22T14:00:00,2024-03-23T00:01:59.495957,10.03,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.098661,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2024-06-22T01:00:00,2024-06-22T17:21:33.018547,16.36,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.098685,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,scheduled_maintenance,2024-07-21T15:00:00,2024-07-21T17:32:59.106178,2.55,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.098697,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2024-07-31T16:00:00,2024-08-01T15:10:53.211856,23.18,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.098760,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2024-10-26T02:00:00,2024-10-26T22:25:45.558214,20.43,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.098799,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2024-12-15T05:00:00,2024-12-15T20:23:27.458831,15.39,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.098915,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,scheduled_maintenance,2025-05-31T12:00:00,2025-06-01T06:51:08.622953,18.85,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.098926,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,scheduled_maintenance,2025-06-09T07:00:00,2025-06-09T18:13:47.956585,11.23,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099013,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2025-10-10T08:00:00,2025-10-10T14:41:41.186861,6.69,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099142,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2026-04-13T06:00:00,2026-04-15T04:47:04.141227,46.78,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099151,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2026-04-18T18:00:00,2026-04-19T09:04:22.829179,15.07,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099184,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,breakdown,2026-05-31T17:00:00,2026-06-01T04:52:00.436641,11.87,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099234,MOIL-BAL-01,MOIL-BAL-01-PUM-11,pump,scheduled_maintenance,2026-08-10T18:00:00,2026-08-10T23:00:23.176010,5.01,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099404,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2024-04-09T17:00:00,2024-04-10T06:39:04.669860,13.65,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099458,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2024-06-20T12:00:00,2024-06-20T20:43:07.570565,8.72,boom pin wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099658,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2025-04-10T18:00:00,2025-04-10T21:56:42.136175,3.95,track failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099738,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2025-07-31T05:00:00,2025-07-31T09:17:17.098989,4.29,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099750,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2025-08-09T21:00:00,2025-08-10T03:57:09.324575,6.95,track failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099766,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2025-08-25T15:00:00,2025-08-26T00:07:11.895584,9.12,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099783,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2025-09-12T20:00:00,2025-09-13T10:57:30.393185,14.96,track failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099927,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2026-04-05T00:00:00,2026-04-05T00:45:48.146551,0.76,boom pin wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099946,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2026-04-26T09:00:00,2026-04-26T15:06:41.770135,6.11,boom pin wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099953,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,breakdown,2026-04-29T19:00:00,2026-04-30T06:33:48.422405,11.56,boom pin wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.099993,MOIL-BAL-01,MOIL-BAL-01-SHO-12,shovel,scheduled_maintenance,2026-06-22T16:00:00,2026-06-22T22:26:18.988794,6.44,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100233,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2024-06-04T10:00:00,2024-06-04T13:57:31.222108,3.96,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100238,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2024-06-06T12:00:00,2024-06-07T11:04:02.929829,23.07,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100263,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2024-07-09T05:00:00,2024-07-09T14:46:58.633504,9.78,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100294,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2024-08-18T21:00:00,2024-08-19T09:31:16.240946,12.52,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100325,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2024-09-27T05:00:00,2024-09-27T06:13:57.615745,1.23,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100335,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,breakdown,2024-10-05T20:00:00,2024-10-06T01:58:09.705032,5.97,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100503,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2025-06-07T12:00:00,2025-06-07T15:58:07.267356,3.97,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100546,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,breakdown,2025-07-30T19:00:00,2025-07-31T20:40:48.880594,25.68,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100579,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2025-09-11T01:00:00,2025-09-11T09:55:24.084374,8.92,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100630,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,scheduled_maintenance,2025-11-20T06:00:00,2025-11-20T08:13:53.040932,2.23,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100687,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,breakdown,2026-02-06T21:00:00,2026-02-07T07:07:32.302265,10.13,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100790,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,breakdown,2026-07-01T01:00:00,2026-07-01T07:14:26.777108,6.24,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100833,MOIL-BAL-01,MOIL-BAL-01-EXC-13,excavator,breakdown,2026-08-28T16:00:00,2026-08-29T18:22:58.315034,26.38,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100896,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2023-11-20T02:00:00,2023-11-21T05:15:34.362827,27.26,axle fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100920,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2023-12-19T11:00:00,2023-12-19T17:05:28.364881,6.09,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.100971,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2024-02-26T07:00:00,2024-02-26T20:34:12.715689,13.57,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101047,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,scheduled_maintenance,2024-06-12T14:00:00,2024-06-13T02:15:58.889437,12.27,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101097,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,scheduled_maintenance,2024-08-19T01:00:00,2024-08-19T14:35:36.057806,13.59,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101106,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2024-08-26T16:00:00,2024-08-26T21:46:17.986017,5.77,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101112,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2024-08-28T03:00:00,2024-08-28T13:46:02.789842,10.77,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101178,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2024-11-27T08:00:00,2024-11-27T18:24:40.836423,10.41,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101353,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,scheduled_maintenance,2025-08-09T06:00:00,2025-08-09T12:07:08.466993,6.12,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101359,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2025-08-12T09:00:00,2025-08-12T11:01:57.434690,2.03,axle fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101413,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2025-10-17T15:00:00,2025-10-17T19:03:48.314379,4.06,axle fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101454,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2025-12-04T08:00:00,2025-12-04T14:52:51.293907,6.88,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101467,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2025-12-16T04:00:00,2025-12-16T22:42:41.268465,18.71,axle fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101512,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2026-02-10T16:00:00,2026-02-10T19:20:37.429190,3.34,axle fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101564,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,scheduled_maintenance,2026-04-20T16:00:00,2026-04-21T10:19:43.751140,18.33,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101626,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2026-07-12T02:00:00,2026-07-12T04:04:27.626227,2.07,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101635,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,scheduled_maintenance,2026-07-19T05:00:00,2026-07-19T17:01:36.269358,12.03,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101646,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,breakdown,2026-07-28T17:00:00,2026-07-28T22:27:20.321960,5.46,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101671,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,scheduled_maintenance,2026-08-29T14:00:00,2026-08-29T23:54:14.052173,9.9,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101678,MOIL-BAL-01,MOIL-BAL-01-LOA-14,loader,scheduled_maintenance,2026-09-02T01:00:00,2026-09-02T05:51:24.781336,4.86,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101745,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,scheduled_maintenance,2023-11-30T02:00:00,2023-11-30T03:11:54.625436,1.2,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101772,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2024-01-02T07:00:00,2024-01-02T11:52:27.308340,4.87,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101881,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2024-06-02T11:00:00,2024-06-02T13:49:04.671338,2.82,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101918,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,scheduled_maintenance,2024-07-21T10:00:00,2024-07-21T11:15:24.654420,1.26,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.101964,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,scheduled_maintenance,2024-09-23T06:00:00,2024-09-23T06:56:18.221298,0.94,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102057,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2025-01-30T08:00:00,2025-01-30T11:11:10.025045,3.19,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102101,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2025-03-30T15:00:00,2025-03-30T19:30:38.312718,4.51,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102125,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2025-04-26T21:00:00,2025-04-26T22:46:03.743259,1.77,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102220,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2025-09-08T06:00:00,2025-09-08T13:13:10.388001,7.22,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102236,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2025-09-25T16:00:00,2025-09-25T16:37:36.377422,0.63,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102415,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,scheduled_maintenance,2026-06-12T15:00:00,2026-06-12T20:27:09.869861,5.45,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102423,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2026-06-17T12:00:00,2026-06-17T18:43:55.020892,6.73,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102445,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2026-07-11T04:00:00,2026-07-11T18:10:15.350136,14.17,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102456,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,scheduled_maintenance,2026-07-21T19:00:00,2026-07-22T03:11:56.998283,8.2,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102481,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2026-08-21T16:00:00,2026-08-22T07:13:59.162109,15.23,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102493,MOIL-BAL-01,MOIL-BAL-01-EXC-15,excavator,breakdown,2026-08-31T18:00:00,2026-08-31T19:30:48.768530,1.51,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102689,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2024-06-10T08:00:00,2024-06-10T08:07:06.699764,0.12,compressor fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102740,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,scheduled_maintenance,2024-08-19T17:00:00,2024-08-19T23:42:01.881472,6.7,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102918,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,scheduled_maintenance,2025-05-05T01:00:00,2025-05-05T07:11:46.488657,6.2,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102934,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2025-05-22T19:00:00,2025-05-23T10:27:06.390391,15.45,rod breakage
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102954,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2025-06-13T03:00:00,2025-06-14T00:56:17.510275,21.94,compressor fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102984,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,scheduled_maintenance,2025-07-23T16:00:00,2025-07-24T16:25:14.323773,24.42,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.102999,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2025-08-05T13:00:00,2025-08-06T05:38:39.155156,16.64,bit wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.103037,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2025-09-25T12:00:00,2025-09-25T15:52:26.627836,3.87,rod breakage
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.103054,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,scheduled_maintenance,2025-10-14T00:00:00,2025-10-14T12:54:36.261047,12.91,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.103087,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2025-11-25T03:00:00,2025-11-26T04:28:33.264065,25.48,rod breakage
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.103148,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2026-02-16T08:00:00,2026-02-17T00:02:15.133961,16.04,compressor fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.103172,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,scheduled_maintenance,2026-03-18T03:00:00,2026-03-18T04:30:12.841075,1.5,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.103206,MOIL-BAL-01,MOIL-BAL-01-DRI-16,drill,breakdown,2026-05-01T04:00:00,2026-05-02T13:39:14.658672,33.65,compressor fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.103461,MOIL-BHR-02,MOIL-BHR-02-SHO-01,shovel,scheduled_maintenance,2024-05-04T00:00:00,2024-05-04T06:12:41.986792,6.21,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.103479,MOIL-BHR-02,MOIL-BHR-02-SHO-01,shovel,breakdown,2024-05-24T00:00:00,2024-05-24T15:25:54.810727,15.43,track failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.103718,MOIL-BHR-02,MOIL-BHR-02-SHO-01,shovel,breakdown,2025-05-07T13:00:00,2025-05-08T09:42:02.449124,20.7,boom pin wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.103755,MOIL-BHR-02,MOIL-BHR-02-SHO-01,shovel,breakdown,2025-06-25T19:00:00,2025-06-26T18:50:22.128813,23.84,track failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.103903,MOIL-BHR-02,MOIL-BHR-02-SHO-01,shovel,scheduled_maintenance,2026-01-25T05:00:00,2026-01-25T10:00:38.054809,5.01,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104012,MOIL-BHR-02,MOIL-BHR-02-SHO-01,shovel,scheduled_maintenance,2026-07-03T09:00:00,2026-07-03T21:27:43.482535,12.46,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104036,MOIL-BHR-02,MOIL-BHR-02-SHO-01,shovel,breakdown,2026-08-01T05:00:00,2026-08-02T11:55:53.127687,30.93,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104109,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2023-11-08T01:00:00,2023-11-08T09:49:21.534818,8.82,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104127,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,scheduled_maintenance,2023-11-29T05:00:00,2023-11-29T06:48:04.149411,1.8,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104140,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,scheduled_maintenance,2023-12-12T02:00:00,2023-12-12T11:18:34.436202,9.31,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104233,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2024-04-21T08:00:00,2024-04-21T18:50:43.096799,10.85,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104244,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,scheduled_maintenance,2024-05-01T16:00:00,2024-05-02T01:30:45.025925,9.51,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104249,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2024-05-02T17:00:00,2024-05-03T05:16:35.763663,12.28,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104261,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2024-05-14T09:00:00,2024-05-14T19:03:11.813955,10.05,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104290,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2024-06-18T17:00:00,2024-06-18T21:07:50.653106,4.13,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104424,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2024-12-27T13:00:00,2024-12-27T20:58:37.968356,7.98,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104438,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2025-01-10T05:00:00,2025-01-10T21:06:58.725151,16.12,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104476,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2025-03-01T15:00:00,2025-03-01T20:01:18.833481,5.02,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104498,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2025-03-25T12:00:00,2025-03-25T21:10:33.927511,9.18,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104546,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2025-05-28T04:00:00,2025-05-28T08:41:38.301816,4.69,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104593,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,breakdown,2025-07-30T03:00:00,2025-07-30T11:27:02.148367,8.45,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104619,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,scheduled_maintenance,2025-09-02T11:00:00,2025-09-02T13:51:38.335580,2.86,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104763,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,scheduled_maintenance,2026-03-29T16:00:00,2026-03-29T18:38:50.053021,2.65,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104853,MOIL-BHR-02,MOIL-BHR-02-PUM-02,pump,scheduled_maintenance,2026-08-06T13:00:00,2026-08-06T17:32:34.091342,4.54,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104914,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2023-10-24T01:00:00,2023-10-24T04:18:20.428321,3.31,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104935,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,scheduled_maintenance,2023-11-18T15:00:00,2023-11-18T23:23:33.142932,8.39,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.104961,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2023-12-21T08:00:00,2023-12-21T17:36:51.942628,9.61,boom pin wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.105112,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2024-07-25T00:00:00,2024-07-25T08:19:59.763239,8.33,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.105127,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,scheduled_maintenance,2024-08-11T05:00:00,2024-08-11T14:44:27.249233,9.74,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.105149,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2024-09-06T14:00:00,2024-09-07T00:17:03.745325,10.28,boom pin wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.105174,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2024-10-06T13:00:00,2024-10-07T05:03:20.433220,16.06,boom pin wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.105197,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,scheduled_maintenance,2024-11-03T19:00:00,2024-11-04T07:48:52.920456,12.81,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.105214,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2024-11-22T08:00:00,2024-11-22T17:59:58.663773,10.0,boom pin wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.105285,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2025-02-27T03:00:00,2025-02-27T14:56:51.954486,11.95,track failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.105361,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2025-06-14T03:00:00,2025-06-14T07:16:44.354027,4.28,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.105387,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2025-07-16T17:00:00,2025-07-17T00:00:11.753838,7.0,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.105415,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2025-08-19T04:00:00,2025-08-19T10:07:30.894404,6.13,boom pin wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.105451,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,scheduled_maintenance,2025-10-06T09:00:00,2025-10-06T18:54:03.573015,9.9,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.105493,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,breakdown,2025-12-01T01:00:00,2025-12-01T13:44:56.933573,12.75,boom pin wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.105624,MOIL-BHR-02,MOIL-BHR-02-SHO-03,shovel,scheduled_maintenance,2026-06-08T21:00:00,2026-06-09T08:47:25.526079,11.79,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.105718,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,scheduled_maintenance,2023-10-20T03:00:00,2023-10-20T14:17:58.427397,11.3,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.105838,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,breakdown,2024-04-07T03:00:00,2024-04-07T17:55:36.400986,14.93,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106094,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,scheduled_maintenance,2025-04-20T09:00:00,2025-04-20T15:27:53.451475,6.46,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106109,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,scheduled_maintenance,2025-05-06T19:00:00,2025-05-07T04:48:51.866308,9.81,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106123,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,breakdown,2025-05-20T20:00:00,2025-05-20T23:22:32.071377,3.38,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106148,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,scheduled_maintenance,2025-06-20T02:00:00,2025-06-20T06:03:59.966714,4.07,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106287,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,breakdown,2026-01-06T06:00:00,2026-01-06T16:39:55.283873,10.67,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106303,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,breakdown,2026-01-24T21:00:00,2026-01-25T14:45:27.121417,17.76,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106389,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,scheduled_maintenance,2026-05-21T21:00:00,2026-05-21T22:24:33.476077,1.41,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106413,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,breakdown,2026-06-18T15:00:00,2026-06-19T00:46:55.250775,9.78,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106426,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,breakdown,2026-07-01T10:00:00,2026-07-02T00:48:47.483550,14.81,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106440,MOIL-BHR-02,MOIL-BHR-02-PUM-04,pump,breakdown,2026-07-15T19:00:00,2026-07-16T16:34:21.616135,21.57,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106682,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,breakdown,2024-07-02T10:00:00,2024-07-03T05:43:51.370628,19.73,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106694,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,breakdown,2024-07-12T21:00:00,2024-07-13T00:41:59.757089,3.7,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106701,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,breakdown,2024-07-16T00:00:00,2024-07-16T09:11:44.468419,9.2,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106736,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,breakdown,2024-08-26T01:00:00,2024-08-26T23:06:48.325018,22.11,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106941,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,scheduled_maintenance,2025-06-21T01:00:00,2025-06-21T01:32:52.557381,0.55,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.106992,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,scheduled_maintenance,2025-08-30T10:00:00,2025-08-30T17:27:54.087754,7.47,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.107083,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,breakdown,2025-12-24T16:00:00,2025-12-25T11:41:13.755252,19.69,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.107123,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,breakdown,2026-02-14T13:00:00,2026-02-15T06:16:11.735004,17.27,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.107164,MOIL-BHR-02,MOIL-BHR-02-EXC-05,excavator,scheduled_maintenance,2026-04-10T20:00:00,2026-04-10T22:47:26.771846,2.79,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.107310,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2023-11-05T09:00:00,2023-11-05T18:47:47.953542,9.8,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.107334,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2023-12-04T00:00:00,2023-12-04T07:13:32.939258,7.23,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.107381,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2024-02-06T04:00:00,2024-02-06T12:02:38.134643,8.04,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.107397,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,scheduled_maintenance,2024-02-23T10:00:00,2024-02-24T21:27:38.144239,35.46,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.107429,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,scheduled_maintenance,2024-04-05T09:00:00,2024-04-05T15:36:47.004081,6.61,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.107454,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2024-05-05T14:00:00,2024-05-06T00:27:45.973491,10.46,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.107508,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2024-07-17T02:00:00,2024-07-17T03:14:19.977582,1.24,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.107763,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2025-07-26T18:00:00,2025-07-28T06:51:44.256918,36.86,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.107803,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2025-09-16T06:00:00,2025-09-16T18:32:48.598146,12.55,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.107908,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2026-02-12T16:00:00,2026-02-13T10:22:13.169996,18.37,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.107976,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2026-05-18T03:00:00,2026-05-18T22:25:35.076726,19.43,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.107984,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,breakdown,2026-05-22T12:00:00,2026-05-23T02:56:42.498311,14.95,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.108012,MOIL-BHR-02,MOIL-BHR-02-PUM-06,pump,scheduled_maintenance,2026-06-28T04:00:00,2026-06-28T09:42:59.665617,5.72,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.108221,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2024-04-24T17:00:00,2024-04-24T17:03:38.951099,0.06,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.108331,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2024-09-28T17:00:00,2024-09-29T05:29:53.238088,12.5,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.108439,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2025-02-28T18:00:00,2025-03-01T00:56:10.000171,6.94,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.108467,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2025-04-02T10:00:00,2025-04-02T15:35:31.015878,5.59,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.108514,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2025-06-05T19:00:00,2025-06-06T06:42:28.302639,11.71,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.108540,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2025-07-07T05:00:00,2025-07-07T09:29:23.068419,4.49,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.108591,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2025-09-13T07:00:00,2025-09-13T09:50:21.270893,2.84,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.108794,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,scheduled_maintenance,2026-07-04T07:00:00,2026-07-04T21:52:11.176802,14.87,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.108800,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2026-07-07T04:00:00,2026-07-07T17:07:21.932321,13.12,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.108806,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2026-07-09T09:00:00,2026-07-09T22:00:52.530622,13.01,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.108820,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,breakdown,2026-07-22T11:00:00,2026-07-22T19:23:27.675907,8.39,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.108826,MOIL-BHR-02,MOIL-BHR-02-PUM-07,pump,scheduled_maintenance,2026-07-26T17:00:00,2026-07-26T21:18:44.543475,4.31,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.109320,MOIL-BHR-02,MOIL-BHR-02-DRI-08,drill,breakdown,2025-07-15T01:00:00,2025-07-15T18:49:27.941176,17.82,compressor fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.109354,MOIL-BHR-02,MOIL-BHR-02-DRI-08,drill,breakdown,2025-08-28T19:00:00,2025-08-29T04:04:20.640983,9.07,bit wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.109382,MOIL-BHR-02,MOIL-BHR-02-DRI-08,drill,breakdown,2025-09-30T10:00:00,2025-09-30T14:06:41.791335,4.11,rod breakage
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.109455,MOIL-BHR-02,MOIL-BHR-02-DRI-08,drill,scheduled_maintenance,2026-01-10T10:00:00,2026-01-10T16:18:40.296316,6.31,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.109527,MOIL-BHR-02,MOIL-BHR-02-DRI-08,drill,breakdown,2026-04-20T14:00:00,2026-04-21T07:00:24.694916,17.01,compressor fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.109638,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2023-09-23T01:00:00,2023-09-23T12:01:53.417088,11.03,transmission fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.109699,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2023-12-15T01:00:00,2023-12-15T07:49:38.374851,6.83,brake wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.109759,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2024-03-05T15:00:00,2024-03-05T19:41:03.597416,4.68,tyre failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.109815,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,scheduled_maintenance,2024-05-22T14:00:00,2024-05-22T22:49:13.337147,8.82,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.109892,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2024-09-05T20:00:00,2024-09-06T08:49:06.538885,12.82,tyre failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.109906,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,scheduled_maintenance,2024-09-20T11:00:00,2024-09-20T18:18:11.454173,7.3,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.109938,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,scheduled_maintenance,2024-11-01T00:00:00,2024-11-01T05:03:02.632402,5.05,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.110129,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,scheduled_maintenance,2025-08-04T03:00:00,2025-08-04T05:54:55.818469,2.92,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.110149,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2025-08-27T16:00:00,2025-08-27T20:26:57.134175,4.45,brake wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.110173,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2025-09-25T02:00:00,2025-09-25T04:55:31.009325,2.93,tyre failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.110239,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2025-12-25T20:00:00,2025-12-26T00:43:55.025275,4.73,brake wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.110245,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,scheduled_maintenance,2025-12-28T07:00:00,2025-12-28T09:35:16.897948,2.59,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.110254,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2025-12-31T16:00:00,2026-01-02T08:56:57.087764,40.95,brake wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.110406,MOIL-BHR-02,MOIL-BHR-02-DUM-09,dumper,breakdown,2026-08-06T12:00:00,2026-08-06T21:10:12.313476,9.17,brake wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.110460,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,scheduled_maintenance,2023-10-17T01:00:00,2023-10-17T05:33:31.102565,4.56,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.110572,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2024-03-16T09:00:00,2024-03-16T15:12:44.801910,6.21,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.110668,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2024-07-19T07:00:00,2024-07-20T06:18:39.688683,23.31,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.110810,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2025-02-06T08:00:00,2025-02-06T10:40:02.891365,2.67,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.110896,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,scheduled_maintenance,2025-06-08T18:00:00,2025-06-08T19:29:57.603440,1.5,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.110923,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,scheduled_maintenance,2025-07-13T01:00:00,2025-07-13T02:42:09.408553,1.7,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.110935,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2025-07-24T01:00:00,2025-07-24T10:10:31.349159,9.18,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.110950,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,scheduled_maintenance,2025-08-09T10:00:00,2025-08-09T15:09:31.338476,5.16,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.111002,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2025-10-18T12:00:00,2025-10-19T16:42:35.654106,28.71,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.111011,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2025-10-24T05:00:00,2025-10-24T12:28:25.868651,7.47,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.111041,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,scheduled_maintenance,2025-12-02T00:00:00,2025-12-02T01:06:15.287812,1.1,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.111170,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2026-06-04T11:00:00,2026-06-05T06:38:02.964915,19.63,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.111206,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2026-07-19T07:00:00,2026-07-19T19:39:04.717083,12.65,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.111251,MOIL-UKW-03,MOIL-UKW-03-PUM-01,pump,breakdown,2026-09-18T03:00:00,2026-09-18T10:45:42.940725,7.76,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.111280,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,breakdown,2023-10-23T14:00:00,2023-10-23T18:03:25.527938,4.06,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.111325,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,breakdown,2023-12-22T04:00:00,2023-12-22T14:55:50.849930,10.93,idler seizure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.111415,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,breakdown,2024-04-25T09:00:00,2024-04-25T21:17:11.917723,12.29,misalignment
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.111617,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,breakdown,2025-02-13T09:00:00,2025-02-13T17:35:36.030558,8.59,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.111717,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,breakdown,2025-07-04T15:00:00,2025-07-04T19:04:31.084570,4.08,idler seizure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.111775,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,scheduled_maintenance,2025-09-23T08:00:00,2025-09-23T20:58:36.870478,12.98,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.111948,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,scheduled_maintenance,2026-06-02T08:00:00,2026-06-02T11:37:03.021745,3.62,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.111961,MOIL-UKW-03,MOIL-UKW-03-CON-02,conveyor,breakdown,2026-06-14T15:00:00,2026-06-14T18:26:32.011718,3.44,idler seizure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.112121,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,breakdown,2024-01-28T20:00:00,2024-01-29T08:27:15.785263,12.45,brake wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.112248,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,scheduled_maintenance,2024-07-29T02:00:00,2024-07-29T11:53:13.091107,9.89,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.112260,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,breakdown,2024-08-09T15:00:00,2024-08-10T15:34:43.829943,24.58,brake wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.112272,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,scheduled_maintenance,2024-08-21T11:00:00,2024-08-21T21:26:27.030891,10.44,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.112329,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,breakdown,2024-11-07T09:00:00,2024-11-07T11:48:36.064669,2.81,tyre failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.112374,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,scheduled_maintenance,2025-01-07T15:00:00,2025-01-07T20:26:27.988325,5.44,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.112390,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,breakdown,2025-01-24T18:00:00,2025-01-25T01:59:16.842950,7.99,transmission fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.112434,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,breakdown,2025-03-23T08:00:00,2025-03-23T14:11:26.277797,6.19,transmission fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.112732,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,breakdown,2026-06-06T04:00:00,2026-06-06T09:47:27.842524,5.79,tyre failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.112748,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,scheduled_maintenance,2026-06-25T01:00:00,2026-06-25T13:42:18.345591,12.71,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.112788,MOIL-UKW-03,MOIL-UKW-03-DUM-03,dumper,scheduled_maintenance,2026-08-18T09:00:00,2026-08-18T14:13:51.165145,5.23,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.112925,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,scheduled_maintenance,2024-02-29T18:00:00,2024-02-29T19:24:45.980928,1.41,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.112966,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,scheduled_maintenance,2024-04-24T00:00:00,2024-04-24T04:51:49.726850,4.86,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113029,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,scheduled_maintenance,2024-07-22T11:00:00,2024-07-22T16:18:55.802823,5.32,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113042,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,scheduled_maintenance,2024-08-05T18:00:00,2024-08-06T04:44:35.340413,10.74,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113049,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,breakdown,2024-08-08T21:00:00,2024-08-09T12:24:33.943370,15.41,rod breakage
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113057,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,scheduled_maintenance,2024-08-15T07:00:00,2024-08-15T10:38:02.548138,3.63,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113227,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,breakdown,2025-04-18T19:00:00,2025-04-19T22:15:31.771384,27.26,rod breakage
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113263,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,scheduled_maintenance,2025-06-05T21:00:00,2025-06-05T23:16:44.574823,2.28,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113279,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,breakdown,2025-06-21T07:00:00,2025-06-21T11:26:24.423553,4.44,compressor fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113344,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,breakdown,2025-09-20T08:00:00,2025-09-20T20:57:40.508905,12.96,bit wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113521,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,breakdown,2026-06-02T02:00:00,2026-06-02T11:03:40.451841,9.06,rod breakage
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113533,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,breakdown,2026-06-13T14:00:00,2026-06-14T15:00:32.351127,25.01,compressor fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113548,MOIL-UKW-03,MOIL-UKW-03-DRI-04,drill,breakdown,2026-06-28T01:00:00,2026-06-28T06:54:26.054422,5.91,rod breakage
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113707,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2024-02-11T20:00:00,2024-02-12T18:01:47.918973,22.03,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113735,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2024-03-17T01:00:00,2024-03-17T09:47:15.769555,8.79,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113775,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2024-05-08T13:00:00,2024-05-08T18:20:18.005490,5.34,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113797,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,scheduled_maintenance,2024-06-04T15:00:00,2024-06-05T02:08:25.510958,11.14,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113841,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2024-08-01T00:00:00,2024-08-01T20:13:00.910340,20.22,motor trip
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113883,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2024-09-26T15:00:00,2024-09-26T20:59:27.543085,5.99,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113905,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,scheduled_maintenance,2024-10-24T04:00:00,2024-10-24T10:03:38.265877,6.06,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.113965,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,scheduled_maintenance,2025-01-17T13:00:00,2025-01-17T22:03:06.709998,9.05,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114045,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2025-05-06T19:00:00,2025-05-07T03:49:02.231875,8.82,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114139,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2025-09-17T21:00:00,2025-09-18T00:49:19.256882,3.82,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114215,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,scheduled_maintenance,2025-12-28T08:00:00,2025-12-28T23:15:27.051315,15.26,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114250,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2026-02-11T02:00:00,2026-02-11T10:49:29.657675,8.82,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114326,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2026-05-28T18:00:00,2026-05-29T06:37:09.002775,12.62,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114354,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2026-07-03T00:00:00,2026-07-03T10:45:01.275011,10.75,impeller wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114392,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,breakdown,2026-08-21T04:00:00,2026-08-22T00:16:53.538216,20.28,seal failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114508,MOIL-UKW-03,MOIL-UKW-03-PUM-05,pump,scheduled_maintenance,2026-09-09T11:00:00,2026-09-09T13:58:14.061661,2.97,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114536,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,scheduled_maintenance,2023-10-12T12:00:00,2023-10-13T05:49:27.038339,17.82,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114714,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2024-06-24T14:00:00,2024-06-24T21:42:24.251175,7.71,misalignment
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114739,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2024-07-24T03:00:00,2024-07-24T22:44:13.307837,19.74,idler seizure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114765,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,scheduled_maintenance,2024-08-27T00:00:00,2024-08-27T10:38:48.302476,10.65,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114792,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2024-09-29T15:00:00,2024-09-30T02:00:18.576895,11.01,idler seizure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114846,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2024-12-10T03:00:00,2024-12-11T11:49:48.911785,32.83,misalignment
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114932,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2025-04-11T17:00:00,2025-04-12T13:11:41.592481,20.19,misalignment
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114979,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2025-06-13T02:00:00,2025-06-13T05:24:15.501849,3.4,idler seizure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.114998,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,scheduled_maintenance,2025-07-06T21:00:00,2025-07-07T12:25:06.834144,15.42,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115016,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2025-07-25T00:00:00,2025-07-25T20:00:21.443167,20.01,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115062,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,scheduled_maintenance,2025-09-27T00:00:00,2025-09-27T01:39:49.742014,1.66,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115086,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2025-10-23T04:00:00,2025-10-24T18:26:57.524390,38.45,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115138,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,scheduled_maintenance,2026-01-01T16:00:00,2026-01-02T02:17:00.019770,10.28,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115178,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2026-02-23T13:00:00,2026-02-23T15:27:05.094390,2.45,misalignment
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115229,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,breakdown,2026-05-03T03:00:00,2026-05-03T05:27:40.367111,2.46,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115276,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,scheduled_maintenance,2026-07-07T15:00:00,2026-07-07T22:53:02.932807,7.88,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115322,MOIL-TIR-04,MOIL-TIR-04-CON-01,conveyor,scheduled_maintenance,2026-09-07T10:00:00,2026-09-07T22:28:23.661491,12.47,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115499,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,scheduled_maintenance,2024-05-22T09:00:00,2024-05-22T13:27:38.418715,4.46,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115589,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2024-09-25T01:00:00,2024-09-25T05:29:33.795571,4.49,bearing failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115704,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2025-03-07T14:00:00,2025-03-07T19:07:48.516563,5.13,jam
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115792,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2025-07-09T10:00:00,2025-07-09T17:22:33.871862,7.38,jam
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115801,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2025-07-15T13:00:00,2025-07-16T03:13:45.808185,14.23,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115876,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2025-10-29T03:00:00,2025-10-29T15:04:18.143256,12.07,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115906,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2025-12-04T09:00:00,2025-12-04T17:51:02.815610,8.85,bearing failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115950,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,scheduled_maintenance,2026-02-01T04:00:00,2026-02-01T08:47:06.676168,4.79,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.115975,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2026-03-03T04:00:00,2026-03-03T10:20:15.911335,6.34,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116082,MOIL-TIR-04,MOIL-TIR-04-CRU-02,crusher,breakdown,2026-08-03T01:00:00,2026-08-03T21:42:19.183878,20.71,bearing failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116204,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2024-01-23T06:00:00,2024-01-23T13:40:32.960908,7.68,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116223,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,scheduled_maintenance,2024-02-14T15:00:00,2024-02-15T00:49:49.008325,9.83,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116240,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2024-03-03T18:00:00,2024-03-05T01:43:55.452323,31.73,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116289,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2024-05-08T03:00:00,2024-05-08T11:00:51.686428,8.01,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116302,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,scheduled_maintenance,2024-05-22T19:00:00,2024-05-23T00:25:53.611784,5.43,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116335,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2024-07-01T18:00:00,2024-07-01T21:50:15.045930,3.84,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116351,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,scheduled_maintenance,2024-07-19T13:00:00,2024-07-19T14:47:50.414553,1.8,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116373,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2024-08-13T19:00:00,2024-08-14T12:01:24.364133,17.02,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116456,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2024-12-06T06:00:00,2024-12-07T06:45:10.626835,24.75,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116564,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2025-05-09T05:00:00,2025-05-09T22:08:36.185626,17.14,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116606,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2025-07-04T17:00:00,2025-07-05T05:29:35.995588,12.49,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116617,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2025-07-13T08:00:00,2025-07-13T14:44:48.813521,6.75,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116786,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2026-03-16T12:00:00,2026-03-17T12:39:46.783798,24.66,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116818,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2026-04-25T13:00:00,2026-04-26T04:35:54.209511,15.6,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116867,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2026-06-30T14:00:00,2026-06-30T22:42:16.611929,8.7,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116886,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2026-07-21T04:00:00,2026-07-21T19:49:35.552978,15.83,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116901,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2026-08-03T05:00:00,2026-08-05T01:55:34.056157,44.93,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116906,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2026-08-05T07:00:00,2026-08-05T15:16:24.032607,8.27,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.116918,MOIL-TIR-04,MOIL-TIR-04-EXC-03,excavator,breakdown,2026-08-15T15:00:00,2026-08-15T22:57:16.491710,7.95,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117035,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2024-01-29T01:00:00,2024-01-29T02:58:53.207608,1.98,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117133,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2024-06-15T02:00:00,2024-06-15T09:27:14.197970,7.45,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117155,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2024-07-12T11:00:00,2024-07-12T19:33:23.422173,8.56,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117261,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2024-12-09T04:00:00,2024-12-09T13:44:06.125807,9.74,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117278,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2024-12-28T20:00:00,2024-12-29T21:06:12.941466,25.1,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117455,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2025-09-08T11:00:00,2025-09-08T15:53:08.015945,4.89,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117463,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,scheduled_maintenance,2025-09-15T10:00:00,2025-09-15T12:27:59.735702,2.47,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117539,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,scheduled_maintenance,2025-12-31T00:00:00,2025-12-31T10:05:58.233961,10.1,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117580,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2026-02-22T09:00:00,2026-02-22T15:29:56.289566,6.5,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117652,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2026-06-02T06:00:00,2026-06-02T12:29:56.056446,6.5,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117657,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2026-06-03T16:00:00,2026-06-04T13:08:44.482888,21.15,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117680,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,breakdown,2026-07-01T16:00:00,2026-07-02T00:32:52.243398,8.55,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117735,MOIL-TIR-04,MOIL-TIR-04-EXC-04,excavator,scheduled_maintenance,2026-09-15T10:00:00,2026-09-15T10:45:39.992708,0.76,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117788,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2023-11-24T02:00:00,2023-11-24T08:32:07.080191,6.54,bearing failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117882,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2024-04-05T01:00:00,2024-04-05T13:22:22.772950,12.37,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117891,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2024-04-12T03:00:00,2024-04-12T16:58:33.046871,13.98,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117958,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2024-07-14T20:00:00,2024-07-15T04:29:43.374703,8.5,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.117979,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2024-08-08T01:00:00,2024-08-08T08:25:36.326163,7.43,jam
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118002,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2024-09-04T06:00:00,2024-09-04T07:54:11.681742,1.9,jam
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118009,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2024-09-07T01:00:00,2024-09-07T11:28:45.622529,10.48,jam
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118167,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2025-04-23T20:00:00,2025-04-24T05:49:02.493595,9.82,bearing failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118214,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2025-06-25T13:00:00,2025-06-25T20:45:22.983464,7.76,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118224,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2025-07-03T10:00:00,2025-07-03T13:37:03.202419,3.62,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118237,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2025-07-17T11:00:00,2025-07-17T12:11:20.072279,1.19,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118279,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,breakdown,2025-09-11T21:00:00,2025-09-12T02:55:32.878486,5.93,jam
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118429,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2026-04-16T16:00:00,2026-04-16T23:39:50.397859,7.66,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118443,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2026-05-01T15:00:00,2026-05-01T18:41:41.638185,3.69,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118451,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2026-05-08T13:00:00,2026-05-08T15:26:10.091420,2.44,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118521,MOIL-TIR-04,MOIL-TIR-04-CRU-05,crusher,scheduled_maintenance,2026-08-13T11:00:00,2026-08-13T22:11:12.412854,11.19,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118603,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,scheduled_maintenance,2023-12-05T13:00:00,2023-12-05T23:30:44.486991,10.51,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118617,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,scheduled_maintenance,2023-12-21T16:00:00,2023-12-22T02:11:13.532727,10.19,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118681,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,breakdown,2024-03-16T20:00:00,2024-03-17T06:35:05.226312,10.58,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118724,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,breakdown,2024-05-13T11:00:00,2024-05-14T06:00:11.419285,19.0,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118752,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,scheduled_maintenance,2024-06-17T00:00:00,2024-06-17T12:31:29.841046,12.52,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118764,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,breakdown,2024-06-28T12:00:00,2024-06-28T20:46:48.340011,8.78,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118796,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,scheduled_maintenance,2024-08-08T09:00:00,2024-08-08T11:36:49.692504,2.61,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.118945,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,scheduled_maintenance,2025-03-12T00:00:00,2025-03-12T16:17:26.882485,16.29,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.119006,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,breakdown,2025-06-03T04:00:00,2025-06-03T05:38:05.932409,1.63,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.119044,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,breakdown,2025-07-23T17:00:00,2025-07-23T21:05:16.847516,4.09,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.119056,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,scheduled_maintenance,2025-08-03T11:00:00,2025-08-03T15:11:15.857708,4.19,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.119064,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,scheduled_maintenance,2025-08-10T18:00:00,2025-08-10T20:10:58.990273,2.18,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.119159,MOIL-DON-05,MOIL-DON-05-EXC-01,excavator,breakdown,2025-12-23T10:00:00,2025-12-23T12:34:20.082612,2.57,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.119373,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,breakdown,2023-10-30T02:00:00,2023-10-30T16:23:46.901937,14.4,bucket tooth loss
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.119481,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,breakdown,2024-03-30T08:00:00,2024-03-30T15:43:18.199540,7.72,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.119619,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,scheduled_maintenance,2024-10-17T13:00:00,2024-10-17T19:10:47.983690,6.18,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.119682,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,scheduled_maintenance,2025-01-08T17:00:00,2025-01-09T09:42:22.130653,16.71,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.119698,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,scheduled_maintenance,2025-01-26T05:00:00,2025-01-26T06:56:53.557515,1.95,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.119709,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,scheduled_maintenance,2025-02-06T16:00:00,2025-02-06T19:09:39.274963,3.16,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.119762,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,breakdown,2025-04-19T04:00:00,2025-04-19T11:04:59.650035,7.08,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.119938,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,scheduled_maintenance,2026-01-01T20:00:00,2026-01-02T01:51:59.954015,5.87,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.120031,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,breakdown,2026-05-11T18:00:00,2026-05-12T18:27:11.225875,24.45,engine overheat
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.120070,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,scheduled_maintenance,2026-07-03T04:00:00,2026-07-03T08:54:04.275387,4.9,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.120105,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,scheduled_maintenance,2026-08-18T14:00:00,2026-08-18T18:35:28.209512,4.59,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.120113,MOIL-DON-05,MOIL-DON-05-EXC-02,excavator,breakdown,2026-08-23T13:00:00,2026-08-23T17:41:11.670545,4.69,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.120163,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,breakdown,2023-10-27T02:00:00,2023-10-27T16:44:03.116199,14.73,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.120286,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,scheduled_maintenance,2024-04-20T08:00:00,2024-04-20T12:53:52.248845,4.9,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.120434,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,breakdown,2024-11-20T06:00:00,2024-11-20T07:45:59.517774,1.77,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.120456,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,breakdown,2024-12-16T06:00:00,2024-12-16T21:50:17.752912,15.84,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.120468,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,scheduled_maintenance,2024-12-27T11:00:00,2024-12-27T13:55:39.146943,2.93,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.120521,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,breakdown,2025-03-06T04:00:00,2025-03-06T06:51:42.880118,2.86,jam
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.120620,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,scheduled_maintenance,2025-07-23T04:00:00,2025-07-23T15:47:19.528766,11.79,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.120696,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,breakdown,2025-11-02T15:00:00,2025-11-02T19:36:56.863224,4.62,bearing failure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.120829,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,breakdown,2026-05-09T01:00:00,2026-05-09T06:54:20.488411,5.91,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.120842,MOIL-DON-05,MOIL-DON-05-CRU-03,crusher,breakdown,2026-05-21T15:00:00,2026-05-21T21:02:50.085212,6.05,liner wear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.120995,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,scheduled_maintenance,2023-12-27T05:00:00,2023-12-27T11:49:47.758398,6.83,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.121211,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,breakdown,2024-11-04T10:00:00,2024-11-04T15:59:26.574406,5.99,misalignment
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.121253,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,scheduled_maintenance,2024-12-31T20:00:00,2025-01-01T01:09:49.767148,5.16,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.121267,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,scheduled_maintenance,2025-01-15T03:00:00,2025-01-15T20:33:15.375522,17.55,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.121344,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,breakdown,2025-05-03T16:00:00,2025-05-04T00:23:17.205894,8.39,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.121406,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,breakdown,2025-07-28T12:00:00,2025-07-28T15:37:34.062996,3.63,idler seizure
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.121578,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,breakdown,2026-04-04T16:00:00,2026-04-05T00:24:23.730692,8.41,misalignment
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.121620,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,breakdown,2026-05-28T17:00:00,2026-05-28T18:30:19.367908,1.51,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.121665,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,breakdown,2026-07-27T12:00:00,2026-07-28T08:37:22.271901,20.62,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.121682,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,breakdown,2026-08-15T11:00:00,2026-08-15T22:08:59.009269,11.15,belt tear
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.121700,MOIL-DON-05,MOIL-DON-05-CON-04,conveyor,scheduled_maintenance,2026-09-04T07:00:00,2026-09-04T22:47:42.824946,15.8,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.121733,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,breakdown,2023-10-15T00:00:00,2023-10-16T06:02:58.271172,30.05,axle fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.121841,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,scheduled_maintenance,2024-03-18T17:00:00,2024-03-19T01:34:33.471943,8.58,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.121888,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,scheduled_maintenance,2024-05-22T14:00:00,2024-05-23T00:02:09.907442,10.04,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.122168,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,breakdown,2025-07-04T15:00:00,2025-07-05T07:18:30.737429,16.31,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.122187,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,breakdown,2025-07-26T11:00:00,2025-07-26T13:20:30.017722,2.34,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.122215,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,breakdown,2025-08-29T13:00:00,2025-08-29T16:37:48.178438,3.63,hydraulic leak
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.122250,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,scheduled_maintenance,2025-10-14T14:00:00,2025-10-15T08:38:50.378895,18.65,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.122287,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,scheduled_maintenance,2025-12-02T14:00:00,2025-12-02T18:45:14.989577,4.75,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.122328,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,breakdown,2026-01-25T08:00:00,2026-01-25T23:07:56.313316,15.13,axle fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.122383,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,breakdown,2026-04-09T10:00:00,2026-04-10T00:22:48.540892,14.38,axle fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.122411,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,scheduled_maintenance,2026-05-13T19:00:00,2026-05-13T20:59:52.319096,2.0,
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.122447,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,breakdown,2026-06-28T13:00:00,2026-06-28T19:13:08.278903,6.22,axle fault
+1.0.0,True,nakshatra-synthetic-v1,2026-09-25T11:28:20.122464,MOIL-DON-05,MOIL-DON-05-LOA-05,loader,scheduled_maintenance,2026-07-18T09:00:00,2026-07-18T20:22:00.297846,11.37,

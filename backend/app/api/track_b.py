@@ -191,7 +191,9 @@ def compute_forecast(mine_code: str, horizon_days: int = 14, grade: str | None =
 
 from app.api.forecast_store import (
     Warming,
+    artifact_identity,
     eta_seconds,
+    identity_matches,
     is_fresh,
     read_artifact,
     status as store_status,
@@ -226,9 +228,18 @@ def compute_backtest(mine_code: str, span_days: int = 150, step_days: int = 14) 
     res["computed_at"] = datetime.now(timezone.utc).isoformat()
     res["data_window_end"] = end.isoformat()
     res["served_from"] = "computed"
+    # Same identity block as a forecast artifact, for the same reason: this is
+    # persisted and committed, and a backtest carrying last month's MAPE under
+    # this month's model_version is worse than having no backtest. It previously
+    # recorded only `data_window_end`, so a change of seed, model or library
+    # left it silently servable.
+    res["artifact_identity"] = artifact_identity()
 
     BACKTEST_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    _backtest_cache_path(mine_code, span_days, step_days).write_text(json.dumps(res, indent=2))
+    path = _backtest_cache_path(mine_code, span_days, step_days)
+    tmp = path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(res, indent=2))
+    tmp.replace(path)
     return res
 
 
@@ -259,6 +270,18 @@ def backtest_mine(mine_code: str, span_days: int = 150, step_days: int = 14,
     path = _backtest_cache_path(mine_code, span_days, step_days)
     if path.exists():
         res = json.loads(path.read_text())
+        matches, reason = identity_matches(res)
+        if not matches:
+            # Refused, not served. A stale backtest is the most quotable number
+            # in the product — "MAPE 11.67%, coverage 0.812" goes on the landing
+            # page — so serving one produced by other code or another dataset
+            # would put a figure nobody can reproduce in front of an audience.
+            raise ValueError(
+                f"The stored backtest for {mine_code} was produced by a different "
+                f"dataset or build ({reason}). Regenerate with "
+                f"`python -m app.api.batch all`, or roll back with "
+                f"`git checkout -- backend/artifacts` (docs/DEMO.md)."
+            )
         res["served_from"] = "artifact"
         age_h = None
         try:

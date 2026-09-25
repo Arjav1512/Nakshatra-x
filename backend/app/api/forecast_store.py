@@ -216,20 +216,36 @@ def _code_fingerprint(root: Path) -> str:
     return h.hexdigest()[:16]
 
 
+# The keys every synthetic-derived artifact must agree on, whatever its kind.
+DATASET_IDENTITY_KEYS = ("generator", "contract_version", "generator_seed", "data_end_date")
+
+
 def artifact_identity() -> dict[str, Any]:
-    from app.ingestion.generator import DEFAULT_SEED, resolve_data_end_date
+    """
+    Identity for one artifact: what dataset it came from, and what code built it.
+
+    The first four keys are the dataset identity, shared with backtests and the
+    exported samples (`generator.dataset_identity`). The rest are per-kind: the
+    forecast origin is the last day of actuals, so the end date decides which
+    window an artifact covers, and an artifact generated for a different end
+    date describes a different fortnight.
+    """
+    from app.ingestion.generator import dataset_identity
     from app.ml.forecaster import MODEL_VERSION
 
     return {
+        **dataset_identity(),
         "model_version": MODEL_VERSION,
-        "generator_seed": DEFAULT_SEED,
-        # The forecast origin is the last day of actuals, so the end date decides
-        # which window the artifact covers. An artifact generated for a different
-        # end date describes a different fortnight and must not be served here.
-        "data_end_date": resolve_data_end_date().isoformat(),
         "code_fingerprint": code_fingerprint(),
         "library_versions": library_versions(),
     }
+
+
+def dataset_identity_of(data: dict[str, Any]) -> dict[str, Any] | None:
+    """The dataset identity an artifact of any kind claims, or None."""
+    ident = data.get("artifact_identity") or {}
+    got = {k: ident.get(k) for k in DATASET_IDENTITY_KEYS}
+    return got if any(v is not None for v in got.values()) else None
 
 
 def identity_matches(data: dict[str, Any]) -> tuple[bool, str | None]:
