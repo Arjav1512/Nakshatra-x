@@ -107,7 +107,7 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
       ) : (
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-border-default bg-surface-2 p-3">
+            <div className="rounded-lg border border-border-default bg-surface-2 p-3" data-provenance="derived" data-provenance-model={m.model_version}>
               <p className="text-xs uppercase tracking-wider text-text-secondary">
                 Leave-one-mine-out AUC
               </p>
@@ -116,7 +116,7 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
                 95% CI [{m.lomo.auc_ci95[0]}, {m.lomo.auc_ci95[1]}]
               </p>
             </div>
-            <div className="rounded-lg border border-border-default bg-surface-2 p-3">
+            <div className="rounded-lg border border-border-default bg-surface-2 p-3" data-provenance="derived" data-provenance-model={m.model_version}>
               <p className="text-xs uppercase tracking-wider text-text-secondary">
                 Spectral features alone
               </p>
@@ -125,7 +125,7 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
               </p>
               <p className="mt-0.5 text-xs text-text-tertiary">the geological claim in isolation</p>
             </div>
-            <div className="rounded-lg border border-border-default bg-surface-2 p-3">
+            <div className="rounded-lg border border-border-default bg-surface-2 p-3" data-provenance="derived" data-provenance-model={m.model_version}>
               <p className="text-xs uppercase tracking-wider text-text-secondary">Validation set</p>
               <p className="mt-1 font-mono text-2xl text-text-primary">{m.n_samples}</p>
               <p className="mt-0.5 text-xs text-text-tertiary">
@@ -134,7 +134,7 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
             </div>
           </div>
 
-          <div className="rounded-lg border border-status-caution/30 bg-status-caution/[0.07] p-3 text-xs leading-relaxed text-status-caution">
+          <div className="rounded-lg border border-status-caution/30 bg-status-caution/[0.07] p-3 text-xs leading-relaxed text-status-caution" data-provenance="derived" data-provenance-model={m.model_version}>
             <p className="font-semibold">Read this before quoting the number</p>
             <p className="mt-1">{m.honest_note}</p>
             <p className="mt-1">{m.ablation_note}</p>
@@ -146,7 +146,7 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
               Feature importance — {m.features.length} features, none derived from distance to a
               known mine
             </p>
-            <div className="space-y-1">
+            <div className="space-y-1" data-provenance="derived" data-provenance-model={m.model_version}>
               {Object.entries(m.feature_importance)
                 .sort((a, b) => b[1] - a[1])
                 .map(([name, imp]) => (
@@ -166,7 +166,7 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
             </div>
           </div>
 
-          <details className="rounded-lg border border-border-default bg-surface-2 p-3">
+          <details className="rounded-lg border border-border-default bg-surface-2 p-3" data-provenance="derived" data-provenance-model={m.model_version}>
             <summary className="cursor-pointer text-xs uppercase tracking-wider text-text-secondary">
               per held-out deposit
             </summary>
@@ -194,7 +194,7 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
             </table>
           </details>
 
-          <p className="text-xs leading-snug text-text-tertiary">
+          <p data-provenance="derived" data-provenance-model={m.model_version} className="text-xs leading-snug text-text-tertiary">
             {m.model_version} · validated {m.validation} · random-split AUC{' '}
             {m.random_split_auc_for_contrast} shown only for contrast. ⛔ {m.guardrail}
           </p>

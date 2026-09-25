@@ -12,25 +12,27 @@ export default function SmartOreBlendingModal({ mine }: Props) {
   const [targetTonnes, setTargetTonnes] = useState(5000)
   const [targetMnMin, setTargetMnMin] = useState(41.0)
   const [isSolving, setIsSolving] = useState(false)
-  const [blendResult, setBlendResult] = useState<any>({
-    success: true,
-    solver_status: 'Simplex Optimal Solution Found',
-    target_tonnes: 5000,
-    blended_mn_grade_pct: 41.2,
-    blended_p_pct: 0.134,
-    blended_sio2_pct: 5.8,
-    total_blending_cost_inr: 31200000,
-    avg_cost_per_tonne_inr: 6240,
-    blend_plan: [
-      { stockpile_name: 'Balaghat High-Grade SP-1 (46.2% Mn)', tonnes_allocated: 2450, allocation_pct: 49.0, cost_inr: 20090000 },
-      { stockpile_name: 'Dongri Buzurg Med-Grade SP-2 (37.5% Mn)', tonnes_allocated: 1800, allocation_pct: 36.0, cost_inr: 9720000 },
-      { stockpile_name: 'Ukwa Silico-Mn SP-3 (34.0% Mn)', tonnes_allocated: 750, allocation_pct: 15.0, cost_inr: 3075000 },
-    ],
-    shortfall_mitigation_tonnes: 5000,
-  })
+  /**
+   * Null until the solver has run.
+   *
+   * This was seeded with a complete optimiser result — a "Simplex Optimal
+   * Solution Found" status, a blended grade of 41.2% Mn, a cost of ₹6,240/t and
+   * a three-line blend plan naming "Balaghat High-Grade SP-1 (46.2% Mn)" and
+   * "Dongri Buzurg Med-Grade SP-2 (37.5% Mn)". None of it had been computed,
+   * and an ore grade attributed to a named MOIL mine is precisely the claim
+   * removed from the map popup and the hotspot table in earlier phases: Track A
+   * produces a prospectivity score, which PRD §2.4 is explicit is not a grade.
+   *
+   * The request payload had already been corrected to say "Illustrative SP-1 —
+   * high grade". The seeded *result* was missed, so the screen went on showing
+   * the old names before anyone pressed the button.
+   */
+  const [blendResult, setBlendResult] = useState<any>(null)
+  const [blendError, setBlendError] = useState<string | null>(null)
 
   const handleRunOptimizer = async () => {
     setIsSolving(true)
+    setBlendError(null)
     try {
       const res = await fetch('/api/v1/optimize-blending', {
         method: 'POST',
@@ -56,9 +58,14 @@ export default function SmartOreBlendingModal({ mine }: Props) {
       if (res.ok) {
         const data = await res.json()
         setBlendResult(data)
+        setBlendError(null)
+      } else {
+        setBlendResult(null)
+        setBlendError(`The optimiser answered ${res.status}.`)
       }
-    } catch {
-      // offline fallback retained
+    } catch (err: any) {
+      setBlendResult(null)
+      setBlendError(err?.message || 'The optimiser could not be reached.')
     } finally {
       setIsSolving(false)
     }
@@ -94,7 +101,9 @@ export default function SmartOreBlendingModal({ mine }: Props) {
         <div>
           <div className="flex justify-between text-xs font-mono mb-1.5">
             <label htmlFor="blend-volume" className="text-text-tertiary">Required dispatch volume:</label>
-            <span className="font-bold text-text-primary">{targetTonnes.toLocaleString()} Tonnes</span>
+            <span className="font-bold text-text-primary" data-provenance="reference">
+              {targetTonnes.toLocaleString()} Tonnes
+            </span>
           </div>
           <input
             id="blend-volume"
@@ -137,10 +146,26 @@ export default function SmartOreBlendingModal({ mine }: Props) {
       </button>
 
       {/* Solver Output Results */}
+      {blendError ? (
+        <div className="rounded-md border border-status-critical/30 bg-status-critical/5 p-3 text-xs">
+          <p className="font-semibold text-status-critical">Optimiser unavailable</p>
+          <p className="mt-1 leading-snug text-text-secondary">
+            {blendError} No blend plan is shown, because a plan this screen invented would be
+            indistinguishable from one the solver produced.
+          </p>
+        </div>
+      ) : !blendResult ? (
+        <div className="rounded-md border border-border-default bg-surface-2 p-3 text-xs text-text-secondary">
+          Set the target tonnage and minimum grade above, then run the optimiser. Nothing is shown
+          here until it returns a plan. The stockpiles it solves against are illustrative inputs,
+          not a MOIL inventory — no stockpile register exists in this system.
+        </div>
+      ) : null}
+
       {blendResult && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="ios-glass-inset p-3.5">
+            <div className="ios-glass-inset p-3.5" data-provenance="derived">
               <span className="text-xs font-mono uppercase text-text-tertiary">Blended Mn Grade</span>
               <div className="text-xl font-mono font-bold text-accent my-1">
                 {blendResult.blended_mn_grade_pct}% Mn
@@ -148,15 +173,19 @@ export default function SmartOreBlendingModal({ mine }: Props) {
               <span className="text-xs font-mono text-text-tertiary">Meets customer spec</span>
             </div>
 
-            <div className="ios-glass-inset p-3.5">
+            <div className="ios-glass-inset p-3.5" data-provenance="derived">
               <span className="text-xs font-mono uppercase text-text-tertiary">Avg Blended Cost</span>
               <div className="text-xl font-mono font-bold text-status-caution my-1">
-                ₹{blendResult.avg_cost_per_tonne_inr?.toLocaleString() || 6240} <span className="text-xs font-normal text-text-tertiary">/ T</span>
+                {/* `|| 6240` stood here: a missing cost became a plausible one. */}
+                {blendResult.avg_cost_per_tonne_inr != null
+                  ? `₹${blendResult.avg_cost_per_tonne_inr.toLocaleString()}`
+                  : '—'}{' '}
+                <span className="text-xs font-normal text-text-tertiary">/ T</span>
               </div>
               <span className="text-xs font-mono text-accent">&bull; Cost Minimized</span>
             </div>
 
-            <div className="ios-glass-inset p-3.5">
+            <div className="ios-glass-inset p-3.5" data-provenance="derived">
               <span className="text-xs font-mono uppercase text-text-tertiary">Shortfall Recovered</span>
               <div className="text-xl font-mono font-bold text-accent my-1">
                 +{blendResult.target_tonnes?.toLocaleString()} T
@@ -179,7 +208,7 @@ export default function SmartOreBlendingModal({ mine }: Props) {
               the tonnages and rupee figures below describe the example, not a mine.
             </p>
             {blendResult.blend_plan?.map((item: any, idx: number) => (
-              <div key={idx} className="flex items-center justify-between text-xs font-mono py-1.5 border-b border-border-subtle last:border-0">
+              <div key={idx} data-provenance="derived" className="flex items-center justify-between text-xs font-mono py-1.5 border-b border-border-subtle last:border-0">
                 <span className="text-text-tertiary">{item.stockpile_name}</span>
                 <div className="flex items-center gap-3">
                   <span className="text-accent font-bold">{item.tonnes_allocated} T ({item.allocation_pct}%)</span>

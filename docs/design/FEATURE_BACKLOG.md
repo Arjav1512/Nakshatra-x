@@ -130,6 +130,25 @@ unknown".
 
 ---
 
+## B-5 — The map's layer switcher needs real layers — ⏳ STILL OPEN
+
+**Not done in Part B, and here is why.** The landing page's data stack (D-036)
+is generated from the honest model and carries three real layers: the 50
+measured training points, the kriged prospectivity surface over 1,710 cells,
+and the kriging standard deviation. Those are vector layers over a study grid.
+
+The map's switcher wants *raster* layers — Sentinel-2 true colour, an iron-oxide
+band ratio, DEM slope — tiled across the belt. Producing them means fetching and
+mosaicking L2A scenes for the whole study area and writing tiles, which this
+pipeline does not do today: `sentinel_features.py` reads bands per training
+point, not per map tile. Adding a drawn stand-in is the fabrication this phase
+exists to remove, so the switcher keeps the two layers that read real data and
+the rest waits for a tiling step.
+
+---
+
+### Original entry
+
 ## B-5 — The map's layer switcher needs real layers
 
 **Removed in the map-restoration PR:** six of the map's eight layers read no
@@ -165,9 +184,12 @@ Rules carried from the redesign brief: a layer that cannot be produced from real
 data is not added, each layer states its source, date and whether it is measured
 or synthetic, and no layer is captioned with a measurement it did not make.
 
-## B-6 — Rendered-page provenance guard
+## B-6 — Rendered-page provenance guard — ✅ DONE 2026-09-25
 
-**Deferred from Part A; this is the first item of Part B.** Stated plainly
+**Built as the first item of Part B.** `npm run test:provenance`, 114 unattributed
+values at the start and 0 now. What it found is listed in DECISIONS D-035.
+
+**Deferred from Part A; this was the first item of Part B.** Stated plainly
 because it is a scope decision, not an oversight.
 
 Every integrity sweep so far has been grep-based, and grep keeps missing things.

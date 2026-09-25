@@ -129,7 +129,17 @@ export function Metric({ label, env, display, unit, unavailableReason, emphasis 
   const hasValue = value !== null && value !== undefined && value !== ''
 
   return (
-    <div className="rounded-md border border-border-default bg-surface-2 p-3">
+    <div
+      className="rounded-md border border-border-default bg-surface-2 p-3"
+      // B-6: the rendered-page provenance guard reads this. The attribute goes
+      // on the whole card, not just the value node, because the label and the
+      // unit are part of the claim — "rainfall 14d mm" beside "104.71" says
+      // what was measured over what window, and both are attributable to the
+      // same envelope. `data-metric` below stays for the existing e2e checks.
+      data-provenance={env ? env.source_kind : 'unavailable'}
+      data-provenance-model={env?.model_version ?? undefined}
+      data-provenance-vintage={env?.vintage ?? undefined}
+    >
       <div className="flex items-start justify-between gap-2">
         <span className="label">{label}</span>
         {env ? <SourceBadge env={env} /> : null}

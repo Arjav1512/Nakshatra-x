@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Sparkles, Brain, Layers, GitBranch, Terminal, ShieldAlert, Award, } from 'lucide-react'
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
-import { type TrackAMetrics, fetchTrackAMetrics } from '@/lib/console-api'
+import { type TrackAMetrics, fetchDrillTargets, fetchTrackAMetrics } from '@/lib/console-api'
 import { Metric } from '@/components/console/Evidence'
 import { EmptyState, Skeleton } from '@/components/ui/primitives'
 import { derived } from '@/lib/provenance'
@@ -28,6 +28,25 @@ export default function JudgesArchitectureDeck() {
    */
   const [metrics, setMetrics] = useState<TrackAMetrics | null>(null)
   const [metricsErr, setMetricsErr] = useState<string | null>(null)
+  /**
+   * Grid size, read from the model rather than typed into the copy.
+   *
+   * The sentence below said "725-point spatial grid" and the tile beside it
+   * said "725 Inferences Computed". The model scores 1,710 candidate cells.
+   * Nobody noticed because 725 is a plausible integer inside a sentence: it
+   * never appeared as a suspicious literal, and no grep for fabrication
+   * patterns would flag it. It was found by reading the rendered page against
+   * the live endpoint, which is what B-6 automates.
+   */
+  const [gridSize, setGridSize] = useState<number | null>(null)
+
+  useEffect(() => {
+    let alive = true
+    fetchDrillTargets(1).then((r) => {
+      if (alive && r.ok) setGridSize(r.data.n_candidates)
+    })
+    return () => { alive = false }
+  }, [])
 
   useEffect(() => {
     let alive = true
@@ -66,8 +85,21 @@ export default function JudgesArchitectureDeck() {
           <h2 className="text-2xl font-bold text-text-primary tracking-tight mt-1.5 flex items-center gap-2">
             Mineral Prospectivity Pipeline & Explainability
           </h2>
-          <p className="text-xs text-text-tertiary mt-1 leading-relaxed">
-            Gradient-boosting model over measured Sentinel-2 band ratios and SRTM terrain, validated leave-one-mine-out (AUC 0.85, 95% CI 0.72–0.95). Maps SURFACE prospectivity only — satellite inputs carry no subsurface information (PRD §2.2).
+          <p
+            className="text-xs text-text-tertiary mt-1 leading-relaxed"
+            data-provenance={metrics ? 'derived' : 'unavailable'}
+            data-provenance-model={metrics?.model_version}
+          >
+            Gradient-boosting model over measured Sentinel-2 band ratios and SRTM
+            terrain, validated leave-one-mine-out
+            {metrics ? (
+              <>
+                {' '}(AUC {metrics.lomo.auc.toFixed(2)}, 95% CI{' '}
+                {metrics.lomo.auc_ci95[0]}–{metrics.lomo.auc_ci95[1]})
+              </>
+            ) : null}
+            . Maps SURFACE prospectivity only — satellite inputs carry no subsurface
+            information (PRD §2.2).
           </p>
         </div>
 
@@ -168,12 +200,20 @@ export default function JudgesArchitectureDeck() {
                 <GitBranch className="w-4 h-4 text-status-caution" />
               </div>
               <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Grid Inference</h3>
-              <p className="text-xs text-text-tertiary leading-relaxed">
-                Scores a 725-point spatial grid (~9km spacing) covering the entire Madhya Pradesh - Maharashtra mineral belt.
+              <p
+                className="text-xs text-text-tertiary leading-relaxed"
+                data-provenance={gridSize !== null ? 'derived' : 'unavailable'}
+              >
+                Scores a{' '}
+                {gridSize !== null ? `${gridSize.toLocaleString()}-cell` : ''} spatial grid
+                covering the Madhya Pradesh &ndash; Maharashtra mineral belt.
               </p>
             </div>
-            <div className="mt-4 text-xs font-mono text-status-caution bg-status-caution/5 p-1.5 rounded border border-status-caution/20">
-              725 Inferences Computed
+            <div
+              className="mt-4 text-xs font-mono text-status-caution bg-status-caution/5 p-1.5 rounded border border-status-caution/20"
+              data-provenance={gridSize !== null ? 'derived' : 'unavailable'}
+            >
+              {gridSize !== null ? `${gridSize.toLocaleString()} cells scored` : 'grid size unavailable'}
             </div>
           </div>
 

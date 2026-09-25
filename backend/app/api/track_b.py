@@ -243,6 +243,43 @@ def compute_backtest(mine_code: str, span_days: int = 150, step_days: int = 14) 
     return res
 
 
+class NoBacktest(Exception):
+    """
+    No backtest artifact exists for this mine, and none will be computed here.
+
+    A full run refits the model at every origin and takes 216 s, so it is a
+    batch job (PRD N-2), never a request. Only the pilot mine's backtest is
+    committed — regenerating all ten would be 36 minutes of demo-day prep for
+    artifacts nothing serves.
+
+    This carries the mines that *do* have one so the console can point at the
+    pilot instead of showing a failure. A mine without a backtest is a scope
+    decision, not an error, and the screen should say which.
+    """
+
+    def __init__(self, mine_code: str, pilots: list[str]):
+        self.mine_code = mine_code
+        self.pilots = pilots
+        super().__init__(
+            f"No precomputed backtest for {mine_code}. "
+            f"Validated on: {', '.join(pilots) or 'none'}."
+        )
+
+
+def backtest_pilots(span_days: int = 150, step_days: int = 14) -> list[str]:
+    """Mine codes with a committed backtest artifact, read from disk."""
+    import re
+
+    out = []
+    if not BACKTEST_CACHE_DIR.exists():
+        return out
+    for f in sorted(BACKTEST_CACHE_DIR.glob(f"*_{span_days}d_{step_days}step.json")):
+        m = re.fullmatch(rf"(.+)_{span_days}d_{step_days}step", f.stem)
+        if m:
+            out.append(m.group(1))
+    return out
+
+
 def backtest_mine(mine_code: str, span_days: int = 150, step_days: int = 14,
                   allow_compute: bool = True) -> dict:
     """
@@ -301,10 +338,7 @@ def backtest_mine(mine_code: str, span_days: int = 150, step_days: int = 14,
         return res
 
     if not allow_compute:
-        raise ValueError(
-            "No precomputed backtest for this mine. Run "
-            "`python -m app.api.batch backtest` (PRD N-2 nightly batch)."
-        )
+        raise NoBacktest(mine_code, backtest_pilots(span_days, step_days))
     res = compute_backtest(mine_code, span_days=span_days, step_days=step_days)
     st["backtests"][key] = res
     return res

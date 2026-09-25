@@ -11,15 +11,20 @@
     "test:e2e": "node tools/e2e-console.js",
     "test:dates": "node tools/e2e-forecast-dates.js",
     "test:routes": "node tools/e2e-routes.js",
-    "test:auth": "node tools/auth-matrix.js"
+    "test:auth": "node tools/auth-matrix.js",
+    "test:provenance": "node tools/provenance-guard.js",
+    "test:pilot": "node tools/e2e-backtest-pilot.js",
+    "test:motion": "node tools/e2e-motion.js"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "@supabase/supabase-js": "^2.116.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/leaflet": "^1.9.22",
     "autoprefixer": "^10.5.4",
     "clsx": "^2.1.1",
     "firebase": "^12.19.0",
+    "gsap": "^3.15.0",
     "idb": "^8.0.3",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.37.0",

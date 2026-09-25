@@ -5,7 +5,7 @@ from app.models.mine import MineSite
 from app.schemas.mine import MineCreate, MineResponse
 from app.services.nasa_power import fetch_weather_signal
 from app.services.satellite import query_sentinel_stac
-from app.api.track_b import backtest_mine, forecast_mine, forecast_status, recommend_actions, warm_forecast
+from app.api.track_b import NoBacktest, backtest_mine, forecast_mine, forecast_status, recommend_actions, warm_forecast
 from app.api.forecast_store import Warming
 from fastapi.responses import JSONResponse
 from app.ml.prospectivity import model_metrics, predict_point, rank_drill_targets
@@ -218,6 +218,38 @@ def track_b_backtest(mine_id: int, span_days: int = Query(150, ge=60, le=400),
     try:
         return backtest_mine(mine_code, span_days=span_days,
                              step_days=step_days, allow_compute=compute)
+    except NoBacktest as exc:
+        # Not an error: only the pilot mine's backtest is committed, because a
+        # full run is 216 s and belongs in the batch. The response names the
+        # mines that do have one, and their ids, so the console can offer the
+        # pilot rather than render a failure.
+        # 404, not 503.
+        #
+        # 503 says "try again later"; this will never become available on a
+        # retry, because nothing computes a backtest on request. The artifact
+        # simply does not exist for this mine, which is what 404 means. It also
+        # keeps a designed state out of the 5xx class that the browser
+        # regression suite watches — a scope decision should not read as a
+        # server fault to a monitor either.
+        by_code = {m["mine_code"]: i + 1 for i, m in enumerate(DEFAULT_MINES)}
+        return JSONResponse(
+            status_code=404,
+            content={
+                "status": "no_backtest",
+                "mine_code": exc.mine_code,
+                "pilots": [
+                    {"mine_code": c, "mine_id": by_code.get(c), "name": next(
+                        (m["name"] for m in DEFAULT_MINES if m["mine_code"] == c), c)}
+                    for c in exc.pilots
+                ],
+                "detail": str(exc),
+                "note": (
+                    "The rolling-origin backtest refits the model at every origin "
+                    "(216 s per mine) and is precomputed by the batch job, not on "
+                    "request. Only the pilot mine's artifact is committed."
+                ),
+            },
+        )
     except ValueError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
 
