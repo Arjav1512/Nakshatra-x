@@ -70,6 +70,115 @@ def committed_artifacts_are_not_modified_by_this_suite():
 
 
 # ---------------------------------------------------------------------------
+# Every synthetic-derived artifact describes the same dataset
+# ---------------------------------------------------------------------------
+
+def test_every_artifact_shares_one_seed_and_end_date():
+    """
+    Forecasts, backtests and the exported samples must agree on the dataset.
+
+    They are all built from one generated dataset. Regenerated separately they
+    drift — the samples describing one three-year window while the forecasts
+    forecast from the end of another — and a screen showing a forecast beside a
+    backtest MAPE is then comparing two datasets under one label. Nothing in the
+    numbers looks wrong, which is what makes it worth a test rather than a
+    convention.
+
+    Regenerate everything together: `python -m app.api.batch all`.
+    """
+    from app.api.batch import dataset_consistency
+
+    report = dataset_consistency()
+    bad = [f"{r['kind']}/{r['path']}: {r['reason']}" for r in report["artifacts"] if not r["consistent"]]
+    assert not bad, (
+        "artifacts disagree about the dataset they came from:\n  "
+        + "\n  ".join(bad)
+        + f"\nexpected {report['expected']}"
+        + "\nregenerate with `python -m app.api.batch all`, or roll back with "
+          "`git checkout -- backend/artifacts data/synthetic`"
+    )
+    kinds = {r["kind"] for r in report["artifacts"]}
+    assert kinds == {"forecast", "backtest", "samples"}, kinds
+    assert report["consistent"] is True
+
+
+def test_readyz_reports_dataset_inconsistency_as_stale(client, monkeypatch):
+    """A mine whose artifact disagrees about the dataset is `stale`, not `ready`."""
+    from app.api import batch
+
+    doctored = json.loads(json.dumps(batch.dataset_consistency()))
+    doctored["consistent"] = False
+    doctored["artifacts"][0]["consistent"] = False
+    doctored["artifacts"][0]["reason"] = "data_end_date: artifact '2026-01-01' vs code '2026-09-20'"
+    bad_path = doctored["artifacts"][0]["path"]
+    monkeypatch.setattr(batch, "dataset_consistency", lambda: doctored)
+
+    r = client.get("/api/v1/readyz")
+    assert r.status_code == 503
+    body = r.json()
+    assert body["ready"] is False
+    assert body["dataset_consistency"]["consistent"] is False
+    flagged = [m for m in body["mines"] if f"{m['mine_code']}_14d.json" == bad_path]
+    assert flagged and flagged[0]["status"] == "stale", body["mines"][:2]
+
+
+def test_changing_the_end_date_makes_every_artifact_inconsistent(monkeypatch):
+    """One env var, and nothing in the set may still claim to match."""
+    from app.api import batch
+
+    assert batch.dataset_consistency()["consistent"] is True
+    monkeypatch.setenv("NAKSHATRA_DATA_END_DATE", "2026-12-31")
+    report = batch.dataset_consistency()
+    assert report["consistent"] is False
+    assert all(not r["consistent"] for r in report["artifacts"]), report
+
+
+def test_backtest_artifact_carries_an_identity_and_a_stale_one_is_refused(tmp_path, monkeypatch):
+    """
+    A backtest is the most quotable number in the product.
+
+    "MAPE 11.67%, coverage 0.812" is what goes on the landing page and into the
+    demo script, so a backtest produced by a different build or dataset must be
+    refused rather than served under the current model_version. The artifact
+    previously recorded only `data_window_end` — no seed, no fingerprint — so a
+    change of model left it silently servable.
+    """
+    from app.api import track_b
+
+    committed = REPO / "backend" / "artifacts" / "backtests" / "MOIL-BAL-01_150d_14step.json"
+    data = json.loads(committed.read_text())
+    assert data.get("artifact_identity"), "committed backtest has no identity block"
+    ok, reason = fs.identity_matches(data)
+    assert ok, reason
+
+    monkeypatch.setattr(track_b, "BACKTEST_CACHE_DIR", tmp_path)
+    stale = dict(data)
+    stale["artifact_identity"] = {**data["artifact_identity"], "model_version": "old-model-v0"}
+    (tmp_path / "MOIL-BAL-01_150d_14step.json").write_text(json.dumps(stale))
+    track_b._STATE["backtests"] = {}
+
+    with pytest.raises(ValueError, match="different dataset or build"):
+        track_b.backtest_mine("MOIL-BAL-01", allow_compute=False)
+
+
+def test_batch_all_regenerates_every_committed_artifact_kind():
+    """
+    The one pre-flight command must cover everything, not most things.
+
+    Asserted against what is on disk rather than a list in the test, so adding a
+    committed artifact kind without adding it to `batch all` fails here.
+    """
+    from app.api import batch
+
+    assert batch.committed_backtest_specs(), "no committed backtests found"
+    covered = {r["path"] for r in batch.dataset_consistency()["artifacts"]}
+    for directory in (fs.FORECAST_DIR, batch.BACKTEST_DIR):
+        for f in directory.glob("*.json"):
+            assert f.name in covered, f"{f.name} is not covered by `batch all`'s verification"
+    assert batch.SAMPLE_IDENTITY.exists(), "samples carry no dataset identity"
+
+
+# ---------------------------------------------------------------------------
 # Artifacts match the code that is running
 # ---------------------------------------------------------------------------
 

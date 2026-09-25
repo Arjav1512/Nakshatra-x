@@ -102,6 +102,28 @@ DEFAULT_DATA_END_DATE = date(2026, 9, 20)
 DATA_END_DATE_ENV = "NAKSHATRA_DATA_END_DATE"
 
 
+def dataset_identity(seed: int | None = None, end: date | None = None) -> dict:
+    """
+    What every artifact derived from the synthetic data must agree on.
+
+    Forecasts, backtests and the exported sample CSVs are all built from one
+    generated dataset. If they are produced at different times with different
+    settings they describe different worlds, and a screen that puts a forecast
+    next to a backtest MAPE is then comparing two datasets while labelling them
+    one. Nothing in the numbers would look wrong.
+
+    This is the subset of identity that crosses artifact kinds, so `/readyz`
+    can check agreement rather than trusting it. The code fingerprint and model
+    version are per-kind and live in `forecast_store.artifact_identity`.
+    """
+    return {
+        "generator": GENERATOR_SOURCE,
+        "contract_version": CONTRACT_VERSION,
+        "generator_seed": DEFAULT_SEED if seed is None else seed,
+        "data_end_date": (end or resolve_data_end_date()).isoformat(),
+    }
+
+
 def resolve_data_end_date() -> date:
     """The configured end of actuals: the env override, else the committed default."""
     raw = os.environ.get(DATA_END_DATE_ENV, "").strip()

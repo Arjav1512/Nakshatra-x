@@ -1,0 +1,12 @@
+{
+  "artifact_identity": {
+    "generator": "nakshatra-synthetic-v1",
+    "contract_version": "1.0.0",
+    "generator_seed": 20260921,
+    "data_end_date": "2026-09-20"
+  },
+  "window": {
+    "start": "2023-09-21",
+    "end": "2026-09-20"
+  }
+}

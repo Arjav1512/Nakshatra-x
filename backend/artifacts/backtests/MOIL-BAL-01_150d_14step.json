@@ -72,7 +72,20 @@
   "verdict": "GBT beats the seasonal-naive baseline: MAPE 11.67% vs 14.81% (+21.2% relative).",
   "nominal_coverage": 0.8,
   "note": "Trained on synthetic operational data generated to the published ingestion contract (docs/INGESTION_CONTRACT.md). MOIL's real production, equipment and blasting records are proprietary (PRD 8.2). Metrics describe the model's behaviour on this dataset, not MOIL's operations.",
-  "computed_at": "2026-09-22T09:38:30.326112+00:00",
+  "computed_at": "2026-09-25T10:41:19.120273+00:00",
   "data_window_end": "2026-09-20",
-  "served_from": "computed"
+  "served_from": "computed",
+  "artifact_identity": {
+    "generator": "nakshatra-synthetic-v1",
+    "contract_version": "1.0.0",
+    "generator_seed": 20260921,
+    "data_end_date": "2026-09-20",
+    "model_version": "nakshatra-gbt-cqr-v1",
+    "code_fingerprint": "46b83fe1ca5406ef",
+    "library_versions": {
+      "numpy": "2.2.0",
+      "pydantic": "2.13.5",
+      "sklearn": "1.6.0"
+    }
+  }
 }

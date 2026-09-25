@@ -119,6 +119,25 @@ def readyz():
     """
     codes = [m["mine_code"] for m in DEFAULT_MINES]
     st = forecast_status(codes)
+
+    # Per-mine readiness is not enough. Ten forecasts can each be individually
+    # fresh and still have been generated from a different dataset than the
+    # backtest sitting next to them on screen — same code, different seed or a
+    # different end date, and every number looks plausible. Agreement across
+    # artifact kinds is checked here, and disagreement is not ready.
+    from app.api.batch import dataset_consistency
+
+    consistency = dataset_consistency()
+    st["dataset_consistency"] = consistency
+    if not consistency["consistent"]:
+        st["ready"] = False
+        stale = {r["path"] for r in consistency["artifacts"] if not r["consistent"]}
+        for m in st["mines"]:
+            if f"{m['mine_code']}_14d.json" in stale and m["status"] == "ready":
+                m["status"] = "stale"
+                m["fresh"] = False
+                st["mines_ready"] -= 1
+
     return JSONResponse(status_code=200 if st["ready"] else 503, content=st)
 
 

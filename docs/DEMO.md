@@ -25,19 +25,53 @@ Open **http://localhost:3000/console**.
 > closed rather than signing cookies with a guessable key. The console itself
 > does not need auth.
 
-### The day before — regenerate the forecast artifacts
+### The day before — regenerate every artifact, together
 
-**Do this once, the day before the demo.** It takes about four minutes and it is
-the difference between a forecast that covers next fortnight and one that covers
-a fortnight that has already been and gone.
+**Do this once, the day before the demo.** One command, about eight minutes, and
+it is the difference between a forecast that covers next fortnight and one that
+covers a fortnight that has already been and gone.
 
 ```bash
-cd backend && NAKSHATRA_DATA_END_DATE=$(date +%F) python -m app.api.batch forecast
+cd backend && NAKSHATRA_DATA_END_DATE=$(date +%F) python -m app.api.batch all
 ```
 
-Measured: 26 s per mine, 260.6 s for all ten, on an 8-core laptop with the default
-two fit threads. It prints the window it generated; check the dates before you
-trust it.
+`all` regenerates the sample CSVs, all ten forecasts and the committed
+backtest(s) from **one** dataset, then verifies they agree and prints the
+identity it used. Check the dates it prints before you trust it.
+
+**Regenerate them together, never one kind at a time.** Forecasts, backtests and
+the exported samples are all built from the same generated dataset. Regenerated
+separately they drift, and a screen showing a forecast next to a backtest MAPE is
+then comparing two datasets under one label — nothing in the numbers would look
+wrong. `/readyz` checks the agreement and reports any mine whose artifact
+disagrees as `stale` rather than `ready`; `python -m app.api.batch check` answers
+the same question from the command line.
+
+Measured on a quiet 8-core laptop with the default two fit threads: samples
+0.5 s, forecasts 25 s each (250 s for ten), backtest 216 s — **about 8 minutes**
+in total.
+
+**Run it on a quiet machine.** This is CPU-bound and it is the one step that
+punishes contention. One run here took **5.8 hours** instead of 8 minutes because
+macOS `mediaanalysisd` had been sitting at 211% CPU for seventeen hours. The
+output was byte-identical — same MAPE, same coverage — it just took ninety-seven
+times as long. Check `ps -Ao pid,%cpu,comm -r | head -5` before you start.
+
+#### If regeneration fails, roll back
+
+The previous artifact set is committed in git, so it is always the fallback:
+
+```bash
+git checkout -- backend/artifacts data/synthetic     # back to the committed set
+cd backend && python -m app.api.batch check          # confirm it agrees
+```
+
+`batch all` verifies at the end and tells you to do exactly this if the check
+fails. Nothing is deleted along the way — each artifact is written to a temporary
+file and renamed into place — so a crashed run leaves the previous artifact in
+place rather than a half-written one. Demo with the committed set if you have to:
+the console will say the window has already ended, which is honest and
+survivable. An inconsistent set is not.
 
 **Why this step exists.** A forecast's origin is the last day of actuals, and the
 synthetic generator's end date is a committed constant — it has to be, or the
