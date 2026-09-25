@@ -8,7 +8,7 @@
 
 export type Result<T> =
   | { ok: true; data: T }
-  | { ok: false; error: string; status: number; warming?: WarmingInfo }
+  | { ok: false; error: string; status: number; warming?: WarmingInfo; noBacktest?: NoBacktestInfo }
 
 /**
  * A 503 that means "computing", not "broken".
@@ -18,6 +18,13 @@ export type Result<T> =
  * as a broken one. The backend now answers cold forecasts with
  * {status: "warming", eta_seconds} and a Retry-After header.
  */
+export interface NoBacktestInfo {
+  mine_code: string
+  pilots: { mine_code: string; mine_id: number | null; name: string }[]
+  detail: string
+  note: string
+}
+
 export interface WarmingInfo {
   mine_code: string
   eta_seconds: number
@@ -42,6 +49,9 @@ async function get<T>(path: string, timeoutMs = 60000): Promise<Result<T>> {
             detail: String(body.detail ?? ''),
           },
         }
+      }
+      if (res.status === 404 && body?.status === 'no_backtest') {
+        return { ok: false, status: 404, error: String(body.detail || ''), noBacktest: body as NoBacktestInfo }
       }
       const detail =
         (body && (body.note || body.detail || body.error)) || `request failed (${res.status})`
@@ -134,6 +144,9 @@ export interface BacktestResponse {
   verdict: string
   nominal_coverage: number
   note: string
+  /** When the batch job produced this artifact. */
+  computed_at?: string
+  artifact_age_hours?: number | null
 }
 
 export interface ActionRow {

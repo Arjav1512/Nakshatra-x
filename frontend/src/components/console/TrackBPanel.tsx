@@ -6,8 +6,8 @@ import {
 } from 'recharts'
 import { derived, reference, synthetic } from '@/lib/provenance'
 import {
-  type BacktestResponse, type ForecastResponse, type RecommendationsResponse,
-  type WarmingInfo,
+  type BacktestResponse, type ForecastResponse, type NoBacktestInfo,
+  type RecommendationsResponse, type WarmingInfo,
   fetchBacktest, fetchForecast, fetchRecommendations,
 } from '@/lib/console-api'
 import { Metric } from './Evidence'
@@ -118,6 +118,16 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
   const [rWarm, setRWarm] = useState<WarmingInfo | null>(null)
   const [backtest, setBacktest] = useState<BacktestResponse | null>(null)
   const [bErr, setBErr] = useState<string | null>(null)
+  /**
+   * Which mines have a committed backtest, when this one does not.
+   *
+   * A full rolling-origin run refits the model at every origin — 216 s — so it
+   * is a batch job and only the pilot's artifact is committed. For the other
+   * nine that is a scope decision, not a failure, and the screen says so and
+   * offers the pilot. It never computes on click: the endpoint defaults to
+   * compute=false and nothing here overrides it.
+   */
+  const [noBacktest, setNoBacktest] = useState<NoBacktestInfo | null>(null)
   const [btLoading, setBtLoading] = useState(false)
   const [grade, setGrade] = useState<string | null>(null)
 
@@ -134,7 +144,13 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
     let timer: ReturnType<typeof setTimeout> | undefined
     setForecast(null); setFErr(null); setFWarm(null); setAttempt(0)
     setRecs(null); setRErr(null); setRWarm(null)
-    setBacktest(null); setBErr(null); setGrade(null)
+    setBacktest(null); setBErr(null); setNoBacktest(null); setGrade(null)
+    // Cheap probe: this reads an artifact or answers 503 immediately.
+    fetchBacktest(mineId).then((r) => {
+      if (!live) return
+      if (r.ok) setBacktest(r.data)
+      else if (r.noBacktest) setNoBacktest(r.noBacktest)
+    })
 
     const poll = (n: number) => {
       fetchForecast(mineId).then((r) => {
@@ -162,7 +178,9 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
   const runBacktest = async () => {
     setBtLoading(true); setBErr(null)
     const r = await fetchBacktest(mineId)
-    r.ok ? setBacktest(r.data) : setBErr(r.error)
+    if (r.ok) setBacktest(r.data)
+    else if (r.noBacktest) setNoBacktest(r.noBacktest)
+    else setBErr(r.error)
     setBtLoading(false)
   }
 
@@ -425,22 +443,65 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
           <p className="text-xs uppercase tracking-wider text-text-secondary">
             Backtest — held-out accuracy (PRD B-10, N-8)
           </p>
-          {!backtest && !btLoading ? (
+          {!backtest && !btLoading && !noBacktest ? (
             <button type="button"
               onClick={runBacktest}
               className="rounded-md border border-accent/40 bg-accent/10 px-3 py-1 text-xs text-accent transition-colors hover:bg-accent/20"
             >
-              Run rolling-origin backtest
+              Show rolling-origin backtest
             </button>
           ) : null}
         </div>
 
         {btLoading ? (
-          <Spinner label="Refitting the model at every origin — this takes a minute or two…" />
+          <Spinner label="Reading the precomputed backtest…" />
+        ) : noBacktest ? (
+          /*
+           * Designed state, not a failure.
+           *
+           * Nine of the ten mines have no committed backtest because a full run
+           * is 216 s and belongs in the batch job. Showing "Backtest
+           * unavailable" in red would say something is broken; it is not. The
+           * panel names the pilot it *was* validated on and links to it, and
+           * there is no control here that could start a computation.
+           */
+          <div
+            className="mt-2 rounded-md border border-border-default bg-surface-1 p-3"
+            data-testid="backtest-pilot"
+            data-provenance="derived"
+          >
+            <p className="measure text-xs text-text-secondary">
+              <strong className="font-medium text-text-primary">
+                Validated on the pilot mine
+                {noBacktest.pilots.length === 1 ? ` (${noBacktest.pilots[0].name})` : ''}.
+              </strong>{' '}
+              The rolling-origin backtest refits the model at every origin, so it is precomputed by
+              the batch job rather than run from this page. {mineName} does not have one; the model
+              and its settings are the same across mines.
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {noBacktest.pilots.map((pilot) =>
+                pilot.mine_id ? (
+                  <a
+                    key={pilot.mine_code}
+                    href={`/console?mine=${pilot.mine_id}&track=b`}
+                    className="rounded-md border border-accent/40 bg-accent/10 px-3 py-1 text-xs text-accent transition-colors hover:bg-accent/20"
+                  >
+                    View {pilot.name}&rsquo;s backtest &rarr;
+                  </a>
+                ) : null
+              )}
+            </div>
+          </div>
         ) : bErr ? (
           <div className="mt-2"><Unavailable what="Backtest" reason={bErr} /></div>
         ) : backtest ? (
-          <div className="mt-3 space-y-3">
+          <div
+            className="mt-3 space-y-3"
+            data-provenance="derived"
+            data-provenance-model={backtest.model_version}
+            data-provenance-vintage={backtest.computed_at}
+          >
             <p className="text-xs text-text-secondary">{backtest.verdict}</p>
             <div className="grid gap-3 sm:grid-cols-3">
               <Metric

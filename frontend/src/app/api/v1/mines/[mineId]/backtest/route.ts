@@ -25,6 +25,14 @@ export async function GET(
     { timeoutMs: 600000 }
   )
   if (r.ok) return NextResponse.json({ ...r.data, served_by: 'fastapi', proxied_from: backendUrl() })
+  // "No backtest for this mine" is a scope decision, not a failure: only the
+  // pilot's artifact is committed because a full run is 216 s. Pass the
+  // backend's own answer through, with the pilots it names, so the console can
+  // offer a link instead of rendering an error.
+  if (!r.ok && r.status === 404 && r.body?.status === 'no_backtest') {
+    return NextResponse.json(r.body, { status: 404 })
+  }
+
   return NextResponse.json(
     {
       error: 'Backtest unavailable',

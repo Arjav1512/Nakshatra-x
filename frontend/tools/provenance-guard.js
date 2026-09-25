@@ -166,6 +166,18 @@ async function scan(page, route) {
             continue
           }
           nodes.push(...(await collect(page)))
+          // Open whatever this control just drew. Leaflet keeps its captions in
+          // popups that exist only while open, and a layer's shapes are only on
+          // the map while that layer is the active one — so the shapes are
+          // clicked here, inside the loop, not once at the end.
+          const drawn = await page.$$('.leaflet-interactive')
+          for (const sh of drawn.slice(0, 6)) {
+            try {
+              await sh.click()
+              await new Promise((r) => setTimeout(r, 350))
+              nodes.push(...(await collect(page)))
+            } catch {}
+          }
         } catch {
           // Detached or non-interactive; nothing new rendered.
         }

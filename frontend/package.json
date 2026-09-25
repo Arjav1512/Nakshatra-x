@@ -12,7 +12,8 @@
     "test:dates": "node tools/e2e-forecast-dates.js",
     "test:routes": "node tools/e2e-routes.js",
     "test:auth": "node tools/auth-matrix.js",
-    "test:provenance": "node tools/provenance-guard.js"
+    "test:provenance": "node tools/provenance-guard.js",
+    "test:pilot": "node tools/e2e-backtest-pilot.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
