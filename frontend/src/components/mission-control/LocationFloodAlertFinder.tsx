@@ -8,6 +8,7 @@ import {
 import { Button, EmptyState, Skeleton, StatusDot, type Status } from '@/components/ui/primitives'
 import { Metric } from '@/components/console/Evidence'
 import { derived, measured, measuredOrNull, measuredValue } from '@/lib/provenance'
+import { UPSTREAMS } from '@/lib/upstreams'
 
 /**
  * Rainfall context for a location, from measured weather only.
@@ -93,7 +94,7 @@ export default function LocationFloodAlertFinder(_props: Props) {
       if (!place) throw new Error(`No location matched "${q}".`)
 
       const url =
-        'https://api.open-meteo.com/v1/forecast' +
+        `${UPSTREAMS.openMeteo}/v1/forecast` +
         `?latitude=${place.lat}&longitude=${place.lng}` +
         '&current=temperature_2m,relative_humidity_2m' +
         '&daily=precipitation_sum&past_days=14&forecast_days=0' +

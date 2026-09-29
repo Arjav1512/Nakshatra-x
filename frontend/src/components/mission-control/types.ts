@@ -8,7 +8,7 @@ export type MineInfo = {
   lng: number
   zone: string
   targetTonnes: number
-  currentProduction: number
+  currentProduction: number | null
 }
 
 // `null` means "not supplied by the active source" and must render as an
@@ -20,7 +20,8 @@ export type WeatherSignal = {
   is_live?: boolean
   /** True when the value came from the seeded synthetic generator. */
   is_synthetic?: boolean
-  rainfall_14d_mm: number
+  /** Null when no reading was obtained — degraded mode does not invent one. */
+  rainfall_14d_mm: number | null
   soil_moisture_pct: number | null
   land_surface_temp_c: number | null
   humidity_pct?: number | null
@@ -60,15 +61,15 @@ export type ProductionForecast = {
   model: string
   horizon_days: number
   total_planned_tonnes: number
-  total_predicted_tonnes: number
-  projected_shortfall_tonnes: number
-  shortfall_percentage: number
-  risk_level: 'CRITICAL' | 'MODERATE' | 'NOMINAL'
-  current_daily_rate_t: number
+  total_predicted_tonnes: number | null
+  projected_shortfall_tonnes: number | null
+  shortfall_percentage: number | null
+  risk_level: 'CRITICAL' | 'MODERATE' | 'NOMINAL' | null
+  current_daily_rate_t: number | null
   drag_factors: {
-    weather_drag_pct: number
-    equipment_downtime_drag_pct: number
-    blasting_delay_drag_pct: number
+    weather_drag_pct: number | null
+    equipment_downtime_drag_pct: number | null
+    blasting_delay_drag_pct: number | null
   }
   trajectory: Array<{
     day_index: number
@@ -81,19 +82,19 @@ export type ProductionForecast = {
 }
 
 export type RiskAnalysis = {
-  composite_risk_score: number
-  risk_status: 'ELEVATED' | 'WATCH' | 'LOW'
-  rainfall_risk_score: number
-  equipment_risk_score: number
-  blasting_risk_score: number
+  composite_risk_score: number | null
+  risk_status: 'ELEVATED' | 'WATCH' | 'LOW' | null
+  rainfall_risk_score: number | null
+  equipment_risk_score: number | null
+  blasting_risk_score: number | null
   stockpile_risk_score: number | null
-  predicted_shortfall_tonnes: number
-  live_downtime_hours: number
+  predicted_shortfall_tonnes: number | null
+  live_downtime_hours: number | null
 }
 
 export type ShapExplanation = {
   explainer: string
-  composite_risk_score: number
+  composite_risk_score: number | null
   base_value: number
   waterfall_features: Array<{
     feature: string
@@ -107,7 +108,7 @@ export type ShapExplanation = {
     impact: string
     remedy: string
   }>
-  primary_driver: string
+  primary_driver: string | null
 }
 
 export type ActionOrder = {

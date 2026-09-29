@@ -3,7 +3,7 @@
 import type { MineInfo, RiskAnalysis, WeatherSignal } from './types'
 import { Metric } from '@/components/console/Evidence'
 import { EmptyState, StatusDot, type Status } from '@/components/ui/primitives'
-import { derived, measured, measuredOrNull } from '@/lib/provenance'
+import { derived, measured, measuredOrNull, synthetic } from '@/lib/provenance'
 
 /**
  * Risk context for the mine whose stockpiles are being blended.
@@ -36,6 +36,36 @@ function band(score: number): { status: Status; label: string } {
 }
 
 const WEATHER_SOURCE = 'NASA POWER daily meteorology'
+
+/**
+ * Build the envelope from the payload's own flags, never from a constant.
+ *
+ * These three cards called `measured(value, unit, WEATHER_SOURCE)` outright. In
+ * degraded mode — the FastAPI layer unreachable — `fetchLiveMineTelemetry`
+ * falls back to `degradedTelemetry`, which *generates* rainfall in the browser
+ * from `boundedNormal(85, 25, 0, 320)` and labels itself honestly:
+ * `is_live: false`, `is_synthetic: true`, `source: 'SYNTHETIC FALLBACK —
+ * service layer unreachable. Not observed data.'`
+ *
+ * The component threw all of that away. The card rendered
+ * **LIVE · 49.7 mm · NASA POWER daily meteorology** over a number no instrument
+ * produced. The data was honest; the badge was not, because the badge was a
+ * literal.
+ *
+ * Found by running the provenance guard with the backend stopped — the value
+ * was attributed, so the ordinary run passed it.
+ */
+function weatherEnvelope<T>(
+  value: T,
+  unit: string,
+  weather: { is_synthetic?: boolean; source?: string; updated_at?: string } | null
+) {
+  const vintage = weather?.updated_at
+  if (weather?.is_synthetic) {
+    return synthetic(value, unit, weather.source ?? 'Synthetic fallback — service layer unreachable.', { vintage })
+  }
+  return measured(value, unit, weather?.source ?? WEATHER_SOURCE, { vintage })
+}
 
 export default function RiskCockpit({ mine, weather, risk }: Props) {
   if (!weather && !risk) {
@@ -83,7 +113,7 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
           
           unit="mm"
           data={measuredOrNull(weather?.rainfall_14d_mm != null
-              ? measured(weather.rainfall_14d_mm, 'mm', WEATHER_SOURCE)
+              ? weatherEnvelope(weather.rainfall_14d_mm, 'mm', weather)
               : undefined, () => String(weather?.rainfall_14d_mm != null ? weather.rainfall_14d_mm : null))}
             unavailable="No measured rainfall was returned for this location."
           />
@@ -92,7 +122,7 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
           
           unit="%"
           data={measuredOrNull(weather?.soil_moisture_pct != null
-              ? measured(weather.soil_moisture_pct, '%', WEATHER_SOURCE)
+              ? weatherEnvelope(weather.soil_moisture_pct, '%', weather)
               : undefined, () => String(weather?.soil_moisture_pct != null ? weather.soil_moisture_pct : null))}
             unavailable="No soil-moisture value was returned."
           />
@@ -101,7 +131,7 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
           
           unit="°C"
           data={measuredOrNull(weather?.land_surface_temp_c != null
-              ? measured(weather.land_surface_temp_c, '°C', WEATHER_SOURCE)
+              ? weatherEnvelope(weather.land_surface_temp_c, '°C', weather)
               : undefined, () => String(weather?.land_surface_temp_c != null ? weather.land_surface_temp_c : null))}
             unavailable="No land-surface temperature was returned."
           />

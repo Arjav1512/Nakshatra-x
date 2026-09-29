@@ -10,8 +10,9 @@
  * Guardrail: these are surface reflectance scenes. They carry no subsurface
  * information and must not be presented as evidence of ore at depth.
  */
+import { UPSTREAMS } from '@/lib/upstreams'
 
-const EARTH_SEARCH = 'https://earth-search.aws.element84.com/v1/search'
+const EARTH_SEARCH = `${UPSTREAMS.stac}/v1/search`
 
 export interface STACScene {
   scene_id: string

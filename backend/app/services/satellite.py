@@ -23,7 +23,11 @@ from datetime import datetime, timedelta, timezone
 
 import httpx
 
-STAC_ENDPOINT = "https://earth-search.aws.element84.com/v1/search"
+def _stac_endpoint() -> str:
+    """Read at call time so NAKSHATRA_OFFLINE can redirect it."""
+    from app.core.config import settings
+
+    return f"{settings.stac_base_url}/v1/search"
 PROVIDER = "Copernicus Sentinel-2 L2A via Earth Search STAC (Element 84)"
 
 
@@ -63,7 +67,7 @@ async def query_sentinel_stac(
 
     try:
         async with httpx.AsyncClient(timeout=8.0) as client:
-            res = await client.post(STAC_ENDPOINT, json=payload)
+            res = await client.post(_stac_endpoint(), json=payload)
             res.raise_for_status()
             data = res.json()
 

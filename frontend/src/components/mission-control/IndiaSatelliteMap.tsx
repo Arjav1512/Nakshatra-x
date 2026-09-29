@@ -5,6 +5,7 @@ import type { MineInfo } from './types'
 import { MOIL_MINES } from './data'
 import { cividis } from '@/lib/colormap'
 import { type MineRow, fetchMines } from '@/lib/console-api'
+import { UPSTREAMS } from '@/lib/upstreams'
 import {
   Layers,
   MapPin,
@@ -669,7 +670,7 @@ export default function IndiaSatelliteMap({
       L.control.zoom({ position: 'bottomright' }).addTo(map)
 
       // 1. High-Resolution Real Satellite Base Layer (ESRI World Imagery)
-      L.tileLayer( 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      L.tileLayer( `${UPSTREAMS.esriTiles}/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}`,
         {
           maxZoom: 18,
           attribution: 'Esri Satellite',
@@ -780,7 +781,12 @@ export default function IndiaSatelliteMap({
         mapInstanceRef.current = null
       }
     }
-  }, [])
+    // `hotspots` is a dependency now: the markers used to come from a literal
+    // array available at mount, and they now arrive from /api/v1/mines. Without
+    // this the effect drew an empty register once and never redrew — the map
+    // rendered its tiles and its prospectivity overlay with no mines on it, and
+    // the route suite caught it ("mine markers plotted — 0 markers").
+  }, [hotspots])
 
   useEffect(() => {
     if (mapInstanceRef.current) {
