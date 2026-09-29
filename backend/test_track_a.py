@@ -108,3 +108,75 @@ if __name__ == "__main__":
     test_kriging_uncertainty_rises_away_from_data()
     test_honest_auc_is_reported_and_modest()
     print("\nALL TRACK A TESTS PASSED.")
+
+# ---------------------------------------------------------------------------
+# The served surface is the loaded model's, not a committed file's
+# ---------------------------------------------------------------------------
+
+def test_served_grid_matches_the_model_that_is_loaded():
+    """
+    The grid endpoint's model_version and cell count must match the model.
+
+    The map used to fetch a committed `prospectivity.geojson`: 1,326 cells from
+    the superseded pipeline, carrying `dist_to_fault_km`, `temp_c` and
+    `rainfall_mm` — two features the honest rebuild dropped for leaking the
+    labels, one the model never had. It was drawn under this model's name, with
+    popups reading "LIVE ML" and "Real-Time Telemetry" over a static asset.
+
+    Nothing about that was visible from the code that rendered it, so it is
+    asserted here: what the surface endpoint serves has to agree with what the
+    model reports about itself.
+    """
+    from app.ml.prospectivity import MODEL_VERSION, model_metrics, rank_drill_targets, scored_grid
+
+    grid = scored_grid()
+    metrics = model_metrics()
+    ranked = rank_drill_targets(top_n=1)
+
+    assert grid["model_version"] == MODEL_VERSION
+    assert grid["model_version"] == metrics["model_version"], (
+        f"surface says {grid['model_version']}, metrics say {metrics['model_version']}"
+    )
+    assert grid["model_version"] == ranked["model_version"]
+
+    # One grid definition, shared: the ranking and the surface must score the
+    # same cells. 1,326 vs 1,710 is exactly how the old file went unnoticed.
+    assert grid["n_cells"] == ranked["n_candidates"], (
+        f"surface scores {grid['n_cells']} cells, ranking considers "
+        f"{ranked['n_candidates']} — they must be the same grid"
+    )
+    assert grid["n_cells"] == len(grid["cells"])
+    assert grid["n_cells"] > 1500, grid["n_cells"]
+
+    # Every cell carries a score and its spread, and nothing from the old model.
+    banned = {"dist_to_fault_km", "temp_c", "rainfall_mm", "confidence", "probability"}
+    for cell in grid["cells"][:50]:
+        assert 0.0 <= cell["prospectivity_score"] <= 1.0
+        assert cell["uncertainty_sd"] >= 0.0
+        assert not (banned & set(cell)), f"superseded field on a cell: {banned & set(cell)}"
+
+    assert grid["provenance"]["is_live"] is False
+    assert grid["provenance"]["model_version"] == MODEL_VERSION
+
+
+def test_no_committed_prospectivity_geojson_anywhere():
+    """
+    The superseded grid must not come back, in any copy.
+
+    It existed three times — AI/outputs, frontend/public/data and
+    frontend/src/data — and `05_export_geojson.py` recreated all of them from
+    the pre-honest pipeline on every run. The route read one of the copies, so
+    deleting only the obvious one would have changed nothing.
+    """
+    import subprocess
+
+    repo = Path(__file__).resolve().parents[1]
+    tracked = subprocess.run(
+        ["git", "ls-files", "*prospectivity*.geojson"],
+        cwd=str(repo), capture_output=True, text=True, check=True,
+    ).stdout.split()
+    assert not tracked, f"a superseded prospectivity grid is committed again: {tracked}"
+
+    on_disk = [str(p) for p in repo.rglob("prospectivity*.geojson")
+               if "node_modules" not in str(p)]
+    assert not on_disk, f"stale grid files on disk: {on_disk}"

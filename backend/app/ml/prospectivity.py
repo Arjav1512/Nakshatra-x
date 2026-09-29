@@ -170,10 +170,8 @@ def rank_drill_targets(candidates: Sequence[tuple[float, float]] | None = None,
     """
     st = _load()
     if candidates is None:
-        # Grid over the study area, excluding cells that sit on a training point.
-        lats = np.arange(20.6, 22.5, 0.05)
-        lngs = np.arange(78.6, 80.8, 0.05)
-        candidates = [(float(a), float(b)) for a in lats for b in lngs]
+        # One grid definition, shared with `scored_grid` (see study_grid).
+        candidates = study_grid()
 
     lat = np.array([c[0] for c in candidates])
     lng = np.array([c[1] for c in candidates])
@@ -215,6 +213,80 @@ def rank_drill_targets(candidates: Sequence[tuple[float, float]] | None = None,
         "n_observations": int(len(st["table"])),
         "validation": st["metrics"].get("lomo", {}),
         "guardrails": _guardrails(),
+    }
+
+
+# The study grid, defined once.
+#
+# `rank_drill_targets` built this inline and the superseded
+# `AI/outputs/prospectivity.geojson` used a different one, which is how the map
+# came to show 1,326 cells while the model scored 1,710. One definition now, and
+# the grid endpoint and the ranking read the same cells.
+GRID_LAT_RANGE = (20.6, 22.5)
+GRID_LNG_RANGE = (78.6, 80.8)
+GRID_STEP_DEG = 0.05
+
+
+def study_grid() -> list[tuple[float, float]]:
+    lats = np.arange(*GRID_LAT_RANGE, GRID_STEP_DEG)
+    lngs = np.arange(*GRID_LNG_RANGE, GRID_STEP_DEG)
+    return [(float(a), float(b)) for a in lats for b in lngs]
+
+
+def scored_grid() -> dict:
+    """
+    The honest prospectivity surface: every study cell, kriged, with its spread.
+
+    This exists because the map was loading `prospectivity.geojson` — output
+    from the superseded model, 1,326 cells, carrying `dist_to_fault_km`,
+    `temp_c` and `rainfall_mm`: two features the honest rebuild dropped for
+    leaking the labels and one the model never had. The map rendered it under
+    this model's name, with popups labelled "LIVE ML" and "Real-Time Telemetry"
+    over a static file.
+
+    Every cell here is scored by the model that is loaded, and the response
+    carries the model version and the cell count so a consumer can check it
+    against /prospectivity/metrics rather than trust the label.
+    """
+    st = _load()
+    grid = study_grid()
+    lat = np.array([c[0] for c in grid])
+    lng = np.array([c[1] for c in grid])
+    est, sd = st["kriging"].uncertainty(lat, lng)
+
+    return {
+        "model_version": MODEL_VERSION,
+        "n_cells": len(grid),
+        "grid": {
+            "lat_range": list(GRID_LAT_RANGE),
+            "lng_range": list(GRID_LNG_RANGE),
+            "step_deg": GRID_STEP_DEG,
+        },
+        "quantity": "prospectivity_score",
+        "cells": [
+            {
+                "lat": round(float(a), 4),
+                "lng": round(float(b), 4),
+                "prospectivity_score": round(float(e), 4),
+                "uncertainty_sd": round(float(s), 4),
+            }
+            for (a, b), e, s in zip(grid, est, sd)
+        ],
+        "guardrails": _guardrails(),
+        "provenance": {
+            "source_kind": "derived",
+            "source": (
+                "Ordinary kriging over a gradient-boosting model of measured "
+                "Sentinel-2 L2A band ratios and SRTM terrain"
+            ),
+            "model_version": MODEL_VERSION,
+            "is_live": False,
+            "is_synthetic": False,
+            "note": (
+                "A surface prospectivity score with its kriging spread. Not a "
+                "grade, not a reserve, and not a live reading (PRD 2.4)."
+            ),
+        },
     }
 
 

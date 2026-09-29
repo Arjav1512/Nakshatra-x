@@ -180,7 +180,12 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
         {
           id: `act-confirm-${Date.now()}`,
           sender: 'assistant',
-          text: `✅ **Stockpile Blending Applied**: Simplex solution dispatched to loader SCADA terminals. Target grade ≥42% Mn locked.`,
+          // Was: "Simplex solution dispatched to loader SCADA terminals.
+          // Target grade >=42% Mn locked." Nothing here dispatches anything —
+          // there is no SCADA integration in this system, and no grade is
+          // locked. A chat reply claiming an action was taken is worse than a
+          // wrong number, because someone may act on the belief that it was.
+          text: `**Blend plan ready.** Open the blending tool to see the allocation the optimiser produced. Nothing has been dispatched: this is decision support, and applying a plan happens in your own systems.`,
           timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
         },
       ])
@@ -225,8 +230,11 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
                       </span>
                       <span className="text-text-secondary font-semibold text-xs ml-1.5 font-mono">Platform Copilot</span>
                     </h3>
-                    <span className="ios-badge ios-badge-live text-xs py-0.5 px-2 font-mono font-bold whitespace-nowrap shrink-0">
-                      100% FREE ON-DEVICE
+                    {/* data-literal-ok: describes how the assistant runs (a local
+                        canned-answer matcher in aix-knowledge-engine, no API
+                        call), not a measurement of anything. */}
+                    <span className="ios-badge text-xs py-0.5 px-2 font-mono font-bold whitespace-nowrap shrink-0">
+                      Runs on-device
                     </span>
                   </div>
                   <p className="text-xs font-mono text-text-secondary">

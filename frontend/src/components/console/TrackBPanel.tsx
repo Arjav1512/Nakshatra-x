@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import {
   Area, AreaChart, CartesianGrid, Line, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
-import { derived, reference, synthetic } from '@/lib/provenance'
+import { derived, measuredValue, reference, synthetic } from '@/lib/provenance'
 import {
   type BacktestResponse, type ForecastResponse, type NoBacktestInfo,
   type RecommendationsResponse, type WarmingInfo,
@@ -266,18 +266,18 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
               label="Plan target (horizon)"
               emphasis
               unit="t"
-              env={reference(
+              data={measuredValue(reference(
                 Math.round(forecast.portfolio.plan_target_tonnes),
                 'tonnes',
                 'plan_target, ingestion contract v1.0.0',
                 { model_version: 'nakshatra-synthetic-v1', method: 'Monthly plan pro-rated across the forecast window.' }
-              )}
-            />
+              ))}
+          />
             <Metric
               label="Expected production"
               emphasis
               unit="t"
-              env={synthetic(
+              data={measuredValue(synthetic(
                 Math.round(forecast.portfolio.expected_cumulative_tonnes),
                 'tonnes',
                 SYNTH_SOURCE,
@@ -285,28 +285,23 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                   model_version: forecast.model_version,
                   method: 'Quantile gradient boosting with conformalised intervals; grade is a model feature.',
                 }
-              )}
-            />
+              ))}
+          />
             <Metric
               label="Expected shortfall"
               emphasis
               unit="t"
-              env={derived(
+              data={measuredValue(derived(
                 Math.round(forecast.portfolio.expected_shortfall_tonnes),
                 'tonnes',
                 'max(0, plan target − expected production)',
                 { model_version: forecast.model_version }
-              )}
-            />
+              ))}
+          />
             <Metric
               label="Worst-grade P(shortfall)"
               emphasis
-              display={
-                grades.length
-                  ? pct(Math.max(...grades.map((g) => g.shortfall.p_shortfall)))
-                  : null
-              }
-              env={derived(
+              data={measuredValue(derived(
                 grades.length ? Math.max(...grades.map((g) => g.shortfall.p_shortfall)) : 0,
                 'probability',
                 'Monte Carlo over per-day predictive distributions',
@@ -319,8 +314,10 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                     basis: 'Daily intervals are conformalised; days treated as independent given covariates.',
                   },
                 }
-              )}
-            />
+              ), () => String(grades.length
+                  ? pct(Math.max(...grades.map((g) => g.shortfall.p_shortfall)))
+                  : null))}
+          />
           </div>
 
           {/* --- grade-aware breakdown: PRD B-5 is per-grade at P0 --- */}
@@ -506,28 +503,25 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             <div className="grid gap-3 sm:grid-cols-3">
               <Metric
                 label="Model MAPE"
-                display={`${backtest.model.mape_pct}%`}
-                env={derived(backtest.model.mape_pct, '%', 'Rolling-origin backtest, held-out', {
+              data={measuredValue(derived(backtest.model.mape_pct, '%', 'Rolling-origin backtest, held-out', {
                   model_version: backtest.model_version,
                   method: `${backtest.n_predictions} predictions from ${backtest.n_origins} origins; model refitted at each origin.`,
-                })}
-              />
+                }), () => String(`${backtest.model.mape_pct}%`))}
+          />
               <Metric
                 label="Baseline MAPE"
-                display={`${backtest.baseline.mape_pct}%`}
-                env={derived(backtest.baseline.mape_pct, '%', 'Seasonal-naive baseline, same origins', {
+              data={measuredValue(derived(backtest.baseline.mape_pct, '%', 'Seasonal-naive baseline, same origins', {
                   model_version: backtest.baseline_version,
                   method: 'y_hat[t] = y[t − 365]. The architecture requires a baseline that must be beaten.',
-                })}
-              />
+                }), () => String(`${backtest.baseline.mape_pct}%`))}
+          />
               <Metric
                 label={`Interval coverage (nominal ${backtest.nominal_coverage})`}
-                display={String(backtest.model.coverage_80)}
-                env={derived(backtest.model.coverage_80, 'share', 'Empirical coverage of the 80% interval', {
+              data={measuredValue(derived(backtest.model.coverage_80, 'share', 'Empirical coverage of the 80% interval', {
                   model_version: backtest.model_version,
                   method: 'PRD §11 calibration: do 80%-confidence predictions come true 80% of the time?',
-                })}
-              />
+                }), () => String(String(backtest.model.coverage_80)))}
+          />
             </div>
             <table className="w-full text-xs">
               <thead className="text-text-tertiary">

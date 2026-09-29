@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { type MineRow, fetchForecast, fetchMines, fetchTelemetry } from '@/lib/console-api'
-import { synthetic } from '@/lib/provenance'
+import { measuredOrNull, synthetic } from '@/lib/provenance'
 import { type ExportRow, buildCsv, downloadCsv, exportPdf } from '@/lib/console-export'
 import { IntegrityBanner, Metric, SourceBadge } from './Evidence'
 import { Button, Card, EmptyState, Skeleton, StatusDot, type Status } from '@/components/ui/primitives'
@@ -437,9 +437,10 @@ export function DecisionConsole() {
                       <Metric
                         key={k}
                         label={k.split('.')[1].replace(/_/g, ' ')}
-                        env={telemetry.provenance[k]}
+                        data={measuredOrNull(telemetry.provenance[k])}
                         unit={telemetry.provenance[k].unit}
-                      />
+            unavailable="The service returned no value for this field, so none is shown."
+          />
                     ))}
                 </div>
               </section>

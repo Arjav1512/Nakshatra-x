@@ -1,3 +1,36 @@
+"""
+Superseded. This script no longer exports anything.
+
+WHY
+---
+It copied `AI/outputs/prospectivity.geojson` into `frontend/public/data/` and
+`frontend/src/data/`, and the Next route served the latter. That file is output
+from the model in `04_predict_grid.py` — the pre-honest pipeline — carrying
+`dist_to_fault_km`, `temp_c` and `rainfall_mm`: two features the honest rebuild
+in `07_build_honest_dataset.py` / `08_train_honest_model.py` dropped because
+they leaked the labels, and one the model never had. 1,326 cells against the
+honest model's 1,710.
+
+So the map drew the superseded model's surface under the honest model's name,
+with popups labelled "LIVE ML" and "Real-Time Telemetry" over a static file.
+
+The surface is now served by `GET /api/v1/prospectivity/grid`, which scores the
+grid with the model that is actually loaded and returns `model_version` and
+`n_cells` with it. There is no committed copy to go stale.
+
+The script is kept, and kept inert, as the record of how the copies got there.
+Re-enabling it means re-introducing the defect; if a static export is ever
+wanted, export from the honest model and carry its identity.
+"""
+import sys
+
+print(__doc__)
+sys.exit(
+    "05_export_geojson.py is disabled: it published the superseded model's grid "
+    "into the frontend. Use GET /api/v1/prospectivity/grid."
+)
+
+_DISABLED_ORIGINAL = """
 import json
 import os
 import shutil
@@ -50,3 +83,5 @@ if os.path.exists(metrics_src):
 
 print(f"\n[OK] Synchronized GeoJSON to Next.js public/data and src/data directories.")
 print("==================================================")
+
+"""

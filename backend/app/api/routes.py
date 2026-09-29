@@ -8,7 +8,7 @@ from app.services.satellite import query_sentinel_stac
 from app.api.track_b import NoBacktest, backtest_mine, forecast_mine, forecast_status, recommend_actions, warm_forecast
 from app.api.forecast_store import Warming
 from fastapi.responses import JSONResponse
-from app.ml.prospectivity import model_metrics, predict_point, rank_drill_targets
+from app.ml.prospectivity import model_metrics, predict_point, rank_drill_targets, scored_grid
 from app.api.telemetry import build_mine_telemetry
 from app.services.recommendations import generate_action_recommendations
 from app.ml.risk_model import calculate_shortfall_risk
@@ -282,6 +282,23 @@ def prospectivity_targets(top_n: int = Query(10, ge=1, le=50)):
     """Ranked drill targets with the evidence behind each. PRD A-5."""
     try:
         return rank_drill_targets(top_n=top_n)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+
+
+@router.get("/prospectivity/grid")
+def prospectivity_grid():
+    """
+    The honest prospectivity surface over the whole study grid (PRD A-3, A-4).
+
+    Serves the model that is loaded. The map previously read a committed
+    `prospectivity.geojson` — 1,326 cells from the superseded model, carrying
+    features the honest rebuild dropped — and rendered it under this model's
+    name. The response carries `model_version` and `n_cells` so a consumer can
+    check rather than trust.
+    """
+    try:
+        return scored_grid()
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
 

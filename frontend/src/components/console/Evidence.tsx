@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { Envelope } from '@/lib/provenance'
+import type { Envelope, Measured } from '@/lib/provenance'
 
 /**
  * Evidence primitives (PRD D-7 [D] P0, N-3 [D]).
@@ -105,28 +105,43 @@ export function EvidenceDetail({ env }: { env: Envelope<any> }) {
   )
 }
 
-export interface MetricProps {
-  label: string
-  /** The provenance envelope. Omit only when the value is genuinely unavailable. */
-  env?: Envelope<any> | null
-  /** Override the rendered value (e.g. pre-formatted); defaults to `env.value`. */
-  display?: string | number | null
-  unit?: string
-  /** Shown when there is no value — states why, never a placeholder number. */
-  unavailableReason?: string
-  emphasis?: boolean
-}
-
 /**
- * The only number-rendering component in the console.
+ * `Metric` takes a `Measured` or an explicit reason it has none.
  *
- * No envelope → no number. That is deliberate: it makes an unprovenanced
- * figure impossible to ship by accident.
+ * It used to take `env?: Envelope` and `display?: string | number` as separate,
+ * both-optional props, which left two holes the rendered-page guard cannot see:
+ *
+ *   * `display` without `env` — a number on screen with no provenance;
+ *   * `display` disagreeing with `env` — the evidence panel documenting one
+ *     number while the card shows another.
+ *
+ * Both render perfectly, so no crawler would flag them. The union below makes
+ * them unrepresentable: either you pass a `Measured` (which can only be built
+ * from an envelope, and reads its value from it) or you say, in words, why
+ * there is nothing to show.
+ *
+ * Absence stays expressible, and stays explained: if the value you pass might
+ * be null, the compiler requires the reason alongside it. "unavailable" on its
+ * own tells the reader nothing, and a card that silently renders blank tells
+ * them less.
  */
-export function Metric({ label, env, display, unit, unavailableReason, emphasis }: MetricProps) {
+export type MetricProps = {
+  label: string
+  unit?: string
+  emphasis?: boolean
+} & (
+  | { data: Measured<any>; unavailable?: string }
+  | { data: Measured<any> | null | undefined; unavailable: string }
+)
+
+export function Metric(props: MetricProps) {
+  const { label, unit, emphasis } = props
   const [open, setOpen] = useState(false)
-  const value = display ?? env?.value ?? null
-  const hasValue = value !== null && value !== undefined && value !== ''
+  const data = 'data' in props ? props.data ?? null : null
+  const env = data?.envelope ?? null
+  const hasValue = data !== null
+  const value = data ? (data.display ?? data.value) : null
+  const unavailableReason = 'unavailable' in props ? props.unavailable : undefined
 
   return (
     <div

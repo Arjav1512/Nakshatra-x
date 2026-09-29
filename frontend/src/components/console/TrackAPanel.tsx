@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { derived, measured } from '@/lib/provenance'
+import { derived, measured, measuredOrNull, measuredValue } from '@/lib/provenance'
 import {
   type DrillTargetsResponse, type TrackAMetrics,
   fetchDrillTargets, fetchTrackAMetrics, predictPoint,
@@ -167,8 +167,7 @@ export function TrackAPanel() {
             <Metric
               label="LOMO AUC (honest)"
               emphasis
-              display={metrics.lomo.auc.toFixed(2)}
-              env={derived(metrics.lomo.auc, 'AUC', 'Leave-one-mine-out cross-validation', {
+              data={measuredValue(derived(metrics.lomo.auc, 'AUC', 'Leave-one-mine-out cross-validation', {
                 model_version: metrics.model_version,
                 method:
                   'Each fold holds out an entire deposit — the model must find a mine it has never seen.',
@@ -177,24 +176,22 @@ export function TrackAPanel() {
                   confidence: 0.95,
                   basis: `Percentile bootstrap, 95% CI [${metrics.lomo.auc_ci95[0]}, ${metrics.lomo.auc_ci95[1]}] over ${metrics.lomo.n_out_of_fold} out-of-fold points.`,
                 },
-              })}
-            />
+              }), () => String(metrics.lomo.auc.toFixed(2)))}
+          />
             <Metric
               label="Spectral-only AUC"
-              display={metrics.ablation_lomo_auc.spectral_only?.toFixed(3)}
-              env={derived(metrics.ablation_lomo_auc.spectral_only, 'AUC', 'Ablation: band ratios alone', {
+              data={measuredValue(derived(metrics.ablation_lomo_auc.spectral_only, 'AUC', 'Ablation: band ratios alone', {
                 model_version: metrics.model_version,
                 method: 'The geological claim in isolation, without terrain.',
-              })}
-            />
+              }), () => String(metrics.ablation_lomo_auc.spectral_only?.toFixed(3)))}
+          />
             <Metric
               label="Slope-only AUC"
-              display={metrics.ablation_lomo_auc.slope_only?.toFixed(3)}
-              env={derived(metrics.ablation_lomo_auc.slope_only, 'AUC', 'Ablation: slope alone', {
+              data={measuredValue(derived(metrics.ablation_lomo_auc.slope_only, 'AUC', 'Ablation: slope alone', {
                 model_version: metrics.model_version,
                 method: 'Near 0.5 — chance. Rules out a pure "mines are on flat ground" detector.',
-              })}
-            />
+              }), () => String(metrics.ablation_lomo_auc.slope_only?.toFixed(3)))}
+          />
           </div>
 
           <div
@@ -334,8 +331,7 @@ export function TrackAPanel() {
             <Metric
               label="Kriged prospectivity"
               emphasis
-              display={probe.kriged_prospectivity_score?.toFixed(3)}
-              env={derived(probe.kriged_prospectivity_score, 'score 0-1', 'Ordinary kriging over measured observations', {
+              data={measuredValue(derived(probe.kriged_prospectivity_score, 'score 0-1', 'Ordinary kriging over measured observations', {
                 model_version: probe.model_version,
                 method: probe.uncertainty_basis,
                 // `?? 0` here reported an uncertainty of ZERO when the kriging
@@ -354,25 +350,24 @@ export function TrackAPanel() {
                             : 'Kriging standard deviation; variogram range not reported.',
                       }
                     : undefined,
-              })}
-            />
+              }), () => String(probe.kriged_prospectivity_score?.toFixed(3)))}
+          />
             {probe.direct_model_score != null ? (
               <Metric
                 label="Direct model score (live read)"
                 emphasis
-                display={probe.direct_model_score.toFixed(3)}
-                env={measured(probe.direct_model_score, 'probability', probe.source ?? 'Sentinel-2 L2A + SRTM', {
+              data={measuredValue(measured(probe.direct_model_score, 'probability', probe.source ?? 'Sentinel-2 L2A + SRTM', {
                   model_version: probe.model_version,
                   vintage: probe.scene?.datetime,
                   method: `Scene ${probe.scene?.scene_id} · cloud ${probe.scene?.cloud_cover_pct}%`,
-                })}
-              />
+                }), () => String(probe.direct_model_score.toFixed(3)))}
+          />
             ) : (
               <Metric
                 label="Direct model score (live read)"
-                env={null}
-                unavailableReason={probe.note ?? 'Live satellite read not requested.'}
-              />
+                data={measuredOrNull(null)}
+            unavailable={probe.note ?? 'Live satellite read not requested.'}
+          />
             )}
           </div>
         ) : null}

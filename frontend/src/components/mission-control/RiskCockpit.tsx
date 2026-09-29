@@ -3,7 +3,7 @@
 import type { MineInfo, RiskAnalysis, WeatherSignal } from './types'
 import { Metric } from '@/components/console/Evidence'
 import { EmptyState, StatusDot, type Status } from '@/components/ui/primitives'
-import { derived, measured } from '@/lib/provenance'
+import { derived, measured, measuredOrNull } from '@/lib/provenance'
 
 /**
  * Risk context for the mine whose stockpiles are being blended.
@@ -68,51 +68,43 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
         <Metric
           label="Composite risk"
           emphasis
-          display={typeof score === 'number' ? score.toFixed(1) : null}
+          
           unit="/ 100"
-          unavailableReason="The risk service returned no composite score."
-          env={
-            typeof score === 'number'
+          data={measuredOrNull(typeof score === 'number'
               ? derived(score, 'score 0-100', 'Constraint-weighted composite over weather and operational drivers', {
                   method:
                     'A weighted index, not a probability. The calibrated probability of shortfall is on the console, from the Track B forecaster.',
                 })
-              : undefined
-          }
-        />
+              : undefined, () => String(typeof score === 'number' ? score.toFixed(1) : null))}
+            unavailable="The risk service returned no composite score."
+          />
         <Metric
           label="Rainfall, 14 days"
-          display={weather?.rainfall_14d_mm != null ? weather.rainfall_14d_mm : null}
+          
           unit="mm"
-          unavailableReason="No measured rainfall was returned for this location."
-          env={
-            weather?.rainfall_14d_mm != null
+          data={measuredOrNull(weather?.rainfall_14d_mm != null
               ? measured(weather.rainfall_14d_mm, 'mm', WEATHER_SOURCE)
-              : undefined
-          }
-        />
+              : undefined, () => String(weather?.rainfall_14d_mm != null ? weather.rainfall_14d_mm : null))}
+            unavailable="No measured rainfall was returned for this location."
+          />
         <Metric
           label="Soil moisture"
-          display={weather?.soil_moisture_pct != null ? weather.soil_moisture_pct : null}
+          
           unit="%"
-          unavailableReason="No soil-moisture value was returned."
-          env={
-            weather?.soil_moisture_pct != null
+          data={measuredOrNull(weather?.soil_moisture_pct != null
               ? measured(weather.soil_moisture_pct, '%', WEATHER_SOURCE)
-              : undefined
-          }
-        />
+              : undefined, () => String(weather?.soil_moisture_pct != null ? weather.soil_moisture_pct : null))}
+            unavailable="No soil-moisture value was returned."
+          />
         <Metric
           label="Land surface temperature"
-          display={weather?.land_surface_temp_c != null ? weather.land_surface_temp_c : null}
+          
           unit="°C"
-          unavailableReason="No land-surface temperature was returned."
-          env={
-            weather?.land_surface_temp_c != null
+          data={measuredOrNull(weather?.land_surface_temp_c != null
               ? measured(weather.land_surface_temp_c, '°C', WEATHER_SOURCE)
-              : undefined
-          }
-        />
+              : undefined, () => String(weather?.land_surface_temp_c != null ? weather.land_surface_temp_c : null))}
+            unavailable="No land-surface temperature was returned."
+          />
       </div>
 
       <p className="measure mt-4 text-xs text-text-tertiary">

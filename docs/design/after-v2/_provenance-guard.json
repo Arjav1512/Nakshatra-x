@@ -1,85 +1,83 @@
 {
-  "base": "http://localhost:3000",
+  "base": "http://localhost:3005",
   "routes": [
     {
-      "route": "/",
-      "attributed": 5,
-      "violations": []
-    },
-    {
-      "route": "/console",
-      "attributed": 0,
-      "violations": []
-    },
-    {
-      "route": "/console?mine=1&track=b",
-      "attributed": 19,
-      "violations": []
-    },
-    {
-      "route": "/console?track=a",
-      "attributed": 141,
-      "violations": []
-    },
-    {
-      "route": "/production",
-      "attributed": 2,
-      "violations": []
-    },
-    {
-      "route": "/blending",
-      "attributed": 2,
-      "violations": []
-    },
-    {
       "route": "/mine-twin",
-      "attributed": 8,
-      "violations": []
-    },
-    {
-      "route": "/flood-alert",
       "attributed": 0,
-      "violations": []
-    },
-    {
-      "route": "/method",
-      "attributed": 31,
-      "violations": []
-    },
-    {
-      "route": "/about",
-      "attributed": 0,
-      "violations": []
-    },
-    {
-      "route": "/login",
-      "attributed": 0,
-      "violations": []
-    },
-    {
-      "route": "/admin",
-      "attributed": 0,
-      "violations": []
-    },
-    {
-      "route": "/admin/login",
-      "attributed": 0,
-      "violations": []
-    },
-    {
-      "route": "/admin/setup",
-      "attributed": 0,
-      "violations": []
-    },
-    {
-      "route": "/admin/profile",
-      "attributed": 0,
-      "violations": []
-    },
-    {
-      "route": "/auth/callback",
-      "attributed": 0,
-      "violations": []
+      "violations": [
+        {
+          "text": "16,800",
+          "attributed": false,
+          "inUnavailable": false,
+          "where": "div.text-xl.font-bold < div.ios-glass-inset.p-4 < div.grid.grid-cols-2"
+        },
+        {
+          "text": "16,620",
+          "attributed": false,
+          "inUnavailable": false,
+          "where": "div.text-xl.font-bold < div.ios-glass-inset.p-4 < div.grid.grid-cols-2"
+        },
+        {
+          "text": "+2,420",
+          "attributed": false,
+          "inUnavailable": false,
+          "where": "div.text-xl.font-bold < div.ios-glass-inset.p-4 < div.grid.grid-cols-2"
+        },
+        {
+          "text": "1,297,753",
+          "attributed": false,
+          "inUnavailable": false,
+          "where": "span.text-accent.font-bold < div.flex.items-center < div.flex.flex-wrap"
+        },
+        {
+          "text": "2,420",
+          "attributed": false,
+          "inUnavailable": false,
+          "where": "span.text-status-caution.font-bold < p.text-xs.text-text-primary < div"
+        },
+        {
+          "text": "5%",
+          "attributed": false,
+          "inUnavailable": false,
+          "where": "span.text-accent.font-bold < p.text-xs.text-text-primary < div"
+        },
+        {
+          "text": "14,200",
+          "attributed": false,
+          "inUnavailable": false,
+          "where": "span.text-text-secondary < div.mt-2.flex < div.ios-glass-inset.p-3.5"
+        },
+        {
+          "text": "16,620",
+          "attributed": false,
+          "inUnavailable": false,
+          "where": "span.text-accent.font-bold < div.mt-2.flex < div.ios-glass-inset.p-3.5"
+        },
+        {
+          "text": "2,420",
+          "attributed": false,
+          "inUnavailable": false,
+          "where": "span.text-status-caution.font-bold < div.mt-2.flex < div.ios-glass-inset.p-3.5"
+        },
+        {
+          "text": "12,200",
+          "attributed": false,
+          "inUnavailable": false,
+          "where": "span.text-text-secondary < div.mt-2.flex < div.ios-glass-inset.p-3.5"
+        },
+        {
+          "text": "13,850",
+          "attributed": false,
+          "inUnavailable": false,
+          "where": "span.text-accent.font-bold < div.mt-2.flex < div.ios-glass-inset.p-3.5"
+        },
+        {
+          "text": "1,650",
+          "attributed": false,
+          "inUnavailable": false,
+          "where": "span.text-status-caution.font-bold < div.mt-2.flex < div.ios-glass-inset.p-3.5"
+        }
+      ]
     }
   ]
 }
