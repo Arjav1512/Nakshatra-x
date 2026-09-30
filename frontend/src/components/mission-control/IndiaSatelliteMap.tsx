@@ -1038,7 +1038,11 @@ export default function IndiaSatelliteMap({
       {/* Cyber Digital Map Viewport */}
       <div
         className={`relative w-full ${
-          isFullscreen ? 'h-[calc(100vh-200px)]' : 'h-[560px] sm:h-[620px]'
+          // Shorter at phone width. 560px of map on an 812px screen left
+          // nothing of the panel around it visible, so the legend, the layer
+          // switcher and the ranked targets all sat below the fold with no
+          // indication that they existed.
+          isFullscreen ? 'h-[calc(100vh-200px)]' : 'h-[380px] sm:h-[560px] lg:h-[620px]'
         } bg-surface-0 overflow-hidden`}
       >
         <div className="cyber-grid-overlay" />

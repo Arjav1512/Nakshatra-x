@@ -128,6 +128,33 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
    * compute=false and nothing here overrides it.
    */
   const [noBacktest, setNoBacktest] = useState<NoBacktestInfo | null>(null)
+
+  /**
+   * Mobile sectioning (B-5, tranche 2).
+   *
+   * At 375px this panel was a 4,513px single column: every desktop section in
+   * sequence, nothing deferred, eleven screens of scrolling to reach the
+   * constraint-checked actions. B-1 confusion 9.
+   *
+   * Sections are tabbed below `md` and stacked above it. Every section stays in
+   * the DOM — hidden with `hidden`, not unmounted — so the content is in the
+   * HTML, the provenance guard still sees it, and Cmd-F still finds it. The
+   * tabs change which one is visible, not which one exists.
+   */
+  const [mobileSection, setMobileSection] = useState<
+    'answer' | 'drivers' | 'evidence' | 'actions'
+  >('answer')
+
+  const SECTIONS = [
+    { id: 'answer' as const, label: 'Answer' },
+    { id: 'drivers' as const, label: 'Drivers' },
+    { id: 'evidence' as const, label: 'Evidence' },
+    { id: 'actions' as const, label: 'Actions' },
+  ]
+
+  /** `hidden` below md unless this is the open section; always shown at md+. */
+  const sectionCls = (id: typeof mobileSection) =>
+    `${mobileSection === id ? '' : 'hidden'} md:block`
   const [btLoading, setBtLoading] = useState(false)
   const [grade, setGrade] = useState<string | null>(null)
 
@@ -185,6 +212,10 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
   }
 
   const grades = forecast?.grades ?? []
+  /** The worst grade's shortfall probability — what the portfolio card shows. */
+  const worstGradeP = grades.length
+    ? Math.max(...grades.map((g) => g.shortfall.p_shortfall))
+    : null
   const selected = grades.find((g) => g.grade === grade) ?? grades[0] ?? null
 
   return (
@@ -260,6 +291,28 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
         </h2>
       </div>
 
+      {/* Section navigation. One tap to any section (B-5). */}
+      <nav
+        aria-label="Mine sections"
+        className="sticky top-[6.5rem] z-10 -mx-4 flex gap-1 overflow-x-auto border-b border-border-default bg-surface-0/95 px-4 py-2 md:hidden"
+      >
+        {SECTIONS.map((sec) => (
+          <button
+            key={sec.id}
+            type="button"
+            onClick={() => setMobileSection(sec.id)}
+            aria-current={mobileSection === sec.id ? 'true' : undefined}
+            className={`shrink-0 rounded-md px-3 py-1.5 text-xs transition-colors duration-[120ms] ease-out ${
+              mobileSection === sec.id
+                ? 'bg-accent-muted text-text-primary'
+                : 'text-text-secondary hover:bg-surface-2'
+            }`}
+          >
+            {sec.label}
+          </button>
+        ))}
+      </nav>
+
       {/* --- D-3 shortfall risk, D-2 trends --- */}
       {fWarm ? (
         <WarmingState what="Forecast" warming={fWarm} attempt={attempt} />
@@ -269,7 +322,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
         <Spinner label={`Loading ${mineName}…`} />
       ) : (
         <>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className={`grid gap-3 sm:grid-cols-2 lg:grid-cols-4 ${sectionCls('answer')}`}>
             <Metric
               label="Plan target (horizon)"
               emphasis
@@ -329,7 +382,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
           </div>
 
           {/* --- grade-aware breakdown: PRD B-5 is per-grade at P0 --- */}
-          <div className="rounded-md border border-border-default bg-surface-2 p-3">
+          <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('drivers')}`}>
             <p className="mb-2 text-xs uppercase tracking-wider text-text-secondary">
               By grade — a shortfall in one grade is not fungible with a surplus in another (PRD §3)
             </p>
@@ -366,7 +419,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
 
           {/* --- trajectory with prediction interval + baseline --- */}
           {selected ? (
-            <div className="rounded-md border border-border-default bg-surface-2 p-3">
+            <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('drivers')}`}>
               <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
                 <p className="text-xs uppercase tracking-wider text-text-secondary">
                   {selected.grade.replace(/_/g, ' ')} · daily trajectory
@@ -451,7 +504,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
         The page is two parts now: what we think, and why you should believe
         it. This heading is the seam.
       */}
-      <div className="border-t border-border-strong pt-6">
+      <div className={`border-t border-border-strong pt-6 ${sectionCls('evidence')}`}>
         <h2 className="font-display text-2xl font-medium tracking-tight">
           Why you should believe it
         </h2>
@@ -461,7 +514,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
       </div>
 
       {/* --- N-8: backtest visible in the UI --- */}
-      <div className="rounded-md border border-border-default bg-surface-2 p-3">
+      <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('evidence')}`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs uppercase tracking-wider text-text-secondary">
             Backtest — held-out accuracy (PRD B-10, N-8)
@@ -580,7 +633,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
       </div>
 
       {/* --- D-4 + C-5: recommendations, and what the engine rejected --- */}
-      <div className="rounded-md border border-border-default bg-surface-2 p-3">
+      <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('actions')}`}>
         <p className="mb-2 text-xs uppercase tracking-wider text-text-secondary">
           Corrective actions (PRD C-1..C-5) — every action constraint-checked
         </p>
