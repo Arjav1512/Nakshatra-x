@@ -198,6 +198,10 @@ class ProductionForecaster:
         self.random_state = random_state
         self.calibration_fraction = calibration_fraction
         self.models: dict[str, dict[float, HistGradientBoostingRegressor]] = {}
+        #: Standardised one-step residuals per mine, in time order. Used to
+        #: aggregate daily distributions into a cumulative one without assuming
+        #: the days are independent — see the note in `fit`.
+        self.residuals: dict[str, np.ndarray] = {}
         # Conformal width correction, in tonnes, per (mine, horizon).
         # A single global width cannot serve both ends of the horizon range:
         # measured at 0.475 coverage for h=1 against 0.75 for h=14, because
@@ -320,6 +324,45 @@ class ProductionForecaster:
                 if len(sel) >= 30:
                     self.conformal_width[(mine, int(h))] = _conformal_q(sel)
             self.conformal_width_default[mine] = _conformal_q(scores)
+
+            # --- residual series, for correlated cumulative aggregation -----
+            #
+            # P(cumulative < target) summed each day's predictive distribution
+            # independently. Daily coverage was fine, so the backtest passed —
+            # but the error was in how days *combine*, which nothing measured.
+            #
+            # Measured on the generated data: the real 14-day cumulative
+            # coefficient of variation is 0.084-0.232 by mine, while summing
+            # independent draws produces 0.034-0.069. Understating cumulative
+            # spread by 2.5-3.4x is what pushed P(shortfall) to 1.000 on nine
+            # of the ten mines: a target sitting ~7% above the expectation is
+            # 3-7 sigma away when sigma is that small, and about 1 sigma away
+            # when it is right.
+            #
+            # Rain drag, equipment downtime and blast delays persist across
+            # days by construction in the generator, and the covariates capture
+            # only part of that. So the residuals are kept, in time order, and
+            # the aggregation bootstraps contiguous blocks of them. No
+            # correlation structure is assumed: whatever persistence is in the
+            # residuals is reproduced by sampling them in runs.
+            #
+            # One-step (h=1) calibration rows only, which is one observation per
+            # origin and therefore a genuine daily series.
+            h_col = X[cal_idx][:, 0].astype(int)
+            one_step = cal_idx[h_col == 1]
+            if len(one_step) >= 30:
+                mid = fits[0.5].predict(X[one_step]) if 0.5 in fits else None
+                lo = fits[q_lo].predict(X[one_step])
+                hi = fits[q_hi].predict(X[one_step])
+                centre = mid if mid is not None else (lo + hi) / 2.0
+                # Standardise by the model's own half-width so the residuals are
+                # comparable across days and output levels.
+                half = np.maximum((hi - lo) / 2.0, 1e-6)
+                r = (y[one_step] - centre) / half
+                r = r[np.isfinite(r)]
+                if len(r) >= 30:
+                    sd = float(np.std(r))
+                    self.residuals[mine] = (r / sd if sd > 1e-9 else r).astype(float)
         return self
 
     def predict(
@@ -372,6 +415,7 @@ def shortfall_probability(
     target_tonnes: float,
     n_sim: int = 4000,
     seed: int = 20260921,
+    residuals: np.ndarray | None = None,
 ) -> dict:
     """
     P(cumulative production < target) over the forecast horizon — PRD B-6, and
@@ -383,28 +427,65 @@ def shortfall_probability(
     the quantiles come from the fitted model, so the shape assumption only
     governs interpolation between them.
 
-    Days are treated as independent given the covariates. That understates
-    variance if shocks persist, so the reported probability is conservative in
-    the direction of *under*-stating risk — stated here rather than hidden.
+    Days are NOT treated as independent.
+    ------------------------------------
+    They were, and it was wrong. Summing independent daily draws gave a 14-day
+    cumulative coefficient of variation of 0.034-0.069 by mine, against
+    0.084-0.232 actually present in the data: an understatement of 2.5-3.4x.
+    With spread that tight, a plan target sitting ~7% above the expectation is
+    3-7 sigma away, so P(shortfall) came out at 1.000 for nine of ten mines and
+    ranked nothing. Daily interval coverage was correct throughout, which is why
+    the backtest passed: the error was in how days combine, and nothing measured
+    that.
+
+    When `residuals` is supplied — a standardised, time-ordered residual series
+    from the model's own calibration slice — the days are simulated as a
+    contiguous block sampled from it (a circular block bootstrap). Whatever
+    persistence the residuals carry is reproduced by construction, with no
+    correlation structure assumed. Rain drag, downtime and blast delay all
+    persist across days in this data, and the covariates capture only part of
+    that.
+
+    Without residuals it falls back to independent draws and says so in
+    `aggregation`, because a number produced one way must not be reported as
+    though it were produced the other.
     """
     rng = np.random.default_rng(seed)
     horizons = sorted(horizon_preds)
     sims = np.zeros(n_sim, dtype=float)
 
+    # Per-day lognormal parameters, matched to the quantiles the model produced.
+    params: list[tuple[float, float]] = []
     for h in horizons:
         p = horizon_preds[h]
         q10, q50, q90 = p["q10"], p["q50"], p["q90"]
         if q50 <= 0:
             continue
-        # Match a lognormal: mu = ln(median); sigma from the 10-90 spread.
         mu = math.log(max(q50, 1e-9))
         z = 1.2815515655446004  # Phi^-1(0.9)
         if q90 > q10 > 0:
             sigma = (math.log(q90) - math.log(q10)) / (2 * z)
         else:
             sigma = 0.15
-        sigma = float(min(max(sigma, 0.02), 1.5))
-        sims += rng.lognormal(mean=mu, sigma=sigma, size=n_sim)
+        params.append((mu, float(min(max(sigma, 0.02), 1.5))))
+
+    use_blocks = residuals is not None and len(residuals) >= max(30, len(params))
+    if use_blocks:
+        r = np.asarray(residuals, dtype=float)
+        n_days = len(params)
+        # Circular block bootstrap: one contiguous run of residuals per path, so
+        # a wet fortnight stays a wet fortnight instead of averaging out.
+        starts = rng.integers(0, len(r), size=n_sim)
+        idx = (starts[:, None] + np.arange(n_days)[None, :]) % len(r)
+        block = r[idx]                                  # (n_sim, n_days)
+        mus = np.array([m for m, _ in params])[None, :]
+        sigmas = np.array([sd for _, sd in params])[None, :]
+        sims = np.exp(mus + sigmas * block).sum(axis=1)
+        aggregation = "block-bootstrap of standardised model residuals (days correlated)"
+    else:
+        for mu, sigma in params:
+            sims += rng.lognormal(mean=mu, sigma=sigma, size=n_sim)
+        aggregation = "independent daily draws (no residual series available)"
 
     p_short = float(np.mean(sims < target_tonnes))
     return {
@@ -415,9 +496,15 @@ def shortfall_probability(
         "target_tonnes": round(float(target_tonnes), 1),
         "expected_shortfall_tonnes": round(max(0.0, float(target_tonnes - np.mean(sims))), 1),
         "method": "Monte Carlo over per-day lognormal predictive distributions matched to model quantiles",
+        "aggregation": aggregation,
         "n_simulations": n_sim,
         "assumption": (
-            "Days are independent given the covariates. Persistent shocks would "
-            "widen the true distribution, so this probability is conservative."
+            "Daily spread comes from the model's conformalised quantiles; the "
+            "correlation between days comes from bootstrapped blocks of its own "
+            "residuals, so no independence is assumed."
+            if use_blocks
+            else "No residual series was available, so days are summed as "
+            "independent draws. That understates cumulative spread when shocks "
+            "persist and pushes this probability towards 0 or 1."
         ),
     }
