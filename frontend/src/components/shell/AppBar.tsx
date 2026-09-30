@@ -189,6 +189,11 @@ export default function AppBar() {
           <button
             type="button"
             onClick={openCopilot}
+            // The visible label is `hidden sm:inline` and the icon is
+            // aria-hidden, so below 640px this button had no accessible name at
+            // all. The project's axe run only visits desktop widths, which is
+            // why it passed there and Lighthouse's mobile emulation did not.
+            aria-label="Open the AI-X assistant"
             className={clsx(
               LINK_BASE,
               'inline-flex items-center gap-1.5 border border-border-interactive text-text-secondary'

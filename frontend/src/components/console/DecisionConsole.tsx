@@ -359,11 +359,19 @@ export function DecisionConsole() {
                 needs my attention today" — in one line, and the grid below
                 becomes the supporting list rather than the whole answer.
               */}
+              {/*
+                The band reserves its height whether or not a winner is known
+                yet. Without this it appears the moment the first forecasts
+                resolve and pushes the whole grid down — measured CLS 0.158 on
+                /console, against a target of 0.1. The portfolio cards were
+                already built this way for the same reason.
+              */}
+              <div className="mt-4 min-h-[8.5rem]">
               {worst ? (
                 <button
                   type="button"
                   onClick={() => openMine(worst)}
-                  className="mt-4 block w-full rounded-md border border-accent/40 bg-accent-muted/30 p-5 text-left transition-colors duration-[120ms] ease-out hover:bg-accent-muted/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                  className="block h-full w-full rounded-md border border-accent/40 bg-accent-muted/30 p-5 text-left transition-colors duration-[120ms] ease-out hover:bg-accent-muted/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                   data-provenance="derived"
                   data-provenance-model={PORTFOLIO_ENV.model_version ?? undefined}
                 >
@@ -390,7 +398,15 @@ export function DecisionConsole() {
                     Open {worst.name} &rarr;
                   </span>
                 </button>
-              ) : null}
+              ) : (
+                <div className="h-full rounded-md border border-border-subtle bg-surface-1/50 p-5">
+                  <span className="label text-text-tertiary">Largest expected shortfall</span>
+                  <p className="mt-2 text-sm text-text-tertiary">
+                    Ranking the portfolio&hellip;
+                  </p>
+                </div>
+              )}
+              </div>
 
               <ul className="mt-4 grid list-none gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {ranked.map((m, rank) => {

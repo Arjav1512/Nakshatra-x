@@ -22,5 +22,146 @@
       "1280": false,
       "1920": false
     }
+  },
+  {
+    "route": "/production",
+    "status": 200,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/blending",
+    "status": 200,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/mine-twin",
+    "status": 200,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/flood-alert",
+    "status": 200,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/method",
+    "status": 200,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/about",
+    "status": 200,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/login",
+    "status": 200,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/admin",
+    "status": 200,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/admin/login",
+    "status": 200,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/admin/setup",
+    "status": 200,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/admin/profile",
+    "status": 200,
+    "consoleIssues": [],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
+  },
+  {
+    "route": "/auth/callback",
+    "status": 200,
+    "consoleIssues": [
+      "error: [AUTH CALLBACK ERROR]: Error: No valid Supabase user session was returned. Please try logging in again.",
+      "error: [AUTH CALLBACK ERROR]: Error: No valid Supabase user session was returned. Please try logging in again.",
+      "error: [AUTH CALLBACK ERROR]: Error: No valid Supabase user session was returned. Please try logging in again.",
+      "error: [AUTH CALLBACK ERROR]: Error: No valid Supabase user session was returned. Please try logging in again.",
+      "error: [AUTH CALLBACK ERROR]: Error: No valid Supabase user session was returned. Please try logging in again.",
+      "error: [AUTH CALLBACK ERROR]: Error: No valid Supabase user session was returned. Please try logging in again.",
+      "error: [AUTH CALLBACK ERROR]: Error: No valid Supabase user session was returned. Please try logging in again.",
+      "error: [AUTH CALLBACK ERROR]: Error: No valid Supabase user session was returned. Please try logging in again."
+    ],
+    "horizontalOverflow": {
+      "375": false,
+      "768": false,
+      "1280": false,
+      "1920": false
+    }
   }
 ]
