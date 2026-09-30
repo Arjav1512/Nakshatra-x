@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 import type { MineInfo } from './types'
 import { MOIL_MINES } from './data'
+import { cividis } from '@/lib/colormap'
+import { type MineRow, fetchMines } from '@/lib/console-api'
+import { UPSTREAMS } from '@/lib/upstreams'
 import {
   Layers,
   MapPin,
@@ -77,74 +80,81 @@ const INDIAN_MINING_LOCATIONS: Record<string, { lat: number; lng: number; name: 
 }
 
 /**
- * Map marker metadata.
+ * Map marker metadata, derived from the register the backend serves.
  *
- * Each entry carried `grade: '46.2% Mn'` and similar — an ore grade asserted
- * for a real MOIL mine. No grade data exists in this system: Track A produces a
- * prospectivity score, explicitly not a grade or a reserve (PRD §2.4), and the
- * ingestion contract has no assay entity populated. Those figures are gone.
+ * This was a literal array of ten mines with their plan targets, which made it
+ * a **second mine register**. D-028 settled that question after DEF-1: one
+ * register, FastAPI's. A committed copy here can only ever drift from it, and
+ * the offline run of the provenance guard is what surfaced it — with the
+ * backend stopped, all ten plan targets were still on screen, which is only
+ * possible if the client is carrying its own.
  *
- * `rate` is the register's plan target relabelled, so it is named as the plan
- * target here. `priority` is an ordering by that target, not an operational
- * assessment, and the popup says so.
+ * An earlier pass had already removed `grade: '46.2% Mn'` from each entry: an
+ * ore grade asserted for a real MOIL mine, which Track A cannot produce (PRD
+ * §2.4). The plan targets survived that pass because they were *correct* —
+ * correct, duplicated, and unattributable.
+ *
+ * `priority` is an ordering by plan target, not an operational assessment, and
+ * the popup says so.
  */
-const HOTSPOT_TELEMETRY = [
-  { id: 'balaghat', name: 'Balaghat', rate: '18,000 T/m', priority: 'CRITICAL', color: 'var(--color-status-critical)', ringColor: 'var(--color-border-interactive)', lat: 21.83, lng: 80.19, state: 'MP' },
-  { id: 'bharweli', name: 'Bharweli', rate: '14,500 T/m', priority: 'CRITICAL', color: 'var(--color-status-critical)', ringColor: 'var(--color-border-interactive)', lat: 21.86, lng: 80.26, state: 'MP' },
-  { id: 'mansar', name: 'Mansar', rate: '12,500 T/m', priority: 'HIGH', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 21.44, lng: 79.25, state: 'MH' },
-  { id: 'dongri-buzurg', name: 'Dongri Buzurg', rate: '12,000 T/m', priority: 'HIGH', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 20.99, lng: 79.34, state: 'MH' },
-  { id: 'tirodi', name: 'Tirodi', rate: '11,200 T/m', priority: 'HIGH', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 22.16, lng: 79.68, state: 'MP' },
-  { id: 'chikla', name: 'Chikla', rate: '10,800 T/m', priority: 'HIGH', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 21.30, lng: 79.66, state: 'MH' },
-  { id: 'gumgaon', name: 'Gumgaon', rate: '10,200 T/m', priority: 'HIGH', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 21.33, lng: 79.03, state: 'MH' },
-  { id: 'ukwa', name: 'Ukwa', rate: '9,800 T/m', priority: 'MEDIUM', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 21.93, lng: 80.52, state: 'MP' },
-  { id: 'kandri', name: 'Kandri', rate: '9,300 T/m', priority: 'MEDIUM', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 21.38, lng: 79.32, state: 'MH' },
-  { id: 'beldongri', name: 'Beldongri', rate: '8,600 T/m', priority: 'MEDIUM', color: 'var(--color-status-caution)', ringColor: 'var(--color-border-interactive)', lat: 21.16, lng: 79.18, state: 'MH' },
-]
+export interface HotspotMeta {
+  id: string
+  name: string
+  rate: string
+  priority: string
+  color: string
+  ringColor: string
+  lat: number
+  lng: number
+  state: string
+}
 
-// Priority Hotspot Area Polygons
-const PRIORITY_HOTSPOT_AREAS = [
-  {
-    name: 'CRITICAL HOTSPOT AREA (BALAGHAT-BHARWELI SYNCLINE)',
-    priorityLabel: 'CRITICAL PRIORITY',
-    rateSummary: '32,500 T/m Combined High-Grade Output',
-    probability: '92.4% Reserve Probability',
-    color: 'var(--color-status-critical)',
-    polygon: [
-      [21.75, 80.05],
-      [21.98, 80.20],
-      [22.25, 79.60],
-      [22.05, 79.55],
-      [21.80, 79.90],
-    ],
-  },
-  {
-    name: 'HIGH PRIORITY AREA (NAGPUR-MANSAR-DONGRI CORRIDOR)',
-    priorityLabel: 'HIGH PRIORITY',
-    rateSummary: '35,300 T/m Active Silico-Mn Extraction',
-    probability: '86.8% Reserve Probability',
-    color: 'var(--color-status-caution)',
-    polygon: [
-      [20.90, 79.15],
-      [21.50, 79.10],
-      [21.52, 79.75],
-      [21.15, 79.80],
-      [20.92, 79.40],
-    ],
-  },
-  {
-    name: 'EXPLORATION AREA (UKWA-TIRODI EXTENSION)',
-    priorityLabel: 'MEDIUM PRIORITY',
-    rateSummary: '21,000 T/m Seam Reserve Extension',
-    probability: '78.2% Reserve Probability',
-    color: 'var(--color-status-caution)',
-    polygon: [
-      [21.55, 79.50],
-      [22.20, 79.65],
-      [22.15, 79.90],
-      [21.60, 79.80],
-    ],
-  },
-]
+const STATE_ABBREV: Record<string, string> = {
+  'Madhya Pradesh': 'MP',
+  Maharashtra: 'MH',
+}
+
+function hotspotsFromRegister(mines: MineRow[]): HotspotMeta[] {
+  return mines.map((m) => {
+    const critical = m.target_tonnes >= 14000
+    const high = m.target_tonnes >= 10000
+    return {
+      id: m.name.toLowerCase().replace(/\s+/g, '-'),
+      name: m.name,
+      rate: `${m.target_tonnes.toLocaleString()} T/m`,
+      priority: critical ? 'CRITICAL' : high ? 'HIGH' : 'MEDIUM',
+      color: critical ? 'var(--color-status-critical)' : 'var(--color-status-caution)',
+      ringColor: 'var(--color-border-interactive)',
+      lat: m.latitude,
+      lng: m.longitude,
+      state: STATE_ABBREV[m.state] ?? m.state,
+    }
+  })
+}
+
+// REMOVED: three hand-drawn "priority hotspot areas".
+//
+// Each carried four fields, none of which was ever rendered:
+//
+//   name:          'CRITICAL HOTSPOT AREA (BALAGHAT-BHARWELI SYNCLINE)'
+//   priorityLabel: 'CRITICAL PRIORITY'
+//   rateSummary:   '32,500 T/m Combined High-Grade Output'
+//   probability:   '92.4% Reserve Probability'
+//
+// A **reserve probability** is the one output PRD §2.4 forbids by name: Track A
+// produces a surface prospectivity score, explicitly not a reserve. Nothing in
+// this system computes 92.4%, 86.8% or 78.2%, and nothing computes a combined
+// output figure either.
+//
+// They were dead fields, which is why no sweep of the rendered page ever found
+// them — there was nothing on screen to find. The JSX-literal lint rule reads
+// the source instead, and that is what surfaced them.
+//
+// The polygons themselves are gone too. They were hand-drawn outlines filled
+// with the status-critical and status-caution colours, so the map asserted a
+// three-tier priority ranking over the belt with no model behind it. The honest
+// version of that claim is already on the same map: the prospectivity surface,
+// scored per cell by the loaded model, with its kriging spread in every popup.
 
 // Real Thin State Boundaries
 const THIN_STATE_BOUNDARIES = [
@@ -204,6 +214,36 @@ export default function IndiaSatelliteMap({
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
   const resizeObserverRef = useRef<ResizeObserver | null>(null)
+  /**
+   * What the drawn surface actually is.
+   *
+   * The legend used to describe the layer in fixed copy while the layer itself
+   * came from a file nobody checked. It now reports the model version and cell
+   * count the service returned, or the reason nothing is drawn.
+   */
+  /**
+   * The register, fetched. Empty until it arrives, and empty if it cannot be
+   * fetched — the map draws no mine it cannot name from the service layer.
+   */
+  const [hotspots, setHotspots] = useState<HotspotMeta[]>([])
+  const [registerError, setRegisterError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let alive = true
+    fetchMines().then((r) => {
+      if (!alive) return
+      if (r.ok) { setHotspots(hotspotsFromRegister(r.data)); setRegisterError(null) }
+      else { setHotspots([]); setRegisterError(r.error) }
+    })
+    return () => { alive = false }
+  }, [])
+
+  const [surfaceMeta, setSurfaceMeta] = useState<{
+    modelVersion: string | null
+    nCells: number | null
+    error: string | null
+  }>({ modelVersion: null, nCells: null, error: null })
+
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [radarSweepActive, setRadarSweepActive] = useState(true)
 
@@ -231,63 +271,65 @@ export default function IndiaSatelliteMap({
     overlay.clearLayers()
 
     if (activeLayer === 'geology') {
+      // The honest surface, scored by the model that is loaded.
+      //
+      // This used to fetch a committed `prospectivity.geojson` — 1,326 cells
+      // from the superseded model, with `dist_to_fault_km`, `temp_c` and
+      // `rainfall_mm` in every popup. Two of those are features the honest
+      // rebuild dropped for leaking the labels; one the model never had. The
+      // popup called the file "LIVE ML" and "Real-Time Telemetry". It was a
+      // static asset from a retired model, badged as a live feed.
       try {
         const res = await fetch('/api/v1/prospectivity')
-        if (!res.ok) throw new Error()
+        if (!res.ok) throw new Error(`prospectivity surface: ${res.status}`)
         const data = await res.json()
+        const cells: any[] = data.cells ?? []
+        if (!cells.length) throw new Error('prospectivity surface returned no cells')
 
-        data.features.forEach((f: any) => {
-          const [lng, lat] = f.geometry.coordinates
-          const prob = f.properties.probability
-          const conf = f.properties.confidence
-          const iron = f.properties.iron_oxide_index
-          const ferrous = f.properties.ferrous_mineral_index
-          const ndvi = f.properties.ndvi ?? 0.35
-          const temp = f.properties.temp_c ?? 28.5
-          const elev = f.properties.elevation_m
-          const slope = f.properties.slope_deg
-          const dist = f.properties.dist_to_fault_km
-          const rain = f.properties.rainfall_mm
+        cells.forEach((c: any) => {
+          const score = c.prospectivity_score
+          const sd = c.uncertainty_sd
+          // cividis (D-027: a quantity gets a sequential colormap, never a
+          // status colour). The previous layer used red/amber/green thresholds,
+          // which read a continuous score as three states.
+          const fill = cividis(score)
+          const alpha = 0.15 + score * 0.65
 
-          const color = prob >= 0.75 ? 'var(--color-status-critical)' : prob >= 0.45 ? 'var(--color-status-caution)' : 'var(--color-status-nominal)'
-
-          const circle = L.circle([lat, lng], {
-            radius: 320,
-            fillColor: color,
-            fillOpacity: prob >= 0.75 ? 0.75 : prob >= 0.45 ? 0.55 : 0.25,
-            color: color,
-            weight: prob >= 0.75 ? 1.5 : 0.8,
-            opacity: 0.8,
+          const circle = L.circle([c.lat, c.lng], {
+            radius: 1600,
+            fillColor: fill,
+            fillOpacity: alpha,
+            color: fill,
+            weight: 0.4,
+            opacity: 0.5,
           })
 
-          const popupContent = `
-            <div style="font-family: monospace; font-size: 10px; color: var(--color-text-primary); background: var(--color-surface-2); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); min-width: 200px; box-shadow: 0 4px 14px rgba(0,0,0,0.6);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <strong style="color: var(--color-status-critical); font-size: 11px; text-shadow: 0 0 6px rgba(239,68,68,0.4);">AI PROSPECTIVITY NODE</strong>
-                <span style="background: rgba(0,255,136,0.15); color: var(--color-status-nominal); border: 1px solid rgba(0,255,136,0.4); padding: 1px 4px; border-radius: 4px; font-size: 8px; font-weight: bold;">LIVE ML</span>
-              </div>
-              <span style="color: var(--color-text-tertiary);">Lat/Lng:</span> ${lat.toFixed(4)}, ${lng.toFixed(4)}<br/>
-              <span style="color: var(--color-text-tertiary);">Probability:</span> <strong style="color: var(--color-status-caution);">${(prob * 100).toFixed(1)}%</strong><br/>
-              <span style="color: var(--color-text-tertiary);">Confidence:</span> <span style="color: ${color}; font-weight: bold; text-transform: uppercase;">${conf}</span><br/>
-              <div style="margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px; line-height: 1.4;">
-                <span style="color: var(--color-status-nominal); font-weight: bold;">Real-Time Telemetry:</span><br/>
-                &bull; Iron Oxide Index: ${iron}<br/>
-                &bull; Ferrous Mineral: ${ferrous}<br/>
-                &bull; NDVI Index: ${ndvi}<br/>
-                &bull; Surface Temp: ${temp}°C<br/>
-                &bull; Topo Slope / Elev: ${slope}° / ${elev}m<br/>
-                &bull; Fault Distance: ${dist} km<br/>
-                &bull; Precip: ${rain} mm
-              </div>
-            </div> `
-          circle.bindPopup(popupContent, { className: 'prospectivity-popup' })
+          circle.bindPopup(
+            `<div class="prospectivity-popup-body" data-provenance="derived">
+               <strong>Prospectivity</strong><br/>
+               ${c.lat.toFixed(3)}, ${c.lng.toFixed(3)}<br/>
+               score <strong>${score.toFixed(3)}</strong> &plusmn; ${sd.toFixed(3)} (kriging sd)<br/>
+               <span class="prospectivity-popup-note">
+                 ${data.model_version} &middot; derived, not a live reading.
+                 A surface score, not a grade and not a reserve (PRD 2.4).
+               </span>
+             </div>`,
+            { className: 'prospectivity-popup' }
+          )
           circle.on('click', () => {
-            triggerAIPrediction(lat, lng, `AI Grid Node (${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E)`)
+            triggerAIPrediction(c.lat, c.lng, `Grid cell (${c.lat.toFixed(3)}, ${c.lng.toFixed(3)})`)
           })
           overlay.addLayer(circle)
         })
-      } catch (err) {
-        console.error('Failed to load prospectivity grid:', err)
+
+        setSurfaceMeta({
+          modelVersion: data.model_version,
+          nCells: data.n_cells ?? cells.length,
+          error: null,
+        })
+      } catch (err: any) {
+        // No surface rather than a drawn one.
+        setSurfaceMeta({ modelVersion: null, nCells: null, error: String(err?.message || err) })
       }
     }
     // REMOVED: six fabricated overlay layers.
@@ -308,8 +350,10 @@ export default function IndiaSatelliteMap({
     // a claim about ore that nothing here can make.
     //
     // The map now carries what is real: the ESRI World Imagery base layer, and
-    // the prospectivity grid from /api/v1/prospectivity with its kriging
-    // uncertainty.
+    // the prospectivity surface scored by the loaded model, with its kriging
+    // spread in every popup. Until this change that second layer was a
+    // committed file from the superseded model; the comment claiming otherwise
+    // was written before anyone checked which file the route served.
   }
 
   const createFallbackPrediction = (lat: number, lng: number, customLocationName?: string) => {
@@ -626,7 +670,7 @@ export default function IndiaSatelliteMap({
       L.control.zoom({ position: 'bottomright' }).addTo(map)
 
       // 1. High-Resolution Real Satellite Base Layer (ESRI World Imagery)
-      L.tileLayer( 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      L.tileLayer( `${UPSTREAMS.esriTiles}/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}`,
         {
           maxZoom: 18,
           attribution: 'Esri Satellite',
@@ -645,20 +689,8 @@ export default function IndiaSatelliteMap({
         }).addTo(map)
       })
 
-      // 3. Priority Hotspot Area Polygons (Red / Orange / Amber)
-      PRIORITY_HOTSPOT_AREAS.forEach((area) => {
-        L.polygon(area.polygon as any, {
-          color: resolveToken(area.color),
-          weight: 2,
-          opacity: 0.9,
-          fillColor: resolveToken(area.color),
-          fillOpacity: 0.18,
-          dashArray: '5, 8',
-        }).addTo(map)
-      })
-
       // 4. All 10 MOIL Hotspots with Priority Colors & Rates
-      HOTSPOT_TELEMETRY.forEach((mine) => {
+      hotspots.forEach((mine) => {
         const isSelected = mine.id === selectedMine.id
         const pinColor = resolveToken(mine.color)
 
@@ -749,7 +781,12 @@ export default function IndiaSatelliteMap({
         mapInstanceRef.current = null
       }
     }
-  }, [])
+    // `hotspots` is a dependency now: the markers used to come from a literal
+    // array available at mount, and they now arrive from /api/v1/mines. Without
+    // this the effect drew an empty register once and never redrew — the map
+    // rendered its tiles and its prospectivity overlay with no mines on it, and
+    // the route suite caught it ("mine markers plotted — 0 markers").
+  }, [hotspots])
 
   useEffect(() => {
     if (mapInstanceRef.current) {
@@ -786,8 +823,18 @@ export default function IndiaSatelliteMap({
     }
   }
 
-  const currentHotspotMeta =
-    HOTSPOT_TELEMETRY.find((h) => h.id === selectedMine.id) || HOTSPOT_TELEMETRY[0]
+  /**
+   * `HotspotMeta | undefined`, written so the compiler agrees.
+   *
+   * This read `... || hotspots[0] || null`, which TypeScript typed as
+   * non-nullable: without `noUncheckedIndexedAccess`, `hotspots[0]` is
+   * `HotspotMeta`, an object type TS considers always truthy, so the `|| null`
+   * branch was dead and every `currentHotspotMeta.color` below type-checked.
+   * At runtime the array is empty until the register arrives — and stays empty
+   * if it never does — so those reads throw. `strict: true` did not catch it.
+   */
+  const currentHotspotMeta: HotspotMeta | undefined =
+    hotspots.find((h) => h.id === selectedMine.id) ?? hotspots.at(0)
 
   return (
     <div
@@ -813,6 +860,24 @@ export default function IndiaSatelliteMap({
             <h4 className="text-sm font-semibold text-text-primary mt-0.5">
               Click a cell, or search a place, to score it against the Track A prospectivity model. The score is a ranking signal from surface geology and terrain — not a grade, not a reserve, and not evidence of ore at depth.
             </h4>
+            {/* What is actually drawn, reported by the service that drew it. */}
+            {activeLayer === 'geology' ? (
+              surfaceMeta.error ? (
+                <p className="mt-1 text-xs text-status-caution">
+                  No surface is drawn: {surfaceMeta.error}. A drawn stand-in would not be the
+                  model&rsquo;s.
+                </p>
+              ) : surfaceMeta.modelVersion ? (
+                <p
+                  className="mt-1 font-mono text-xs text-text-tertiary"
+                  data-provenance="derived"
+                  data-provenance-model={surfaceMeta.modelVersion}
+                >
+                  {surfaceMeta.modelVersion} · {surfaceMeta.nCells?.toLocaleString()} cells scored,
+                  kriged · derived, not a live reading
+                </p>
+              ) : null
+            ) : null}
           </div>
         </div>
 
@@ -984,6 +1049,13 @@ export default function IndiaSatelliteMap({
 
         {/* Legend and layer switcher. Six of the eight layers here read no data and were captioned as ISRO measurements; see the removal note above. */}
         <div className="absolute top-4 left-4 z-[400] flex flex-col gap-2.5 p-3.5 rounded-md bg-[rgba(8,12,18,0.88)] border border-border-default  max-w-xs shadow-2xl">
+          {/*
+            The key only appears when there are markers for it to describe.
+            It states three plan-target thresholds, and with the register
+            unavailable there is nothing on the map they apply to — a legend for
+            an empty map is three numbers asserted for no reason.
+          */}
+          {hotspots.length > 0 ? (
           <div className="space-y-1 pb-2 border-b border-border-default" data-provenance="reference">
             <span className="text-xs font-mono font-semibold text-text-primary uppercase tracking-wider block mb-1">
               Marker size = plan target (register)
@@ -1001,6 +1073,7 @@ export default function IndiaSatelliteMap({
               <span className="font-bold">Smallest plan target:</span> &lt;10,000 T/m
             </div>
           </div>
+          ) : null}
 
           {/* Sensor Layers */}
           <div className="flex flex-col gap-1">
@@ -1036,7 +1109,17 @@ export default function IndiaSatelliteMap({
         </div>
 
         {/* DEFAULT TELEMETRY CARD (Top Right - visible when search prediction report is not active) */}
-        {!activePrediction && (
+        {!activePrediction && !currentHotspotMeta && registerError ? (
+          <div className="absolute top-4 right-4 z-[400] max-w-xs rounded-md border border-border-default bg-[rgba(8,12,18,0.92)] p-4 text-xs shadow-2xl">
+            <p className="font-semibold text-status-caution">Mine register unavailable</p>
+            <p className="mt-1 leading-snug text-text-secondary">
+              {registerError}. No mines are drawn: this map reads the register from the service
+              layer and does not keep a copy of its own.
+            </p>
+          </div>
+        ) : null}
+
+        {!activePrediction && currentHotspotMeta && (
           <div className="absolute top-4 right-4 z-[400] p-4 rounded-md bg-[rgba(8,12,18,0.92)] border border-border-default  max-w-xs shadow-2xl">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
@@ -1198,7 +1281,7 @@ export default function IndiaSatelliteMap({
           <span className="text-xs font-mono font-bold text-text-tertiary uppercase px-2 shrink-0 hidden sm:inline">
             HOTSPOTS:
           </span>
-          {HOTSPOT_TELEMETRY.map((m) => (
+          {hotspots.map((m) => (
             <button
               type="button"
               key={m.id}

@@ -93,3 +93,6 @@ yarn-error.log*
 # Runtime lock + test-fixture artifacts; only the ten real mines are committed.
 backend/artifacts/forecasts/.warm.lock
 backend/artifacts/forecasts/MOIL-ABANDON_*.json
+
+# Backend dev environment, created by backend/scripts/setup_dev.sh
+backend/.venv/

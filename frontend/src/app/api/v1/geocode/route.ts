@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { UPSTREAMS } from '@/lib/upstreams'
 
 interface GeocodeResult {
   lat: number
@@ -191,7 +192,7 @@ export async function GET(req: Request) {
     // 2. Fetch from OpenStreetMap Nominatim with strict custom User-Agent header (Server-Side)
     try {
       const searchTerm = rawQuery.toLowerCase().includes('india') ? rawQuery : `${rawQuery}, India`
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+      const url = `${UPSTREAMS.nominatim}/search?format=json&q=${encodeURIComponent(
         searchTerm
       )}&countrycodes=in&limit=8&addressdetails=1`
 
@@ -243,7 +244,7 @@ export async function GET(req: Request) {
     // 3. Fallback: Fetch from Photon Komoot API if results are still empty
     if (results.length === 0) {
       try {
-        const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(
+        const photonUrl = `${UPSTREAMS.photon}/api/?q=${encodeURIComponent(
           rawQuery + ' India'
         )}&bbox=68.1,6.5,97.4,35.5&limit=5`
 

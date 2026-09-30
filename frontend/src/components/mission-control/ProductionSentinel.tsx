@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { type MineRow, fetchMines, fetchTelemetry } from '@/lib/console-api'
 import { Metric, IntegrityBanner } from '@/components/console/Evidence'
+import { measuredOrNull } from '@/lib/provenance'
 import { EmptyState, Skeleton, StatusDot, type Status } from '@/components/ui/primitives'
 
 /**
@@ -142,9 +143,10 @@ export default function ProductionSentinel() {
               <Metric
                 key={t.key}
                 label={t.label}
-                env={prov[t.key]}
+                data={measuredOrNull(prov[t.key])}
                 unit={prov[t.key].unit}
-              />
+            unavailable="The service returned no value for this field, so none is shown."
+          />
             ))}
           </div>
 

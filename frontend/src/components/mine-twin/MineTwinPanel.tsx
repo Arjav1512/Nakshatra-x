@@ -46,7 +46,13 @@ const DEFAULT_MINE: MineInfo = {
   lng: 80.19,
   zone: 'Central India',
   targetTonnes: 18000,
-  currentProduction: 16800,
+  // Null, not 16800.
+  //
+  // This is a placeholder used before a mine is chosen, and a current
+  // production figure is a reading — the register is the only thing entitled to
+  // state one. With the service layer down it was the last number still on
+  // screen here, sourced from nothing but this line.
+  currentProduction: null,
 }
 
 export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {

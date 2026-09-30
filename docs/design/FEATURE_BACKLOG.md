@@ -184,6 +184,46 @@ Rules carried from the redesign brief: a layer that cannot be produced from real
 data is not added, each layer states its source, date and whether it is measured
 or synthetic, and no layer is captioned with a measurement it did not make.
 
+## B-7 — Turn on `noUncheckedIndexedAccess` — ⏳ OPEN, own PR
+
+**Found while wiring the map's markers to the real register.** This line
+type-checked under `strict: true`:
+
+```ts
+const currentHotspotMeta = hotspots.find((h) => h.id === selectedMine.id) || hotspots[0] || null
+```
+
+and every `currentHotspotMeta.color` below it type-checked too. Without
+`noUncheckedIndexedAccess`, TypeScript types `hotspots[0]` as `HotspotMeta`
+rather than `HotspotMeta | undefined` — an object type it considers always
+truthy — so the `|| null` branch is dead and the result is non-nullable. At
+runtime the array is empty until the register arrives, and stays empty if it
+never does, so those reads throw. `strict: true` did not see it.
+
+That is the same class as the defects this phase has been removing: something
+that cannot happen according to the code, happening. It was fixed in place with
+an explicit `HotspotMeta | undefined`, but the compiler setting that would have
+caught it is still off.
+
+**Measured cost: 42 errors**, `npx tsc --noEmit --noUncheckedIndexedAccess`:
+
+| File | Errors |
+|---|---|
+| `src/lib/chatbot/engine.ts` | 11 |
+| `src/lib/degraded-telemetry.ts` | 5 |
+| `src/app/blending/page.tsx` | 4 |
+| `IndiaSatelliteMap.tsx`, `MineTwinPanel.tsx`, `ProspectivityStack.tsx`, `Evidence.tsx` | 3 each |
+| `src/lib/colormap.ts` | 2 |
+| eight more files | 1 each |
+
+**Why it is not in this PR.** Forty-two sites is a mechanical but wide change,
+and each one needs reading rather than a blanket `!`: the point of the flag is
+to find the places where an index really can miss, and silencing them with
+non-null assertions would turn a genuine safety win into churn. It also touches
+files this PR does not otherwise open, which would make the diff harder to
+review than the work it contains. Its own PR, with the errors triaged into "can
+genuinely miss" and "provably cannot".
+
 ## B-6 — Rendered-page provenance guard — ✅ DONE 2026-09-25
 
 **Built as the first item of Part B.** `npm run test:provenance`, 114 unattributed

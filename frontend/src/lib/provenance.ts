@@ -156,3 +156,58 @@ export function dataIntegrity(args: {
     notice,
   }
 }
+
+// ---------------------------------------------------------------------------
+// Measured<T> — a value that cannot be separated from its provenance
+// ---------------------------------------------------------------------------
+//
+// The rendered-page guard checks the screen, and it only sees states a crawler
+// can reach. This is the other half: a type the compiler enforces on every
+// path, including the ones no test walks.
+//
+// `Metric` previously took `env?: Envelope` and `display?: string | number`
+// as independent props. Two holes followed from that. A caller could pass
+// `display` with no `env` — a number on screen with no provenance at all. And
+// a caller could pass a `display` that disagreed with its `env`, so the
+// evidence panel documented one number while the card showed another. Neither
+// is catchable by looking at the page, because both render perfectly.
+//
+// A `Measured<T>` can only be built from an `Envelope`, and its value is read
+// *from* that envelope. The brand means an object literal cannot stand in for
+// one: you cannot write `{value: 12689, envelope: ...}` and have it type-check,
+// so there is no path to a rendered number that does not carry its origin.
+
+declare const MEASURED_BRAND: unique symbol
+
+export interface Measured<T = number> {
+  readonly [MEASURED_BRAND]: true
+  readonly value: T
+  readonly envelope: Envelope<T>
+  /** Pre-formatted text, when the raw value is not what should be shown. */
+  readonly display: string | null
+}
+
+/**
+ * Wrap an envelope as a renderable value.
+ *
+ * `display` is a formatting choice, not a different number: it is derived from
+ * the same envelope, so it cannot contradict it.
+ */
+export function measuredValue<T>(
+  env: Envelope<T>,
+  display?: (value: T) => string
+): Measured<T> {
+  return {
+    value: env.value,
+    envelope: env,
+    display: display ? display(env.value) : null,
+  } as Measured<T>
+}
+
+/** Convenience: an envelope may be absent, and absence must stay expressible. */
+export function measuredOrNull<T>(
+  env: Envelope<T> | null | undefined,
+  display?: (value: T) => string
+): Measured<T> | null {
+  return env ? measuredValue(env, display) : null
+}

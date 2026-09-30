@@ -7,7 +7,8 @@ import {
 } from 'recharts'
 import { Button, EmptyState, Skeleton, StatusDot, type Status } from '@/components/ui/primitives'
 import { Metric } from '@/components/console/Evidence'
-import { derived, measured } from '@/lib/provenance'
+import { derived, measured, measuredOrNull, measuredValue } from '@/lib/provenance'
+import { UPSTREAMS } from '@/lib/upstreams'
 
 /**
  * Rainfall context for a location, from measured weather only.
@@ -93,7 +94,7 @@ export default function LocationFloodAlertFinder(_props: Props) {
       if (!place) throw new Error(`No location matched "${q}".`)
 
       const url =
-        'https://api.open-meteo.com/v1/forecast' +
+        `${UPSTREAMS.openMeteo}/v1/forecast` +
         `?latitude=${place.lat}&longitude=${place.lng}` +
         '&current=temperature_2m,relative_humidity_2m' +
         '&daily=precipitation_sum&past_days=14&forecast_days=0' +
@@ -189,45 +190,43 @@ export default function LocationFloodAlertFinder(_props: Props) {
             <Metric
               label="Rainfall, last 14 days"
               emphasis
-              display={data.rainfall14dMm.toLocaleString()}
+              
               unit="mm"
-              env={measured(data.rainfall14dMm, 'mm', SOURCE, {
+              data={measuredValue(measured(data.rainfall14dMm, 'mm', SOURCE, {
                 vintage: data.observedAt,
                 method:
                   `Sum of ${data.daysMeasured} measured daily totals` +
                   (data.daysMissing > 0
                     ? `. ${data.daysMissing} day(s) had no record and are excluded rather than counted as zero, so this is a total over ${data.daysMeasured} days, not 14.`
                     : ' over the full 14-day window.'),
-              })}
-            />
+              }), () => String(data.rainfall14dMm.toLocaleString()))}
+          />
             <Metric
               label="Temperature"
-              display={data.tempC != null ? data.tempC.toFixed(1) : null}
+              
               unit="°C"
-              unavailableReason="The service returned no current temperature."
-              env={data.tempC != null ? measured(data.tempC, '°C', SOURCE, { vintage: data.observedAt }) : undefined}
-            />
+              data={measuredOrNull(data.tempC != null ? measured(data.tempC, '°C', SOURCE, { vintage: data.observedAt }) : undefined, () => String(data.tempC != null ? data.tempC.toFixed(1) : null))}
+            unavailable="The weather service returned no current temperature for this location."
+          />
             <Metric
               label="Relative humidity"
-              display={data.humidityPct != null ? data.humidityPct : null}
+              
               unit="%"
-              unavailableReason="The service returned no current humidity."
-              env={data.humidityPct != null ? measured(data.humidityPct, '%', SOURCE, { vintage: data.observedAt }) : undefined}
-            />
+              data={measuredOrNull(data.humidityPct != null ? measured(data.humidityPct, '%', SOURCE, { vintage: data.observedAt }) : undefined, () => String(data.humidityPct != null ? data.humidityPct : null))}
+            unavailable="The weather service returned no current humidity for this location."
+          />
             <Metric
               label="Soil moisture, 0–1 cm"
-              display={data.soilMoisturePct != null ? data.soilMoisturePct : null}
+              
               unit="%"
-              unavailableReason="The service returned no soil-moisture value for this location."
-              env={
-                data.soilMoisturePct != null
+              data={measuredOrNull(data.soilMoisturePct != null
                   ? derived(data.soilMoisturePct, '%', SOURCE, {
                       vintage: data.observedAt,
                       method: 'First non-null hourly value in the window, expressed as a percentage.',
                     })
-                  : undefined
-              }
-            />
+                  : undefined, () => String(data.soilMoisturePct != null ? data.soilMoisturePct : null))}
+            unavailable="The weather service returned no soil-moisture value for this location."
+          />
           </div>
 
           <div className="rounded-md border border-border-default bg-surface-2 p-4">

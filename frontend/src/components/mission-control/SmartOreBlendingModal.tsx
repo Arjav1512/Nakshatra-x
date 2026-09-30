@@ -190,7 +190,17 @@ export default function SmartOreBlendingModal({ mine }: Props) {
               <div className="text-xl font-mono font-bold text-accent my-1">
                 +{blendResult.target_tonnes?.toLocaleString()} T
               </div>
-              <span className="text-xs font-mono text-text-tertiary">100% Contract Fulfillment</span>
+              {/*
+                Was a flat "100% Contract Fulfillment", printed whatever the
+                solver returned — including when it did not meet the target.
+                It now states what was actually recovered against what was
+                asked.
+              */}
+              <span className="text-xs font-mono text-text-tertiary">
+                {blendResult.target_tonnes != null && targetTonnes
+                  ? `${Math.round((blendResult.target_tonnes / targetTonnes) * 100)}% of the ${targetTonnes.toLocaleString()} t target`
+                  : 'against the requested target'}
+              </span>
             </div>
           </div>
 

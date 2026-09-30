@@ -6,7 +6,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGri
 import { type TrackAMetrics, fetchDrillTargets, fetchTrackAMetrics } from '@/lib/console-api'
 import { Metric } from '@/components/console/Evidence'
 import { EmptyState, Skeleton } from '@/components/ui/primitives'
-import { derived } from '@/lib/provenance'
+import { derived, measuredValue } from '@/lib/provenance'
 
 export default function JudgesArchitectureDeck() {
   const [activeTab, setActiveTab] = useState<'pipeline' | 'hyperparameters' | 'shap'>('pipeline')
@@ -280,8 +280,7 @@ export default function JudgesArchitectureDeck() {
                   <Metric
                     label="LOMO AUC"
                     emphasis
-                    display={metrics.lomo.auc.toFixed(3)}
-                    env={derived(metrics.lomo.auc, 'AUC', `Leave-one-mine-out cross-validation over ${metrics.lomo.n_out_of_fold} out-of-fold points`, {
+              data={measuredValue(derived(metrics.lomo.auc, 'AUC', `Leave-one-mine-out cross-validation over ${metrics.lomo.n_out_of_fold} out-of-fold points`, {
                       model_version: metrics.model_version,
                       method: metrics.validation,
                       uncertainty: {
@@ -289,33 +288,31 @@ export default function JudgesArchitectureDeck() {
                         confidence: 0.95,
                         basis: `95% CI [${metrics.lomo.auc_ci95[0]}, ${metrics.lomo.auc_ci95[1]}] — an entire deposit is held out at a time.`,
                       },
-                    })}
-                  />
+                    }), () => String(metrics.lomo.auc.toFixed(3)))}
+          />
                   <Metric
                     label="Average precision"
-                    display={metrics.lomo.average_precision.toFixed(3)}
-                    env={derived(metrics.lomo.average_precision, 'AP', 'Leave-one-mine-out cross-validation', {
+              data={measuredValue(derived(metrics.lomo.average_precision, 'AP', 'Leave-one-mine-out cross-validation', {
                       model_version: metrics.model_version,
                       method: `Base rate is ${metrics.lomo.base_rate}, so AP is the honest headline rather than accuracy.`,
-                    })}
-                  />
+                    }), () => String(metrics.lomo.average_precision.toFixed(3)))}
+          />
                   <Metric
                     label="Validation points"
-                    display={metrics.n_samples}
+                    
                     unit="points"
-                    env={derived(metrics.n_samples, 'points', 'Track A training set', {
+              data={measuredValue(derived(metrics.n_samples, 'points', 'Track A training set', {
                       model_version: metrics.model_version,
                       method: 'Ten positive sites. An interval this wide is what that sample supports.',
-                    })}
-                  />
+                    }), () => String(metrics.n_samples))}
+          />
                   <Metric
                     label="Random-split AUC (for contrast)"
-                    display={metrics.random_split_auc_for_contrast.toFixed(3)}
-                    env={derived(metrics.random_split_auc_for_contrast, 'AUC', 'Random 5-fold split — shown only as a contrast', {
+              data={measuredValue(derived(metrics.random_split_auc_for_contrast, 'AUC', 'Random 5-fold split — shown only as a contrast', {
                       model_version: metrics.model_version,
                       method: 'A random split leaks neighbouring cells of the same deposit across folds, so it flatters the model. LOMO is the figure to quote.',
-                    })}
-                  />
+                    }), () => String(metrics.random_split_auc_for_contrast.toFixed(3)))}
+          />
                 </div>
                 <p className="measure mt-3 text-xs text-text-tertiary">{metrics.lithology_note}</p>
               </>
@@ -324,17 +321,52 @@ export default function JudgesArchitectureDeck() {
 
           <div className="ios-glass-inset p-5 flex flex-col justify-between">
             <div>
-              <span className="text-xs font-mono text-text-tertiary uppercase block mb-1">Offline GEE Replacement</span>
-              <h3 className="text-2xl font-mono font-semibold text-status-critical">Zero Cost Sandbox</h3>
+              <span className="text-xs font-mono text-text-tertiary uppercase block mb-1">
+                Model inputs
+              </span>
+              <h3 className="text-2xl font-mono font-semibold text-text-primary">
+                Measured, not proxied
+              </h3>
+              {/*
+                This panel described the superseded pipeline. It read "Replaces
+                Google Earth Engine APIs by computing terrain slope, elevation,
+                fault distances, and rainfall mathematically", and listed
+                "Deterministic DEM DEM proxy", "Rainfall Seasonality Proxy" and
+                "Sausar Shear coordinates".
+
+                Every one of those is a feature the honest rebuild removed:
+                fault distance and rainfall leaked the labels or did not exist,
+                and the terrain is real SRTM rather than a formula. So the
+                evidence page advertised, as an architecture feature, the exact
+                thing the model was rebuilt to stop doing. It was never on a
+                screen a crawler reaches as a *number*, which is why the
+                rendered-page guard did not find it.
+
+                The feature list now comes from the model.
+              */}
               <p className="text-xs text-text-tertiary mt-2 leading-relaxed">
-                Replaces Google Earth Engine APIs by computing terrain slope, elevation, fault distances, and rainfall mathematically.
+                Track A is fitted on measured Sentinel-2 L2A band ratios and SRTM terrain. Nothing
+                is synthesised from a formula, and no feature is derived from distance to a known
+                mine &mdash; that leaked the labels and was removed.
               </p>
             </div>
-            <div className="space-y-1.5 mt-6 pt-3 border-t border-border-subtle text-xs font-mono">
-              <div className="flex justify-between"><span className="text-text-tertiary">Terrain:</span> <span className="text-text-primary">Deterministic DEM DEM proxy</span></div>
-              <div className="flex justify-between"><span className="text-text-tertiary">Weather:</span> <span className="text-text-primary">Rainfall Seasonality Proxy</span></div>
-              <div className="flex justify-between"><span className="text-text-tertiary">Faults:</span> <span className="text-text-primary">Sausar Shear coordinates</span></div>
-              <div className="flex justify-between"><span className="text-text-tertiary">API Key Requirement:</span> <span className="text-accent font-bold">0% (Keyless Sandbox)</span></div>
+            <div
+              className="space-y-1.5 mt-6 pt-3 border-t border-border-subtle text-xs font-mono"
+              data-provenance={metrics ? 'derived' : 'unavailable'}
+              data-provenance-model={metrics?.model_version}
+            >
+              {metrics ? (
+                metrics.features.map((f) => (
+                  <div key={f} className="flex justify-between gap-3">
+                    <span className="text-text-tertiary">{f.replace(/_/g, ' ')}</span>
+                    <span className="text-text-primary">fitted</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-text-tertiary">
+                  The feature list could not be read from the model, so none is shown.
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -418,16 +450,16 @@ export default function JudgesArchitectureDeck() {
                 <Metric
                   key={item.name}
                   label={item.name.replace(/_/g, ' ')}
-                  display={item.value.toFixed(1)}
+                  
                   unit="%"
-                  env={derived(
+              data={measuredValue(derived(
                     item.value, '% of total importance', 'Gradient-boosted prospectivity model, leave-one-mine-out validated',
                     {
                       model_version: metrics.model_version,
                       method: 'Impurity-based feature importance from the fitted model, normalised across ' + `${metrics.features.length} features. Not a SHAP value.`,
                     }
-                  )}
-                />
+                  ), () => String(item.value.toFixed(1)))}
+          />
               ))}
             </div>
             <p className="measure mt-3 text-xs text-text-tertiary">{metrics.honest_note}</p>

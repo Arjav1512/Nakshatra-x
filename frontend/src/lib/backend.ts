@@ -8,6 +8,11 @@
 const DEFAULT_BACKEND = 'http://127.0.0.1:8000'
 
 export function backendUrl(): string {
+  // The service layer is an upstream like any other, so it follows the same
+  // switch: NAKSHATRA_OFFLINE=1 sends it to the discard port. Without this the
+  // offline guard could only stop the browser's requests, not the ones a route
+  // handler makes from Node.
+  if (process.env.NAKSHATRA_OFFLINE === '1') return 'http://127.0.0.1:9'
   return (process.env.BACKEND_URL || DEFAULT_BACKEND).replace(/\/+$/, '')
 }
 

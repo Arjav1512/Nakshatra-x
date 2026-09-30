@@ -29,6 +29,17 @@ const CHROME =
   process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 const BASE = process.env.E2E_BASE || 'http://localhost:3000'
 const REPORT = process.argv.includes('--report')
+/**
+ * Offline mode: the backend is down, so nothing that needs it may render.
+ *
+ * With the service layer stopped, every data-shaped value still on screen came
+ * from the client — an embedded copy, a constant, or something invented in a
+ * catch block. Attribution is not the question here; presence is. A
+ * `data-provenance="reference"` on a plan target that the client carries its own
+ * copy of is still a second register that can drift from the first, which is
+ * the defect DEF-1 was.
+ */
+const OFFLINE = process.argv.includes('--offline')
 const SETTLE = Number(process.env.E2E_SETTLE || 9000)
 
 const ROUTES = process.env.GUARD_ROUTES ? process.env.GUARD_ROUTES.split(',') : [
@@ -76,6 +87,17 @@ const ALLOW = [
   { re: /MOIL-[A-Z]{3}-\d{2}/,                   why: 'mine code' },
   { re: /\b(?:past|last|previous|rolling|over|preceding)\s+\d+\s*(?:days?|hours?|weeks?|months?)\b/i,
     why: 'time-window phrase in prose — names the window a figure covers, is not itself a figure' },
+  { re: /^[A-Za-z][A-Za-z ()/-]{0,30},?\s*\d+\s*-?\s*(?:d|day|days|h|hour|hours|wk|week|weeks|mo|month|months)\b\.?$/i,
+    why: 'metric label naming its own window ("Rainfall, 14 days") — the figure is the value beside it, not this' },
+]
+
+/**
+ * The only values allowed on screen with the backend down: what the person in
+ * front of it typed. A number the user entered into a form is theirs, not a
+ * claim the app is making.
+ */
+const OFFLINE_ALLOW = [
+  /^\s*[\d,.]+\s*(?:Tonnes?|t)?\s*$/i,
 ]
 
 const results = []
@@ -128,7 +150,13 @@ async function collect(page) {
           : ''))
         if (where.length >= 3) break
       }
-      out.push({ text: text.slice(0, 120), attributed, where: where.join(' < ') })
+      // A card that is showing "unavailable" may keep its label: "Rainfall,
+      // 14 days" names the window a missing figure would have covered. It is
+      // not itself a figure, and hiding the label would leave an unlabelled
+      // empty card.
+      const holder = el.closest('[data-provenance]')
+      const inUnavailable = !!holder && /\bunavailable\b/i.test(holder.textContent || '')
+      out.push({ text: text.slice(0, 120), attributed, inUnavailable, where: where.join(' < ') })
     }
     return out
   })
@@ -230,6 +258,25 @@ async function scan(page, route) {
   const page = await browser.newPage()
   await page.setViewport({ width: 1440, height: 1200 })
 
+  if (OFFLINE) {
+    // "Backend down" has to mean the app has no data source at all.
+    //
+    // Stopping FastAPI alone is not enough: some Next route handlers call
+    // upstreams directly, so `/blending` still rendered a real measured
+    // rainfall figure with a LIVE badge — correct, live, and nothing to do
+    // with the service layer. That is not a fabrication, so the test would
+    // have been carving an exception around a true value. Blocking every
+    // outbound request instead makes the question unambiguous: with no data
+    // reachable, anything still on screen came from the client.
+    await page.setRequestInterception(true)
+    page.on('request', (req) => {
+      const url = req.url()
+      const local = url.startsWith(BASE) || url.startsWith('data:') || url.startsWith('blob:')
+      if (local) return req.continue()
+      return req.abort().catch(() => {})
+    })
+  }
+
   for (const route of ROUTES) {
     let nodes
     try {
@@ -243,9 +290,16 @@ async function scan(page, route) {
     let attributedCount = 0
     for (const node of nodes) {
       if (!looksLikeData(node.text)) continue
-      if (node.attributed) { attributedCount++; continue }
       const why = allowed(node.text)
       if (why) continue
+      if (node.attributed) {
+        attributedCount++
+        // Offline: attributed or not, it should not be on screen at all.
+        if (OFFLINE && !node.inUnavailable && !OFFLINE_ALLOW.some((re) => re.test(node.text))) {
+          violations.push(node)
+        }
+        continue
+      }
       violations.push(node)
     }
     results.push({ route, attributed: attributedCount, violations })
@@ -263,6 +317,7 @@ async function scan(page, route) {
     path.resolve(__dirname, '..', '..', 'docs', 'design', 'after-v2', '_provenance-guard.json'),
     JSON.stringify({ base: BASE, routes: results }, null, 2)
   )
-  console.log(`\n${total === 0 ? 'PASS' : 'FAIL'} — ${total} unattributed data-shaped value(s) across ${ROUTES.length} routes\n`)
+  const label = OFFLINE ? 'data-shaped value(s) rendered with the backend down' : 'unattributed data-shaped value(s)'
+  console.log(`\n${total === 0 ? 'PASS' : 'FAIL'} — ${total} ${label} across ${ROUTES.length} routes\n`)
   process.exit(REPORT ? 0 : total === 0 ? 0 : 1)
 })().catch((e) => { console.error(e); process.exit(1) })

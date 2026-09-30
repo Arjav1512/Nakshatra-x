@@ -1,5 +1,5 @@
-import { dataIntegrity, synthetic } from '@/lib/provenance'
-import { SYNTHETIC_CALIBRATION, mineStream, operatingDay, round } from '@/lib/synthetic'
+import { dataIntegrity } from '@/lib/provenance'
+import { operatingDay } from '@/lib/synthetic'
 
 /**
  * Degraded telemetry payload, used when the FastAPI service layer is
@@ -8,10 +8,23 @@ import { SYNTHETIC_CALIBRATION, mineStream, operatingDay, round } from '@/lib/sy
  * PRD N-6: "Degrades gracefully when a data source is stale or missing —
  * states staleness, does not silently extrapolate."
  *
- * Everything here is deterministic and explicitly synthetic. No recommendation
- * is issued, because a recommendation that has not been constraint-checked
- * against real inputs is worse than none (PRD C-5). Scene identifiers are
- * never fabricated, so the list is empty.
+ * No recommendation is issued, because a recommendation that has not been
+ * constraint-checked against real inputs is worse than none (PRD C-5). Scene
+ * identifiers are never fabricated, so the list is empty.
+ *
+ * WHAT CHANGED, AND WHY
+ * ---------------------
+ * The weather block used to be *generated*: `boundedNormal(85, 25, 0, 320)`
+ * produced a per-mine rainfall figure, and the risk scores were computed from
+ * it. The payload labelled itself honestly (`is_synthetic: true`), but a number
+ * invented in the browser is not a degraded reading of anything — nobody can
+ * act on it, and it sits exactly where "we could not reach the service layer"
+ * belongs. It also made the offline provenance run unanswerable: values kept
+ * appearing with no data source anywhere.
+ *
+ * The readings are `null` now. The shape, the labels and the explanation stay,
+ * so every card says what it would have shown and why it cannot. That is what
+ * PRD N-6 asks for: state staleness, do not silently extrapolate.
  */
 
 const MINE_REGISTER: Record<number, { id: string; name: string; code: string; state: string; lat: number; lng: number; zone: string; targetTonnes: number }> = {
@@ -29,33 +42,24 @@ const MINE_REGISTER: Record<number, { id: string; name: string; code: string; st
 
 export function degradedTelemetry(mineId: number, backendError: string) {
   const mine = MINE_REGISTER[mineId] || MINE_REGISTER[1]
-  const day = operatingDay()
-  const s = mineStream(mine.id, 'degraded', day)
 
-  const rainfall = round(s.boundedNormal(mine.state === 'MP' ? 85 : 60, 25, 0, 320), 1)
-  const downtime = round(s.boundedNormal(9, 4, 0, 40), 1)
-
-  const weatherDrag = rainfall > 60 ? Math.min(0.35, (rainfall / 150) * 0.35) : 0.02
-  const downtimeDrag = Math.min(0.3, (downtime / 40) * 0.3)
-  const totalDrag = Math.min(0.55, weatherDrag + downtimeDrag)
-  const shortfallPct = round(totalDrag * 100, 1)
+  // No generated readings. See the note above.
   const dailyTarget = mine.targetTonnes / 30
   const planned = Math.round(dailyTarget * 14)
-  const predicted = Math.round(planned * (1 - totalDrag))
 
   return {
     mine: { ...mine, numericId: mineId, currentProduction: null },
     weather: {
-      rainfall_14d_mm: rainfall,
+      rainfall_14d_mm: null,
       soil_moisture_pct: null,
-      land_surface_temp_c: round(s.boundedNormal(31, 3, 12, 48), 1),
-      humidity_pct: Math.round(s.boundedNormal(62, 12, 10, 100)),
+      land_surface_temp_c: null,
+      humidity_pct: null,
       forecast_rain_next_3d_mm: null,
       live_precipitation_rate_mm_hr: null,
       updated_at: new Date().toISOString(),
-      source: 'SYNTHETIC FALLBACK — service layer unreachable. Not observed data.',
+      source: 'Service layer unreachable — no reading was obtained.',
       is_live: false,
-      is_synthetic: true,
+      is_synthetic: false,
     },
     reserve: {
       mine_id: mineId,
@@ -72,48 +76,42 @@ export function degradedTelemetry(mineId: number, backendError: string) {
       note: 'Not a UNFC or statutory reserve statement (PRD 2.4).',
     },
     forecast: {
-      model: 'nakshatra-drag-model-v1 (degraded, synthetic inputs)',
+      model: 'unavailable',
       horizon_days: 14,
+      // `total_planned_tonnes` is the register's own plan target pro-rated over
+      // the horizon — a stated intention, not a reading, so it survives. Every
+      // prediction below it came from the generated drag model and is gone.
       total_planned_tonnes: planned,
-      total_predicted_tonnes: predicted,
-      projected_shortfall_tonnes: Math.max(0, planned - predicted),
-      shortfall_percentage: shortfallPct,
-      risk_level: shortfallPct >= 20 ? ('CRITICAL' as const) : shortfallPct >= 10 ? ('MODERATE' as const) : ('NOMINAL' as const),
-      current_daily_rate_t: Math.round(dailyTarget * (1 - totalDrag)),
+      total_predicted_tonnes: null,
+      projected_shortfall_tonnes: null,
+      shortfall_percentage: null,
+      risk_level: null,
+      current_daily_rate_t: null,
       drag_factors: {
-        weather_drag_pct: round(weatherDrag * 100, 1),
-        equipment_downtime_drag_pct: round(downtimeDrag * 100, 1),
-        blasting_delay_drag_pct: 0,
+        weather_drag_pct: null,
+        equipment_downtime_drag_pct: null,
+        blasting_delay_drag_pct: null,
       },
-      trajectory: Array.from({ length: 14 }, (_, i) => ({
-        day_index: i + 1,
-        date: `Day ${i + 1}`,
-        planned_tonnes: Math.round(dailyTarget),
-        predicted_tonnes: Math.round(dailyTarget * (1 - totalDrag)),
-        shortfall_tonnes: Math.round(dailyTarget * totalDrag),
-        efficiency_pct: round((1 - totalDrag) * 100, 1),
-      })),
+      trajectory: [],
     },
     risk: {
-      composite_risk_score: round(Math.min(98, totalDrag * 160 + 8), 1),
-      risk_status: totalDrag > 0.3 ? ('ELEVATED' as const) : ('WATCH' as const),
-      rainfall_risk_score: round(Math.min(100, (weatherDrag / 0.35) * 100), 1),
-      equipment_risk_score: round(Math.min(100, (downtimeDrag / 0.3) * 100), 1),
-      blasting_risk_score: 0,
+      composite_risk_score: null,
+      risk_status: null,
+      rainfall_risk_score: null,
+      equipment_risk_score: null,
+      blasting_risk_score: null,
       stockpile_risk_score: null,
-      predicted_shortfall_tonnes: Math.max(0, planned - predicted),
-      live_downtime_hours: downtime,
+      predicted_shortfall_tonnes: null,
+      live_downtime_hours: null,
     },
     shap: {
-      explainer: 'additive-driver-attribution-v1 (exact linear decomposition, not SHAP)',
-      composite_risk_score: round(Math.min(98, totalDrag * 160 + 8), 1),
+      explainer: 'unavailable',
+      composite_risk_score: null,
       base_value: 0,
-      waterfall_features: [
-        { feature: `14-day rainfall (${rainfall} mm, synthetic)`, shap_value: round(weatherDrag * 100, 1), is_positive: true },
-        { feature: `Equipment downtime (${downtime} h/week, synthetic)`, shap_value: round(downtimeDrag * 100, 1), is_positive: true },
-      ],
+      // An attribution of a score that was not computed explains nothing.
+      waterfall_features: [],
       causal_chains: [],
-      primary_driver: weatherDrag >= downtimeDrag ? 'Rainfall (synthetic)' : 'Equipment downtime (synthetic)',
+      primary_driver: null,
     },
     actions: [
       {
@@ -136,15 +134,9 @@ export function degradedTelemetry(mineId: number, backendError: string) {
     // Scene identifiers are never fabricated.
     stacScenes: [],
     stac_status: { queried: false, ok: false, source: null, error: 'degraded mode', queried_at: new Date().toISOString() },
-    provenance: {
-      'weather.rainfall_14d_mm': synthetic(rainfall, 'mm', 'Synthetic fallback (service layer unreachable)', {
-        model_version: 'synthetic-ops-v1',
-        method: `Seeded draw, stream "${mine.id}|degraded|${day}".`,
-      }),
-      'risk.live_downtime_hours': synthetic(downtime, 'hours/week', SYNTHETIC_CALIBRATION.note, {
-        model_version: 'synthetic-ops-v1',
-      }),
-    },
+    // No envelopes: there are no values to carry provenance for. Two used to
+    // sit here describing seeded draws as though a draw were an observation.
+    provenance: {},
     data_integrity: dataIntegrity({
       containsSynthetic: true,
       liveOk: false,

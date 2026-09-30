@@ -13,22 +13,22 @@
     },
     {
       "route": "/console?mine=1&track=b",
-      "attributed": 19,
+      "attributed": 18,
       "violations": []
     },
     {
       "route": "/console?track=a",
-      "attributed": 141,
+      "attributed": 112,
       "violations": []
     },
     {
       "route": "/production",
-      "attributed": 2,
+      "attributed": 1,
       "violations": []
     },
     {
       "route": "/blending",
-      "attributed": 2,
+      "attributed": 1,
       "violations": []
     },
     {
