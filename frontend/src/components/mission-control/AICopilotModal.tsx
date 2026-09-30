@@ -213,7 +213,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
       {/* AI-X Copilot Modal Overlay */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-end p-2 sm:p-6 bg-surface-0/80  animate-in fade-in duration-200">
-          <div className="ios-glass-card w-full sm:max-w-md md:max-w-lg h-[660px] max-h-[92vh] flex flex-col justify-between overflow-hidden shadow-2xl border border-border-interactive rounded-md relative">
+          <div className="rounded-md border border-border-default bg-surface-1 w-full sm:max-w-md md:max-w-lg h-[660px] max-h-[92vh] flex flex-col justify-between overflow-hidden shadow-2xl border border-border-interactive rounded-md relative">
             {/* Header */}
             <div className="p-4 sm:p-5 border-b border-border-default bg-gradient-to-r from-[rgba(6,12,24,0.95)] to-[rgba(10,20,35,0.95)] flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -233,7 +233,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
                     {/* data-literal-ok: describes how the assistant runs (a local
                         canned-answer matcher in aix-knowledge-engine, no API
                         call), not a measurement of anything. */}
-                    <span className="ios-badge text-xs py-0.5 px-2 font-mono font-bold whitespace-nowrap shrink-0">
+                    <span className="text-xs py-0.5 px-2 font-mono font-bold whitespace-nowrap shrink-0">
                       Runs on-device
                     </span>
                   </div>

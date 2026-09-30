@@ -354,19 +354,18 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   const differenceVal = simResult?.difference ?? null
 
   return (
-    <div className="ios-glass-card p-6 border border-border-interactive rounded-md space-y-6 shadow-2xl relative overflow-hidden">
+    <div className="rounded-md border border-border-default bg-surface-1 p-6 border border-border-interactive rounded-md space-y-6 shadow-2xl relative overflow-hidden">
       {/* Background Cyber Ambient Glow */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border-default pb-5">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="ios-badge ios-badge-gold text-xs font-mono font-bold tracking-widest uppercase">
+            <span className="text-xs font-mono font-bold tracking-widest uppercase">
               ⭐ DIGITAL TWIN &bull; SIEMENS CONCEPT
             </span>
-            <span className="ios-badge ios-badge-live text-xs font-mono font-bold">
+            <span className="text-xs font-mono font-bold">
               REAL 50-YR MOIL & IBM DATA &bull; 2040 FORECAST
             </span>
           </div>
@@ -390,7 +389,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
       {/* Main Grid: Parameter Controls + Real Digital Data Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Interactive Scenario Controls (5 Columns) */}
-        <div className="lg:col-span-5 space-y-5 ios-glass-inset p-5 rounded-md border border-border-default">
+        <div className="lg:col-span-5 space-y-5 rounded-md border border-border-subtle bg-surface-2 p-5 rounded-md border border-border-default">
           <div className="flex items-center justify-between border-b border-border-default pb-2">
             <div className="flex items-center gap-2">
               <Sliders className="w-4 h-4 text-accent" />
@@ -630,7 +629,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
             </div>
 
           {/* SLEEK MINIMALISTIC 50-YEAR HISTORY (1975-2025) & 2040 FORECAST GRAPH */}
-          <div className="ios-glass-inset p-5 rounded-md border border-border-default space-y-3 relative overflow-hidden bg-[var(--color-surface-1)]/90">
+          <div className="rounded-md border border-border-subtle bg-surface-2 p-5 rounded-md border border-border-default space-y-3 relative overflow-hidden bg-[var(--color-surface-1)]/90">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-default pb-2">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-accent" />
@@ -789,7 +788,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
 
           {/* Daily forecast trajectory — the real Track B artifact, not a shape */}
           <div
-            className="ios-glass-inset p-5 rounded-md border border-border-default space-y-3"
+            className="rounded-md border border-border-subtle bg-surface-2 p-5 rounded-md border border-border-default space-y-3"
             data-provenance={trajectoryState === 'ready' ? 'synthetic' : 'unavailable'}
             data-provenance-model={forecastMeta?.model}
           >
@@ -967,7 +966,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 key={s.id}
                 onClick={() => setComparedScenario(s)}
                 data-provenance="assumption"
-                className={`ios-glass-inset p-3.5 rounded-md border transition-colors cursor-pointer hover:border-accent/50 ${
+                className={`rounded-md border border-border-subtle bg-surface-2 p-3.5 rounded-md border transition-colors cursor-pointer hover:border-accent/50 ${
                   comparedScenario?.id === s.id
                     ? 'border-accent bg-accent/10'
                     : 'border-border-default bg-surface-2'

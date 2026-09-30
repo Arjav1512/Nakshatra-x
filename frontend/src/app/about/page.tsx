@@ -42,7 +42,7 @@ export default function AboutPage() {
 
         {/* Key Attributes Meta Cards Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="ios-glass-card p-4 rounded-md bg-surface-1/70 border border-accent/40 flex flex-col justify-between">
+          <div className="rounded-md border border-border-default bg-surface-1 p-4 rounded-md bg-surface-1/70 border border-accent/40 flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-mono font-bold text-text-secondary uppercase">Organization</span>
               <Building2 size={16} className="text-accent" />
@@ -51,7 +51,7 @@ export default function AboutPage() {
             <div className="text-xs font-mono text-accent">Govt. of India</div>
           </div>
 
-          <div className="ios-glass-card p-4 rounded-md bg-surface-1/70 border border-accent/40 flex flex-col justify-between">
+          <div className="rounded-md border border-border-default bg-surface-1 p-4 rounded-md bg-surface-1/70 border border-accent/40 flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-mono font-bold text-text-secondary uppercase">Department</span>
               <ShieldCheck size={16} className="text-accent" />
@@ -60,7 +60,7 @@ export default function AboutPage() {
             <div className="text-xs font-mono text-accent">Largest Producer in India</div>
           </div>
 
-          <div className="ios-glass-card p-4 rounded-md bg-surface-1/70 border border-status-caution/40 flex flex-col justify-between">
+          <div className="rounded-md border border-border-default bg-surface-1 p-4 rounded-md bg-surface-1/70 border border-status-caution/40 flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-mono font-bold text-text-secondary uppercase">Category</span>
               <Layers size={16} className="text-status-caution" />
@@ -69,7 +69,7 @@ export default function AboutPage() {
             <div className="text-xs font-mono text-status-caution">AI/ML &amp; Analytics</div>
           </div>
 
-          <div className="ios-glass-card p-4 rounded-md bg-surface-1/70 border border-status-critical/40 flex flex-col justify-between">
+          <div className="rounded-md border border-border-default bg-surface-1 p-4 rounded-md bg-surface-1/70 border border-status-critical/40 flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-mono font-bold text-text-secondary uppercase">Theme</span>
               <Globe2 size={16} className="text-status-critical" />
@@ -82,7 +82,7 @@ export default function AboutPage() {
         {/* Main Content Sections */}
         <div className="space-y-8">
           {/* Background Card */}
-          <div className="ios-glass-card p-6 sm:p-8 rounded-md bg-surface-1/80 border border-border-default shadow-2xl space-y-3">
+          <div className="rounded-md border border-border-default bg-surface-1 p-6 sm:p-8 rounded-md bg-surface-1/80 border border-border-default shadow-2xl space-y-3">
             <div className="flex items-center gap-2.5 text-accent">
               <FileText size={20} />
               <h2 className="text-lg sm:text-xl font-bold font-sans text-text-primary uppercase tracking-wider">
@@ -95,7 +95,7 @@ export default function AboutPage() {
           </div>
 
           {/* Detailed Description Card */}
-          <div className="ios-glass-card p-6 sm:p-8 rounded-md bg-surface-1/80 border border-accent/30 shadow-2xl space-y-6">
+          <div className="rounded-md border border-border-default bg-surface-1 p-6 sm:p-8 rounded-md bg-surface-1/80 border border-accent/30 shadow-2xl space-y-6">
             <div className="flex items-center gap-2.5 text-accent">
               <Target size={20} />
               <h2 className="text-lg sm:text-xl font-bold font-sans text-text-primary uppercase tracking-wider">
@@ -140,7 +140,7 @@ export default function AboutPage() {
           </div>
 
           {/* Expected Solution Card */}
-          <div className="ios-glass-card p-6 sm:p-8 rounded-md bg-surface-1/80 border border-accent/30 shadow-2xl space-y-4">
+          <div className="rounded-md border border-border-default bg-surface-1 p-6 sm:p-8 rounded-md bg-surface-1/80 border border-accent/30 shadow-2xl space-y-4">
             <div className="flex items-center gap-2.5 text-accent">
               <Sparkles size={20} />
               <h2 className="text-lg sm:text-xl font-bold font-sans text-text-primary uppercase tracking-wider">
