@@ -57,6 +57,15 @@ export function SourceBadge({ env }: { env: Envelope<any> }) {
       cls: 'border-border-default bg-surface-1 text-text-tertiary',
       title: 'Fixed reference constant.',
     },
+    assumption: {
+      label: 'ASSUMPTION',
+      // Deliberately unlike the others: dashed, no fill, muted. A value built
+      // on stated assumptions should not sit on the page with the same
+      // confidence as one the model produced.
+      cls: 'border-dashed border-text-tertiary/60 bg-transparent text-text-tertiary',
+      title:
+        'Arithmetic over planner assumptions shown on screen. Not a forecast, not fitted, no data was used to derive the coefficients.',
+    },
   }
   const m = map[env.source_kind] ?? map.reference
   return (

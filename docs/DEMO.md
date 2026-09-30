@@ -289,6 +289,25 @@ non-goal. The PRD wins.
 
 ---
 
+## 2:20 — The constraint engine says no (15 s)
+
+Open **Operations → Mine twin**. The what-if calculator is already on a feasible
+plan: the 06:00–14:00 shift with no blast delay, which puts the blast inside the
+permitted 06:00–07:00 window. The constraint check reads **passed**.
+
+Now move **Blasting delay** to **+6 h**. The blast moves to 12:00, outside both
+permitted windows, and the engine rejects it by name:
+
+> *Proposed 12:00 is outside the underground inter-shift blasting windows
+> (06:00-07:00, 14:00-15:00).*
+
+Say the line: **constraints are enforced, never learned.** The arithmetic still
+tells you what the extra tonnes would have been; the engine tells you the plan is
+not allowed, and the two are shown separately because they answer different
+questions. Point at the assumptions panel while you are there — every multiplier
+is on screen, editable, and labelled as a planner assumption rather than a fitted
+coefficient.
+
 ## 2:30 — Track A: prospectivity (25 s)
 
 **Click "Track A · prospectivity".**

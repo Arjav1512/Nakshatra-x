@@ -3,7 +3,7 @@
   "routes": [
     {
       "route": "/",
-      "attributed": 5,
+      "attributed": 0,
       "violations": []
     },
     {
@@ -13,17 +13,17 @@
     },
     {
       "route": "/console?mine=1&track=b",
-      "attributed": 18,
+      "attributed": 0,
       "violations": []
     },
     {
       "route": "/console?track=a",
-      "attributed": 112,
+      "attributed": 0,
       "violations": []
     },
     {
       "route": "/production",
-      "attributed": 1,
+      "attributed": 0,
       "violations": []
     },
     {
@@ -33,7 +33,7 @@
     },
     {
       "route": "/mine-twin",
-      "attributed": 8,
+      "attributed": 1,
       "violations": []
     },
     {
@@ -43,7 +43,7 @@
     },
     {
       "route": "/method",
-      "attributed": 31,
+      "attributed": 0,
       "violations": []
     },
     {

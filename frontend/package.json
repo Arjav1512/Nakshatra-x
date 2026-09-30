@@ -16,7 +16,8 @@
     "test:pilot": "node tools/e2e-backtest-pilot.js",
     "test:motion": "node tools/e2e-motion.js",
     "test:surface": "node tools/e2e-surface.js",
-    "lint:literals": "node tools/lint-jsx-data-literals.js"
+    "lint:literals": "node tools/lint-jsx-data-literals.js",
+    "test:scenario": "node tools/e2e-scenario.js"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

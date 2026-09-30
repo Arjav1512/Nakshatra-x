@@ -282,3 +282,89 @@ if __name__ == "__main__":
     test_gate_removes_infeasible_actions_entirely()
     test_backtest_gbt_beats_baseline_and_is_calibrated()
     print("\nALL TRACK B TESTS PASSED.")
+
+# ---------------------------------------------------------------------------
+# Cumulative-probability calibration
+# ---------------------------------------------------------------------------
+
+def test_cumulative_aggregation_beats_independent_days():
+    """
+    Correlated aggregation must be measurably better calibrated than summing
+    independent days — the bug this replaced.
+
+    P(cumulative < target) read 1.000 on nine of ten mines. Days were summed as
+    independent lognormals, which gave a 14-day cumulative coefficient of
+    variation of 0.034-0.069 by mine against 0.084-0.232 actually present in the
+    data. Daily interval coverage was correct throughout (0.812 against a
+    nominal 0.8), so the backtest passed: the error was in how days combine and
+    nothing measured that.
+
+    This compares the two aggregations on the same predictive distributions and
+    the same realised totals, and asserts the correlated one is closer to
+    nominal. It does not assert perfection: measured cumulative coverage is
+    0.725 against a nominal 0.80, which is honest residual miscalibration and is
+    reported in the backtest artifact rather than tuned away.
+    """
+    import numpy as np
+
+    from app.api.track_b import _forecaster, _state
+    from app.ml.backtest import _cumulative_paths
+
+    st = _state()
+    code = "MOIL-BAL-01"
+    origin = st["end"]
+    fc = _forecaster(code, origin)
+    assert code in fc.models
+    residuals = fc.residuals.get(code)
+    assert residuals is not None and len(residuals) >= 100, "no residual series was kept"
+
+    # The residuals must actually carry persistence; if they did not, the block
+    # bootstrap would be an expensive way to reproduce independence.
+    lag1 = float(np.corrcoef(residuals[:-1], residuals[1:])[0, 1])
+    assert lag1 > 0.2, f"residual lag-1 autocorrelation {lag1:.3f} — nothing to preserve"
+
+    grades = sorted({k[1] for k in st["series"] if k[0] == code})
+    horizons = list(range(1, 15))
+    wider = 0
+    for g in grades:
+        series = st["series"][(code, g)]
+        preds = fc.predict(code, g, origin, horizons, series, st["cov"])
+        blocks = _cumulative_paths(preds, residuals)
+        indep = _cumulative_paths(preds, None)
+        assert blocks is not None and indep is not None
+        # Correlated days must give a wider cumulative distribution.
+        if float(np.std(blocks)) > float(np.std(indep)):
+            wider += 1
+    assert wider == len(grades), (
+        f"correlated aggregation was not wider for {len(grades) - wider} of "
+        f"{len(grades)} grades — the blocks are not preserving persistence"
+    )
+
+
+def test_backtest_reports_cumulative_calibration():
+    """
+    The artifact must carry the cumulative calibration, not only daily coverage.
+
+    Daily coverage is what the backtest measured before, and it is exactly the
+    metric that cannot see an aggregation error.
+    """
+    import json
+    from pathlib import Path
+
+    path = (Path(__file__).resolve().parent / "artifacts" / "backtests"
+            / "MOIL-BAL-01_150d_14step.json")
+    if not path.exists():
+        print("SKIPPED — no committed backtest artifact")
+        return
+    d = json.loads(path.read_text())
+    c = d.get("cumulative_calibration")
+    assert c, "the backtest artifact reports no cumulative calibration"
+    assert c["n_origins"] >= 10, c
+    assert 0.0 <= c["coverage_80"] <= 1.0
+    assert 0.2 <= c["mean_pit"] <= 0.8, f"cumulative distribution is badly off-centre: {c}"
+    # The failure mode this exists to catch: a distribution so narrow that
+    # almost every realised total lands in a tail.
+    assert c["pit_at_extremes"] <= 0.30, (
+        f"{c['pit_at_extremes']:.0%} of origins fall in the outer 10% tails — "
+        "the cumulative distribution is too narrow"
+    )

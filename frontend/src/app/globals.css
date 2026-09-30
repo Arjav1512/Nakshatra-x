@@ -179,3 +179,48 @@
     display: none;
   }
 }
+
+
+/* Display face (B-2). Utility rather than a token override, because it applies
+   only to the one heading per page that names what you are looking at. */
+.font-display {
+  font-family: var(--font-display);
+  font-feature-settings: 'ss01' on;
+}
+
+
+/* ---------------------------------------------------------------------------
+   Product-surface motion (B-4, product half).
+   Calm and functional: it tells you something changed and then stops. The
+   landing page keeps its narrative; nothing here scrubs, pins or loops.
+   Everything respects the global prefers-reduced-motion rule above.
+   --------------------------------------------------------------------------- */
+
+/* A panel or route arriving. Opacity and a small lift, transform only. */
+@keyframes panel-enter {
+  from { opacity: 0; transform: translate3d(0, 6px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+.panel-enter {
+  animation: panel-enter var(--duration-disclosure) var(--ease-out) both;
+}
+
+/* One-shot highlight when a map click resolves to a real prediction. It fires
+   once and leaves no trace: a looping pulse on a resolved value reads as a
+   live feed, and none of this is live. */
+@keyframes resolve-once {
+  0%   { background-color: var(--color-accent-muted); }
+  100% { background-color: transparent; }
+}
+
+.resolve-once {
+  animation: resolve-once 900ms var(--ease-out) 1 both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-enter,
+  .resolve-once {
+    animation: none;
+  }
+}

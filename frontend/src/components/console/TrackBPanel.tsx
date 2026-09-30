@@ -188,7 +188,9 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
   const selected = grades.find((g) => g.grade === grade) ?? grades[0] ?? null
 
   return (
-    <section className="space-y-4">
+    // Calm arrival for the whole panel when a different mine is opened. Keyed
+    // on the mine so it plays on change, not on every re-render.
+    <section key={mineId} className="panel-enter space-y-4">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-accent">
           Track B · Production shortfall
@@ -251,6 +253,12 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             )
           })()
         : null}
+
+      <div>
+        <h2 className="font-display text-2xl font-medium tracking-tight">
+          What the forecaster expects
+        </h2>
+      </div>
 
       {/* --- D-3 shortfall risk, D-2 trends --- */}
       {fWarm ? (
@@ -433,6 +441,24 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
           ) : null}
         </>
       )}
+
+      {/*
+        B-1 confusion 6 and 7. Everything below arrived as one sequence of
+        same-weight panels, so nothing said which to read first and the
+        strongest thing this product can say — a rolling-origin backtest
+        against a seasonal-naive baseline — sat two thirds down the page in the
+        same box as everything else.
+        The page is two parts now: what we think, and why you should believe
+        it. This heading is the seam.
+      */}
+      <div className="border-t border-border-strong pt-6">
+        <h2 className="font-display text-2xl font-medium tracking-tight">
+          Why you should believe it
+        </h2>
+        <p className="measure mt-2 text-sm text-text-secondary">
+          Held-out accuracy and the constraint checks behind every action above.
+        </p>
+      </div>
 
       {/* --- N-8: backtest visible in the UI --- */}
       <div className="rounded-md border border-border-default bg-surface-2 p-3">

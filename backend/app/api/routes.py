@@ -8,6 +8,7 @@ from app.services.satellite import query_sentinel_stac
 from app.api.track_b import NoBacktest, backtest_mine, forecast_mine, forecast_status, recommend_actions, warm_forecast
 from app.api.forecast_store import Warming
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
 from app.ml.prospectivity import model_metrics, predict_point, rank_drill_targets, scored_grid
 from app.api.telemetry import build_mine_telemetry
 from app.services.recommendations import generate_action_recommendations
@@ -284,6 +285,99 @@ def prospectivity_targets(top_n: int = Query(10, ge=1, le=50)):
         return rank_drill_targets(top_n=top_n)
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
+
+
+class ScenarioCheckRequest(BaseModel):
+    """The controls a planner set in the what-if calculator."""
+
+    mine_id: int
+    shift_window: str = Field(..., pattern=r"^\d{2}-\d{2}$")
+    blasting_delay_hours: int = Field(..., ge=0, le=24)
+    redeploy: str
+    dry_blast_tolerance_mm: int = Field(..., ge=0, le=100)
+
+
+@router.post("/scenario/constraint-check")
+def scenario_constraint_check(req: ScenarioCheckRequest):
+    """
+    Run a what-if scenario's controls through the constraint engine (PRD C-1..C-5).
+
+    The calculator is arithmetic over stated assumptions, and arithmetic does
+    not know that blasting at 02:00 is inside the statutory rest window. The
+    engine already does: its vocabulary is exactly these controls —
+    RESCHEDULE_SHIFT (C-1), BLAST_RESCHEDULE (C-2), EQUIPMENT_RELOCATION (C-3) —
+    so a scenario that cannot legally be run is reported as such rather than
+    quietly costed.
+
+    Constraints are enforced, never learned (PRD guardrail 3).
+    """
+    from datetime import datetime, timedelta
+
+    from app.ml.constraints import ActionType, ConstraintEngine, MineContext, ProposedAction
+
+    mine_code, mine_name = _mine_code_or_404(req.mine_id)
+    meta = next((m for m in DEFAULT_MINES if m["mine_code"] == mine_code), None)
+    ctx = MineContext(mine_code, "underground", meta["latitude"] if meta else 21.8,
+                      meta["longitude"] if meta else 80.0)
+    engine = ConstraintEngine({mine_code: ctx})
+
+    # The blast lands at the start of the shift window, delayed by the chosen
+    # hours — which is what puts it into or out of the rest window.
+    start_hour = int(req.shift_window.split("-")[0])
+    today = datetime.utcnow().replace(minute=0, second=0, microsecond=0)
+    blast_at = today.replace(hour=start_hour) + timedelta(hours=req.blasting_delay_hours)
+
+    actions = [
+        ProposedAction(
+            id="scenario-shift",
+            action_type=ActionType.RESCHEDULE_SHIFT,
+            mine_code=mine_code,
+            description=f"Haulage shift window {req.shift_window}",
+            additional_hours=float(int(req.shift_window.split("-")[1]) - start_hour) % 24,
+        ),
+        ProposedAction(
+            id="scenario-blast",
+            action_type=ActionType.BLAST_RESCHEDULE,
+            mine_code=mine_code,
+            description=f"Blast delayed {req.blasting_delay_hours} h",
+            proposed_at=blast_at,
+        ),
+    ]
+    if req.redeploy != "none":
+        actions.append(
+            ProposedAction(
+                id="scenario-redeploy",
+                action_type=ActionType.EQUIPMENT_RELOCATION,
+                mine_code=mine_code,
+                description=f"Redeploy {req.redeploy}",
+                equipment_id=req.redeploy,
+                equipment_class="shovel" if "shovel" in req.redeploy else "crusher",
+                from_mine=mine_code,
+                to_mine=mine_code,
+                available_hours=12.0,
+            )
+        )
+
+    results = []
+    for a in actions:
+        v = engine.check(a)
+        results.append({
+            "id": a.id,
+            "action_type": a.action_type.value,
+            "description": a.description,
+            **v.to_dict(),
+        })
+
+    return {
+        "mine_code": mine_code,
+        "mine_name": mine_name,
+        "feasible": all(r["feasible"] for r in results),
+        "checks": results,
+        "note": (
+            "Constraints are enforced, never learned. A scenario that fails here "
+            "cannot be run as configured, whatever the arithmetic says it would yield."
+        ),
+    }
 
 
 @router.get("/prospectivity/grid")

@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { fetchForecast } from '@/lib/console-api'
+import { ASSUMPTION_GROUPS, ASSUMPTION_NOTE } from '@/lib/scenario-assumptions'
+import { Metric } from '@/components/console/Evidence'
+import { assumption, measuredValue, reference } from '@/lib/provenance'
 import type { MineInfo } from '@/components/mission-control/types'
 import {
   HISTORICAL_DATABASE_1977_2026,
@@ -18,17 +21,26 @@ import {
   Database,
 } from 'lucide-react'
 
+/**
+ * A scenario the user ran. `risk_delta` is gone: it was a hardcoded ternary
+ * (0.06 / 0.08 / -0.05 / -0.03) and nothing in this system estimates a change
+ * in risk. `predicted_` became `estimated_`, because a prediction is what the
+ * forecaster makes and this is arithmetic over stated assumptions.
+ */
 export type Scenario = {
   id: string
   mine_name: string
-  shift_window: string
-  blasting_delay_hours: number
-  redeploy: string
-  dry_blast_tolerance: number
-  predicted_production_t: number
+  /** What the planner chose, per assumption group. */
+  selections: Record<string, string | number>
+  /** The multiplier used for each group, as shown on screen. */
+  factors: Record<string, number>
+  combined_multiplier: number
   baseline_production_t: number
-  recovery_t: number
-  risk_delta: number
+  baseline_source: string
+  baseline_model_version: string | null
+  estimated_production_t: number
+  difference_t: number
+  kind: 'assumption'
   created_at: string
 }
 
@@ -57,10 +69,60 @@ const DEFAULT_MINE: MineInfo = {
 
 export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   // What-If Simulator Controls
-  const [shift, setShift] = useState<'04-10' | '06-14' | '22-06'>('04-10')
+  // Opens on a feasible plan.
+  //
+  // The blast lands at the shift's start hour plus the delay, and the operating
+  // rules permit 06:00-07:00 and 14:00-15:00 underground. The default was
+  // 04-10, which put the blast at 04:00 and had the constraint engine rejecting
+  // the very first thing anyone saw. A tool whose default state is illegal
+  // teaches the wrong lesson about the tool. Moving the blast delay off zero is
+  // what triggers the rejection now — which is the demo beat (docs/DEMO.md).
+  const [shift, setShift] = useState<'04-10' | '06-14' | '22-06'>('06-14')
   const [blastDelay, setBlastDelay] = useState<0 | 6 | 12>(0)
   const [redeploy, setRedeploy] = useState<'none' | '1-crusher' | '1-shovel-1-dumper'>('1-shovel-1-dumper')
   const [tolerance, setTolerance] = useState<10 | 20 | 30>(20)
+
+  /**
+   * The multipliers, editable.
+   *
+   * They used to live inside the route handler, invisible to whoever was
+   * reading the output. PRD C-4 asks a recommendation to state its expected
+   * effect *and its assumptions*; an assumption you cannot see or change is not
+   * stated. Defaults come from `scenario-assumptions.ts`, which is the one
+   * place they are written down.
+   */
+  const [factors, setFactors] = useState<Record<string, number>>(() => {
+    // Seed from the controls' own initial selections, not from `options[0]`.
+    // Those disagreed: the panel opened on "+1 shovel, +1 dumper" while the
+    // factor row showed 1.0 for redeployment, so the arithmetic on screen did
+    // not match the options on screen.
+    const initial: Record<string, string | number> = {
+      shiftWindow: '06-14',
+      blastingDelayHours: 0,
+      redeploy: '1-shovel-1-dumper',
+      dryBlastTolerance: 20,
+    }
+    return Object.fromEntries(
+      ASSUMPTION_GROUPS.map((g) => [
+        g.id,
+        g.options.find((o) => o.value === initial[g.id])?.factor ?? g.options[0]?.factor ?? 1,
+      ])
+    )
+  })
+  // When a control moves, adopt that option's documented default factor —
+  // unless the planner has already overridden it.
+  const chooseOption = (groupId: string, optionValue: string | number) => {
+    const group = ASSUMPTION_GROUPS.find((g) => g.id === groupId)
+    const opt = group?.options.find((o) => o.value === optionValue)
+    if (opt) setFactors((f) => ({ ...f, [groupId]: opt.factor }))
+  }
+
+  const selectionOf: Record<string, string | number> = {
+    shiftWindow: shift,
+    blastingDelayHours: blastDelay,
+    redeploy,
+    dryBlastTolerance: tolerance,
+  }
 
   // Simulation State
   // Null until a simulation has actually run.
@@ -70,11 +132,24 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   // before anyone had pressed the button — three numbers presented as the
   // output of a simulation that had not happened.
   const [simResult, setSimResult] = useState<{
-    predicted: number
-    recovery: number
-    riskDelta: number
+    estimated: number
+    difference: number
+    multiplier: number
+    note: string
   } | null>(null)
   const [simError, setSimError] = useState<string | null>(null)
+  /**
+   * The constraint engine's verdict on these controls (PRD C-1..C-5).
+   *
+   * Arithmetic does not know that blasting at 02:00 is inside the statutory
+   * rest window. The engine does, and its action vocabulary is exactly these
+   * controls, so a scenario that cannot legally be run is reported as such
+   * rather than quietly costed.
+   */
+  const [constraints, setConstraints] = useState<{
+    feasible: boolean
+    checks: { action_type: string; description: string; feasible: boolean; violations: { rule: string; detail: string }[] }[]
+  } | null>(null)
 
   const [history, setHistory] = useState<Scenario[]>([])
   const [loading, setLoading] = useState(false)
@@ -128,8 +203,15 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   const minVal = Math.min(...fullTimeline.map((d) => d.value || 0))
 
   const runSimulation = async () => {
+    if (baselineProd === null) {
+      setSimError(
+        'No baseline is available for this mine, so there is nothing to apply the assumptions to.'
+      )
+      return
+    }
     setLoading(true)
     setSimError(null)
+    setConstraints(null)
     try {
       const res = await fetch('/api/v1/mine-twin', {
         method: 'POST',
@@ -137,26 +219,48 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
         body: JSON.stringify({
           mineId: selectedMine.id,
           mineName: selectedMine.name,
-          shiftWindow: shift,
-          blastingDelayHours: blastDelay,
-          redeploy,
-          dryBlastTolerance: tolerance,
-          baselineProduction: selectedMine.currentProduction || 14200,
-          currentRisk: 0.12,
+          factors,
+          selections: selectionOf,
+          baselineProduction: baselineProd,
+          baselineSource: `Track B forecast artifact, 14-day median${
+            forecastMeta ? ` (${forecastMeta.model}, from ${forecastMeta.origin})` : ''
+          }`,
+          baselineModelVersion: forecastMeta?.model ?? null,
         }),
       })
       if (res.ok) {
         const data = await res.json()
         setSimResult({
-          predicted: data.predicted,
-          recovery: data.recovery,
-          riskDelta: data.riskDelta,
+          estimated: data.estimated,
+          difference: data.difference,
+          multiplier: data.combined_multiplier,
+          note: data.model_note ?? ASSUMPTION_NOTE,
         })
         setSimError(null)
         setHistory(data.scenarios || [])
+
+        // Check the controls against the operating rules, in parallel with
+        // showing the arithmetic — never instead of it.
+        try {
+          const cr = await fetch('/api/v1/scenario/constraint-check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              mine_id: selectedMine.numericId ?? 1,
+              shift_window: shift,
+              blasting_delay_hours: blastDelay,
+              redeploy,
+              dry_blast_tolerance_mm: tolerance,
+            }),
+          })
+          setConstraints(cr.ok ? await cr.json() : null)
+        } catch {
+          setConstraints(null)
+        }
       } else {
+        const body = await res.json().catch(() => null)
         setSimResult(null)
-        setSimError(`The simulation service answered ${res.status}.`)
+        setSimError(body?.error || `The scenario service answered ${res.status}.`)
       }
     } catch (err: any) {
       // Report the failure. Do not invent a result.
@@ -233,10 +337,21 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   // missing value into a plausible number, and `|| 0` would have fired on a
   // legitimate zero as well. A value that is not there is rendered as not
   // there.
-  const baselineProd = selectedMine.currentProduction ?? null
-  const predictedProd = simResult?.predicted ?? null
-  const recoveryVal = simResult?.recovery ?? null
-  const riskDelta = simResult?.riskDelta ?? null
+  /**
+   * Baseline tonnes, from the mine's own forecast artifact.
+   *
+   * This read `selectedMine.currentProduction`, a client constant, and the
+   * route defaulted a missing value to 14,200. Both are gone: the baseline is
+   * the summed 14-day median from the artifact the console already serves, it
+   * carries that artifact's model version, and when it cannot be read the
+   * calculator says so instead of estimating from nothing.
+   */
+  const baselineProd =
+    trajectory && trajectory.length
+      ? Math.round(trajectory.reduce((a, d) => a + d.median, 0))
+      : null
+  const estimatedProd = simResult?.estimated ?? null
+  const differenceVal = simResult?.difference ?? null
 
   return (
     <div className="ios-glass-card p-6 border border-border-interactive rounded-md space-y-6 shadow-2xl relative overflow-hidden">
@@ -397,47 +512,106 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
         {/* Right Column: Simulation Outcomes & Sleek Minimalistic 50-Yr Graph (7 Columns) */}
         <div className="lg:col-span-7 space-y-5">
           {/* Key Simulation Outcome Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div
-              className="ios-glass-inset p-4 space-y-1 border border-border-default"
-              data-provenance="reference"
-            >
-              <span className="text-xs font-mono text-text-secondary uppercase">Baseline Plan</span>
-              <div className="text-xl font-bold font-mono text-text-primary">
-                {baselineProd !== null ? `${baselineProd.toLocaleString()} T` : '—'}
-              </div>
-              <span className="text-xs font-mono text-text-secondary">&bull; Mine register</span>
-            </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Metric
+              label="Baseline, 14 days"
+              data={
+                baselineProd !== null && forecastMeta
+                  ? measuredValue(
+                      reference(baselineProd, 't', `Track B forecast artifact (${forecastMeta.model})`, {
+                        model_version: forecastMeta.model,
+                        method: `Sum of the 14-day median trajectory, forecast from ${forecastMeta.origin}.`,
+                      })
+                    )
+                  : null
+              }
+              unavailable="No forecast artifact for this mine, so there is no baseline to apply assumptions to."
+            />
 
-            <div
-              className="ios-glass-inset p-4 space-y-1 border border-accent/30 bg-accent/5"
-              data-provenance={predictedProd !== null ? 'synthetic' : 'unavailable'}
-            >
-              <span className="text-xs font-mono text-accent uppercase font-bold">Predicted Output</span>
-              <div className="text-xl font-bold font-mono text-accent">
-                {predictedProd !== null ? `${predictedProd.toLocaleString()} T` : 'not run'}
-              </div>
-              <span className="text-xs font-mono text-accent font-bold">
-                {predictedProd !== null ? '\u2022 Simulation result' : '\u2022 Run the simulation'}
+            <Metric
+              label="Estimate under assumptions"
+              emphasis
+              data={
+                estimatedProd !== null && simResult
+                  ? measuredValue(
+                      assumption(
+                        estimatedProd,
+                        't',
+                        'Arithmetic over the planner assumptions shown below',
+                        ASSUMPTION_GROUPS.map((g) => ({
+                          label: g.label,
+                          value: factors[g.id] ?? 1,
+                        })),
+                        { method: simResult.note }
+                      )
+                    )
+                  : null
+              }
+              unavailable="Set the assumptions below and run the scenario. Nothing is shown until you do."
+            />
+
+            <Metric
+              label="Difference vs baseline"
+              data={
+                differenceVal !== null && simResult
+                  ? measuredValue(
+                      assumption(
+                        differenceVal,
+                        't',
+                        `Estimate minus baseline, combined multiplier ${simResult.multiplier}`,
+                        ASSUMPTION_GROUPS.map((g) => ({
+                          label: g.label,
+                          value: factors[g.id] ?? 1,
+                        })),
+                        { method: simResult.note }
+                      )
+                    )
+                  : null
+              }
+              unavailable="Run the scenario to compare it against the baseline."
+            />
+          </div>
+
+          {/* The assumptions, on screen and editable (PRD C-4). */}
+          <div className="rounded-md border border-border-default bg-surface-1 p-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="text-sm font-semibold text-text-primary">Planner assumptions</h3>
+              <span className="font-mono text-xs uppercase tracking-wider text-text-tertiary">
+                not fitted &middot; no data derived
               </span>
             </div>
+            <p className="measure mt-2 text-xs text-text-secondary">{ASSUMPTION_NOTE}</p>
 
-            <div
-              className="ios-glass-inset p-4 space-y-1 border border-status-caution/30 bg-status-caution/5"
-              data-provenance={recoveryVal !== null ? 'derived' : 'unavailable'}
-            >
-              <span className="text-xs font-mono text-status-caution uppercase font-bold">Net Recovery</span>
-              <div className="text-xl font-bold font-mono text-status-caution">
-                {recoveryVal === null
-                  ? 'not run'
-                  : `${recoveryVal >= 0 ? '+' : ''}${recoveryVal.toLocaleString()} T`}
-              </div>
-              <span className="text-xs font-mono text-status-caution">
-                {recoveryVal !== null ? '\u2022 vs baseline' : '\u2022 Run the simulation'}
-              </span>
-            </div>
+            <ul className="mt-4 space-y-3">
+              {ASSUMPTION_GROUPS.map((g) => (
+                <li key={g.id} className="border-l border-border-strong pl-3">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <span className="text-xs font-medium text-text-primary">{g.label}</span>
+                    <label className="flex items-center gap-2 text-xs text-text-tertiary">
+                      <span className="font-mono">x</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        value={factors[g.id] ?? 1}
+                        onChange={(e) => {
+                          const v = Number(e.target.value)
+                          if (Number.isFinite(v) && v > 0) {
+                            setFactors((f) => ({ ...f, [g.id]: v }))
+                          }
+                        }}
+                        className="w-20 rounded-sm border border-border-default bg-surface-2 px-2 py-1 text-right font-mono text-xs text-text-primary tabular-nums"
+                        aria-label={`${g.label} multiplier`}
+                      />
+                    </label>
+                  </div>
+                  <p className="measure mt-1 text-xs text-text-tertiary">{g.rationale}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            {/*
+          {/*
               A "Twin Confidence" tile used to sit here showing
               `simResult?.confidence || 94`% under the label "High Precision ML".
               The endpoint's confidence was min(96, max(72, 90 - |delay| * 1.4 ...)),
@@ -454,7 +628,6 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 backtest, is on the console.
               </p>
             </div>
-          </div>
 
           {/* SLEEK MINIMALISTIC 50-YEAR HISTORY (1975-2025) & 2040 FORECAST GRAPH */}
           <div className="ios-glass-inset p-5 rounded-md border border-border-default space-y-3 relative overflow-hidden bg-[var(--color-surface-1)]/90">
@@ -705,44 +878,73 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 </p>
               </div>
             </div>
-          ) : recoveryVal === null ? (
+          ) : differenceVal === null ? (
             <div className="p-4 rounded-md border border-border-default bg-surface-2 flex items-start gap-3">
               <Sparkles className="w-5 h-5 text-text-tertiary shrink-0 mt-0.5" />
-              <p className="text-xs text-text-secondary leading-relaxed">
-                Set the shift window, blast delay and redeployment above, then run the simulation.
-                Nothing is shown here until it returns a result.
+              <p className="measure text-xs text-text-secondary leading-relaxed">
+                Choose the options above, adjust the assumptions if you disagree with them, then run
+                the scenario. Nothing is shown here until you do.
               </p>
             </div>
           ) : (
           <div
-            className="p-4 rounded-md bg-gradient-to-r from-[rgba(0,255,136,0.15)] to-[rgba(56,189,248,0.15)] border border-accent/40 flex items-start gap-3"
-            data-provenance="derived"
+            className="rounded-md border border-dashed border-text-tertiary/60 bg-surface-1 p-4"
+            data-provenance="assumption"
           >
-            <Sparkles className="w-5 h-5 text-accent shrink-0 mt-0.5" />
-            <div>
-              <div className="text-xs font-mono text-accent font-bold uppercase tracking-wider">
-                Simulation result
-              </div>
-              <p className="text-xs text-text-primary font-sans mt-0.5 leading-relaxed">
-                Shifting haulage to <span className="text-accent font-bold">{shift}</span> with{' '}
-                <span className="text-accent font-bold">{redeploy.toUpperCase()}</span> redeployment
-                changes output by{' '}
-                <span className="text-status-caution font-bold">
-                  {recoveryVal >= 0 ? '+' : ''}{recoveryVal.toLocaleString()} t
-                </span>{' '}
-                against the register baseline
-                {riskDelta !== null ? (
-                  <>
-                    , with a modelled shortfall-risk change of{' '}
-                    <span className="text-accent font-bold">
-                      {(riskDelta * 100).toFixed(1)} pp
-                    </span>
-                  </>
-                ) : null}
-                . Simulated on synthetic operational data (PRD §8.2) — decision support, not a
-                commitment.
-              </p>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <span className="font-mono text-xs uppercase tracking-wider text-text-tertiary">
+                Assumption-based estimate &mdash; not a forecast
+              </span>
+              <span className="font-mono text-xs text-text-tertiary tabular-nums">
+                combined multiplier {simResult?.multiplier}
+              </span>
             </div>
+            <p className="measure mt-2 text-sm text-text-primary">
+              With a {shift} haulage window, {redeploy.replace(/-/g, ' ')} and a {tolerance} mm
+              dry-blast tolerance, this arithmetic gives{' '}
+              <span className="font-mono tabular-nums">
+                {differenceVal >= 0 ? '+' : ''}{differenceVal.toLocaleString()} t
+              </span>{' '}
+              against a baseline of{' '}
+              <span className="font-mono tabular-nums">{baselineProd?.toLocaleString()} t</span>{' '}
+              over 14 days.
+            </p>
+            {/* The route's own caveat, on screen rather than in a field nobody reads. */}
+            <p className="measure mt-2 text-xs text-text-tertiary">{simResult?.note}</p>
+
+            {constraints ? (
+              <div className="mt-3 border-t border-border-subtle pt-3">
+                <p
+                  className={`text-xs font-medium ${
+                    constraints.feasible ? 'text-status-nominal' : 'text-status-critical'
+                  }`}
+                >
+                  {constraints.feasible
+                    ? 'Constraint check passed — these controls can be run as configured.'
+                    : 'Constraint check failed — these controls cannot be run as configured.'}
+                </p>
+                <ul className="mt-1 space-y-1">
+                  {constraints.checks.map((c) => (
+                    <li key={c.action_type} className="text-xs text-text-secondary">
+                      <span className="font-mono text-text-tertiary">{c.action_type}</span>{' '}
+                      {c.feasible ? (
+                        <span className="text-status-nominal">ok</span>
+                      ) : (
+                        c.violations.map((v) => (
+                          <span key={v.rule} className="text-status-critical">
+                            {v.detail}
+                          </span>
+                        ))
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                <p className="measure mt-1 text-xs text-text-tertiary">
+                  Constraints are enforced, never learned. The estimate above is what the arithmetic
+                  gives; this is whether the plan is allowed.
+                </p>
+              </div>
+            ) : null}
           </div>
           )}
         </div>
@@ -754,9 +956,9 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
               <Database className="w-4 h-4 text-status-caution" />
-              <span>Saved Scenario Archives ({history.length} Scenarios Recorded)</span>
+              <span>Scenarios you have run ({history.length})</span>
             </h3>
-            <span className="text-xs font-mono text-text-secondary">Encrypted Mission Ledger</span>
+            <span className="font-mono text-xs uppercase tracking-wider text-text-tertiary">assumption-based &middot; this session only</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -764,7 +966,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               <div
                 key={s.id}
                 onClick={() => setComparedScenario(s)}
-                data-provenance="derived"
+                data-provenance="assumption"
                 className={`ios-glass-inset p-3.5 rounded-md border transition-colors cursor-pointer hover:border-accent/50 ${
                   comparedScenario?.id === s.id
                     ? 'border-accent bg-accent/10'
@@ -778,15 +980,19 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                   </span>
                 </div>
                 <div className="text-xs font-mono text-text-secondary space-x-1">
-                  <span>SHIFT {s.shift_window}</span>
-                  <span>&bull; BLAST +{s.blasting_delay_hours}H</span>
-                  <span>&bull; {s.redeploy.toUpperCase()}</span>
+                  {Object.entries(s.selections ?? {}).map(([k, v]) => (
+                    <span key={k}>&bull; {String(v)}</span>
+                  ))}
                 </div>
                 <div className="mt-2 flex items-center justify-between text-xs font-mono">
-                  <span className="text-text-secondary">{s.baseline_production_t.toLocaleString()}T &rarr;</span>
-                  <span className="text-accent font-bold">{s.predicted_production_t.toLocaleString()}T</span>
-                  <span className="text-status-caution font-bold">
-                    ({s.recovery_t >= 0 ? '+' : ''}{s.recovery_t.toLocaleString()} T)
+                  <span className="text-text-secondary tabular-nums">
+                    {s.baseline_production_t?.toLocaleString()} t &rarr;
+                  </span>
+                  <span className="text-text-primary font-bold tabular-nums">
+                    {s.estimated_production_t?.toLocaleString()} t
+                  </span>
+                  <span className="text-text-tertiary tabular-nums">
+                    ({s.difference_t >= 0 ? '+' : ''}{s.difference_t?.toLocaleString()} t)
                   </span>
                 </div>
               </div>

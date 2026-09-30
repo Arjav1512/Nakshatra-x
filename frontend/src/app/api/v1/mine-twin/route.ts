@@ -1,163 +1,125 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { ASSUMPTION_NOTE } from '@/lib/scenario-assumptions'
+
+/**
+ * What-if scenario calculator (PRD C-6 scenario comparison, C-4 assumptions).
+ *
+ * This multiplies a real baseline by coefficients the planner supplies. It is
+ * arithmetic over stated assumptions, and the response says so in every field
+ * that leaves here.
+ *
+ * WHAT CHANGED, AND WHY
+ * ---------------------
+ * 1. The multiplier tables lived here, invisible to the person using them. They
+ *    now live in `src/lib/scenario-assumptions.ts`, are rendered on screen with
+ *    their values, and are editable — so the assumptions are part of the result
+ *    rather than a note nobody reads. The caller sends the factors it used.
+ *
+ * 2. `IN_MEMORY_SCENARIOS` shipped **pre-populated** with two fabricated runs —
+ *    Balaghat 16,620/14,200/2,420 and Bharweli 13,850/12,200/1,650 — stamped
+ *    `Date.now() - 3600000` and `- 7200000` so they presented as saved work from
+ *    one and two hours ago. Nothing computed them. They rendered with the
+ *    service layer stopped, which is how they were found. A scenario exists only
+ *    when someone runs one.
+ *
+ * 3. `riskDelta` was a hardcoded ternary — 0.06 / 0.08 / -0.05 / -0.03 keyed off
+ *    which control moved. Nothing in this system estimates a change in risk, so
+ *    it is gone rather than dressed up.
+ *
+ * The baseline is not defaulted and not accepted from a client constant: the
+ * caller reads it from the mine's forecast artifact and sends it with its
+ * provenance, and without it this endpoint returns 400.
+ */
 
 type SimInput = {
   mineId: string
   mineName: string
-  shiftWindow: '04-10' | '06-14' | '22-06'
-  blastingDelayHours: 0 | 6 | 12
-  redeploy: 'none' | '1-crusher' | '1-shovel-1-dumper'
-  dryBlastTolerance: 10 | 20 | 30
+  /** The factor actually used per assumption group, as shown in the UI. */
+  factors: Record<string, number>
+  /** Human-readable selection per group, for the record. */
+  selections: Record<string, string | number>
+  /** Baseline tonnes, read from the mine's forecast artifact. */
   baselineProduction: number
-  currentRisk?: number
+  /** Where that baseline came from, carried through onto the scenario. */
+  baselineSource: string
+  baselineModelVersion?: string | null
 }
 
-/**
- * Scenario multipliers.
- *
- * These are stated assumptions, not fitted coefficients: no data was used to
- * derive them and they describe no measured mine. The endpoint is a
- * deterministic what-if calculator, which is useful for comparing options
- * against each other and useless as a prediction. The validated forecaster is
- * nakshatra-gbt-cqr-v1, served from /api/v1/mines/{id}/forecast with a
- * published backtest.
- */
-const SHIFT_BONUS: Record<string, number> = {
-  '04-10': 1.18,
-  '06-14': 1.06,
-  '22-06': 0.92,
-}
+/** Scenarios this process has been asked to compute. Empty until then. */
+let SCENARIOS: any[] = []
 
-const BLASTING_PENALTY: Record<number, number> = {
-  0: 1.0,
-  6: 0.93,
-  12: 0.84,
+function badRequest(error: string, note: string) {
+  return NextResponse.json({ success: false, error, note }, { status: 400 })
 }
-
-const REDEPLOY_BONUS: Record<string, number> = {
-  none: 1.0,
-  '1-crusher': 1.07,
-  '1-shovel-1-dumper': 1.12,
-}
-
-const TOLERANCE_PENALTY: Record<number, number> = {
-  10: 0.96,
-  20: 0.99,
-  30: 1.01,
-}
-
-// In-memory scenario fallback storage for local zero-config serverless sessions
-let IN_MEMORY_SCENARIOS: any[] = [
-  {
-    id: 'scen-demo-1',
-    mine_id: 'balaghat',
-    mine_name: 'Balaghat',
-    shift_window: '04-10',
-    blasting_delay_hours: 0,
-    redeploy: '1-shovel-1-dumper',
-    dry_blast_tolerance: 20,
-    predicted_production_t: 16620,
-    baseline_production_t: 14200,
-    recovery_t: 2420,
-    risk_delta: -0.05,
-    created_at: new Date(Date.now() - 3600000).toISOString(),
-  },
-  {
-    id: 'scen-demo-2',
-    mine_id: 'bharweli',
-    mine_name: 'Bharweli',
-    shift_window: '06-14',
-    blasting_delay_hours: 6,
-    redeploy: '1-crusher',
-    dry_blast_tolerance: 10,
-    predicted_production_t: 13850,
-    baseline_production_t: 12200,
-    recovery_t: 1650,
-    risk_delta: -0.02,
-    created_at: new Date(Date.now() - 7200000).toISOString(),
-  },
-]
 
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as SimInput
 
-    const shiftFactor = SHIFT_BONUS[body.shiftWindow] ?? 1
-    const blastFactor = BLASTING_PENALTY[body.blastingDelayHours] ?? 1
-    const redeployFactor = REDEPLOY_BONUS[body.redeploy] ?? 1
-    const toleranceFactor = TOLERANCE_PENALTY[body.dryBlastTolerance] ?? 1
-
-    const multiplier = shiftFactor * blastFactor * redeployFactor * toleranceFactor
-
-    // `body.baselineProduction || 14200` silently substituted a literal
-    // baseline when the caller sent none, so every derived figure below rested
-    // on a number nobody supplied. The baseline is now required.
     const baseProd = body.baselineProduction
     if (typeof baseProd !== 'number' || !Number.isFinite(baseProd) || baseProd <= 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'baselineProduction is required and must be a positive number.',
-          note: 'Every figure this endpoint returns is derived from the baseline, so it is not defaulted.',
-        },
-        { status: 400 }
+      return badRequest(
+        'baselineProduction is required and must be a positive number.',
+        'Every figure this endpoint returns is derived from the baseline, so it is not defaulted. ' +
+          'Read it from the mine forecast artifact.'
       )
     }
+    if (!body.baselineSource) {
+      return badRequest(
+        'baselineSource is required.',
+        'The baseline carries its own provenance onto the scenario; a figure without it cannot be attributed.'
+      )
+    }
+
+    const factors = body.factors ?? {}
+    const values = Object.values(factors)
+    if (!values.length || values.some((f) => typeof f !== 'number' || !Number.isFinite(f) || f <= 0)) {
+      return badRequest(
+        'factors must be a non-empty map of positive numbers.',
+        'The multipliers are planner assumptions supplied by the caller and shown on screen; ' +
+          'this endpoint does not hold a private copy.'
+      )
+    }
+
+    const multiplier = values.reduce((a, f) => a * f, 1)
     const predicted = Math.round(baseProd * multiplier)
-    const recovery = predicted - baseProd
 
-    const riskDelta =
-      body.shiftWindow === '22-06'
-        ? 0.06
-        : body.blastingDelayHours === 12
-        ? 0.08
-        : body.redeploy === '1-shovel-1-dumper'
-        ? -0.05
-        : -0.03
-
-    // `confidence` used to be reported here as
-    //     min(96, max(72, 90 - |blastingDelayHours| * 1.4 + (redeploy ? 2 : 0)))
-    // which is not a confidence: no interval, no validation, and the 72/96
-    // bounds and 1.4 coefficient were picked to make the number look plausible.
-    // A scenario calculator with fixed multipliers has no uncertainty to
-    // report, so it reports none.
-
-    const newScenario = {
+    const scenario = {
       id: `scen-${Date.now()}`,
-      mine_id: body.mineId || 'balaghat',
-      mine_name: body.mineName || 'Balaghat',
-      shift_window: body.shiftWindow,
-      blasting_delay_hours: body.blastingDelayHours,
-      redeploy: body.redeploy,
-      dry_blast_tolerance: body.dryBlastTolerance,
-      predicted_production_t: predicted,
+      mine_id: body.mineId,
+      mine_name: body.mineName,
+      selections: body.selections ?? {},
+      factors,
+      combined_multiplier: Number(multiplier.toFixed(4)),
       baseline_production_t: baseProd,
-      recovery_t: recovery,
-      risk_delta: riskDelta,
+      baseline_source: body.baselineSource,
+      baseline_model_version: body.baselineModelVersion ?? null,
+      estimated_production_t: predicted,
+      difference_t: predicted - baseProd,
+      kind: 'assumption' as const,
       created_at: new Date().toISOString(),
     }
 
-    IN_MEMORY_SCENARIOS = [newScenario, ...IN_MEMORY_SCENARIOS.slice(0, 19)]
+    SCENARIOS = [scenario, ...SCENARIOS.slice(0, 19)]
 
     return NextResponse.json({
       success: true,
-      model_note:
-        'Deterministic what-if calculator over fixed multipliers that are stated assumptions, ' +
-        'not fitted coefficients. Not a forecast, and no uncertainty is reported because none ' +
-        'is computed. The validated forecaster is nakshatra-gbt-cqr-v1.',
-      predicted,
-      recovery,
-      riskDelta,
-      scenario: newScenario,
-      scenarios: IN_MEMORY_SCENARIOS,
+      model_note: ASSUMPTION_NOTE,
+      kind: 'assumption',
+      estimated: predicted,
+      difference: predicted - baseProd,
+      combined_multiplier: scenario.combined_multiplier,
+      scenario,
+      scenarios: SCENARIOS,
     })
   } catch (err: any) {
     return NextResponse.json(
-      { error: err?.message || 'Mine Twin Simulation failed' },
+      { error: err?.message || 'Scenario calculation failed' },
       { status: 400 }
     )
   }
 }
 
 export async function GET() {
-  return NextResponse.json({ scenarios: IN_MEMORY_SCENARIOS })
+  return NextResponse.json({ scenarios: SCENARIOS, model_note: ASSUMPTION_NOTE })
 }

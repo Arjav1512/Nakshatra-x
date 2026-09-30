@@ -67,7 +67,13 @@ async function main() {
       withProbability: cards.filter((c) => /P\s*\d+%/.test(c.innerText)).length,
       withBadge: cards.filter((c) => badges.some((b) => c.innerText.includes(b))).length,
       unavailable: cards.filter((c) => /unavailable/i.test(c.innerText)).length,
-      names: cards.map((c) => c.innerText.split('\n')[0].trim()),
+      // The mine name, not the first line: cards now open with a rank ("02"),
+      // so taking line 0 made `second` the string "02" and the DEF-1 guard
+      // asserted against a number instead of a mine.
+      names: cards.map((c) => {
+        const lines = c.innerText.split('\n').map((l) => l.trim()).filter(Boolean)
+        return lines.find((l) => /^[A-Za-z]/.test(l)) ?? lines[0] ?? ''
+      }),
     }
   }, PROVENANCE_BADGES)
 
@@ -94,7 +100,12 @@ async function main() {
   const second = portfolio.names[1]
   console.log(`\ndrill-down — ${second} (DEF-1 substitution guard)\n`)
   await page.evaluate((name) => {
-    const li = [...document.querySelectorAll('li')].find((l) => l.innerText.startsWith(name))
+    // `startsWith` coupled this to how the card happens to open. The portfolio
+    // now leads each card with its rank ("02  Balaghat"), so the selector found
+    // nothing and every downstream check failed against a page that had never
+    // been navigated. Match the name anywhere in the card instead: the guard is
+    // about which mine opens, not about what the card looks like.
+    const li = [...document.querySelectorAll('li')].find((l) => l.innerText.includes(name))
     li?.querySelector('button')?.click()
   }, second)
   await sleep(12000)
@@ -111,7 +122,10 @@ async function main() {
   await page.goto(`${BASE}/console`, { waitUntil: 'networkidle2', timeout: 60000 })
   await sleep(Number(process.env.E2E_SETTLE || 15000))
   await page.evaluate(() => {
-    const li = [...document.querySelectorAll('li')].find((l) => l.innerText.startsWith('Balaghat'))
+    // Find Balaghat by name. The portfolio is ranked by expected shortfall now,
+    // so Balaghat is not first and `startsWith` no longer matches a card that
+    // opens with its rank.
+    const li = [...document.querySelectorAll('li')].find((l) => l.innerText.includes('Balaghat'))
     li?.querySelector('button')?.click()
   })
   await sleep(20000)

@@ -125,7 +125,11 @@ def compute_forecast(mine_code: str, horizon_days: int = 14, grade: str | None =
         series = st["series"][(mine_code, g)]
         preds = fc.predict(mine_code, g, origin, horizons, series, st["cov"])
         target = _plan_target(mine_code, g, window_start, window_end)
-        risk = shortfall_probability(preds, target_tonnes=target)
+        # Pass the fitted model's own residual series so the days are
+        # aggregated with their correlation rather than as independent draws.
+        risk = shortfall_probability(
+            preds, target_tonnes=target, residuals=fc.residuals.get(mine_code)
+        )
         baseline_total = sum(
             seasonal_naive(series, origin + timedelta(days=h)) for h in horizons
         )

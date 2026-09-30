@@ -104,6 +104,38 @@ export function DecisionConsole() {
   const [telemetry, setTelemetry] = useState<any>(null)
   const [portfolio, setPortfolio] = useState<Record<number, Cell>>({})
 
+  /**
+   * Mines ordered by expected shortfall, largest first.
+   *
+   * The register's own order is neither risk order nor alphabetical, so
+   * position on screen carried no meaning while the eye read it as importance
+   * (B-1 confusion 2). A mine whose forecast has not arrived sorts last rather
+   * than to the top or the bottom of the risk range — it is unknown, not safe
+   * and not urgent.
+   */
+  const ranked = useMemo(() => {
+    if (!mines) return []
+    const shortfallOf = (id: number): number | null => {
+      const v = portfolio[id]
+      if (v === undefined || v === null || isFailure(v)) return null
+      return v.shortfall
+    }
+    return [...mines].sort((a, b) => {
+      const sa = shortfallOf(a.id)
+      const sb = shortfallOf(b.id)
+      if (sa === null && sb === null) return a.name.localeCompare(b.name)
+      if (sa === null) return 1
+      if (sb === null) return -1
+      return sb - sa
+    })
+  }, [mines, portfolio])
+
+  /** The single worst mine, if one is known — the screen's focal element. */
+  const worst = ranked.find((m) => {
+    const v = portfolio[m.id]
+    return v !== undefined && v !== null && !isFailure(v) && v.shortfall > 0
+  })
+
   useEffect(() => {
     let alive = true
     fetchMines().then((r) => {
@@ -234,23 +266,63 @@ export function DecisionConsole() {
       </div>
 
       <main className="space-y-8 pt-6">
+        {/*
+          B-1 confusion 4: the heading is scoped to what you are looking at.
+          It read "Decision support for MOIL" on every screen, including after
+          drilling into a mine, so the only thing naming the open mine was a
+          12px breadcrumb. A first-time user could not tell whose numbers were
+          on the page.
+        */}
         <div className="print-plain">
-          <h1 className="text-2xl">Decision support for MOIL</h1>
-          <p className="measure mt-2 text-sm text-text-secondary">
-            Two tracks, as the problem statement implies but does not say:{' '}
-            <strong className="font-medium text-text-primary">Track B</strong> predicts production
-            shortfall over days to months,{' '}
-            <strong className="font-medium text-text-primary">Track A</strong> ranks where to
-            prospect over years. Satellite data is used for what it can measure — weather and
-            surface geology. Nothing here claims to see ore underground.
-          </p>
+          {selected ? (
+            <>
+              <h1 className="font-display text-4xl font-medium tracking-tight">
+                {selected.name}
+              </h1>
+              <p className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-text-secondary">
+                <span className="font-mono text-xs text-text-tertiary">{selected.mine_code}</span>
+                <span>{selected.state} · {selected.zone}</span>
+                <span className="text-text-tertiary">
+                  {track === 'B' ? 'Production shortfall, days to months' : 'Reserve prospectivity, years'}
+                </span>
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="font-display text-4xl font-medium tracking-tight">
+                Decision support for MOIL
+              </h1>
+              <p className="measure mt-3 text-base text-text-secondary">
+                Two tracks, as the problem statement implies but does not say:{' '}
+                <strong className="font-medium text-text-primary">Track B</strong> predicts
+                production shortfall over days to months,{' '}
+                <strong className="font-medium text-text-primary">Track A</strong> ranks where to
+                prospect over years. Satellite data is used for what it can measure — weather and
+                surface geology. Nothing here claims to see ore underground.
+              </p>
+            </>
+          )}
         </div>
 
         {telemetry?.data_integrity ? <IntegrityBanner integrity={telemetry.data_integrity} /> : null}
 
         {level === 'portfolio' && track === 'B' ? (
           <section>
-            <h2 className="label">Portfolio · shortfall risk by mine</h2>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="label">Portfolio · ranked by expected shortfall</h2>
+              <p className="text-xs text-text-tertiary">
+                Largest shortfall first. Mines still computing sort last.
+              </p>
+            </div>
+            {/*
+              B-1 confusion 1 and 2. This read "shortfall risk by mine" and led
+              each card with P(shortfall), which is 100% on nine of the ten
+              mines — a headline that ranks nothing. The figure that separates
+              them was on the same card in tertiary weight: expected shortfall,
+              −0 t to −700 t. The cards now lead with the tonnes, carry the
+              probability as the qualifier it is, and the list is sorted, with
+              the sort stated.
+            */}
 
             {minesErr ? (
               <EmptyState
@@ -278,20 +350,88 @@ export function DecisionConsole() {
                 <p className="sr-only">Loading mine register</p>
               </div>
             ) : (
-              <ul className="mt-3 grid list-none gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {mines.map((m) => {
+              <>
+              {/*
+                B-1 confusion 3: one focal element. Ten equal cards gave the eye
+                no entry point, so reading the screen was a scan of ten
+                near-identical blocks. The mine with the largest expected
+                shortfall is promoted here and answers task (a) — "which mine
+                needs my attention today" — in one line, and the grid below
+                becomes the supporting list rather than the whole answer.
+              */}
+              {/*
+                The band reserves its height whether or not a winner is known
+                yet. Without this it appears the moment the first forecasts
+                resolve and pushes the whole grid down — measured CLS 0.158 on
+                /console, against a target of 0.1. The portfolio cards were
+                already built this way for the same reason.
+              */}
+              <div className="mt-4 min-h-[8.5rem]">
+              {worst ? (
+                <button
+                  type="button"
+                  onClick={() => openMine(worst)}
+                  className="block h-full w-full rounded-md border border-accent/40 bg-accent-muted/30 p-5 text-left transition-colors duration-[120ms] ease-out hover:bg-accent-muted/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                  data-provenance="derived"
+                  data-provenance-model={PORTFOLIO_ENV.model_version ?? undefined}
+                >
+                  <span className="label text-accent">Largest expected shortfall</span>
+                  <span className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                    <span className="font-display text-3xl font-medium tracking-tight text-text-primary">
+                      {worst.name}
+                    </span>
+                    <span className="font-mono text-2xl tabular-nums text-text-primary">
+                      −{Math.round((portfolio[worst.id] as any).shortfall).toLocaleString()} t
+                    </span>
+                    {/*
+                      Not "over the next 14 days": the figure comes from a
+                      stored forecast whose window was fixed when it was
+                      generated, and the console states those dates on the mine
+                      itself (D-030). Saying it here would be the rolling-window
+                      claim that page exists to avoid.
+                    */}
+                    <span className="text-sm text-text-secondary">
+                      expected against plan, from the stored forecast
+                    </span>
+                  </span>
+                  <span className="mt-2 block text-sm text-accent">
+                    Open {worst.name} &rarr;
+                  </span>
+                </button>
+              ) : (
+                <div className="h-full rounded-md border border-border-subtle bg-surface-1/50 p-5">
+                  <span className="label text-text-tertiary">Largest expected shortfall</span>
+                  <p className="mt-2 text-sm text-text-tertiary">
+                    Ranking the portfolio&hellip;
+                  </p>
+                </div>
+              )}
+              </div>
+
+              <ul className="mt-4 grid list-none gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {ranked.map((m, rank) => {
                   const v = portfolio[m.id]
                   const isPilot = m.mine_code === PILOT_CODE
                   return (
                     <li key={m.id}>
-                      <Card interactive className="h-full">
+                      <Card
+                        interactive
+                        className={`h-full ${
+                          worst && m.id === worst.id ? 'border-accent/50 bg-accent-muted/20' : ''
+                        }`}
+                      >
                         <button
                           type="button"
                           onClick={() => openMine(m)}
                           className="h-full w-full p-4 text-left"
                         >
                           <div className="flex items-baseline justify-between gap-2">
-                            <span className="font-medium text-text-primary">{m.name}</span>
+                            <span className="flex items-baseline gap-2">
+                              <span className="font-mono text-xs tabular-nums text-text-tertiary">
+                                {String(rank + 1).padStart(2, '0')}
+                              </span>
+                              <span className="font-medium text-text-primary">{m.name}</span>
+                            </span>
                             <span className="font-mono text-xs text-text-tertiary">
                               {m.mine_code}
                             </span>
@@ -330,21 +470,25 @@ export function DecisionConsole() {
                               )}
                             </p>
                           ) : (
-                            <div className="mt-3 flex min-h-6 flex-wrap items-center gap-x-3 gap-y-1.5">
-                              <span className="inline-flex items-center gap-1.5">
+                            <div className="mt-3 min-h-6">
+                              {/* Lead with the quantity that separates the mines. */}
+                              <div className="flex items-baseline gap-2">
                                 <StatusDot status={band(v.p).status} />
-                                <span className="font-mono text-base text-text-primary">
+                                <span className="font-mono text-xl tabular-nums text-text-primary">
+                                  −{Math.round(v.shortfall).toLocaleString()}
+                                </span>
+                                <span className="text-xs text-text-secondary">t expected</span>
+                              </div>
+                              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                                <span className="font-mono text-xs text-text-secondary tabular-nums">
                                   P {Math.round(v.p * 100)}%
                                 </span>
-                                <span className="text-xs text-text-secondary">
+                                <span className="text-xs text-text-tertiary">
                                   {band(v.p).label}
                                 </span>
-                              </span>
-                              <span className="font-mono text-sm text-text-secondary">
-                                −{Math.round(v.shortfall).toLocaleString()} t
-                              </span>
-                              {/* N-3: the strip shows numbers, so it shows their kind too. */}
-                              <SourceBadge env={PORTFOLIO_ENV} />
+                                {/* N-3: the strip shows numbers, so it shows their kind too. */}
+                                <SourceBadge env={PORTFOLIO_ENV} />
+                              </div>
                             </div>
                           )}
 
@@ -359,6 +503,7 @@ export function DecisionConsole() {
                   )
                 })}
               </ul>
+              </>
             )}
 
             <p className="measure mt-4 text-xs text-text-tertiary">

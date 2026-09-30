@@ -20,6 +20,22 @@ export type SourceKind =
   | 'synthetic'
   /** A fixed reference constant (mine coordinates, statutory limits). */
   | 'reference'
+  /**
+   * Arithmetic over stated planner assumptions — not a model output.
+   *
+   * The what-if calculator multiplies a real baseline by coefficients a planner
+   * chose. No data was used to derive them and they describe no measured mine,
+   * so the result is not a forecast and carries no uncertainty: there is
+   * nothing to have uncertainty about beyond the assumptions themselves, which
+   * are on screen and editable.
+   *
+   * It has its own kind because `derived` means "deterministically derived from
+   * measured inputs, adding no new information", and this adds a great deal —
+   * all of it supplied by the person using it. PRD C-4 asks a recommendation to
+   * state its expected effect *and its assumptions*; this is how the assumptions
+   * become part of the value rather than a footnote someone drops.
+   */
+  | 'assumption'
 
 export interface Uncertainty {
   /** Half-width of the interval, in the same unit as `value`. */
@@ -116,6 +132,33 @@ export function reference<T>(
   opts: Partial<EnvelopeInit<T>> = {}
 ): Envelope<T> {
   return envelope({ ...opts, value, unit, source, source_kind: 'reference' })
+}
+
+/**
+ * Arithmetic over stated planner assumptions.
+ *
+ * `assumptions` is required: a value of this kind without its coefficients on
+ * record is the thing this kind exists to prevent.
+ */
+export function assumption<T>(
+  value: T,
+  unit: string,
+  source: string,
+  assumptions: { label: string; value: number | string; note?: string }[],
+  opts: Partial<EnvelopeInit<T>> = {}
+): Envelope<T> {
+  const spelled = assumptions.map((a) => `${a.label} = ${a.value}`).join(', ')
+  return envelope({
+    ...opts,
+    value,
+    unit,
+    source,
+    source_kind: 'assumption',
+    method:
+      opts.method ??
+      `Assumption-based estimate, not a forecast. Planner assumptions: ${spelled}. ` +
+        'None is fitted; no data was used to derive them.',
+  })
 }
 
 /** Dataset-level banner describing the mix of sources in a response. */

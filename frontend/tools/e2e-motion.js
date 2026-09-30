@@ -140,6 +140,64 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
     await page.close()
   }
 
+  // ---- product surfaces: calm, functional, bounded ------------------------
+  {
+    console.log('\nConsole — product-surface motion\n')
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1280, height: 1000 })
+    await page.goto(`${BASE}/console?mine=1&track=b`, { waitUntil: 'networkidle2', timeout: 60000 })
+    await sleep(14000)
+
+    const motion = await page.evaluate(() => {
+      const all = [...document.querySelectorAll('*')]
+      const animated = all
+        .map((e) => ({ e, cs: getComputedStyle(e) }))
+        .filter(({ cs }) => cs.animationName !== 'none' && cs.animationName)
+      const transitioned = all
+        .map((e) => getComputedStyle(e))
+        .filter((cs) => cs.transitionProperty && cs.transitionProperty !== 'none' && cs.transitionProperty !== 'all')
+      const ms = (v) => v.split(',').map((x) => (x.includes('ms') ? parseFloat(x) : parseFloat(x) * 1000))
+      return {
+        looping: animated.filter(({ cs }) => cs.animationIterationCount === 'infinite')
+          .map(({ e }) => `${e.tagName.toLowerCase()}.${String(e.className).slice(0, 30)}`),
+        longest: Math.max(0, ...animated.flatMap(({ cs }) => ms(cs.animationDuration))),
+        longestTransition: Math.max(0, ...transitioned.flatMap((cs) => ms(cs.transitionDuration))),
+        animatedProps: [...new Set(transitioned.map((cs) => cs.transitionProperty))].slice(0, 12),
+      }
+    })
+
+    check('no looping animation on the console', motion.looping.length === 0,
+      motion.looping.join(', '))
+    check('no animation runs longer than 300 ms', motion.longest <= 300,
+      `longest ${motion.longest} ms`)
+    check('no transition runs longer than 300 ms', motion.longestTransition <= 300,
+      `longest ${motion.longestTransition} ms`)
+    // Assert the absence of layout-triggering properties rather than listing
+    // the allowed ones: the allowlist version failed on Tailwind's own
+    // --tw-gradient-* custom properties, which animate nothing and trigger
+    // nothing. What matters is that no transition forces a reflow.
+    const LAYOUT = /^(width|height|top|left|right|bottom|margin|padding|font-size|line-height|inset|flex|grid)/
+    const offenders = motion.animatedProps
+      .flatMap((pr) => pr.split(',').map((x) => x.trim()))
+      .filter((pr) => LAYOUT.test(pr))
+    check('no transition animates a layout property', offenders.length === 0,
+      offenders.join(', ') || JSON.stringify(motion.animatedProps))
+
+    // Content must survive reduced motion here too.
+    const rm = await browser.newPage()
+    await rm.setViewport({ width: 1280, height: 1000 })
+    await rm.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }])
+    await rm.goto(`${BASE}/console?mine=1&track=b`, { waitUntil: 'networkidle2', timeout: 60000 })
+    await sleep(14000)
+    const visible = await rm.evaluate(() => {
+      const el = document.querySelector('[data-testid="forecast-provenance"]')
+      return el ? Number(getComputedStyle(el).opacity) : null
+    })
+    check('reduced motion: the console still renders its content', visible === 1, String(visible))
+    await rm.close()
+    await page.close()
+  }
+
   await browser.close()
   console.log(`\n${failed === 0 ? 'PASS' : 'FAIL'} — ${failed} failing check(s)\n`)
   process.exit(failed === 0 ? 0 : 1)

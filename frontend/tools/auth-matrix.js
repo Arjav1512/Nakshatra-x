@@ -57,6 +57,9 @@ const PUBLIC = {
     'Stateless computation. Proxies a linear program, persists nothing, and returns no user or operational record.',
   'POST /api/v1/prospectivity/predict':
     'Stateless computation. Scores a coordinate against the published model; persists nothing.',
+  'POST /api/v1/scenario/constraint-check':
+    'Stateless computation. Runs a set of scenario controls through the constraint engine and ' +
+    'returns a verdict; reads no record, writes none, and reveals nothing a mine register does not.',
   'POST /api/v1/historical-forecasts':
     'Stateless computation over a seeded synthetic series. Persists nothing.',
   'POST /api/v1/mine-twin':

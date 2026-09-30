@@ -21,15 +21,16 @@
       "grade": "blast_furnace",
       "plan_target_tonnes": 1798.0,
       "shortfall": {
-        "p_shortfall": 0.9955,
-        "expected_cumulative_tonnes": 1646.9,
-        "p10_cumulative_tonnes": 1577.2,
-        "p90_cumulative_tonnes": 1719.0,
+        "p_shortfall": 0.987,
+        "expected_cumulative_tonnes": 1634.2,
+        "p10_cumulative_tonnes": 1524.6,
+        "p90_cumulative_tonnes": 1737.8,
         "target_tonnes": 1798.0,
-        "expected_shortfall_tonnes": 151.2,
+        "expected_shortfall_tonnes": 163.8,
         "method": "Monte Carlo over per-day lognormal predictive distributions matched to model quantiles",
+        "aggregation": "block-bootstrap of standardised model residuals (days correlated)",
         "n_simulations": 4000,
-        "assumption": "Days are independent given the covariates. Persistent shocks would widen the true distribution, so this probability is conservative."
+        "assumption": "Daily spread comes from the model's conformalised quantiles; the correlation between days comes from bootstrapped blocks of its own residuals, so no independence is assumed."
       },
       "baseline_cumulative_tonnes": 1582.1,
       "trajectory": [
@@ -151,15 +152,16 @@
       "grade": "dioxide",
       "plan_target_tonnes": 224.8,
       "shortfall": {
-        "p_shortfall": 0.6885,
-        "expected_cumulative_tonnes": 213.0,
-        "p10_cumulative_tonnes": 180.3,
-        "p90_cumulative_tonnes": 248.3,
+        "p_shortfall": 0.7015,
+        "expected_cumulative_tonnes": 206.4,
+        "p10_cumulative_tonnes": 161.7,
+        "p90_cumulative_tonnes": 260.4,
         "target_tonnes": 224.8,
-        "expected_shortfall_tonnes": 11.7,
+        "expected_shortfall_tonnes": 18.3,
         "method": "Monte Carlo over per-day lognormal predictive distributions matched to model quantiles",
+        "aggregation": "block-bootstrap of standardised model residuals (days correlated)",
         "n_simulations": 4000,
-        "assumption": "Days are independent given the covariates. Persistent shocks would widen the true distribution, so this probability is conservative."
+        "assumption": "Daily spread comes from the model's conformalised quantiles; the correlation between days comes from bootstrapped blocks of its own residuals, so no independence is assumed."
       },
       "baseline_cumulative_tonnes": 194.5,
       "trajectory": [
@@ -281,15 +283,16 @@
       "grade": "ferro_manganese",
       "plan_target_tonnes": 1873.0,
       "shortfall": {
-        "p_shortfall": 0.9998,
-        "expected_cumulative_tonnes": 1665.7,
-        "p10_cumulative_tonnes": 1590.2,
-        "p90_cumulative_tonnes": 1742.9,
+        "p_shortfall": 1.0,
+        "expected_cumulative_tonnes": 1652.2,
+        "p10_cumulative_tonnes": 1536.3,
+        "p90_cumulative_tonnes": 1768.4,
         "target_tonnes": 1873.0,
-        "expected_shortfall_tonnes": 207.3,
+        "expected_shortfall_tonnes": 220.7,
         "method": "Monte Carlo over per-day lognormal predictive distributions matched to model quantiles",
+        "aggregation": "block-bootstrap of standardised model residuals (days correlated)",
         "n_simulations": 4000,
-        "assumption": "Days are independent given the covariates. Persistent shocks would widen the true distribution, so this probability is conservative."
+        "assumption": "Daily spread comes from the model's conformalised quantiles; the correlation between days comes from bootstrapped blocks of its own residuals, so no independence is assumed."
       },
       "baseline_cumulative_tonnes": 1632.1,
       "trajectory": [
@@ -411,15 +414,16 @@
       "grade": "silico_manganese",
       "plan_target_tonnes": 3596.1,
       "shortfall": {
-        "p_shortfall": 0.9988,
-        "expected_cumulative_tonnes": 3266.0,
-        "p10_cumulative_tonnes": 3129.9,
-        "p90_cumulative_tonnes": 3405.4,
+        "p_shortfall": 0.994,
+        "expected_cumulative_tonnes": 3241.9,
+        "p10_cumulative_tonnes": 3030.6,
+        "p90_cumulative_tonnes": 3444.9,
         "target_tonnes": 3596.1,
-        "expected_shortfall_tonnes": 330.1,
+        "expected_shortfall_tonnes": 354.1,
         "method": "Monte Carlo over per-day lognormal predictive distributions matched to model quantiles",
+        "aggregation": "block-bootstrap of standardised model residuals (days correlated)",
         "n_simulations": 4000,
-        "assumption": "Days are independent given the covariates. Persistent shocks would widen the true distribution, so this probability is conservative."
+        "assumption": "Daily spread comes from the model's conformalised quantiles; the correlation between days comes from bootstrapped blocks of its own residuals, so no independence is assumed."
       },
       "baseline_cumulative_tonnes": 3148.7,
       "trajectory": [
@@ -540,16 +544,16 @@
   ],
   "portfolio": {
     "plan_target_tonnes": 7491.8,
-    "expected_cumulative_tonnes": 6791.6,
-    "expected_shortfall_tonnes": 700.2
+    "expected_cumulative_tonnes": 6734.7,
+    "expected_shortfall_tonnes": 757.1
   },
   "provenance": {
     "forecast": {
-      "value": 6791.6,
+      "value": 6734.7,
       "unit": "tonnes",
       "source": "Trained on synthetic operational data generated to the published ingestion contract (docs/INGESTION_CONTRACT.md). MOIL's real production, equipment and blasting records are proprietary (PRD 8.2). Metrics describe the model's behaviour on this dataset, not MOIL's operations.",
       "source_kind": "synthetic",
-      "vintage": "2026-09-29T17:38:51.379973+00:00",
+      "vintage": "2026-09-30T19:07:47.000140+00:00",
       "model_version": "nakshatra-gbt-cqr-v1",
       "uncertainty": null,
       "is_synthetic": true,
@@ -561,7 +565,7 @@
       "unit": "tonnes",
       "source": "Trained on synthetic operational data generated to the published ingestion contract (docs/INGESTION_CONTRACT.md). MOIL's real production, equipment and blasting records are proprietary (PRD 8.2). Metrics describe the model's behaviour on this dataset, not MOIL's operations.",
       "source_kind": "synthetic",
-      "vintage": "2026-09-29T17:38:51.379987+00:00",
+      "vintage": "2026-09-30T19:07:47.000153+00:00",
       "model_version": "nakshatra-synthetic-v1",
       "uncertainty": null,
       "is_synthetic": true,
@@ -576,14 +580,14 @@
     "notice": "MIXED \u2014 weather is measured live; operational figures are synthetic (MOIL operational data is proprietary) and are labelled per field."
   },
   "guardrail": "Decision support for production planning. Not a statutory reserve statement, and not a commitment.",
-  "vintage": "2026-09-29T17:38:51.380064+00:00",
+  "vintage": "2026-09-30T19:07:47.000225+00:00",
   "artifact_identity": {
     "generator": "nakshatra-synthetic-v1",
     "contract_version": "1.0.0",
     "generator_seed": 20260921,
     "data_end_date": "2026-09-20",
     "model_version": "nakshatra-gbt-cqr-v1",
-    "code_fingerprint": "ed781df295b6f658",
+    "code_fingerprint": "560a855179768a09",
     "library_versions": {
       "numpy": "2.2.0",
       "pydantic": "2.13.5",

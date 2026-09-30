@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, IBM_Plex_Mono } from 'next/font/google'
+import { IBM_Plex_Mono, Inter, Sora } from 'next/font/google'
 import './globals.css'
 import AppBar from '@/components/shell/AppBar'
 import IntegrityFooter from '@/components/shell/IntegrityFooter'
@@ -17,6 +17,24 @@ const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-inter',
+})
+
+/**
+ * Display family (B-2).
+ *
+ * Sora is geometric where Inter is neo-grotesque: rounder bowls, a single-storey
+ * 'a', wider apertures. At 36px and above that difference is what separates a
+ * heading from large body text, which the audit found this product did not do —
+ * everything was Inter at slightly different sizes.
+ *
+ * Display only. It is never used below --text-2xl, and never for data: figures
+ * stay in IBM Plex Mono, which ships true tabular figures.
+ */
+const sora = Sora({
+  subsets: ['latin'],
+  weight: ['500', '600'],
+  variable: '--font-sora',
+  display: 'swap',
 })
 
 const plexMono = IBM_Plex_Mono({
@@ -52,7 +70,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/favicon.ico" />
       </head>
       <body
-        className={`${inter.variable} ${plexMono.variable} bg-surface-0 text-text-primary antialiased`}
+        className={`${inter.variable} ${plexMono.variable} ${sora.variable} bg-surface-0 text-text-primary antialiased`}
         suppressHydrationWarning
       >
         <a
