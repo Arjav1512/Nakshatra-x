@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import {
   Area, AreaChart, CartesianGrid, Line, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
-import { derived, measuredValue, reference, synthetic } from '@/lib/provenance'
+import { PLAN_TARGET_NOTE, derived, measuredValue, reference, synthetic } from '@/lib/provenance'
 import {
   type BacktestResponse, type ForecastResponse, type NoBacktestInfo,
   type RecommendationsResponse, type WarmingInfo,
@@ -380,6 +380,10 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                   : null))}
           />
           </div>
+
+          <p className={`measure text-xs text-text-tertiary ${sectionCls('answer')}`}>
+            {PLAN_TARGET_NOTE}
+          </p>
 
           {/* --- grade-aware breakdown: PRD B-5 is per-grade at P0 --- */}
           <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('drivers')}`}>

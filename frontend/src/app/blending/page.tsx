@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { PageHeader } from '@/components/ui/primitives'
 import { FALLBACK_MINES, fetchLiveMineTelemetry } from '@/components/mission-control/data'
 import type { WeatherSignal, RiskAnalysis } from '@/components/mission-control/types'
 import SmartOreBlendingModal from '@/components/mission-control/SmartOreBlendingModal'
@@ -24,31 +25,18 @@ export default function BlendingPage() {
 
   return (
     <main className="relative min-h-screen bg-surface-0 text-text-primary pt-24 md:pt-28 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Radial background sheen */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-[radial-gradient(ellipse_at_top,_rgba(250,204,21,0.12)_0%,_transparent_70%)] pointer-events-none" />
 
       <div className="relative mx-auto max-w-7xl space-y-8">
-        {/* Header Breadcrumb & Mission Control Switcher */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border-default pb-4">
-          <div className="flex items-center gap-2 text-xs font-mono text-accent">
-            <Link href="/" className="hover:underline flex items-center gap-1.5 text-text-secondary hover:text-text-primary font-bold">
-              <Home size={14} className="text-accent" />
-              <span>Mission Control (Video Landing)</span>
-            </Link>
-            <span>/</span>
-            <span className="text-status-caution font-bold">Feature Page 05: Ore Blending Optimizer & Risk Cockpit</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Link
-              href="/"
-              className="px-3.5 py-1.5 rounded-full bg-accent/15 border border-accent/40 text-accent text-xs font-mono font-bold flex items-center gap-2 hover:bg-accent/25 transition-colors"
-            >
-              <Sparkles size={13} />
-              <span>Back to Video Landing Page</span>
-            </Link>
-          </div>
-        </div>
+        {/*
+          The breadcrumb read "Mission Control (Video Landing) / Feature Page NN"
+          and the action was "Back to Video Landing Page". The video landing was
+          removed in Stage 1, and "Feature Page 03" names nothing a planner is
+          looking for. Orientation now says what the screen is (B-5).
+        */}
+        <PageHeader
+          title="Ore blending"
+          description="A linear program over illustrative stockpiles: the cheapest blend that meets a target tonnage and grade. There is no stockpile register in this system, so the inputs are stated assumptions rather than inventory."
+        />
 
         {/* Mine Switcher Dock */}
         <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-md bg-surface-1/90 border border-border-default ">
@@ -105,10 +93,10 @@ export default function BlendingPage() {
 
           <Link
             href="/"
-            className="w-full sm:w-auto px-5 py-2.5 rounded-md bg-gradient-to-r from-accent/25 via-accent/20 to-accent/25 hover:from-accent/40 hover:to-accent/40 text-text-primary font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2.5 transition-colors duration-300 cursor-pointer border border-accent/60 hover:border-accent hover:  hover:scale-[1.02] active:scale-[0.98]"
+            className="inline-flex h-10 items-center justify-center rounded-md border border-border-interactive bg-surface-2 px-4 text-sm text-text-primary transition-colors duration-[120ms] ease-out hover:bg-surface-3"
           >
-            <span className="font-semibold text-text-primary drop-">Return to Mission Control Video Landing</span>
-            <Home size={15} className="text-accent" />
+            <Home size={15} className="mr-2 text-text-tertiary" aria-hidden="true" />
+            Home
           </Link>
         </div>
       </div>

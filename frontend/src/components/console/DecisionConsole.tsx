@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { type MineRow, fetchForecast, fetchMines, fetchTelemetry } from '@/lib/console-api'
-import { measuredOrNull, synthetic } from '@/lib/provenance'
+import { PLAN_TARGET_NOTE, measuredOrNull, synthetic } from '@/lib/provenance'
 import { type ExportRow, buildCsv, downloadCsv, exportPdf } from '@/lib/console-export'
 import { IntegrityBanner, Metric, SourceBadge } from './Evidence'
 import { Button, Card, EmptyState, Skeleton, StatusDot, type Status } from '@/components/ui/primitives'
@@ -550,6 +550,7 @@ export function DecisionConsole() {
               synthetic operational data. Open a mine for drivers, the backtest and
               constraint-checked actions.
             </p>
+            <p className="measure mt-2 text-xs text-text-tertiary">{PLAN_TARGET_NOTE}</p>
           </section>
         ) : null}
 
