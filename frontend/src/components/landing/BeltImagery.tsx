@@ -76,8 +76,12 @@ export function BeltImagery({ manifest }: { manifest: ImageryManifest }) {
             <figcaption className="mt-2 font-mono text-xs leading-relaxed text-text-tertiary">
               {img.mgrs_tile} · {img.datetime.slice(0, 10)} · cloud{' '}
               {img.eo_cloud_cover_pct === null ? 'unknown' : `${img.eo_cloud_cover_pct.toFixed(2)}%`}
-              <br />
-              {img.scene_id}
+              {/*
+                `break-all`: a Sentinel-2 scene id is 50 unbroken monospace
+                characters and pushed the page into horizontal scroll at 375px
+                and 768px. It stays in full — it is the provenance — and wraps.
+              */}
+              <span className="mt-0.5 block break-all">{img.scene_id}</span>
             </figcaption>
           </figure>
         ))}

@@ -156,7 +156,13 @@ async function collect(page) {
       // empty card.
       const holder = el.closest('[data-provenance]')
       const inUnavailable = !!holder && /\bunavailable\b/i.test(holder.textContent || '')
-      out.push({ text: text.slice(0, 120), attributed, inUnavailable, where: where.join(' < ') })
+      // Provenance printed on an asset that ships with the page — a scene id,
+      // its date, its cloud cover. It travels with the image in the repo, so it
+      // cannot go stale against an upstream and its presence offline says
+      // nothing about whether the app invents data. Narrow on purpose: only
+      // inside a <figure> that carries a provenance attribute.
+      const isAssetCaption = !!el.closest('figure') && !!holder
+      out.push({ text: text.slice(0, 120), attributed, inUnavailable, isAssetCaption, where: where.join(' < ') })
     }
     return out
   })
@@ -295,7 +301,8 @@ async function scan(page, route) {
       if (node.attributed) {
         attributedCount++
         // Offline: attributed or not, it should not be on screen at all.
-        if (OFFLINE && !node.inUnavailable && !OFFLINE_ALLOW.some((re) => re.test(node.text))) {
+        if (OFFLINE && !node.inUnavailable && !node.isAssetCaption &&
+            !OFFLINE_ALLOW.some((re) => re.test(node.text))) {
           violations.push(node)
         }
         continue
