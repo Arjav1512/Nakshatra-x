@@ -53,6 +53,7 @@ class BacktestResult:
     by_horizon: list[dict]
     window: dict
     verdict: str
+    cumulative_calibration: dict | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -61,6 +62,7 @@ class BacktestResult:
             "n_origins": self.n_origins,
             "n_predictions": self.n_predictions,
             "horizons": self.horizons,
+            "cumulative_calibration": self.cumulative_calibration,
             "model": self.model,
             "baseline": self.baseline,
             "by_horizon": self.by_horizon,
@@ -80,6 +82,48 @@ def _smape(actual: np.ndarray, pred: np.ndarray) -> float:
     denom = (np.abs(actual) + np.abs(pred)) / 2.0
     denom = np.maximum(denom, 1e-9)
     return float(np.mean(np.abs(actual - pred) / denom) * 100.0)
+
+
+def _cumulative_paths(
+    preds: dict[int, dict[str, float]],
+    residuals=None,
+    n_sim: int = 4000,
+    seed: int = 20260921,
+):
+    """
+    Cumulative-production paths, built exactly as `shortfall_probability` does.
+
+    Deliberately the same construction: a calibration check that used a
+    different aggregation would validate something the product does not ship.
+    """
+    import math
+
+    rng = np.random.default_rng(seed)
+    params = []
+    for h in sorted(preds):
+        p = preds[h]
+        q10, q50, q90 = p["q10"], p["q50"], p["q90"]
+        if q50 <= 0:
+            continue
+        mu = math.log(max(q50, 1e-9))
+        z = 1.2815515655446004
+        sigma = (math.log(q90) - math.log(q10)) / (2 * z) if q90 > q10 > 0 else 0.15
+        params.append((mu, float(min(max(sigma, 0.02), 1.5))))
+    if not params:
+        return None
+
+    if residuals is not None and len(residuals) >= max(30, len(params)):
+        r = np.asarray(residuals, dtype=float)
+        starts = rng.integers(0, len(r), size=n_sim)
+        idx = (starts[:, None] + np.arange(len(params))[None, :]) % len(r)
+        mus = np.array([m for m, _ in params])[None, :]
+        sds = np.array([sd for _, sd in params])[None, :]
+        return np.exp(mus + sds * r[idx]).sum(axis=1)
+
+    sims = np.zeros(n_sim)
+    for mu, sigma in params:
+        sims += rng.lognormal(mu, sigma, n_sim)
+    return sims
 
 
 def rolling_origin_backtest(
@@ -109,6 +153,21 @@ def rolling_origin_backtest(
     rec_model: list[tuple[int, float, float, float, float]] = []   # h, actual, q50, q10, q90
     rec_base: list[tuple[int, float, float]] = []                  # h, actual, pred
 
+    # Cumulative calibration, per origin.
+    #
+    # The backtest measured daily interval coverage and nothing else, so an
+    # error in how days *combine* into a cumulative distribution passed it
+    # untouched: every day's interval was right while the cumulative spread was
+    # understated 2.5-3.4x, and P(cumulative < target) saturated at 1.000 on
+    # nine of ten mines. Daily coverage cannot see that.
+    #
+    # At each origin the realised cumulative is compared against the predicted
+    # cumulative distribution. If the aggregation is calibrated, the realised
+    # value falls inside the 10-90 band about 80% of the time, and the PIT
+    # values are roughly uniform.
+    cum_pit: list[float] = []
+    cum_inside: list[bool] = []
+
     for origin in origins:
         # Refit on data strictly before this origin.
         fc = ProductionForecaster().fit(
@@ -130,6 +189,20 @@ def rolling_origin_backtest(
                 p = preds[h]
                 rec_model.append((h, float(actual), p["q50"], p["q10"], p["q90"]))
                 rec_base.append((h, float(actual), seasonal_naive(series, target)))
+
+            # --- cumulative calibration over the full horizon ---------------
+            full = list(range(1, max_h + 1))
+            actuals = [series.get(origin + timedelta(days=h)) for h in full]
+            if any(a is None for a in actuals):
+                continue
+            dense = fc.predict(mine_code, grade, origin, full, series, cov)
+            sims = _cumulative_paths(dense, fc.residuals.get(mine_code))
+            if sims is None:
+                continue
+            realised = float(sum(float(a) for a in actuals))
+            cum_pit.append(float(np.mean(sims < realised)))
+            lo, hi = np.percentile(sims, [10, 90])
+            cum_inside.append(bool(lo <= realised <= hi))
 
     if not rec_model:
         raise ValueError("Backtest produced no predictions")
@@ -156,6 +229,29 @@ def rolling_origin_backtest(
             "coverage_80": round(float(np.mean((mh[:, 1] >= mh[:, 3]) & (mh[:, 1] <= mh[:, 4]))), 3),
         })
 
+    # Cumulative calibration: does P(cumulative < x) mean what it says?
+    cumulative = None
+    if cum_pit:
+        pit = np.array(cum_pit, dtype=float)
+        cumulative = {
+            "n_origins": int(len(pit)),
+            "coverage_80": round(float(np.mean(cum_inside)), 3),
+            "nominal_coverage": 0.8,
+            "coverage_gap": round(float(np.mean(cum_inside)) - 0.8, 3),
+            # Mean PIT is 0.5 when the predicted cumulative distribution is
+            # centred on reality. Far from 0.5 means the aggregation is biased;
+            # a PIT bunched at 0 and 1 means it is too narrow, which is the
+            # failure that produced P(shortfall) = 1.000.
+            "mean_pit": round(float(np.mean(pit)), 3),
+            "pit_at_extremes": round(float(np.mean((pit < 0.05) | (pit > 0.95))), 3),
+            "note": (
+                "Calibration of the cumulative distribution, not of the daily "
+                "intervals. Daily coverage was correct while the cumulative "
+                "spread was understated 2.5-3.4x, so this is the check that "
+                "would have caught it."
+            ),
+        }
+
     beats = model_metrics["mape_pct"] < base_metrics["mape_pct"]
     improvement = 100.0 * (base_metrics["mape_pct"] - model_metrics["mape_pct"]) / base_metrics["mape_pct"]
     verdict = (
@@ -176,6 +272,7 @@ def rolling_origin_backtest(
         window={"test_start": test_start.isoformat(), "test_end": test_end.isoformat(),
                 "origin_step_days": origin_step_days},
         verdict=verdict,
+        cumulative_calibration=cumulative,
     )
 
 

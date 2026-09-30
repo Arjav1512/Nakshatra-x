@@ -69,7 +69,15 @@ const DEFAULT_MINE: MineInfo = {
 
 export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   // What-If Simulator Controls
-  const [shift, setShift] = useState<'04-10' | '06-14' | '22-06'>('04-10')
+  // Opens on a feasible plan.
+  //
+  // The blast lands at the shift's start hour plus the delay, and the operating
+  // rules permit 06:00-07:00 and 14:00-15:00 underground. The default was
+  // 04-10, which put the blast at 04:00 and had the constraint engine rejecting
+  // the very first thing anyone saw. A tool whose default state is illegal
+  // teaches the wrong lesson about the tool. Moving the blast delay off zero is
+  // what triggers the rejection now — which is the demo beat (docs/DEMO.md).
+  const [shift, setShift] = useState<'04-10' | '06-14' | '22-06'>('06-14')
   const [blastDelay, setBlastDelay] = useState<0 | 6 | 12>(0)
   const [redeploy, setRedeploy] = useState<'none' | '1-crusher' | '1-shovel-1-dumper'>('1-shovel-1-dumper')
   const [tolerance, setTolerance] = useState<10 | 20 | 30>(20)
@@ -89,7 +97,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
     // factor row showed 1.0 for redeployment, so the arithmetic on screen did
     // not match the options on screen.
     const initial: Record<string, string | number> = {
-      shiftWindow: '04-10',
+      shiftWindow: '06-14',
       blastingDelayHours: 0,
       redeploy: '1-shovel-1-dumper',
       dryBlastTolerance: 20,

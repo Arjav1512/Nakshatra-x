@@ -46,9 +46,24 @@ function arg(name, fallback) {
   const report = []
   let totalSerious = 0
 
+  /**
+   * Both widths, every route.
+   *
+   * This audited 1280 only, and that is a blind spot rather than a shortcut:
+   * responsive utilities change what exists. The AI-X button's label is
+   * `hidden sm:inline`, so below 640px the button had no accessible name at
+   * all — a serious violation this run passed for months because it never
+   * looked at a narrow viewport. Lighthouse's mobile emulation found it.
+   */
+  const VIEWPORTS = [
+    { name: 'desktop', width: 1280, height: 900 },
+    { name: 'mobile', width: 375, height: 812 },
+  ]
+
+  for (const { name: vp, width, height } of VIEWPORTS) {
   for (const route of routes) {
     const page = await browser.newPage()
-    await page.setViewport({ width: 1280, height: 900 })
+    await page.setViewport({ width, height })
     try {
       await page.goto(base + route, { waitUntil: 'networkidle2', timeout: 45000 })
     } catch {
@@ -73,17 +88,18 @@ function arg(name, fallback) {
 
     const serious = results.filter((v) => v.impact === 'serious' || v.impact === 'critical')
     totalSerious += serious.length
-    report.push({ route, violations: results, seriousOrCritical: serious.length })
+    report.push({ route, viewport: vp, width, violations: results, seriousOrCritical: serious.length })
 
     const flag = serious.length === 0 ? 'PASS' : `FAIL (${serious.length})`
     console.log(
-      `${route.padEnd(18)} ${String(results.length).padStart(2)} total  ` +
+      `${vp.padEnd(8)} ${route.padEnd(18)} ${String(results.length).padStart(2)} total  ` +
         `${String(serious.length).padStart(2)} serious/critical  ${flag}`
     )
     for (const v of serious) {
       console.log(`    ${v.impact.toUpperCase().padEnd(8)} ${v.id} (${v.nodes}) — ${v.help}`)
     }
     await page.close()
+  }
   }
 
   await browser.close()
@@ -95,7 +111,7 @@ function arg(name, fallback) {
   }
 
   console.log(
-    `\n${totalSerious === 0 ? 'PASS' : 'FAIL'} — ${totalSerious} serious/critical violations across ${routes.length} route(s)`
+    `\n${totalSerious === 0 ? 'PASS' : 'FAIL'} — ${totalSerious} serious/critical violations across ${routes.length} route(s) x 2 viewports (1280, 375)`
   )
   process.exit(totalSerious === 0 ? 0 : 1)
 })()

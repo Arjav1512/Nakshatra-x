@@ -355,14 +355,28 @@ class ProductionForecaster:
                 lo = fits[q_lo].predict(X[one_step])
                 hi = fits[q_hi].predict(X[one_step])
                 centre = mid if mid is not None else (lo + hi) / 2.0
-                # Standardise by the model's own half-width so the residuals are
-                # comparable across days and output levels.
-                half = np.maximum((hi - lo) / 2.0, 1e-6)
-                r = (y[one_step] - centre) / half
-                r = r[np.isfinite(r)]
-                if len(r) >= 30:
-                    sd = float(np.std(r))
-                    self.residuals[mine] = (r / sd if sd > 1e-9 else r).astype(float)
+
+                # Standardise in LOG space, because that is where they are
+                # applied.
+                #
+                # The first version standardised in level space —
+                # (y - centre) / half-width — and then used the result as a
+                # standard-normal shock on log(output). For a right-skewed
+                # lognormal those are not the same variable, and the mismatch
+                # compressed the cumulative spread: the calibration check below
+                # showed cumulative coverage 0.575 against a nominal 0.80 with
+                # 35% of origins in the outer tails, while daily coverage was a
+                # correct 0.812. Same units on both sides now.
+                z90 = 1.2815515655446004
+                ok = (y[one_step] > 0) & (centre > 0) & (hi > lo) & (lo > 0)
+                if int(np.sum(ok)) >= 30:
+                    sd_day = (np.log(hi[ok]) - np.log(lo[ok])) / (2 * z90)
+                    sd_day = np.maximum(sd_day, 1e-6)
+                    r = (np.log(y[one_step][ok]) - np.log(centre[ok])) / sd_day
+                    r = r[np.isfinite(r)]
+                    if len(r) >= 30:
+                        sd = float(np.std(r))
+                        self.residuals[mine] = (r / sd if sd > 1e-9 else r).astype(float)
         return self
 
     def predict(
