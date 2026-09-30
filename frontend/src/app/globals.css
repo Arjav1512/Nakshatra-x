@@ -179,3 +179,11 @@
     display: none;
   }
 }
+
+
+/* Display face (B-2). Utility rather than a token override, because it applies
+   only to the one heading per page that names what you are looking at. */
+.font-display {
+  font-family: var(--font-display);
+  font-feature-settings: 'ss01' on;
+}
