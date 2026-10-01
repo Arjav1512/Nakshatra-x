@@ -41,12 +41,40 @@ with its own band index rather than as a band name inside the expression. The
 flag is set below and the tiles render; the error is recorded here because the
 next person to write a band expression against this API will hit it too.
 
-CACHING
--------
+REGISTRATION LIFETIME — WHAT WAS MEASURED
+-----------------------------------------
 A mosaic is a registered search: POST the search, get an id, build tile URLs from
-it. Registration costs a round trip, so the ids are cached in-process with a TTL
-and re-registered when stale. Nothing here runs on a page render — the route
-serves the cache and reports what it has.
+it. Whether that id is durable decided the design, so it was tested rather than
+assumed:
+
+  1. The same search body registered three times returned the SAME id
+     (823ed285...d88d each time). The id is a content hash of the search, not a
+     random token, so registering is idempotent and re-registering is free.
+  2. Changing one filter (cloud < 5 to < 6) returned a different id. Confirms
+     the hash.
+  3. GET /mosaic/<id>/info returns `search.hash`, `lastused` and `usecount`.
+     A server that tracks `lastused` is running a cache with eviction, not a
+     permanent store.
+  4. GET /mosaic/<unregistered-id>/info answers 404
+     {"detail":"SearchId `000...0` not found"}.
+  5. A TILE request against an unregistered id answers the same 404, not a blank
+     image. So eviction is detectable from the client, loudly.
+
+So an id must never be treated as permanent. Two defences, because the browser
+fetches the tiles and the backend cannot see their 404s:
+
+  * the backend re-registers on a TTL and at startup — idempotent, so this costs
+    one round trip and cannot produce a different mosaic;
+  * the map watches for tile errors and asks this module to re-register
+    (`force=True`), then swaps the layer's URL. Finding (5) is what makes that
+    possible: an evicted mosaic fails visibly rather than silently.
+
+MOSAIC METHOD
+-------------
+These are mosaics, not scenes, so no single scene id applies and the legend must
+not imply one. Items are sorted by increasing cloud cover and the first valid
+pixel wins, which is stated on screen: a reader can tell that a pixel came from
+whichever acceptable scene was clearest, not from one dated acquisition.
 """
 from __future__ import annotations
 
@@ -71,6 +99,59 @@ BBOX = [78.6, 20.6, 80.8, 22.5]
 #: across the whole year is mostly cloud over exactly the ground of interest.
 S2_DATETIME = "2025-11-01/2026-03-31"
 S2_MAX_CLOUD = 5
+#: Sorting is what makes the mosaic method stateable. titiler-pgstac composites
+#: by taking the first valid pixel in the search's sort order, so ordering by
+#: increasing cloud cover means every pixel comes from the clearest acceptable
+#: scene covering it. Without an explicit sort the order is the API's default and
+#: the legend could only say "some scene".
+S2_SORTBY = [{"field": "eo:cloud_cover", "direction": "asc"}]
+MOSAIC_METHOD = "scenes sorted by increasing cloud cover; first valid pixel wins"
+
+# ---------------------------------------------------------------------------
+# LICENCE ATTRIBUTION — the licensor's words, not ours
+# ---------------------------------------------------------------------------
+# These strings are quoted from the primary documents, because an attribution
+# written from memory is a licence term we invented.
+#
+# The STAC collections themselves do NOT carry an attribution sentence: they give
+# `license: "proprietary"`, the licensors (ESA for both) and a link to the licence
+# document. Both linked documents are unreachable — scihub.copernicus.eu is
+# decommissioned and the spacedata.copernicus.eu annex times out — so the wording
+# was taken from these instead, and where each came from is recorded here so it
+# can be rechecked:
+#
+#   Sentinel-2: European Commission, DG GROW, "Legal notice on the use of
+#   Copernicus Sentinel Data and Service Information", page 2, the notice
+#   required "[w]here the Copernicus Sentinel Data and Service Information have
+#   been adapted or modified" (footnote: Art. 8 of Regulation 1159/2013).
+#   Retrieved 2026-10-01 from
+#   https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice
+#
+#   These layers ARE modified — mosaicked, band-ratioed, colour-mapped — so the
+#   "Contains modified ..." form applies rather than the plain "Copernicus
+#   Sentinel data [Year]" form used for unaltered data.
+#
+#   Copernicus DEM: the "Use License" field on the dataset record at
+#   https://doi.org/10.5069/G9028PQB — OpenTopography, which the STAC collection
+#   itself lists as a provider with role `host`. Retrieved 2026-10-01.
+SENTINEL_ATTRIBUTION_TEMPLATE = "Contains modified Copernicus Sentinel data {years}"
+COPERNICUS_DEM_ATTRIBUTION = (
+    "© DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 "
+    "provided under COPERNICUS by the European Union and ESA; all rights reserved"
+)
+TILER_ATTRIBUTION = "Tiles: Microsoft Planetary Computer"
+
+
+def _sentinel_years(datetime_range: str) -> str:
+    """
+    The year or year range the mosaic's scenes actually come from.
+
+    Derived from the search window rather than written down, so moving the window
+    cannot leave the attribution claiming a year that is no longer in the data.
+    """
+    start, _, stop = datetime_range.partition("/")
+    y0, y1 = start[:4], (stop[:4] or start[:4])
+    return y0 if y0 == y1 else f"{y0}\u2013{y1}"
 #: Registrations are cheap but not free, and the tiler keeps them a while.
 TTL_SECONDS = 1800
 TIMEOUT_SECONDS = 20
@@ -122,14 +203,17 @@ _SPECS: list[dict[str, Any]] = [
         "register_extra": {
             "datetime": S2_DATETIME,
             "query": {"eo:cloud_cover": {"lt": S2_MAX_CLOUD}},
+            "sortby": S2_SORTBY,
         },
         "query": (
             "collection=sentinel-2-l2a&assets=B04&assets=B03&assets=B02"
             "&color_formula=Gamma%20RGB%203.2%20Saturation%200.8%20Sigmoidal%20RGB%2025%200.35"
         ),
         "quantity": "surface reflectance, red/green/blue",
+        "licence": "sentinel",
         "rendering": "assets B04,B03,B02; Gamma RGB 3.2, Saturation 0.8, Sigmoidal RGB 25 0.35",
         "legend": "What the ground looks like. Cloud-filtered dry-season mosaic.",
+        "scale": None,
         "caveat": (
             "A mosaic of many dates, not one scene, so it shows typical dry-season "
             "ground rather than a particular day."
@@ -142,14 +226,20 @@ _SPECS: list[dict[str, Any]] = [
         "register_extra": {
             "datetime": S2_DATETIME,
             "query": {"eo:cloud_cover": {"lt": S2_MAX_CLOUD}},
+            "sortby": S2_SORTBY,
         },
         "query": (
             "collection=sentinel-2-l2a&expression=B04%2FB02&asset_as_band=True"
             "&rescale=0.8,2.5&colormap_name=magma"
         ),
         "quantity": "band ratio, dimensionless",
+        "licence": "sentinel",
         "rendering": "expression B04/B02, asset_as_band=True, rescale 0.8-2.5, colormap magma",
         "legend": "Iron staining at the surface. Bright = higher red-over-blue ratio.",
+        # The colours mean nothing without these two, so they are first-class
+        # legend facts rather than buried in the rendering string.
+        "scale": {"rescale": [0.8, 2.5], "colormap": "magma",
+                  "low_label": "0.8 (low)", "high_label": "2.5 (high)"},
         "caveat": (
             "Responds to ferric iron, bare soil and red roofing alike. It is not a "
             "manganese detector and says nothing about what lies below the surface "
@@ -163,14 +253,87 @@ _SPECS: list[dict[str, Any]] = [
         "register_extra": {},
         "query": "collection=cop-dem-glo-30&assets=data&rescale=200,900&colormap_name=terrain",
         "quantity": "elevation, metres",
+        "licence": "cop-dem",
         "rendering": "asset data, rescale 200-900 m, colormap terrain",
         "legend": "Ground elevation, 30 m posting. Terrain is a model feature.",
+        "scale": {"rescale": [200, 900], "colormap": "terrain",
+                  "low_label": "200 m", "high_label": "900 m"},
         "caveat": (
             "Elevation only. Slope is derived from this inside the model and is not "
             "what is drawn here."
         ),
     },
 ]
+
+
+def _attribution(spec: dict[str, Any]) -> dict[str, Any]:
+    """The licensor's required notice for this layer, plus who served the tiles."""
+    if spec.get("licence") == "sentinel":
+        years = _sentinel_years(spec["register_extra"]["datetime"])
+        required = SENTINEL_ATTRIBUTION_TEMPLATE.format(years=years)
+        return {
+            "required": required,
+            "licensor": "European Space Agency",
+            "licence_name": "Copernicus Sentinel Data Terms",
+            "licence_url": (
+                "https://sentinels.copernicus.eu/documents/247904/690755/"
+                "Sentinel_Data_Legal_Notice"
+            ),
+            "source_of_wording": (
+                "European Commission, Legal notice on the use of Copernicus "
+                "Sentinel Data and Service Information, p. 2 (notice for adapted "
+                "or modified data)"
+            ),
+            "tiler": TILER_ATTRIBUTION,
+            "html": f"{required} | {TILER_ATTRIBUTION}",
+        }
+    return {
+        "required": COPERNICUS_DEM_ATTRIBUTION,
+        "licensor": "European Space Agency",
+        "licence_name": "Copernicus DEM Licence",
+        "licence_url": "https://doi.org/10.5069/G9028PQB",
+        "source_of_wording": (
+            "\"Use License\" field of the Copernicus Global DEM record at "
+            "OpenTopography, the provider the STAC collection lists as host"
+        ),
+        "tiler": TILER_ATTRIBUTION,
+        "html": f"{COPERNICUS_DEM_ATTRIBUTION} | {TILER_ATTRIBUTION}",
+    }
+
+
+def _legend_facts(spec: dict[str, Any]) -> list[dict[str, str]]:
+    """
+    What the legend states, as fields rather than prose.
+
+    These are mosaics. There is no scene id to show and showing one would be a
+    lie about how the pixels were chosen, so the method is stated instead.
+    """
+    extra = spec.get("register_extra", {})
+    facts = [{"label": "Collection", "value": spec["collections"][0]}]
+    if extra.get("datetime"):
+        start, _, stop = str(extra["datetime"]).partition("/")
+        facts.append({"label": "Dates", "value": f"{start} to {stop}"})
+    cloud = extra.get("query", {}).get("eo:cloud_cover", {}).get("lt")
+    if cloud is not None:
+        facts.append({"label": "Cloud filter", "value": f"scene cloud cover < {cloud}%"})
+    else:
+        facts.append({"label": "Cloud filter", "value": "none — this collection is not optical"})
+    facts.append({
+        "label": "Mosaic",
+        "value": MOSAIC_METHOD if extra.get("sortby") else "single-collection mosaic; first valid pixel wins",
+    })
+    scale = spec.get("scale")
+    if scale:
+        facts.append({
+            "label": "Scale",
+            "value": (
+                f"{scale['rescale'][0]}-{scale['rescale'][1]} rendered with the "
+                f"{scale['colormap']} colormap"
+            ),
+        })
+    facts.append({"label": "Quantity", "value": spec["quantity"]})
+    facts.append({"label": "Attribution", "value": _attribution(spec)["required"]})
+    return facts
 
 
 def _build(spec: dict[str, Any]) -> dict[str, Any]:
@@ -184,12 +347,10 @@ def _build(spec: dict[str, Any]) -> dict[str, Any]:
         "max_zoom": 14,
         "bbox": BBOX,
         "legend": spec["legend"],
+        "legend_facts": _legend_facts(spec),
+        "scale": spec.get("scale"),
         "caveat": spec["caveat"],
-        "attribution": (
-            "Microsoft Planetary Computer; Copernicus Sentinel data"
-            if "sentinel-2-l2a" in spec["collections"]
-            else "Microsoft Planetary Computer; Copernicus DEM"
-        ),
+        "attribution": _attribution(spec),
         "provenance": {
             "source_kind": "measured",
             "is_live": True,
@@ -203,8 +364,22 @@ def _build(spec: dict[str, Any]) -> dict[str, Any]:
             ),
             "quantity": spec["quantity"],
             "rendering": spec["rendering"],
+            "mosaic_method": (
+                MOSAIC_METHOD if spec.get("register_extra", {}).get("sortby")
+                else "single-collection mosaic; first valid pixel wins"
+            ),
+            "sortby": spec.get("register_extra", {}).get("sortby"),
+            "is_mosaic": True,
+            "scene_id": None,
+            "scene_id_note": (
+                "A mosaic combines many scenes, so no single scene id applies. "
+                "The method above says how pixels were chosen."
+            ),
             "search_id": search_id,
             "bbox": BBOX,
+            "licence": _attribution(spec)["licence_name"],
+            "licence_url": _attribution(spec)["licence_url"],
+            "attribution": _attribution(spec)["required"],
         },
     }
 
@@ -218,7 +393,10 @@ def _unavailable(spec: dict[str, Any], reason: str) -> dict[str, Any]:
         "tile_url": None,
         "reason": reason,
         "legend": spec["legend"],
+        "legend_facts": _legend_facts(spec),
+        "scale": spec.get("scale"),
         "caveat": spec["caveat"],
+        "attribution": _attribution(spec),
         "provenance": {
             "source_kind": "measured",
             "is_live": False,

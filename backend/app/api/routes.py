@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Response
 from sqlalchemy.orm import Session
 from app.db.session import get_db, resolve_mine_code
 from app.models.mine import MineSite
@@ -10,6 +10,7 @@ from app.api.forecast_store import Warming
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from app.ml.map_layers import tile_layers
+from app.ml.tile_cache import cache_status, read_tile
 from app.ml.prospectivity import (
     measured_points,
     model_metrics,
@@ -428,8 +429,49 @@ def map_tile_layers(force: bool = False):
     `status: "unavailable"` and the upstream's reason. A 503 for the whole
     endpoint would lose the distinction between "no imagery at all" and "the DEM
     mosaic is refusing", and the screen needs to be able to say which.
+
+    Each layer also carries what the local tile cache holds for it, so the map
+    knows before it asks for a tile whether a fallback exists and what date to
+    label it with.
     """
-    return tile_layers(force=force)
+    payload = tile_layers(force=force)
+    cache = cache_status()
+    for layer in payload["layers"]:
+        layer["cache"] = cache.get("layers", {}).get(
+            layer["id"], {"available": False, "reason": cache.get("reason", "not cached")}
+        )
+    return {**payload, "cache": {k: v for k, v in cache.items() if k != "layers"}}
+
+
+@router.get("/map/cached-tiles/{layer_id}/{z}/{x}/{y}")
+def map_cached_tile(layer_id: str, z: int, x: int, y: int):
+    """
+    One tile from the local cache.
+
+    The map uses this only after the live tiler has failed it, and the layer is
+    relabelled "cached" before any of these are drawn — a cached pixel must never
+    be presented as a live one. A tile that was never fetched is a 404, not a
+    placeholder image.
+    """
+    hit = read_tile(layer_id, z, x, y)
+    if hit is None:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"no cached tile for {layer_id} z{z}/{x}/{y}. The cache covers the "
+                f"study area over its manifest's zoom range; run "
+                f"`python -m app.api.batch tiles` to build it."
+            ),
+        )
+    body, ctype = hit
+    return Response(
+        content=body,
+        media_type=ctype,
+        headers={
+            "Cache-Control": "public, max-age=86400",
+            "X-Tile-Source": "local-cache",
+        },
+    )
 
 
 @router.get("/prospectivity/metrics")

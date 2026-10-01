@@ -96,3 +96,8 @@ backend/artifacts/forecasts/MOIL-ABANDON_*.json
 
 # Backend dev environment, created by backend/scripts/setup_dev.sh
 backend/.venv/
+
+# Map raster tiles fetched from Planetary Computer for offline demo resilience.
+# Hundreds of MB of someone else's imagery under the Copernicus licence: a local
+# convenience, not repository content. Rebuild with `python -m app.api.batch tiles`.
+backend/.tile-cache/
