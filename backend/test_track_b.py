@@ -302,13 +302,17 @@ def test_cumulative_aggregation_beats_independent_days():
     This compares the two aggregations on the same predictive distributions and
     the same realised totals, and asserts the correlated one is closer to
     nominal. It does not assert perfection: measured cumulative coverage is
-    0.725 against a nominal 0.80, which is honest residual miscalibration and is
-    reported in the backtest artifact rather than tuned away.
+    0.725 against a nominal 0.80 before the cumulative calibration, which is
+    honest residual miscalibration and is reported in the backtest artifact
+    rather than tuned away.
+
+    This test covers the block bootstrap only, with the common factor off, so it
+    keeps measuring the thing it was written to measure.
     """
     import numpy as np
 
     from app.api.track_b import _forecaster, _state
-    from app.ml.backtest import _cumulative_paths
+    from app.ml.forecaster import cumulative_paths, lognormal_day_params
 
     st = _state()
     code = "MOIL-BAL-01"
@@ -329,9 +333,15 @@ def test_cumulative_aggregation_beats_independent_days():
     for g in grades:
         series = st["series"][(code, g)]
         preds = fc.predict(code, g, origin, horizons, series, st["cov"])
-        blocks = _cumulative_paths(preds, residuals)
-        indep = _cumulative_paths(preds, None)
-        assert blocks is not None and indep is not None
+        blocks = cumulative_paths(preds, residuals)
+        # `cumulative_paths` returns None without a residual series rather than
+        # silently producing independent draws, so the independent arm is built
+        # here explicitly — the comparison is the point of this test.
+        rng = np.random.default_rng(20260921)
+        indep = np.zeros(4000)
+        for mu, sigma in lognormal_day_params(preds):
+            indep += rng.lognormal(mean=mu, sigma=sigma, size=4000)
+        assert blocks is not None
         # Correlated days must give a wider cumulative distribution.
         if float(np.std(blocks)) > float(np.std(indep)):
             wider += 1

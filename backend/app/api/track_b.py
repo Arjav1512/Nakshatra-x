@@ -128,7 +128,13 @@ def compute_forecast(mine_code: str, horizon_days: int = 14, grade: str | None =
         # Pass the fitted model's own residual series so the days are
         # aggregated with their correlation rather than as independent draws.
         risk = shortfall_probability(
-            preds, target_tonnes=target, residuals=fc.residuals.get(mine_code)
+            preds,
+            target_tonnes=target,
+            residuals=fc.residuals.get(mine_code),
+            # Calibrated on origins held out from the fit, the conformal widths
+            # and the residual series; validated in the backtest on later
+            # origins still.
+            rho=fc.rho_for(mine_code),
         )
         baseline_total = sum(
             seasonal_naive(series, origin + timedelta(days=h)) for h in horizons

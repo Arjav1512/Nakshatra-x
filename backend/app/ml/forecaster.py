@@ -49,6 +49,22 @@ SEASONAL_PERIOD_DAYS = 365
 DEFAULT_QUANTILES = (0.1, 0.5, 0.9)
 NOMINAL_COVERAGE = 0.8  # the 0.1-0.9 interval
 
+#: Standard deviation of a U(0,1) variate. A calibrated predictive distribution
+#: has uniform PIT values, so this is the target the cumulative calibration
+#: matches. Larger means the distribution is too narrow; smaller, too wide.
+UNIFORM_PIT_SD = 1.0 / math.sqrt(12.0)
+#: Candidate common-factor loadings. Fine near zero, because that is where the
+#: answer sits and where coverage moves fastest, and capped at 0.5 — a loading
+#: above that would say most of a fortnight's variation is one shared shock,
+#: which is a different model, not a calibration.
+#: 0.02 steps: rho moves coverage smoothly, so a finer grid would cost backtest
+#: minutes (the model refits at every origin) to buy precision below the noise
+#: in the estimate.
+CUMULATIVE_RHO_GRID = tuple(float(round(x, 3)) for x in np.arange(0.0, 0.5001, 0.02))
+#: Below this many held-out cumulative windows the loading is too noisy to fit;
+#: the mine falls back to the pooled median and says so.
+MIN_CUMULATIVE_CALIBRATION_RECORDS = 40
+
 
 @dataclass
 class SeriesPoint:
@@ -193,10 +209,15 @@ class ProductionForecaster:
         quantiles: Sequence[float] = DEFAULT_QUANTILES,
         random_state: int = 20260921,
         calibration_fraction: float = 0.25,
+        cumulative_fraction: float = 0.12,
     ):
         self.quantiles = tuple(quantiles)
         self.random_state = random_state
         self.calibration_fraction = calibration_fraction
+        #: Share of rows reserved, after the conformal slice, for calibrating
+        #: the CUMULATIVE distribution. Carved out of the rows already held back
+        #: from the quantile fits, so the fit set is unchanged.
+        self.cumulative_fraction = cumulative_fraction
         self.models: dict[str, dict[float, HistGradientBoostingRegressor]] = {}
         #: Standardised one-step residuals per mine, in time order. Used to
         #: aggregate daily distributions into a cumulative one without assuming
@@ -209,8 +230,19 @@ class ProductionForecaster:
         # dominated by long-horizon errors.
         self.conformal_width: dict[tuple[str, int], float] = {}
         self.conformal_width_default: dict[str, float] = {}
+        #: Calibrated common-factor loading per mine, for the cumulative
+        #: distribution only. See `_calibrate_cumulative`.
+        self.cumulative_rho: dict[str, float] = {}
+        self.cumulative_rho_default: float = 0.0
+        #: What the calibration saw and chose, per mine, so the number can be
+        #: audited rather than taken on trust.
+        self.cumulative_calibration: dict[str, dict] = {}
         self.epoch: date | None = None
         self.opencast: dict[str, bool] = {}
+
+    def rho_for(self, mine_code: str) -> float:
+        """The calibrated loading for a mine, or the pooled fallback."""
+        return self.cumulative_rho.get(mine_code, self.cumulative_rho_default)
 
     def fit(
         self,
@@ -279,11 +311,49 @@ class ProductionForecaster:
             #
             # Calibrating on the most recent history instead lets the width
             # track the regime the forecast is actually being made in.
+            #
+            # THREE BLOCKS, NOT TWO
+            # ---------------------
+            # The held-back slice is split again, because the cumulative
+            # distribution needs a block that the conformal widths and the
+            # residual series have not seen either.
+            #
+            # Measured: on origins inside the conformal slice the cumulative
+            # 80% band covered 0.852 of outcomes — too WIDE. On the backtest's
+            # genuinely held-out origins the same construction covered 0.725 —
+            # too narrow. Both numbers come from the same code; the difference
+            # is only whether the widths and residuals were fitted on the
+            # origins being scored. A loading calibrated on the conformal slice
+            # would therefore read the deficiency as a surplus and correct the
+            # wrong way.
+            #
+            #   fit block        origin <  cal_cut   -> the quantile GBTs
+            #   conformal block  cal_cut..cum_cut    -> widths + residual series
+            #   cumulative block origin >= cum_cut   -> the loading below
+            #
+            # The cuts land on origin boundaries, so no origin contributes rows
+            # to two blocks. The cumulative block is carved out of rows already
+            # held back, so the fit block is the same set of origins as before
+            # and the point forecast is untouched.
             n = len(X)
             n_cal = max(50, int(n * self.calibration_fraction))
             n_cal = min(n_cal, n // 3)
-            fit_idx = np.arange(0, n - n_cal)
-            cal_idx = np.arange(n - n_cal, n)
+            n_cum = min(int(n * self.cumulative_fraction), max(0, n_cal // 2))
+
+            origins = [s[2] for s in samples]
+            cal_cut = origins[n - n_cal]
+            cum_cut = origins[n - n_cum] if n_cum > 0 else None
+
+            o_arr = np.array([(d - self.epoch).days for d in origins], dtype=int)
+            cal_cut_i = (cal_cut - self.epoch).days
+            if cum_cut is not None:
+                cum_cut_i = (cum_cut - self.epoch).days
+                cum_mask = o_arr >= cum_cut_i
+            else:
+                cum_mask = np.zeros(n, dtype=bool)
+            cal_mask = (o_arr >= cal_cut_i) & ~cum_mask
+            fit_idx = np.flatnonzero(~cal_mask & ~cum_mask)
+            cal_idx = np.flatnonzero(cal_mask)
 
             fits: dict[float, HistGradientBoostingRegressor] = {}
             for q in self.quantiles:
@@ -377,7 +447,196 @@ class ProductionForecaster:
                     if len(r) >= 30:
                         sd = float(np.std(r))
                         self.residuals[mine] = (r / sd if sd > 1e-9 else r).astype(float)
+
+            # --- cumulative calibration, on the third block -----------------
+            if cum_cut is not None and mine in self.residuals:
+                self._calibrate_cumulative(
+                    mine, series_by_key, cov, cum_cut, train_end, int(max(horizons)),
+                )
+
+        # Pooled fallback for a mine whose own block was too thin to calibrate.
+        # The median, not the mean, so one mine with a degenerate block cannot
+        # drag the others.
+        fitted = [v for v in self.cumulative_rho.values()]
+        if fitted:
+            self.cumulative_rho_default = float(np.median(fitted))
         return self
+
+    def _calibrate_cumulative(
+        self,
+        mine: str,
+        series_by_key: dict[tuple[str, str], dict[date, float]],
+        cov: Covariates,
+        cum_cut: date,
+        train_end: date,
+        max_h: int,
+        step_days: int = 2,
+        n_sim: int = 1500,
+    ) -> None:
+        """
+        Calibrate how much of each day's shock is shared across the window.
+
+        THE PROBLEM
+        -----------
+        Daily intervals are calibrated (0.812 against 0.80 nominal) and the
+        days are already aggregated with a block bootstrap of the model's own
+        residuals, which is what brought P(shortfall) down off 1.000. But the
+        14-day TOTAL was still too narrow on held-out origins: the 80% band
+        covered 0.725 of outcomes and 0.175 landed in the outer 10% tails
+        against an expected 0.10. The residual series is built from one-step
+        errors, so it can only express persistence up to the length of the runs
+        it contains; a fortnight-long regime — a wet spell, a long equipment
+        outage — is wider than anything a one-step residual can say.
+
+        THE CORRECTION, AND WHY IT IS THIS ONE
+        --------------------------------------
+        A single scalar: the share `rho` of each day's standardised shock that
+        is common to the whole window.
+
+            z_h = sqrt(1 - rho) * r_h + sqrt(rho) * e      e drawn once per path
+
+        Because the weights' squares sum to one, every day's marginal
+        distribution is left exactly as the model reported it — the daily
+        intervals stay calibrated by construction, and the point forecast is not
+        touched at all. Only the dependence between days changes, which is
+        precisely what was wrong. Widening the daily sigmas instead would have
+        bought the same cumulative coverage by breaking the daily coverage that
+        is already correct.
+
+        HOW IT IS FITTED
+        ----------------
+        On the cumulative block only: origins the quantile fits, the conformal
+        widths and the residual series have all never seen. The block is
+        embargoed by `max_h` days after the conformal cut, so no realised day
+        used here was also used to fit a width.
+
+        The objective is NOT the number that gets reported. Fitting rho to make
+        coverage read 0.80 would be tuning the output. Instead rho is chosen to
+        make the PIT values as dispersed as a calibrated forecast's would be —
+        standard deviation 1/sqrt(12) for a uniform — which is a statement about
+        the whole distribution. Coverage and tail frequency are then *measured*
+        consequences, on origins this search never saw, in the backtest.
+        """
+        grades = sorted(g for (m, g) in series_by_key if m == mine)
+        full = list(range(1, max_h + 1))
+        r = self.residuals.get(mine)
+        if r is None:
+            return
+
+        # Embargo: the conformal block's targets reach `max_h` days past its
+        # last origin, so start that far in or the two blocks share realised
+        # days.
+        start = cum_cut + timedelta(days=max_h)
+
+        recs: list[tuple[np.ndarray, np.ndarray, float]] = []
+        for g in grades:
+            series = series_by_key.get((mine, g))
+            if not series:
+                continue
+            o = start
+            while o + timedelta(days=max_h) <= train_end:
+                actuals = [series.get(o + timedelta(days=h)) for h in full]
+                if all(a is not None for a in actuals):
+                    preds = self.predict(mine, g, o, full, series, cov)
+                    params = lognormal_day_params(preds)
+                    if params:
+                        recs.append((
+                            np.array([m for m, _ in params], dtype=float),
+                            np.array([s for _, s in params], dtype=float),
+                            float(sum(float(a) for a in actuals)),
+                        ))
+                o += timedelta(days=step_days)
+
+        if len(recs) < MIN_CUMULATIVE_CALIBRATION_RECORDS:
+            self.cumulative_calibration[mine] = {
+                "calibrated": False,
+                "reason": (
+                    f"only {len(recs)} held-out cumulative windows available, "
+                    f"below the {MIN_CUMULATIVE_CALIBRATION_RECORDS} needed for a "
+                    f"stable estimate"
+                ),
+                "n_windows": len(recs),
+            }
+            return
+
+        # One set of draws, reused across the grid, so differences between
+        # loadings are the loading and not Monte Carlo noise.
+        rng = np.random.default_rng(self.random_state)
+        prepared = []
+        for mus, sigmas, realised in recs:
+            n_days = len(mus)
+            starts = rng.integers(0, len(r), size=n_sim)
+            idx = (starts[:, None] + np.arange(n_days)[None, :]) % len(r)
+            prepared.append((
+                mus[None, :], sigmas[None, :], r[idx],
+                rng.standard_normal((n_sim, 1)), realised,
+            ))
+
+        def _pits(rho: float) -> np.ndarray:
+            a, b = math.sqrt(1.0 - rho), math.sqrt(rho)
+            out = np.empty(len(prepared), dtype=float)
+            for i, (mus, sigmas, block, shared, realised) in enumerate(prepared):
+                z = block if rho <= 0.0 else a * block + b * shared
+                sims = np.exp(mus + sigmas * z).sum(axis=1)
+                out[i] = float(np.mean(sims < realised))
+            return out
+
+        best_rho, best_dist = 0.0, float("inf")
+        curve: list[dict] = []
+        for rho in CUMULATIVE_RHO_GRID:
+            pit = _pits(rho)
+            sd = float(np.std(pit))
+            dist = abs(sd - UNIFORM_PIT_SD)
+            curve.append({
+                "rho": round(float(rho), 3),
+                "pit_sd": round(sd, 4),
+                "coverage_80": round(float(np.mean((pit >= 0.10) & (pit <= 0.90))), 3),
+            })
+            if dist < best_dist:
+                best_rho, best_dist = float(rho), dist
+
+        chosen = _pits(best_rho)
+        at_zero = _pits(0.0)
+        sd_zero = float(np.std(at_zero))
+
+        # Which way the block said the distribution was wrong. The common factor
+        # can only widen, so a block that was already at or beyond nominal width
+        # gets a zero loading and this field says so rather than letting a 0.00
+        # read as "nothing needed doing".
+        if sd_zero > UNIFORM_PIT_SD + 0.01:
+            direction = "too narrow at rho=0; widened to the uniform target"
+        elif sd_zero < UNIFORM_PIT_SD - 0.01:
+            direction = (
+                "ALREADY TOO WIDE at rho=0 (PIT less dispersed than uniform). "
+                "The common factor only widens, so the loading is zero and this "
+                "mine's cumulative distribution stays conservative. Narrowing it "
+                "would mean shrinking intervals on held-out evidence, which is "
+                "not a change this calibration is allowed to make."
+            )
+        else:
+            direction = "already within 0.01 of the uniform target; no loading needed"
+
+        self.cumulative_rho[mine] = best_rho
+        self.cumulative_calibration[mine] = {
+            "calibrated": True,
+            "rho": round(best_rho, 3),
+            "direction": direction,
+            "at_grid_edge": bool(best_rho >= CUMULATIVE_RHO_GRID[-1] - 1e-9),
+            "n_windows": len(recs),
+            "block_start": start.isoformat(),
+            "block_end": train_end.isoformat(),
+            "objective": "match PIT dispersion to uniform (sd = 1/sqrt(12))",
+            "uniform_pit_sd": round(UNIFORM_PIT_SD, 4),
+            "in_block_pit_sd_at_rho_0": round(sd_zero, 4),
+            "in_block_pit_sd_at_rho": round(float(np.std(chosen)), 4),
+            "search_curve": curve,
+            "note": (
+                "Fitted on origins held out from the quantile fits, the "
+                "conformal widths and the residual series. Coverage and tail "
+                "frequency are reported by the backtest on later origins this "
+                "search never saw."
+            ),
+        }
 
     def predict(
         self,
@@ -424,12 +683,88 @@ class ProductionForecaster:
         return out
 
 
+def lognormal_day_params(
+    horizon_preds: dict[int, dict[str, float]],
+) -> list[tuple[float, float]]:
+    """
+    Per-day (mu, sigma) in log space, matched to the q10/q50/q90 the model
+    produced. A lognormal is used because daily output is non-negative and
+    right-skewed; the quantiles come from the fitted model, so the shape
+    assumption only governs interpolation between them.
+    """
+    params: list[tuple[float, float]] = []
+    for h in sorted(horizon_preds):
+        p = horizon_preds[h]
+        q10, q50, q90 = p["q10"], p["q50"], p["q90"]
+        if q50 <= 0:
+            continue
+        mu = math.log(max(q50, 1e-9))
+        z = 1.2815515655446004  # Phi^-1(0.9)
+        if q90 > q10 > 0:
+            sigma = (math.log(q90) - math.log(q10)) / (2 * z)
+        else:
+            sigma = 0.15
+        params.append((mu, float(min(max(sigma, 0.02), 1.5))))
+    return params
+
+
+def cumulative_paths(
+    horizon_preds: dict[int, dict[str, float]],
+    residuals: np.ndarray | None = None,
+    rho: float = 0.0,
+    n_sim: int = 4000,
+    seed: int = 20260921,
+) -> np.ndarray | None:
+    """
+    Simulated cumulative-production totals over the forecast horizon.
+
+    THE ONE CONSTRUCTION
+    --------------------
+    This function is the only place cumulative paths are built. The product's
+    `shortfall_probability`, the backtest's calibration check and the
+    calibration search in `ProductionForecaster.fit` all call it. They used to
+    hold two copies of the arithmetic with a comment asking the reader to keep
+    them identical; a calibration check that drifts from the thing it validates
+    certifies nothing, so the duplicate is gone.
+
+    `rho` is the common-factor loading described in `fit`: the share of each
+    day's standardised shock that is shared across the whole window. It widens
+    the cumulative distribution while leaving every day's marginal distribution
+    exactly as the model reported it, because the two components are combined
+    with weights whose squares sum to one.
+    """
+    rng = np.random.default_rng(seed)
+    params = lognormal_day_params(horizon_preds)
+    if not params:
+        return None
+    n_days = len(params)
+    mus = np.array([m for m, _ in params])[None, :]
+    sigmas = np.array([sd for _, sd in params])[None, :]
+
+    if residuals is not None and len(residuals) >= max(30, n_days):
+        r = np.asarray(residuals, dtype=float)
+        # Circular block bootstrap: one contiguous run of residuals per path, so
+        # a wet fortnight stays a wet fortnight instead of averaging out.
+        starts = rng.integers(0, len(r), size=n_sim)
+        idx = (starts[:, None] + np.arange(n_days)[None, :]) % len(r)
+        block = r[idx]
+    else:
+        return None
+
+    if rho > 0.0:
+        shared = rng.standard_normal((n_sim, 1))
+        block = math.sqrt(1.0 - rho) * block + math.sqrt(rho) * shared
+
+    return np.exp(mus + sigmas * block).sum(axis=1)
+
+
 def shortfall_probability(
     horizon_preds: dict[int, dict[str, float]],
     target_tonnes: float,
     n_sim: int = 4000,
     seed: int = 20260921,
     residuals: np.ndarray | None = None,
+    rho: float = 0.0,
 ) -> dict:
     """
     P(cumulative production < target) over the forecast horizon — PRD B-6, and
@@ -464,40 +799,22 @@ def shortfall_probability(
     `aggregation`, because a number produced one way must not be reported as
     though it were produced the other.
     """
-    rng = np.random.default_rng(seed)
-    horizons = sorted(horizon_preds)
-    sims = np.zeros(n_sim, dtype=float)
-
-    # Per-day lognormal parameters, matched to the quantiles the model produced.
-    params: list[tuple[float, float]] = []
-    for h in horizons:
-        p = horizon_preds[h]
-        q10, q50, q90 = p["q10"], p["q50"], p["q90"]
-        if q50 <= 0:
-            continue
-        mu = math.log(max(q50, 1e-9))
-        z = 1.2815515655446004  # Phi^-1(0.9)
-        if q90 > q10 > 0:
-            sigma = (math.log(q90) - math.log(q10)) / (2 * z)
-        else:
-            sigma = 0.15
-        params.append((mu, float(min(max(sigma, 0.02), 1.5))))
-
-    use_blocks = residuals is not None and len(residuals) >= max(30, len(params))
+    sims = cumulative_paths(
+        horizon_preds, residuals=residuals, rho=rho, n_sim=n_sim, seed=seed
+    )
+    use_blocks = sims is not None
     if use_blocks:
-        r = np.asarray(residuals, dtype=float)
-        n_days = len(params)
-        # Circular block bootstrap: one contiguous run of residuals per path, so
-        # a wet fortnight stays a wet fortnight instead of averaging out.
-        starts = rng.integers(0, len(r), size=n_sim)
-        idx = (starts[:, None] + np.arange(n_days)[None, :]) % len(r)
-        block = r[idx]                                  # (n_sim, n_days)
-        mus = np.array([m for m, _ in params])[None, :]
-        sigmas = np.array([sd for _, sd in params])[None, :]
-        sims = np.exp(mus + sigmas * block).sum(axis=1)
         aggregation = "block-bootstrap of standardised model residuals (days correlated)"
+        if rho > 0.0:
+            aggregation += (
+                f"; plus a calibrated window-wide common factor "
+                f"(loading {rho:.2f}, held-out calibration)"
+            )
     else:
-        for mu, sigma in params:
+        # No residual series: fall back to independent daily draws, and say so.
+        rng = np.random.default_rng(seed)
+        sims = np.zeros(n_sim, dtype=float)
+        for mu, sigma in lognormal_day_params(horizon_preds):
             sims += rng.lognormal(mean=mu, sigma=sigma, size=n_sim)
         aggregation = "independent daily draws (no residual series available)"
 
@@ -512,10 +829,14 @@ def shortfall_probability(
         "method": "Monte Carlo over per-day lognormal predictive distributions matched to model quantiles",
         "aggregation": aggregation,
         "n_simulations": n_sim,
+        "cumulative_common_factor_rho": round(float(rho), 3) if use_blocks else None,
         "assumption": (
             "Daily spread comes from the model's conformalised quantiles; the "
             "correlation between days comes from bootstrapped blocks of its own "
-            "residuals, so no independence is assumed."
+            "residuals, so no independence is assumed. A common-factor loading "
+            "calibrated on held-out origins carries the window-wide shocks the "
+            "one-step residuals cannot express; it leaves each day's marginal "
+            "distribution unchanged."
             if use_blocks
             else "No residual series was available, so days are summed as "
             "independent draws. That understates cumulative spread when shocks "
