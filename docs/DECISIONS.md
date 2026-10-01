@@ -777,3 +777,55 @@ The split changes the quantile fits' calibration inputs, so unlike the loading i
 *may* move MAPE and daily coverage. Whatever it does is reported; the model must
 still beat the seasonal-naive baseline and daily coverage must stay within the
 gap already documented, or the split is wrong too.
+
+### D-040 addendum — the model change was declined (2026-10-01T06:27:17Z)
+
+**Written after the results, which the rule above was written before.** Stating
+that plainly matters: everything in this addendum is post-hoc, and the only
+reason it is legitimate is the direction it goes.
+
+**The decision: the cumulative calibration does not ship.** The model returns to
+`b045369` byte-for-byte.
+
+**Why the pre-registered rule did not settle it.** The rule judged the loading
+against `rho = 0` *on this branch*, and by that comparison the loading works:
++0.0355 coverage and +0.0196 tails, both intervals excluding zero. It passed.
+What the rule never asked was whether the branch beats **main**, and it does not:
+
+| versus main `b045369` | coverage | tails | PIT dispersion |
+|---|---|---|---|
+| split only (`rho = 0`) | −0.0331 [−0.0711, 0.0049] | −0.0061 [−0.0466, 0.0306] | −0.0033 [−0.0145, 0.0079] |
+| split + pooled (would have shipped) | +0.0025 [−0.0368, 0.0417] | +0.0135 [−0.0196, 0.0453] | +0.0040 [−0.0077, 0.0156] |
+| split + per-mine (not selected) | +0.0294 [−0.0061, 0.0625] | **+0.0404 [0.0123, 0.0711]** | **+0.0148 [0.0025, 0.0246]** |
+
+The loading recovers what the three-block split costs, and nets to nothing
+measurable. Daily coverage also dips, 0.7607 → 0.7512, with MAPE flat
+(10.000% → 10.050%).
+
+**Why this is not post-hoc selection.** Declining to ship keeps the status quo.
+A pre-registration protects against choosing the analysis that makes a change
+look good; it does not oblige shipping a change whose only measured effect is
+added complexity. The asymmetry is the point — the rule can license a change, and
+refusing to use that licence costs nothing it was protecting.
+
+**What "disabled" had to mean.** The rule's fallback was "ship disabled with the
+mechanism retained". That wording assumed `rho = 0` was neutral. It is not: the
+split alone is worse than main by −0.0331 on coverage. So "disabled" could only
+mean *main's exact behaviour*, and the cleanest way to deliver main's exact
+behaviour is to be main. A flag defaulting to it would need the two-block index
+split restored as a second path and the new artifact fields suppressed when off —
+a dormant branch whose sole purpose is reproducing main. Reverted instead; the
+mechanism is at `dee2dd3` and `cef2801` in this branch's history and every number
+it produced is in `docs/CALIBRATION.md`.
+
+**The per-mine result is recorded, not adopted.** It is the one arm that beat
+main with intervals excluding zero. It was rejected by the pre-registered
+deciding statistic (PIT dispersion, +0.0108, CI [−0.0005, 0.0155]) by 0.0005, and
+adopting it now on the strength of metrics the rule did not nominate would be
+exactly the move the rule exists to block. It goes to the backlog as a fresh
+pre-registered replication on an **independent synthetic seed** — not these
+origins, because a result selected on a sample cannot be confirmed on it — judged
+against main rather than against `rho = 0`.
+
+**What the rule should have said**, for next time: the comparison that decides is
+against the current shipped behaviour, not against a within-branch baseline.
