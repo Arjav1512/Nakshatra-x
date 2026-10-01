@@ -838,7 +838,7 @@ export default function IndiaSatelliteMap({
 
   return (
     <div
-      className={`ios-glass-card overflow-hidden transition-colors duration-500 relative ${
+      className={`rounded-md border border-border-default bg-surface-1 overflow-hidden transition-colors duration-500 relative ${
         isFullscreen ? 'fixed inset-4 z-50 rounded-md' : 'rounded-[32px]'
       }`}
     >
@@ -853,7 +853,7 @@ export default function IndiaSatelliteMap({
               <span className="text-xs font-mono font-semibold uppercase tracking-widest text-status-critical">
                 PROSPECTIVITY MAP
               </span>
-              <span className="ios-badge ios-badge-risk text-xs">
+              <span className="text-xs">
                 CLICK A CELL, OR SEARCH A PLACE
               </span>
             </div>
@@ -886,7 +886,7 @@ export default function IndiaSatelliteMap({
           <button
             type="button"
             onClick={() => setRadarSweepActive(!radarSweepActive)}
-            className={`ios-glass-button px-3.5 py-1.5 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer ${
+            className={`rounded-md border border-border-interactive bg-surface-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer ${
               radarSweepActive ? 'border-status-critical text-status-critical' : 'text-text-tertiary'
             }`}
           >
@@ -897,7 +897,7 @@ export default function IndiaSatelliteMap({
           <button
             type="button"
             onClick={zoomToNational}
-            className="ios-glass-button px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-text-primary flex items-center gap-1.5 cursor-pointer"
+            className="rounded-md border border-border-interactive bg-surface-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-text-primary flex items-center gap-1.5 cursor-pointer"
           >
             <Compass className="w-3.5 h-3.5 text-accent" />
             <span>National View</span>
@@ -906,7 +906,7 @@ export default function IndiaSatelliteMap({
           <button
             type="button"
             onClick={zoomToIndia}
-            className="ios-glass-button px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-text-primary flex items-center gap-1.5 cursor-pointer"
+            className="rounded-md border border-border-interactive bg-surface-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-text-primary flex items-center gap-1.5 cursor-pointer"
           >
             <Navigation className="w-3.5 h-3.5 text-[var(--color-status-caution)]" />
             <span>Manganese Belt</span>
@@ -915,7 +915,7 @@ export default function IndiaSatelliteMap({
           <button
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="ios-glass-button p-2 rounded-full text-text-primary hover:text-accent transition-colors cursor-pointer"
+            className="rounded-md border border-border-interactive bg-surface-2 p-2 rounded-full text-text-primary hover:text-accent transition-colors cursor-pointer"
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
@@ -986,7 +986,7 @@ export default function IndiaSatelliteMap({
           <button
             type="submit"
             disabled={isSearching}
-            className="ios-glass-button px-5 py-2 rounded-md text-xs font-mono font-bold text-accent hover:text-text-primary border border-accent/40 hover:border-accent flex items-center gap-2 cursor-pointer transition-colors shrink-0 disabled:opacity-50"
+            className="rounded-md border border-border-interactive bg-surface-2 px-5 py-2 rounded-md text-xs font-mono font-bold text-accent hover:text-text-primary border border-accent/40 hover:border-accent flex items-center gap-2 cursor-pointer transition-colors shrink-0 disabled:opacity-50"
           >
             {isSearching ? (
               <Loader2 className="w-3.5 h-3.5 text-accent animate-spin" />
@@ -1013,7 +1013,7 @@ export default function IndiaSatelliteMap({
                   setSearchError(null)
                   triggerAIPrediction(loc.lat, loc.lng, loc.name)
                 }}
-                className="ios-glass-button px-3 py-1 rounded-full text-xs font-mono text-text-secondary hover:text-accent whitespace-nowrap transition-colors cursor-pointer shrink-0"
+                className="rounded-md border border-border-interactive bg-surface-2 px-3 py-1 rounded-full text-xs font-mono text-text-secondary hover:text-accent whitespace-nowrap transition-colors cursor-pointer shrink-0"
               >
                 {key.toUpperCase()}
               </button>
@@ -1038,10 +1038,13 @@ export default function IndiaSatelliteMap({
       {/* Cyber Digital Map Viewport */}
       <div
         className={`relative w-full ${
-          isFullscreen ? 'h-[calc(100vh-200px)]' : 'h-[560px] sm:h-[620px]'
+          // Shorter at phone width. 560px of map on an 812px screen left
+          // nothing of the panel around it visible, so the legend, the layer
+          // switcher and the ranked targets all sat below the fold with no
+          // indication that they existed.
+          isFullscreen ? 'h-[calc(100vh-200px)]' : 'h-[380px] sm:h-[560px] lg:h-[620px]'
         } bg-surface-0 overflow-hidden`}
       >
-        <div className="cyber-grid-overlay" />
 
         {radarSweepActive && <div className="cyber-radar-sweep-beam" />}
 
@@ -1129,7 +1132,7 @@ export default function IndiaSatelliteMap({
                 </span>
               </div>
               <span
-                className="ios-badge text-xs"
+                className="text-xs"
                 style={{
                   backgroundColor: `${currentHotspotMeta.color}20`,
                   borderColor: `${currentHotspotMeta.color}60`,
@@ -1254,13 +1257,13 @@ export default function IndiaSatelliteMap({
             <div className="flex items-center gap-2 pt-1 border-t border-border-default">
               <a
                 href="#smart-blending"
-                className="ios-glass-button flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
+                className="rounded-md border border-border-interactive bg-surface-2 flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
               >
                 3D Borehole Kriging
               </a>
               <a
                 href="#smart-blending"
-                className="ios-glass-button flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
+                className="rounded-md border border-border-interactive bg-surface-2 flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
               >
                 Simulate Blending
               </a>

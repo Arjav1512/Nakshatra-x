@@ -160,3 +160,39 @@ before the header at every width.
 | 9 | Mobile is squeezed desktop | no mobile composition | B-5 · designed mobile layout |
 | ~~10~~ | ~~Launcher over content~~ | **withdrawn** — Next.js dev overlay, not the product | nothing to fix |
 | 11 | Exports before content | chrome renders first | B-5 · demote to the panel they belong to |
+
+---
+
+# Re-run — tranche 2 (2026-10-01)
+
+Same four tasks, desktop and 375 px, against the tranche-2 build. Screenshots in
+`docs/design/after-v2/`.
+
+| # | Confusion | Status | Evidence |
+|---|---|---|---|
+| 1 | Headline number saturates | **fixed** | Cards lead with expected shortfall (−0 t to −700 t). P is the qualifier. The underlying saturation was a bug and is fixed separately: independent daily aggregation understated cumulative spread 2.5–3.4×; P at 1.000 went from 9/10 mines to 2/10. |
+| 2 | No stated ordering | **fixed** | Ranked 01–10 by expected shortfall, sort stated on screen: *"Largest shortfall first. Mines still computing sort last."* |
+| 3 | No focal point | **fixed** | A focal band promotes the largest expected shortfall and answers task (a) in one line. Visible at 506 px at 375 px width. |
+| 4 | Page does not name the mine | **fixed** | `<h1>` reads **Balaghat** on the mine detail, "Decision support for MOIL" at portfolio level. Verified at both widths. |
+| 5 | Track toggle competes with breadcrumb | **open** | The toggle is still a button pair below the integrity banner, unrelated to the breadcrumb describing the same state. Not addressed in tranche 2. |
+| 6 | Everything at equal weight | **improved** | Two named parts — *What the forecaster expects*, *Why you should believe it* — and four tabbed sections at 375 px. The desktop composition is still a long single column below those headings. |
+| 7 | Credibility buried mid-page | **fixed** at 375 px, **improved** at desktop | One tap to *Evidence* on mobile. On desktop it sits under its own display heading rather than being the seventh identical panel. |
+| 8 | Missing backtest read as failure | **fixed** (tranche 1) | Pilot-mine state, asserted by `test:pilot`. |
+| 9 | Mobile is squeezed desktop | **fixed** | Mine detail 4,513 px → 2,512 px. Sticky summary carrying mine, shortfall, P and status at 310 px — inside the fold. Four sections, one tap each. |
+| ~~10~~ | ~~Launcher over content~~ | **withdrawn** | Next.js dev overlay, not the product. |
+| 11 | Exports before content | **improved** | Still above the title, but the answer now precedes everything that matters: the sticky summary is at 310 px with the exports above it in the page chrome. |
+
+## Measured
+
+| | before | after |
+|---|---|---|
+| mine detail height @375 | 4,513 px | 2,512 px |
+| answer visible without scrolling @375 | no (1,330 px) | **yes (310 px)** |
+| sections reachable in one tap @375 | 0 | **4** |
+| portfolio height @1280 | — | 1,590 px |
+
+## Still open, honestly
+
+Confusion 5 is untouched. Confusion 6 is improved rather than fixed: the desktop
+mine detail remains a long column beneath its two headings, and a genuine
+two-column or progressive layout there is the next thing worth doing.

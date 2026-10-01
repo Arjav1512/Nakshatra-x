@@ -72,17 +72,17 @@ export default function SmartOreBlendingModal({ mine }: Props) {
   }
 
   return (
-    <div className="ios-glass-card p-6 flex flex-col justify-between space-y-6 h-full">
+    <div className="rounded-md border border-border-default bg-surface-1 p-6 flex flex-col justify-between space-y-6 h-full">
       {/* Header */}
       <div>
         <div className="flex items-center justify-between gap-4 mb-2">
           <div className="flex items-center gap-2">
-            <span className="ios-badge ios-badge-gold">
+            <span className="">
               REAL CASE OPTIMIZER
             </span>
             <span className="text-xs font-mono text-text-tertiary">SciPy Simplex Linear Programming</span>
           </div>
-          <span className="ios-badge ios-badge-live">
+          <span className="">
             <Scale className="w-3 h-3 text-accent" />
             Shortfall Mitigator
           </span>
@@ -97,7 +97,7 @@ export default function SmartOreBlendingModal({ mine }: Props) {
       </div>
 
       {/* Target Controls (Light Liquid Glass Inset) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ios-glass-inset p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-md border border-border-subtle bg-surface-2 p-4">
         <div>
           <div className="flex justify-between text-xs font-mono mb-1.5">
             <label htmlFor="blend-volume" className="text-text-tertiary">Required dispatch volume:</label>
@@ -139,7 +139,7 @@ export default function SmartOreBlendingModal({ mine }: Props) {
       <button type="button"
         onClick={handleRunOptimizer}
         disabled={isSolving}
-        className="ios-glass-button w-full py-3 rounded-md text-xs font-mono font-bold text-accent flex items-center justify-center gap-2 cursor-pointer"
+        className="rounded-md border border-border-interactive bg-surface-2 w-full py-3 rounded-md text-xs font-mono font-bold text-accent flex items-center justify-center gap-2 cursor-pointer"
       >
         <Sparkles className={`w-4 h-4 ${isSolving ? 'animate-spin' : ''}`} />
         <span>{isSolving ? 'Solving Simplex Mathematical Model...' : 'Calculate Optimal Stockpile Blending Plan'}</span>
@@ -165,7 +165,7 @@ export default function SmartOreBlendingModal({ mine }: Props) {
       {blendResult && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="ios-glass-inset p-3.5" data-provenance="derived">
+            <div className="rounded-md border border-border-subtle bg-surface-2 p-3.5" data-provenance="derived">
               <span className="text-xs font-mono uppercase text-text-tertiary">Blended Mn Grade</span>
               <div className="text-xl font-mono font-bold text-accent my-1">
                 {blendResult.blended_mn_grade_pct}% Mn
@@ -173,7 +173,7 @@ export default function SmartOreBlendingModal({ mine }: Props) {
               <span className="text-xs font-mono text-text-tertiary">Meets customer spec</span>
             </div>
 
-            <div className="ios-glass-inset p-3.5" data-provenance="derived">
+            <div className="rounded-md border border-border-subtle bg-surface-2 p-3.5" data-provenance="derived">
               <span className="text-xs font-mono uppercase text-text-tertiary">Avg Blended Cost</span>
               <div className="text-xl font-mono font-bold text-status-caution my-1">
                 {/* `|| 6240` stood here: a missing cost became a plausible one. */}
@@ -185,7 +185,7 @@ export default function SmartOreBlendingModal({ mine }: Props) {
               <span className="text-xs font-mono text-accent">&bull; Cost Minimized</span>
             </div>
 
-            <div className="ios-glass-inset p-3.5" data-provenance="derived">
+            <div className="rounded-md border border-border-subtle bg-surface-2 p-3.5" data-provenance="derived">
               <span className="text-xs font-mono uppercase text-text-tertiary">Shortfall Recovered</span>
               <div className="text-xl font-mono font-bold text-accent my-1">
                 +{blendResult.target_tonnes?.toLocaleString()} T

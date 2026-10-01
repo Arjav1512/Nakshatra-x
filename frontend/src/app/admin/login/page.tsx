@@ -87,7 +87,6 @@ export default function AdminLoginPage() {
 
         <div className="rounded-md bg-surface-1/90 border border-border-default p-8  relative overflow-hidden">
           {/* Top Radial Glow */}
-          <div className="absolute -top-16 -left-16 w-32 h-32 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
 
           {/* Header */}
           <div className="flex flex-col items-center text-center mb-6">

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { type MineRow, fetchForecast, fetchMines, fetchTelemetry } from '@/lib/console-api'
-import { measuredOrNull, synthetic } from '@/lib/provenance'
+import { PLAN_TARGET_NOTE, measuredOrNull, synthetic } from '@/lib/provenance'
 import { type ExportRow, buildCsv, downloadCsv, exportPdf } from '@/lib/console-export'
 import { IntegrityBanner, Metric, SourceBadge } from './Evidence'
 import { Button, Card, EmptyState, Skeleton, StatusDot, type Status } from '@/components/ui/primitives'
@@ -259,13 +259,19 @@ export function DecisionConsole() {
             </span>
           </>
         ) : null}
+        {/*
+          B-1 confusion 11. At 375px these two took a full row above the page
+          title — prime position for actions a first-time user has no reason to
+          take yet, and 60px of the fold the answer needed. They wrap below the
+          breadcrumb on mobile and keep their place on desktop.
+        */}
         <div className="ml-auto flex items-center gap-2">
           <Button onClick={doExportCsv}>Export CSV</Button>
           <Button onClick={exportPdf}>Export PDF</Button>
         </div>
       </div>
 
-      <main className="space-y-8 pt-6">
+      <main className="flex flex-col space-y-8 pt-6">
         {/*
           B-1 confusion 4: the heading is scoped to what you are looking at.
           It read "Decision support for MOIL" on every screen, including after
@@ -276,7 +282,7 @@ export function DecisionConsole() {
         <div className="print-plain">
           {selected ? (
             <>
-              <h1 className="font-display text-4xl font-medium tracking-tight">
+              <h1 className="font-display text-3xl font-medium tracking-tight md:text-4xl">
                 {selected.name}
               </h1>
               <p className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-text-secondary">
@@ -289,7 +295,7 @@ export function DecisionConsole() {
             </>
           ) : (
             <>
-              <h1 className="font-display text-4xl font-medium tracking-tight">
+              <h1 className="font-display text-3xl font-medium tracking-tight md:text-4xl">
                 Decision support for MOIL
               </h1>
               <p className="measure mt-3 text-base text-text-secondary">
@@ -303,6 +309,39 @@ export function DecisionConsole() {
             </>
           )}
         </div>
+
+        {/*
+          The answer, above the fold at 375px (B-5).
+          Rendered here rather than inside the panel because everything between
+          the heading and the forecast — the integrity banner, the track nav and
+          a 488px conditions block — pushed the figure a planner opened the page
+          for to 1,330px down. It reads from the portfolio cell the console
+          already holds, so it needs nothing the panel has.
+        */}
+        {selected && track === 'B' && portfolio[selected.id] && !isFailure(portfolio[selected.id]!) ? (
+          <div
+            className="sticky top-14 z-20 -mx-4 border-y border-border-default bg-surface-1/95 px-4 py-3 md:hidden"
+            data-testid="mine-sticky-summary"
+            data-provenance="derived"
+            data-provenance-model={PORTFOLIO_ENV.model_version ?? undefined}
+          >
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="min-w-0 truncate text-sm font-medium text-text-primary">
+                {selected.name}
+              </span>
+              <span className="shrink-0 font-mono text-lg tabular-nums text-text-primary">
+                &minus;{Math.round((portfolio[selected.id] as any).shortfall).toLocaleString()} t
+              </span>
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 text-xs">
+              <StatusDot status={band((portfolio[selected.id] as any).p).status} />
+              <span className="font-mono tabular-nums text-text-secondary">
+                P {Math.round((portfolio[selected.id] as any).p * 100)}%
+              </span>
+              <span className="text-text-tertiary">expected shortfall against plan</span>
+            </div>
+          </div>
+        ) : null}
 
         {telemetry?.data_integrity ? <IntegrityBanner integrity={telemetry.data_integrity} /> : null}
 
@@ -511,6 +550,7 @@ export function DecisionConsole() {
               synthetic operational data. Open a mine for drivers, the backtest and
               constraint-checked actions.
             </p>
+            <p className="measure mt-2 text-xs text-text-tertiary">{PLAN_TARGET_NOTE}</p>
           </section>
         ) : null}
 
@@ -568,7 +608,18 @@ export function DecisionConsole() {
 
             {/* face/section level (D-6) */}
             {track === 'B' && telemetry ? (
-              <section data-testid="live-conditions" data-panel-live="true">
+              /*
+                Mobile order: the answer first, conditions after it. This block
+                is 488px tall at 375px and sat between the header and the
+                forecast, which put the figure a planner opened the page for
+                1,330px down. Desktop order is unchanged — there the whole
+                composition is visible at once.
+              */
+              <section
+                data-testid="live-conditions"
+                data-panel-live="true"
+                className="order-last md:order-none"
+              >
                 <h2 className="label">{selected.name} · conditions</h2>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   {[

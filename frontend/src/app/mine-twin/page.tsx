@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { PageHeader } from '@/components/ui/primitives'
 import { FALLBACK_MINES } from '@/components/mission-control/data'
 import MineTwinPanel from '@/components/mine-twin/MineTwinPanel'
 import { Box, ArrowLeft, ArrowRight, MapPin, Sparkles, Home } from 'lucide-react'
@@ -11,31 +12,18 @@ export default function MineTwinPage() {
 
   return (
     <main className="relative min-h-screen bg-surface-0 text-text-primary pt-24 md:pt-28 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Radial background sheen */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-[radial-gradient(ellipse_at_top,_rgba(0,255,136,0.12)_0%,_transparent_70%)] pointer-events-none" />
 
       <div className="relative mx-auto max-w-7xl space-y-8">
-        {/* Header Breadcrumb & Mission Control Switcher */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border-default pb-4">
-          <div className="flex items-center gap-2 text-xs font-mono text-accent">
-            <Link href="/" className="hover:underline flex items-center gap-1.5 text-text-secondary hover:text-text-primary font-bold">
-              <Home size={14} className="text-accent" />
-              <span>Mission Control (Video Landing)</span>
-            </Link>
-            <span>/</span>
-            <span className="text-accent font-bold">Feature Page 03: Mine Twin & Operational Simulator</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Link
-              href="/"
-              className="px-3.5 py-1.5 rounded-full bg-accent/15 border border-accent/40 text-accent text-xs font-mono font-bold flex items-center gap-2 hover:bg-accent/25 transition-colors"
-            >
-              <Sparkles size={13} />
-              <span>Back to Video Landing Page</span>
-            </Link>
-          </div>
-        </div>
+        {/*
+          The breadcrumb read "Mission Control (Video Landing) / Feature Page NN"
+          and the action was "Back to Video Landing Page". The video landing was
+          removed in Stage 1, and "Feature Page 03" names nothing a planner is
+          looking for. Orientation now says what the screen is (B-5).
+        */}
+        <PageHeader
+          title="Scenario calculator"
+          description="A what-if calculator for one mine: set the operating assumptions, see what the arithmetic gives against the mine's own forecast baseline, and whether the constraint engine permits the plan."
+        />
 
         {/* Mine Switcher Dock */}
         <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-md bg-surface-1/90 border border-border-default ">

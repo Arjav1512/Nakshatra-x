@@ -254,3 +254,20 @@ export function measuredOrNull<T>(
 ): Measured<T> | null {
   return env ? measuredValue(env, display) : null
 }
+
+
+/**
+ * What a plan target is, wherever one is shown (tranche 2, item 5).
+ *
+ * P(shortfall) reads 88-100% across the portfolio. That is a property of this
+ * dataset, not a statement about MOIL: the synthetic generator sets plan
+ * targets a median 6.5% above what its own production model achieves, so the
+ * portfolio is behind plan by construction. Anyone reading those percentages
+ * without this sentence would take them for a finding about a real company.
+ */
+export const PLAN_TARGET_NOTE =
+  'Plan targets are synthetic stretch plans, not MOIL\'s. Annual totals are ' +
+  'calibrated to MOIL\'s published scale of roughly 1.1-1.3 Mt/year; the ' +
+  'per-mine split and the target level are invented, and sit a median 6.5% ' +
+  'above what the generated production model achieves — so a high P(shortfall) ' +
+  'is a property of this dataset, not a claim about MOIL.'

@@ -1,0 +1,50 @@
+{
+  "generated_by": "app.ml.fetch_identity_imagery",
+  "bbox": [
+    78.6,
+    20.6,
+    80.8,
+    22.5
+  ],
+  "search_window": "2025-11-01/2026-03-31",
+  "max_cloud_cover_pct": 3.0,
+  "note": "Rendered previews, not analysis inputs. A true-colour COG mosaic of the belt is gigabytes; these are page backgrounds and are labelled as such wherever they appear.",
+  "images": [
+    {
+      "file": "/imagery/belt-44QMK.webp",
+      "bytes": 385620,
+      "collection": "sentinel-2-l2a",
+      "scene_id": "S2C_MSIL2A_20260328T050651_R019_T44QMK_20260328T102419",
+      "mgrs_tile": "44QMK",
+      "datetime": "2026-03-28T05:06:51.025000Z",
+      "eo_cloud_cover_pct": 0.0,
+      "platform": "Sentinel-2C",
+      "processing": "L2A surface reflectance, true colour (B04/B03/B02), rendered by the Planetary Computer data API",
+      "source": "Microsoft Planetary Computer"
+    },
+    {
+      "file": "/imagery/belt-44QMJ.webp",
+      "bytes": 421362,
+      "collection": "sentinel-2-l2a",
+      "scene_id": "S2C_MSIL2A_20260328T050651_R019_T44QMJ_20260328T102419",
+      "mgrs_tile": "44QMJ",
+      "datetime": "2026-03-28T05:06:51.025000Z",
+      "eo_cloud_cover_pct": 0.000206,
+      "platform": "Sentinel-2C",
+      "processing": "L2A surface reflectance, true colour (B04/B03/B02), rendered by the Planetary Computer data API",
+      "source": "Microsoft Planetary Computer"
+    },
+    {
+      "file": "/imagery/belt-44QMH.webp",
+      "bytes": 354874,
+      "collection": "sentinel-2-l2a",
+      "scene_id": "S2C_MSIL2A_20260328T050651_R019_T44QMH_20260328T102419",
+      "mgrs_tile": "44QMH",
+      "datetime": "2026-03-28T05:06:51.025000Z",
+      "eo_cloud_cover_pct": 3.3e-05,
+      "platform": "Sentinel-2C",
+      "processing": "L2A surface reflectance, true colour (B04/B03/B02), rendered by the Planetary Computer data API",
+      "source": "Microsoft Planetary Computer"
+    }
+  ]
+}

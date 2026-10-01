@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { loadLandingEvidence } from '@/lib/landing-evidence'
 import { ProspectivityStack, type StackData } from '@/components/landing/ProspectivityStack'
+import { BeltImagery, loadImagery } from '@/components/landing/BeltImagery'
 
 /**
  * Landing page.
@@ -68,7 +69,11 @@ async function loadStack(): Promise<StackData | null> {
 }
 
 export default async function HomePage() {
-  const [evidence, stack] = await Promise.all([loadLandingEvidence(), loadStack()])
+  const [evidence, stack, imagery] = await Promise.all([
+    loadLandingEvidence(),
+    loadStack(),
+    loadImagery(),
+  ])
 
   return (
     <main className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
@@ -260,6 +265,8 @@ export default async function HomePage() {
           </Card>
         </div>
       </section>
+
+      {imagery && imagery.images.length ? <BeltImagery manifest={imagery} /> : null}
 
       {/* Limits, stated up front */}
       <section className="border-t border-border-subtle py-12 sm:py-16">

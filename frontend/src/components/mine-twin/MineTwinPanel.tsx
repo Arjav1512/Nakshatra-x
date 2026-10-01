@@ -354,43 +354,50 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   const differenceVal = simResult?.difference ?? null
 
   return (
-    <div className="ios-glass-card p-6 border border-border-interactive rounded-md space-y-6 shadow-2xl relative overflow-hidden">
+    <div className="rounded-md border border-border-default bg-surface-1 p-6 border border-border-interactive rounded-md space-y-6 shadow-2xl relative overflow-hidden">
       {/* Background Cyber Ambient Glow */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border-default pb-5">
+
+      {/*
+        Header. What this screen actually is.
+
+        It read:
+          "DIGITAL TWIN · SIEMENS CONCEPT"
+          "REAL 50-YR MOIL & IBM DATA · 2040 FORECAST"
+          "MINE TWIN · Live Digital Twin & What-If Operational Simulator"
+          "TWIN SYNCED (4ms)"
+
+        Four claims, none true. The series is synthetic, generated to this
+        project's own ingestion contract — MOIL's operational records are
+        proprietary (PRD §8.2) and there is no IBM data anywhere in this system.
+        Siemens has nothing to do with it. Nothing syncs, so nothing syncs in
+        4 ms, and nothing here is live. The paragraph underneath had already
+        been corrected to say "synthetic 50-year series"; the badges above it
+        still said the opposite, which is worse than either alone.
+      */}
+      <div className="flex flex-col gap-4 border-b border-border-default pb-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="ios-badge ios-badge-gold text-xs font-mono font-bold tracking-widest uppercase">
-              ⭐ DIGITAL TWIN &bull; SIEMENS CONCEPT
-            </span>
-            <span className="ios-badge ios-badge-live text-xs font-mono font-bold">
-              REAL 50-YR MOIL & IBM DATA &bull; 2040 FORECAST
-            </span>
-          </div>
-          <h2 className="text-2xl font-semibold text-text-primary tracking-tight flex items-center gap-2 font-sans">
-            <Box className="w-6 h-6 text-accent" />
-            MINE TWIN &bull; <span className="text-accent">Live Digital Twin & What-If Operational Simulator</span>
+          <span className="label">Scenario calculator</span>
+          <h2 className="mt-1 flex items-center gap-2 font-display text-2xl font-medium tracking-tight text-text-primary">
+            <Box className="h-6 w-6 text-text-tertiary" aria-hidden="true" />
+            {selectedMine.name}
           </h2>
-          <p className="text-xs font-mono text-text-secondary mt-1 max-w-3xl leading-relaxed">
-            Real-time virtual copy of <span className="text-accent font-bold">{selectedMine.name} Mine ({selectedMine.code})</span>. Driven by a synthetic 50-year series generated to the published ingestion contract, with an illustrative forward trajectory. Not statutory disclosures, and not a fitted trajectory model.
+          <p className="measure mt-2 text-sm text-text-secondary">
+            A what-if calculator over a synthetic 50-year series generated to the published
+            ingestion contract, with an illustrative forward trajectory. Not a fitted trajectory
+            model, not a statutory disclosure, and not a live feed from the mine.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="px-3 py-1.5 rounded-full bg-surface-1/90 border border-accent/40 text-xs font-mono text-accent font-bold flex items-center gap-2">
-            <Activity className="w-3.5 h-3.5 text-accent " />
-            <span>TWIN SYNCED (4ms)</span>
-          </div>
-        </div>
+        <span className="shrink-0 font-mono text-xs text-text-tertiary">
+          {selectedMine.code}
+        </span>
       </div>
 
       {/* Main Grid: Parameter Controls + Real Digital Data Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Interactive Scenario Controls (5 Columns) */}
-        <div className="lg:col-span-5 space-y-5 ios-glass-inset p-5 rounded-md border border-border-default">
+        <div className="lg:col-span-5 space-y-5 rounded-md border border-border-subtle bg-surface-2 p-5 rounded-md border border-border-default">
           <div className="flex items-center justify-between border-b border-border-default pb-2">
             <div className="flex items-center gap-2">
               <Sliders className="w-4 h-4 text-accent" />
@@ -630,7 +637,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
             </div>
 
           {/* SLEEK MINIMALISTIC 50-YEAR HISTORY (1975-2025) & 2040 FORECAST GRAPH */}
-          <div className="ios-glass-inset p-5 rounded-md border border-border-default space-y-3 relative overflow-hidden bg-[var(--color-surface-1)]/90">
+          <div className="rounded-md border border-border-subtle bg-surface-2 p-5 rounded-md border border-border-default space-y-3 relative overflow-hidden bg-[var(--color-surface-1)]/90">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-default pb-2">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-accent" />
@@ -789,7 +796,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
 
           {/* Daily forecast trajectory — the real Track B artifact, not a shape */}
           <div
-            className="ios-glass-inset p-5 rounded-md border border-border-default space-y-3"
+            className="rounded-md border border-border-subtle bg-surface-2 p-5 rounded-md border border-border-default space-y-3"
             data-provenance={trajectoryState === 'ready' ? 'synthetic' : 'unavailable'}
             data-provenance-model={forecastMeta?.model}
           >
@@ -967,7 +974,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 key={s.id}
                 onClick={() => setComparedScenario(s)}
                 data-provenance="assumption"
-                className={`ios-glass-inset p-3.5 rounded-md border transition-colors cursor-pointer hover:border-accent/50 ${
+                className={`rounded-md border border-border-subtle bg-surface-2 p-3.5 rounded-md border transition-colors cursor-pointer hover:border-accent/50 ${
                   comparedScenario?.id === s.id
                     ? 'border-accent bg-accent/10'
                     : 'border-border-default bg-surface-2'

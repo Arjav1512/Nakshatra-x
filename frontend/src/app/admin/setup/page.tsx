@@ -146,7 +146,6 @@ export default function AdminSetupPage() {
         {/* ================= CASE 1: SLOT IS OPEN (Claim It) ================= */}
         {isSlotAvailable && !success && (
           <div className="rounded-md bg-surface-1/90 border border-border-default p-6 sm:p-8 relative overflow-hidden ">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
 
             <div className="flex items-center gap-3.5 mb-6 border-b border-border-default pb-5">
               <div className="h-12 w-12 rounded-md bg-accent/10 border border-accent/40 flex items-center justify-center text-accent">
