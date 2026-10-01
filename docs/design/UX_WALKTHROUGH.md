@@ -92,7 +92,11 @@ no hierarchy between "the answer" and "the evidence for the answer".
 ### Confusion 7 — the credibility evidence is below the fold, mid-page
 
 The rolling-origin backtest — MAPE 11.67% against a 14.81% baseline, coverage
-0.812 — is the single strongest thing this product can say. It sits roughly
+0.812 on the pilot mine — is among the strongest things this product can say.
+(Scoped deliberately: 0.812 is Balaghat on one 150-day window. Portfolio-wide
+daily coverage is 0.761 [0.733, 0.786] and the 14-day cumulative distribution is
+too narrow at 0.738 [0.700, 0.777] — `docs/CALIBRATION.md`. The protocol is the
+strong claim; the single number is not a system-wide one.) It sits roughly
 two-thirds down a long page, in a panel with the same border and background as
 the panel above it.
 

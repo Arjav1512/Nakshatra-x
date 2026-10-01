@@ -72,7 +72,7 @@ file:line, a test name, or a measured number.
 | B-7 attribution to constraints | P0 | **fully** | Exact additive decomposition, `additive-driver-attribution-v1`. Honestly named — not SHAP. |
 | B-8 threshold alerts | P1 | **partial** | `POST /dispatch-operational-alert` + `GET /alerts` work, but are **not driven by the B-6 probability crossing a threshold**. |
 | B-9 grade-aware (non-fungible) | P1 | **fully** | Grade is a first-class key throughout the contract and the forecaster. |
-| B-10 backtest + display error | P0 | **fully** | Rolling-origin, refit at every origin. **MAPE 11.67% vs baseline 14.81%**, coverage **0.812** (nominal 0.80), 160 predictions. `docs/BACKTEST.md`; surfaced in `TrackBPanel.tsx`. |
+| B-10 backtest + display error | P0 | **fully** | Rolling-origin, refit at every origin. **MAPE 11.67% vs baseline 14.81%**, coverage **0.812** (nominal 0.80), 160 predictions — **pilot mine only**. Portfolio-wide over 24 origins: daily coverage **0.761 [0.733, 0.786]**, 14-day cumulative **0.738 [0.700, 0.777]**, both below nominal (`docs/CALIBRATION.md`). `docs/BACKTEST.md`; surfaced in `TrackBPanel.tsx`. |
 
 **Track B: 8 fully · 2 partial · 0 missing** — the strongest track, as PRD §10 intends.
 
@@ -117,7 +117,7 @@ file:line, a test name, or a measured number.
 | N-5 on-premise | — | **partial** | Models, constraint engine, kriging and contract are local. **Supabase (auth) is an external dependency**; weather/imagery are external by nature and degrade with a stated reason. |
 | N-6 degrade + state staleness | Required | **fully** | Backend down → 4/4 endpoints 503 with reason, **zero numeric fields**, `/console` still 200. Backtest reports `artifact_age_hours`. |
 | N-7 audit log of recommendations | Required | **missing** | `grep audit_log\|disposition` → no hits. Not implemented. |
-| N-8 backtest visible in UI | Required | **fully** | On-demand panel in `TrackBPanel.tsx` showing model vs baseline MAPE, coverage vs nominal, per-horizon table. **Browser-verified 2026-09-24**: MAPE 11.67% vs 14.81%, coverage 0.812, four horizons. Before the DEF-1 fix the panel returned 503 and rendered nothing. |
+| N-8 backtest visible in UI | Required | **fully** | On-demand panel in `TrackBPanel.tsx` showing model vs baseline MAPE, coverage vs nominal, per-horizon table. **Browser-verified 2026-09-24**: MAPE 11.67% vs 14.81%, coverage 0.812 (that mine's artifact, not a portfolio figure), four horizons. Before the DEF-1 fix the panel returned 503 and rendered nothing. |
 
 **Non-functional: 5 fully · 2 partial · 1 missing**
 
@@ -252,7 +252,10 @@ rather than optimised ones.
 ### Functional correctness — **18 / 25**  *(was 19)*
 
 What works, works honestly and is tested: the forecaster beats its baseline on a
-correct rolling-origin protocol with calibrated intervals (0.812 vs 0.800); the
+correct rolling-origin protocol, with the pilot mine's daily intervals close to
+nominal (0.812 vs 0.800) though portfolio-wide daily coverage is below it at
+0.761 [0.733, 0.786] and the 14-day cumulative distribution is too narrow at
+0.738 [0.700, 0.777] (`docs/CALIBRATION.md`); the
 constraint engine rejects both failures the PRD names; the blend optimiser
 reports infeasible with an LP-derived diagnosis; weather and imagery are
 genuinely live. Deducted for: Track A's headline AUC leaning partly on terrain

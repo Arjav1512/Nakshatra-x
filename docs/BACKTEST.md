@@ -24,6 +24,15 @@ VERDICT: GBT beats the seasonal-naive baseline: MAPE 10.75% vs 14.81% (+27.4% re
 
 The 80% prediction interval achieved **0.812 empirical coverage against a 0.800 nominal** — a gap of **+0.012**.
 
+> **Scope.** That is Balaghat, on this 150-day window. It is not the system's
+> coverage, and it should not be quoted as one. Measured across all ten mines over
+> 24 origin dates, daily coverage is **0.761 [0.733, 0.786]** — below nominal, with
+> the interval excluding 0.80 — and the **14-day cumulative** distribution is too
+> narrow at **0.738 [0.700, 0.777]** with 16.5% of totals in the outer 10% tails.
+> Per-mine cumulative coverage ranges from 0.542 to 0.903. Full tables, clustered
+> intervals and the calibration attempt that was measured and declined:
+> **`docs/CALIBRATION.md`**.
+
 ### Per horizon
 
 | Horizon | GBT MAPE | Baseline MAPE | Coverage (80% nominal) |
@@ -68,7 +77,7 @@ Reported in full because the intermediate numbers are part of the evidence.
 | 1 | Raw quantile GBT (q=0.1/0.5/0.9) | 10.54% | **0.581** | Beat the baseline, but the intervals were badly overconfident |
 | 2 | Conformalised (CQR), random calibration split | 10.75% | 0.656 | Better; still 0.14 short |
 | 3 | CQR, **per-horizon** widths | 10.75% | 0.662 | Barely moved — the problem was not horizon-specific |
-| 4 | CQR, **recency-based** calibration split | 11.67% | **0.812** | Calibrated |
+| 4 | CQR, **recency-based** calibration split | 11.67% | **0.812** | Calibrated (pilot; 0.761 portfolio-wide) |
 
 **Why the raw model was overconfident.** Fitting the pinball loss on training residuals understates out-of-sample spread. Standard, and the reason conformal prediction exists.
 

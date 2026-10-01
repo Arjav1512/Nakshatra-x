@@ -99,6 +99,12 @@ series violate it — the evaluation window spans the monsoon, when output sprea
 genuinely widens. Calibrating on the most recent slice of history instead
 reached 0.812.
 
+*Scope, added 2026-10-01:* those figures are the pilot mine on its 150-day
+window. Portfolio-wide daily coverage is 0.761 [0.733, 0.786] and the 14-day
+cumulative distribution is too narrow at 0.738 [0.700, 0.777]. The progression
+above is real; the endpoint is not a system-wide calibration claim. See
+`docs/CALIBRATION.md`.
+
 *Trade-off:* MAPE worsens from 10.75% to 11.67%, because the temporal split
 removes the most recent 25% of samples from the fit. Accepted: an interval that
 claims 80% and delivers 66% is worse than useless to a planner sizing a risk,
@@ -658,3 +664,174 @@ entire annotation column rendered blank. The content was in the HTML and the
 motion took it away. `immediateRender: false` fixes it, and
 `npm run test:motion` now asserts every annotation is visible before any
 scrolling, under both motion and reduced-motion.
+
+## D-040 — Pre-registered ship criterion for the cumulative calibration
+
+**Written 2026-10-01T05:48:10Z, before any dense validation result was read.**
+The validation run was 16 of 34 origins in at the time and had written no report
+file. This entry is committed before the numbers exist so that the numbers cannot
+choose the rule.
+
+**What was already known when this was written**, disclosed because a
+pre-registration that hides prior looks is worth nothing:
+
+- The committed backtest artifact on main reports cumulative coverage **0.725**
+  and tail frequency **0.175** for the pilot mine, 40 windows at 10 origin dates.
+- Inside the conformal slice the same construction reports coverage **0.852** —
+  too wide. That contrast is why the third block exists (D-040 mechanism, commit
+  `dee2dd3`).
+- One sparse run of the *branch's* backtest, same single mine and 10 origin
+  dates, reported the uncalibrated arm at **0.825** and the calibrated arm at
+  **0.975**. On an instrument whose resolution is 1/40 = 0.025 per window that is
+  three windows of movement, which is why it is not being treated as the result —
+  but it was seen, and it says the loading may overshoot.
+- Per-mine loadings from the full fit: 0.00 to 0.50, three mines at 0.00 because
+  their block said the cumulative was already too wide.
+
+### Primary metrics
+
+Pooled across all ten mines, on held-out origins only:
+
+- `coverage_80` of the cumulative 10–90 band, nominal 0.80;
+- `pit_at_extremes`, the share of windows in the outer 10% tails, nominal 0.10.
+
+Both are reported as distances from nominal, so "better" is unambiguous:
+
+```
+d_cov  = |coverage - 0.80|
+d_tail = |tail      - 0.10|
+```
+
+### Improvement statistics
+
+Paired on identical windows, loading on versus loading off:
+
+```
+Δ_cov  = d_cov(rho = 0)  - d_cov(calibrated)      positive = better
+Δ_tail = d_tail(rho = 0) - d_tail(calibrated)     positive = better
+```
+
+### Uncertainty — clustered, never binomial
+
+The windows are not independent: consecutive origins share 13 of 14 days, and
+every mine is evaluated at the same origin dates, so weather and equipment state
+are common across a date's windows. A binomial interval on ~1,156 windows would
+claim a precision the design does not have.
+
+So every coverage and tail figure, and every Δ, carries a **95% percentile
+interval from a cluster bootstrap that resamples whole origin dates with
+replacement** — cluster = origin date, all mines and grades at that date moving
+together — 2,000 resamples, fixed seed.
+
+Effective sample size is reported as the design effect against the independent
+case:
+
+```
+ESS = n_windows x Var_binomial(coverage) / Var_bootstrap(coverage)
+```
+
+### Ship criterion
+
+Ship the loading **enabled** only if all of:
+
+1. `Δ_cov >= 0` and `Δ_tail >= 0` — neither metric moves away from nominal;
+2. at least one of `Δ_cov`, `Δ_tail` has a 95% CI excluding zero;
+3. daily interval coverage and the point forecast are **unchanged** by the
+   loading. This holds by construction — the loading never enters `predict` —
+   so it is verified as an identity, not as an approximation: MAPE, sMAPE, MAE
+   and daily `coverage_80` must be bit-identical between the two arms.
+
+Otherwise: ship the mechanism **disabled**, default loading zero, and report the
+result as negative. The measurement script and the three-block split stay either
+way, because a negative result that is measurable is worth more than an
+unmeasured positive one.
+
+### Pooled versus per-mine loading
+
+Both are evaluated on the same held-out windows. The choice rule, fixed here:
+
+```
+Δ_disp = |sd(PIT) - 1/sqrt(12)| for pooled
+       - |sd(PIT) - 1/sqrt(12)| for per-mine
+```
+
+Per-mine is used **only if** the 95% cluster-bootstrap CI of `Δ_disp` is strictly
+above zero — that is, only if per-mine beats pooled by more than the uncertainty.
+Otherwise the pooled loading is used, because a single number fitted on ten times
+the windows is the more defensible default and ten separate numbers each fitted
+on ~100 windows invite exactly the overfitting this entry exists to guard
+against.
+
+The `direction` field stays on every mine either way, so the three mines whose
+cumulative is already too wide keep saying so rather than showing a bare 0.00.
+
+### Three arms, identical origins
+
+The change is two changes, and they are reported separately:
+
+| arm | what it is |
+|---|---|
+| `main` | `b045369`, two-block split, no loading |
+| `split only` | this branch, three-block split, loading forced to 0 |
+| `split + loading` | this branch as it would ship |
+
+`main` versus `split only` is the split's effect. `split only` versus
+`split + loading` is the loading's effect. Reporting one number for both would
+credit the loading with whatever the split did.
+
+The split changes the quantile fits' calibration inputs, so unlike the loading it
+*may* move MAPE and daily coverage. Whatever it does is reported; the model must
+still beat the seasonal-naive baseline and daily coverage must stay within the
+gap already documented, or the split is wrong too.
+
+### D-040 addendum — the model change was declined (2026-10-01T06:27:17Z)
+
+**Written after the results, which the rule above was written before.** Stating
+that plainly matters: everything in this addendum is post-hoc, and the only
+reason it is legitimate is the direction it goes.
+
+**The decision: the cumulative calibration does not ship.** The model returns to
+`b045369` byte-for-byte.
+
+**Why the pre-registered rule did not settle it.** The rule judged the loading
+against `rho = 0` *on this branch*, and by that comparison the loading works:
++0.0355 coverage and +0.0196 tails, both intervals excluding zero. It passed.
+What the rule never asked was whether the branch beats **main**, and it does not:
+
+| versus main `b045369` | coverage | tails | PIT dispersion |
+|---|---|---|---|
+| split only (`rho = 0`) | −0.0331 [−0.0711, 0.0049] | −0.0061 [−0.0466, 0.0306] | −0.0033 [−0.0145, 0.0079] |
+| split + pooled (would have shipped) | +0.0025 [−0.0368, 0.0417] | +0.0135 [−0.0196, 0.0453] | +0.0040 [−0.0077, 0.0156] |
+| split + per-mine (not selected) | +0.0294 [−0.0061, 0.0625] | **+0.0404 [0.0123, 0.0711]** | **+0.0148 [0.0025, 0.0246]** |
+
+The loading recovers what the three-block split costs, and nets to nothing
+measurable. Daily coverage also dips, 0.7607 → 0.7512, with MAPE flat
+(10.000% → 10.050%).
+
+**Why this is not post-hoc selection.** Declining to ship keeps the status quo.
+A pre-registration protects against choosing the analysis that makes a change
+look good; it does not oblige shipping a change whose only measured effect is
+added complexity. The asymmetry is the point — the rule can license a change, and
+refusing to use that licence costs nothing it was protecting.
+
+**What "disabled" had to mean.** The rule's fallback was "ship disabled with the
+mechanism retained". That wording assumed `rho = 0` was neutral. It is not: the
+split alone is worse than main by −0.0331 on coverage. So "disabled" could only
+mean *main's exact behaviour*, and the cleanest way to deliver main's exact
+behaviour is to be main. A flag defaulting to it would need the two-block index
+split restored as a second path and the new artifact fields suppressed when off —
+a dormant branch whose sole purpose is reproducing main. Reverted instead; the
+mechanism is at `dee2dd3` and `cef2801` in this branch's history and every number
+it produced is in `docs/CALIBRATION.md`.
+
+**The per-mine result is recorded, not adopted.** It is the one arm that beat
+main with intervals excluding zero. It was rejected by the pre-registered
+deciding statistic (PIT dispersion, +0.0108, CI [−0.0005, 0.0155]) by 0.0005, and
+adopting it now on the strength of metrics the rule did not nominate would be
+exactly the move the rule exists to block. It goes to the backlog as a fresh
+pre-registered replication on an **independent synthetic seed** — not these
+origins, because a result selected on a sample cannot be confirmed on it — judged
+against main rather than against `rho = 0`.
+
+**What the rule should have said**, for next time: the comparison that decides is
+against the current shipped behaviour, not against a within-branch baseline.

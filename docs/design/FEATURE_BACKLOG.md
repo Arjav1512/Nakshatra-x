@@ -376,3 +376,59 @@ redesign itself:
 - Distinguishing a 503 from a network error — `status` already exists (B-2).
 - A designed 404 and loading state — the framework already renders these; they
   simply had no design.
+
+## Cumulative calibration — three items from the declined attempt
+
+Context: `docs/CALIBRATION.md` and `docs/DECISIONS.md` D-040 + addendum. The
+calibration was built, measured against main, and not shipped.
+
+### 1. Per-mine loading, as a fresh pre-registered replication
+
+The per-mine common-factor loading was the one arm that beat main with intervals
+excluding zero — tails +0.0404 [0.0123, 0.0711], PIT dispersion +0.0148 [0.0025,
+0.0246]. It was rejected by D-040's pre-registered deciding statistic by 0.0005
+and adopting it on other metrics afterwards is the move that rule exists to
+block.
+
+Requirements for the replication, so it is a test and not a re-run:
+
+- **An independent synthetic seed.** Not the 2025-10-15..2026-09-02 origins used
+  before. A result selected on a sample cannot be confirmed on that sample.
+- **Pre-registered before generating the new data**, and this time the deciding
+  comparison is **against shipped behaviour**, not against a within-branch
+  `rho = 0` baseline. That was the gap in D-040.
+- Mechanism to start from: commits `dee2dd3` and `cef2801` on
+  `ml/cumulative-calibration`. It should be re-derived rather than inherited as a
+  dormant flag.
+- The split's cost must be carried in the comparison. Main -> split-only was
+  −0.0331 [−0.0711, 0.0049] on coverage and daily coverage dipped 0.7607 ->
+  0.7512; any version that keeps the three-block split has to beat main net of
+  that.
+
+### 2. `_cumulative_paths` is a second copy of the product's aggregation
+
+`backend/app/ml/backtest.py` holds its own copy of the arithmetic in
+`shortfall_probability`, with a comment asking the reader to keep the two
+identical. A calibration check that can drift from the thing it validates
+certifies nothing, and this is exactly the shape of the bug that originally let
+P(shortfall) reach 1.000 with every daily interval correct.
+
+The declined branch de-duplicated it into one `cumulative_paths` in
+`forecaster.py`; that part was behaviour-preserving (identical RNG consumption
+and arithmetic at `rho = 0`) and was reverted only because it travelled with the
+model change. Worth landing on its own, with byte-identical artifacts as the
+proof.
+
+### 3. `batch all` cannot produce byte-identical sample CSVs
+
+`data/synthetic/*.sample.csv` embed a wall-clock `ingested_at`, so every
+regeneration dirties all seven files even when the data is unchanged — verified
+by masking the timestamp column, after which the rows are byte-identical to the
+committed set.
+
+This undercuts the reproducibility claim that makes committing the artifacts
+honest ("the same commit produces byte-identical forecasts" —
+`batch.run_forecasts`). The fix is to derive `ingested_at` from the dataset's
+resolved end date rather than from the clock, or to drop it from the sample
+export. Until then a regeneration cannot be distinguished from a change by
+`git diff`.
