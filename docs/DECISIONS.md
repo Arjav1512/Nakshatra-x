@@ -99,6 +99,12 @@ series violate it — the evaluation window spans the monsoon, when output sprea
 genuinely widens. Calibrating on the most recent slice of history instead
 reached 0.812.
 
+*Scope, added 2026-10-01:* those figures are the pilot mine on its 150-day
+window. Portfolio-wide daily coverage is 0.761 [0.733, 0.786] and the 14-day
+cumulative distribution is too narrow at 0.738 [0.700, 0.777]. The progression
+above is real; the endpoint is not a system-wide calibration claim. See
+`docs/CALIBRATION.md`.
+
 *Trade-off:* MAPE worsens from 10.75% to 11.67%, because the temporal split
 removes the most recent 25% of samples from the fit. Accepted: an interval that
 claims 80% and delivers 66% is worse than useless to a planner sizing a risk,

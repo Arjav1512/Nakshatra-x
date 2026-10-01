@@ -241,12 +241,17 @@ Result:
 
 | | MAPE | Coverage |
 |---|---|---|
-| GBT + conformal | ~10–12% | **0.82** |
-| Seasonal-naive | ~15% | — |
+| GBT + conformal, pilot mine | ~10–12% | **0.82** |
+| Seasonal-naive, pilot mine | ~15% | — |
+| GBT + conformal, all ten mines | ~10% | **0.761** [0.733, 0.786] |
 
-**Say two things.** First, the model beats the baseline — the comparison is
-like-for-like, same origins and targets. Second, and rarer: the 80% interval
-covers **82%** of actuals. PRD §11 calls calibration out specifically —
+**Say two things, and scope the second one.** First, the model beats the
+baseline — the comparison is like-for-like, same origins and targets. Second, and
+rarer: the 80% interval covers **82%** of actuals *on the pilot mine*. Do not
+generalise that figure. Across all ten mines daily coverage is **0.761**
+[0.733, 0.786] and the 14-day cumulative total is too narrow at **0.738**
+[0.700, 0.777] — if a judge asks, that is the honest answer and it is written up
+in `docs/CALIBRATION.md`. PRD §11 calls calibration out specifically —
 *"do 70%-confidence predictions come true 70% of the time? Almost no team will
 measure this."* Getting there took four attempts; `docs/BACKTEST.md` reports all
 of them including the two that failed.
