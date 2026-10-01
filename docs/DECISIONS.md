@@ -658,3 +658,122 @@ entire annotation column rendered blank. The content was in the HTML and the
 motion took it away. `immediateRender: false` fixes it, and
 `npm run test:motion` now asserts every annotation is visible before any
 scrolling, under both motion and reduced-motion.
+
+## D-040 — Pre-registered ship criterion for the cumulative calibration
+
+**Written 2026-10-01T05:48:10Z, before any dense validation result was read.**
+The validation run was 16 of 34 origins in at the time and had written no report
+file. This entry is committed before the numbers exist so that the numbers cannot
+choose the rule.
+
+**What was already known when this was written**, disclosed because a
+pre-registration that hides prior looks is worth nothing:
+
+- The committed backtest artifact on main reports cumulative coverage **0.725**
+  and tail frequency **0.175** for the pilot mine, 40 windows at 10 origin dates.
+- Inside the conformal slice the same construction reports coverage **0.852** —
+  too wide. That contrast is why the third block exists (D-040 mechanism, commit
+  `dee2dd3`).
+- One sparse run of the *branch's* backtest, same single mine and 10 origin
+  dates, reported the uncalibrated arm at **0.825** and the calibrated arm at
+  **0.975**. On an instrument whose resolution is 1/40 = 0.025 per window that is
+  three windows of movement, which is why it is not being treated as the result —
+  but it was seen, and it says the loading may overshoot.
+- Per-mine loadings from the full fit: 0.00 to 0.50, three mines at 0.00 because
+  their block said the cumulative was already too wide.
+
+### Primary metrics
+
+Pooled across all ten mines, on held-out origins only:
+
+- `coverage_80` of the cumulative 10–90 band, nominal 0.80;
+- `pit_at_extremes`, the share of windows in the outer 10% tails, nominal 0.10.
+
+Both are reported as distances from nominal, so "better" is unambiguous:
+
+```
+d_cov  = |coverage - 0.80|
+d_tail = |tail      - 0.10|
+```
+
+### Improvement statistics
+
+Paired on identical windows, loading on versus loading off:
+
+```
+Δ_cov  = d_cov(rho = 0)  - d_cov(calibrated)      positive = better
+Δ_tail = d_tail(rho = 0) - d_tail(calibrated)     positive = better
+```
+
+### Uncertainty — clustered, never binomial
+
+The windows are not independent: consecutive origins share 13 of 14 days, and
+every mine is evaluated at the same origin dates, so weather and equipment state
+are common across a date's windows. A binomial interval on ~1,156 windows would
+claim a precision the design does not have.
+
+So every coverage and tail figure, and every Δ, carries a **95% percentile
+interval from a cluster bootstrap that resamples whole origin dates with
+replacement** — cluster = origin date, all mines and grades at that date moving
+together — 2,000 resamples, fixed seed.
+
+Effective sample size is reported as the design effect against the independent
+case:
+
+```
+ESS = n_windows x Var_binomial(coverage) / Var_bootstrap(coverage)
+```
+
+### Ship criterion
+
+Ship the loading **enabled** only if all of:
+
+1. `Δ_cov >= 0` and `Δ_tail >= 0` — neither metric moves away from nominal;
+2. at least one of `Δ_cov`, `Δ_tail` has a 95% CI excluding zero;
+3. daily interval coverage and the point forecast are **unchanged** by the
+   loading. This holds by construction — the loading never enters `predict` —
+   so it is verified as an identity, not as an approximation: MAPE, sMAPE, MAE
+   and daily `coverage_80` must be bit-identical between the two arms.
+
+Otherwise: ship the mechanism **disabled**, default loading zero, and report the
+result as negative. The measurement script and the three-block split stay either
+way, because a negative result that is measurable is worth more than an
+unmeasured positive one.
+
+### Pooled versus per-mine loading
+
+Both are evaluated on the same held-out windows. The choice rule, fixed here:
+
+```
+Δ_disp = |sd(PIT) - 1/sqrt(12)| for pooled
+       - |sd(PIT) - 1/sqrt(12)| for per-mine
+```
+
+Per-mine is used **only if** the 95% cluster-bootstrap CI of `Δ_disp` is strictly
+above zero — that is, only if per-mine beats pooled by more than the uncertainty.
+Otherwise the pooled loading is used, because a single number fitted on ten times
+the windows is the more defensible default and ten separate numbers each fitted
+on ~100 windows invite exactly the overfitting this entry exists to guard
+against.
+
+The `direction` field stays on every mine either way, so the three mines whose
+cumulative is already too wide keep saying so rather than showing a bare 0.00.
+
+### Three arms, identical origins
+
+The change is two changes, and they are reported separately:
+
+| arm | what it is |
+|---|---|
+| `main` | `b045369`, two-block split, no loading |
+| `split only` | this branch, three-block split, loading forced to 0 |
+| `split + loading` | this branch as it would ship |
+
+`main` versus `split only` is the split's effect. `split only` versus
+`split + loading` is the loading's effect. Reporting one number for both would
+credit the loading with whatever the split did.
+
+The split changes the quantile fits' calibration inputs, so unlike the loading it
+*may* move MAPE and daily coverage. Whatever it does is reported; the model must
+still beat the seasonal-naive baseline and daily coverage must stay within the
+gap already documented, or the split is wrong too.
