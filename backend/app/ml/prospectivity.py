@@ -290,6 +290,59 @@ def scored_grid() -> dict:
     }
 
 
+def measured_points() -> dict:
+    """
+    The points the model was fitted on (PRD A-3), for the map's measured layer.
+
+    The grid layers are kriged output — derived. These are the inputs: real
+    Sentinel-2 L2A band ratios and SRTM terrain at real coordinates, with the
+    binary site label. Showing them beside the surface is the difference between
+    "the model says this area scores high" and "here is what it was told".
+
+    `source_kind` is `measured` for the bands and terrain. The labels are public
+    MOIL mine locations, which is reference data, and the note says so rather
+    than letting one envelope cover two different kinds of fact.
+    """
+    st = _load()
+    df = st["table"]
+    scores = st["train_scores"]
+
+    points = [
+        {
+            "lat": round(float(r.lat), 4),
+            "lng": round(float(r.lng), 4),
+            "label": int(r.label),
+            "fitted_score": round(float(sc), 4),
+            "iron_oxide_ratio": round(float(r.iron_oxide_ratio), 4),
+            "slope_deg": round(float(r.slope_deg), 2),
+            "ndvi": round(float(r.ndvi), 4),
+        }
+        for r, sc in zip(df.itertuples(), scores)
+    ]
+
+    return {
+        "model_version": MODEL_VERSION,
+        "n_points": len(points),
+        "n_positive": int(sum(p["label"] for p in points)),
+        "quantity": "training observations",
+        "points": points,
+        "guardrails": _guardrails(),
+        "provenance": {
+            "source_kind": "measured",
+            "source": (
+                "Sentinel-2 L2A band ratios and SRTM terrain sampled at each site; "
+                "site labels are public MOIL mine locations (reference)"
+            ),
+            "model_version": MODEL_VERSION,
+            "note": (
+                "The observations the model was fitted on, not its output. "
+                "`fitted_score` is the model's probability at that point and is "
+                "derived; the bands and terrain are measured."
+            ),
+        },
+    }
+
+
 def model_metrics() -> dict:
     """Honest validation metrics for the evidence panel (PRD A-8, D-7)."""
     return _load()["metrics"]

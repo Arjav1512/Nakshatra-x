@@ -9,7 +9,14 @@ from app.api.track_b import NoBacktest, backtest_mine, forecast_mine, forecast_s
 from app.api.forecast_store import Warming
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from app.ml.prospectivity import model_metrics, predict_point, rank_drill_targets, scored_grid
+from app.ml.map_layers import tile_layers
+from app.ml.prospectivity import (
+    measured_points,
+    model_metrics,
+    predict_point,
+    rank_drill_targets,
+    scored_grid,
+)
 from app.api.telemetry import build_mine_telemetry
 from app.services.recommendations import generate_action_recommendations
 from app.ml.risk_model import calculate_shortfall_risk
@@ -395,6 +402,34 @@ def prospectivity_grid():
         return scored_grid()
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
+
+
+@router.get("/prospectivity/measured")
+def prospectivity_measured():
+    """
+    The training observations behind the surface (PRD A-3).
+
+    The map can draw the kriged surface and the points it was kriged from. Only
+    one of those is a measurement, and the layer switcher now lets a reader see
+    both and tell them apart.
+    """
+    try:
+        return measured_points()
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+
+
+@router.get("/map/tile-layers")
+def map_tile_layers(force: bool = False):
+    """
+    Raster tile layers from Planetary Computer, with provenance (PRD A-3).
+
+    Always 200: a layer that cannot be produced comes back with
+    `status: "unavailable"` and the upstream's reason. A 503 for the whole
+    endpoint would lose the distinction between "no imagery at all" and "the DEM
+    mosaic is refusing", and the screen needs to be able to say which.
+    """
+    return tile_layers(force=force)
 
 
 @router.get("/prospectivity/metrics")
