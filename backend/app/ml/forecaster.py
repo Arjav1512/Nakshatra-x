@@ -64,6 +64,20 @@ CUMULATIVE_RHO_GRID = tuple(float(round(x, 3)) for x in np.arange(0.0, 0.5001, 0
 #: Below this many held-out cumulative windows the loading is too noisy to fit;
 #: the mine falls back to the pooled median and says so.
 MIN_CUMULATIVE_CALIBRATION_RECORDS = 40
+#: Which calibrated loading the product applies.
+#:
+#: "pooled" — one loading for every mine, the median of the per-mine fits — is
+#: what the pre-registered rule in docs/DECISIONS.md D-040 selected. Per-mine
+#: loadings did beat pooled on held-out coverage (+0.027) and tails (+0.027),
+#: both with intervals excluding zero, but the rule's deciding statistic was
+#: held-out PIT dispersion, where per-mine gained +0.0108 with a 95% interval of
+#: [-0.0005, 0.0155] — not strictly above zero. It missed by 0.0005.
+#:
+#: Switching to the statistic that gives the preferred answer after seeing the
+#: numbers is the thing a pre-registration exists to prevent, so this stays
+#: "pooled". The per-mine numbers are reported in full in D-040 so the choice can
+#: be revisited deliberately rather than silently.
+CUMULATIVE_LOADING_MODE = "pooled"
 
 
 @dataclass
@@ -241,8 +255,50 @@ class ProductionForecaster:
         self.opencast: dict[str, bool] = {}
 
     def rho_for(self, mine_code: str) -> float:
-        """The calibrated loading for a mine, or the pooled fallback."""
+        """
+        The PER-MINE calibrated loading, or the pooled fallback if this mine's
+        block was too thin to fit one.
+
+        This is the per-mine estimate itself, not necessarily what the product
+        applies — see `applied_rho`. Measurement code asks for this one directly
+        when it needs the per-mine arm.
+        """
         return self.cumulative_rho.get(mine_code, self.cumulative_rho_default)
+
+    def applied_rho(self, mine_code: str) -> float:
+        """
+        The loading the product actually applies, honouring
+        `CUMULATIVE_LOADING_MODE`.
+
+        Everything that serves or validates a forecast goes through here, so the
+        backtest measures the configuration that ships rather than a different
+        one.
+        """
+        if CUMULATIVE_LOADING_MODE == "pooled":
+            return self.cumulative_rho_default
+        if CUMULATIVE_LOADING_MODE == "per_mine":
+            return self.rho_for(mine_code)
+        if CUMULATIVE_LOADING_MODE == "off":
+            return 0.0
+        raise ValueError(f"unknown CUMULATIVE_LOADING_MODE {CUMULATIVE_LOADING_MODE!r}")
+
+    def calibration_summary(self, mine_code: str) -> dict:
+        """
+        The calibration record for serving: everything except the search curve.
+
+        The curve is 26 rows per mine and belongs in a measurement run, not on
+        every forecast artifact. What is kept is what a reader needs to judge
+        the number: the loading, which way the block said it was wrong, how many
+        held-out windows that came from, and which block.
+        """
+        meta = dict(self.cumulative_calibration.get(mine_code) or {})
+        meta.pop("search_curve", None)
+        meta.setdefault("calibrated", False)
+        meta.setdefault("reason", "no calibration record for this mine")
+        meta["loading_mode"] = CUMULATIVE_LOADING_MODE
+        meta["rho_fitted_for_this_mine"] = round(self.rho_for(mine_code), 3)
+        meta["rho_applied"] = round(self.applied_rho(mine_code), 3)
+        return meta
 
     def fit(
         self,

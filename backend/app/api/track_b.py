@@ -134,7 +134,7 @@ def compute_forecast(mine_code: str, horizon_days: int = 14, grade: str | None =
             # Calibrated on origins held out from the fit, the conformal widths
             # and the residual series; validated in the backtest on later
             # origins still.
-            rho=fc.rho_for(mine_code),
+            rho=fc.applied_rho(mine_code),
         )
         baseline_total = sum(
             seasonal_naive(series, origin + timedelta(days=h)) for h in horizons
@@ -167,6 +167,11 @@ def compute_forecast(mine_code: str, horizon_days: int = 14, grade: str | None =
         "window": {"start": window_start.isoformat(), "end": window_end.isoformat()},
         "horizon_days": horizon_days,
         "interval": {"nominal_coverage": NOMINAL_COVERAGE, "quantiles": [0.1, 0.5, 0.9]},
+        # How the cumulative distribution was calibrated for THIS mine: the
+        # loading, the block it was fitted on, and what the block said. Carried
+        # on the artifact so the number in P(shortfall) can be audited without
+        # refitting, and so a mine that could not be calibrated says so.
+        "cumulative_calibration": fc.calibration_summary(mine_code),
         "grades": per_grade,
         "portfolio": {
             "plan_target_tonnes": round(portfolio_target, 1),

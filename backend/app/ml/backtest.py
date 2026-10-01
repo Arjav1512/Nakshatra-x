@@ -164,7 +164,7 @@ def rolling_origin_backtest(
             # Both aggregations, at every origin. The calibrated one is what the
             # product serves; the uncalibrated one is kept so the before/after
             # is measured on identical origins rather than across two runs.
-            rho = fc.rho_for(mine_code)
+            rho = fc.applied_rho(mine_code)
             sims = cumulative_paths(dense, fc.residuals.get(mine_code), rho=rho)
             raw = cumulative_paths(dense, fc.residuals.get(mine_code), rho=0.0)
             if sims is None or raw is None:
