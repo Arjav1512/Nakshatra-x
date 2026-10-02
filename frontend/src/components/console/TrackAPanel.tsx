@@ -237,8 +237,18 @@ export function TrackAPanel() {
               {targets.n_candidates.toLocaleString()} candidate cells · {targets.n_observations} measured
               observations · {targets.ranked_by}
             </p>
+            {/*
+              A scroll container holding only a table has nothing focusable, so a
+              keyboard user could not scroll it to the columns past the edge at
+              375 — axe "scrollable-region-focusable", serious. Pre-existing;
+              found when the audit first covered this route. Focusable, named,
+              and announced as a region now.
+            */}
             <div
-              className="overflow-x-auto"
+              tabIndex={0}
+              role="region"
+              aria-label="Ranked drill targets — scrolls horizontally"
+              className="overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               data-provenance="derived"
               data-provenance-model={targets.model_version}
             >

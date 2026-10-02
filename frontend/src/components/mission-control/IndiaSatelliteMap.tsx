@@ -1204,6 +1204,11 @@ export default function IndiaSatelliteMap({
           <button
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
+            // Icon-only, so it had no accessible name: axe "button-name",
+            // critical. Pre-existing; found when the audit first covered this
+            // route (it had never visited /console?track=a).
+            aria-label={isFullscreen ? 'Exit full-screen map' : 'Full-screen map'}
+            aria-pressed={isFullscreen}
             className="rounded-md border border-border-interactive bg-surface-2 p-2 rounded-full text-text-primary hover:text-accent transition-colors cursor-pointer"
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
