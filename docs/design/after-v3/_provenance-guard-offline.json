@@ -1,0 +1,85 @@
+{
+  "base": "http://localhost:3000",
+  "routes": [
+    {
+      "route": "/",
+      "attributed": 3,
+      "violations": []
+    },
+    {
+      "route": "/console",
+      "attributed": 0,
+      "violations": []
+    },
+    {
+      "route": "/console?mine=1&track=b",
+      "attributed": 0,
+      "violations": []
+    },
+    {
+      "route": "/console?track=a",
+      "attributed": 0,
+      "violations": []
+    },
+    {
+      "route": "/production",
+      "attributed": 0,
+      "violations": []
+    },
+    {
+      "route": "/blending",
+      "attributed": 1,
+      "violations": []
+    },
+    {
+      "route": "/mine-twin",
+      "attributed": 1,
+      "violations": []
+    },
+    {
+      "route": "/flood-alert",
+      "attributed": 0,
+      "violations": []
+    },
+    {
+      "route": "/method",
+      "attributed": 0,
+      "violations": []
+    },
+    {
+      "route": "/about",
+      "attributed": 0,
+      "violations": []
+    },
+    {
+      "route": "/login",
+      "attributed": 0,
+      "violations": []
+    },
+    {
+      "route": "/admin",
+      "attributed": 0,
+      "violations": []
+    },
+    {
+      "route": "/admin/login",
+      "attributed": 0,
+      "violations": []
+    },
+    {
+      "route": "/admin/setup",
+      "attributed": 0,
+      "violations": []
+    },
+    {
+      "route": "/admin/profile",
+      "attributed": 0,
+      "violations": []
+    },
+    {
+      "route": "/auth/callback",
+      "attributed": 0,
+      "violations": []
+    }
+  ]
+}

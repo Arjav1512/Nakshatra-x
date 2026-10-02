@@ -1,0 +1,74 @@
+[
+  {
+    "layer": "probability",
+    "width": 1280,
+    "file": "probability@1280.png",
+    "source": null
+  },
+  {
+    "layer": "uncertainty",
+    "width": 1280,
+    "file": "uncertainty@1280.png",
+    "source": null
+  },
+  {
+    "layer": "measured",
+    "width": 1280,
+    "file": "measured@1280.png",
+    "source": null
+  },
+  {
+    "layer": "s2-true-colour",
+    "width": 1280,
+    "file": "s2-true-colour@1280.png",
+    "source": "LIVE"
+  },
+  {
+    "layer": "iron-oxide",
+    "width": 1280,
+    "file": "iron-oxide@1280.png",
+    "source": "LIVE"
+  },
+  {
+    "layer": "dem",
+    "width": 1280,
+    "file": "dem@1280.png",
+    "source": "LIVE"
+  },
+  {
+    "layer": "probability",
+    "width": 375,
+    "file": "probability@375.png",
+    "source": null
+  },
+  {
+    "layer": "uncertainty",
+    "width": 375,
+    "file": "uncertainty@375.png",
+    "source": null
+  },
+  {
+    "layer": "measured",
+    "width": 375,
+    "file": "measured@375.png",
+    "source": null
+  },
+  {
+    "layer": "s2-true-colour",
+    "width": 375,
+    "file": "s2-true-colour@375.png",
+    "source": "LIVE"
+  },
+  {
+    "layer": "iron-oxide",
+    "width": 375,
+    "file": "iron-oxide@375.png",
+    "source": "LIVE"
+  },
+  {
+    "layer": "dem",
+    "width": 375,
+    "file": "dem@375.png",
+    "source": "LIVE"
+  }
+]
