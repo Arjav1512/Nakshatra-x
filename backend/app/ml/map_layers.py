@@ -194,6 +194,15 @@ def _tiles_url(search_id: str, query: str) -> str:
     return f"{PC_DATA}/mosaic/{search_id}/tiles/WebMercatorQuad/{{z}}/{{x}}/{{y}}?{query}"
 
 
+def _tilejson_url(search_id: str, query: str) -> str:
+    """
+    The tilejson document for this layer, which is what a reader opens to check
+    a layer against its source: it states the tile template, the bounds and the
+    zoom range the tiler will actually serve.
+    """
+    return f"{PC_DATA}/mosaic/{search_id}/tilejson.json?{query}"
+
+
 #: Each entry is everything a reader needs to check the layer against the source.
 _SPECS: list[dict[str, Any]] = [
     {
@@ -343,6 +352,7 @@ def _build(spec: dict[str, Any]) -> dict[str, Any]:
         "name": spec["name"],
         "status": "ok",
         "tile_url": _tiles_url(search_id, spec["query"]),
+        "tilejson_url": _tilejson_url(search_id, spec["query"]),
         "min_zoom": 6,
         "max_zoom": 14,
         "bbox": BBOX,

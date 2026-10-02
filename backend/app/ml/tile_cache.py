@@ -192,8 +192,26 @@ def fetch_all(
         # reused everything wrote a manifest claiming 0.0 MB for a 39 MB cache —
         # and `cache_status` would have advertised an empty cache that was in
         # fact complete. The manifest describes the cache, not the run.
-        on_disk = sum(f.stat().st_size for f in (CACHE_DIR / lid).rglob("*") if f.is_file())
+        files = [f for f in (CACHE_DIR / lid).rglob("*") if f.is_file()]
+        on_disk = sum(f.stat().st_size for f in files)
         total_bytes += on_disk
+
+        # WHEN THE TILES WERE FETCHED, from the tiles themselves.
+        #
+        # The first version stamped `fetched_at` with the time the manifest was
+        # written. A re-run that reused every tile then claimed tiles from
+        # 2026-10-01 14:06 had been fetched on 2026-10-02 16:22 — and the map
+        # labels a cached layer "cached · fetched <date>", so the label would
+        # have overstated freshness by a day. Same class of error as calling a
+        # cached tile live, one step removed.
+        #
+        # So the date comes from the files' modification times. The OLDEST is
+        # what the label shows: a cache can mix tiles from several runs, and a
+        # label must never claim the whole layer is fresher than its stalest
+        # tile. The newest is kept beside it so a mixed cache is visible.
+        mtimes = [f.stat().st_mtime for f in files]
+        oldest = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(min(mtimes))) if mtimes else None
+        newest = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(max(mtimes))) if mtimes else None
         entries.append({
             "layer": lid,
             "name": layer["name"],
@@ -204,8 +222,14 @@ def fetch_all(
             "n_missing": missing,
             "bytes": on_disk,
             "bytes_fetched_this_run": layer_bytes,
-            "fetched_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "fetched_at": oldest,
+            "fetched_latest_at": newest,
+            "fetched_at_note": (
+                "Oldest tile's modification time — what the cached label shows, so "
+                "it never claims the layer is fresher than its stalest tile."
+            ),
             "tile_url": layer["tile_url"],
+            "tilejson_url": layer["tilejson_url"],
             "provenance": layer["provenance"],
             "legend_facts": layer["legend_facts"],
             # The licence travels with the bytes. These tiles are redistributed
@@ -213,8 +237,12 @@ def fetch_all(
             # recorded next to them rather than looked up later from a live
             # response that may not exist when the cache is being served.
             "attribution": layer["attribution"],
+            # Flat, named fields as well as the nested object, so the licence
+            # terms are greppable in the manifest without knowing its shape.
             "licence": layer["attribution"]["licence_name"],
             "licence_url": layer["attribution"]["licence_url"],
+            "attribution_required": layer["attribution"]["required"],
+            "source_of_wording": layer["attribution"]["source_of_wording"],
         })
         log(
             f"  {lid:16} {got:5} fetched  {reused:5} reused  {missing:4} none  "
