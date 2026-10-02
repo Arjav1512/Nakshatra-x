@@ -153,9 +153,16 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
     { id: 'actions' as const, label: 'Actions' },
   ]
 
-  /** `hidden` below md unless this is the open section; always shown at md+. */
-  const sectionCls = (id: typeof mobileSection) =>
-    `${mobileSection === id ? '' : 'hidden'} md:block`
+  /**
+   * Hidden below md unless this is the open section; untouched at md+.
+   *
+   * This returned `hidden md:block`. `md:block` forced display:block on every
+   * section at desktop widths — including the metric row, which is a grid — so
+   * the four answer cards sat one per row at full width, 456px of them, and
+   * pushed P(shortfall) to 1,054px on a 1280x800 screen. `max-md:hidden` hides
+   * only where the tabs apply and leaves each element its own display above.
+   */
+  const sectionCls = (id: typeof mobileSection) => (mobileSection === id ? '' : 'max-md:hidden')
   const [btLoading, setBtLoading] = useState(false)
   const [grade, setGrade] = useState<string | null>(null)
 
@@ -388,6 +395,15 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
           />
           </div>
 
+          {/*
+            B-1 confusion 6. Below the four answer cards: the drivers on the
+            left, and how far to trust the answer on the right, side by side
+            from lg up. The trust column comes first in the DOM — it qualifies
+            the number directly above it, so that is where a screen reader and
+            the mobile tabs meet it — and is moved to the right visually.
+          */}
+          <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
+          <div className="space-y-3 lg:order-last lg:col-span-5">
           <div className={sectionCls('answer')}>
             <ShortfallCalibration mineCode={forecast.mine_code} mineName={mineName} />
           </div>
@@ -395,7 +411,9 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
           <p className={`measure text-xs text-text-tertiary ${sectionCls('answer')}`}>
             {PLAN_TARGET_NOTE}
           </p>
+          </div>
 
+          <div className="space-y-4 lg:col-span-7">
           {/* --- grade-aware breakdown: PRD B-5 is per-grade at P0 --- */}
           <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('drivers')}`}>
             <p className="mb-2 text-xs uppercase tracking-wider text-text-secondary">
@@ -507,6 +525,8 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
               </div>
             </div>
           ) : null}
+          </div>
+          </div>
         </>
       )}
 
@@ -519,12 +539,21 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
         The page is two parts now: what we think, and why you should believe
         it. This heading is the seam.
       */}
-      <div className={`border-t border-border-strong pt-6 ${sectionCls('evidence')}`}>
+      {/*
+        Confusion 6, the lower half. Evidence and actions were two more panels
+        in the same column; they are now two columns from lg up, each under its
+        own heading, so "why believe it" and "what to do about it" read as the
+        two separate questions they are. The old subtitle said "the constraint
+        checks behind every action above" — the actions were below it.
+      */}
+      <div className="grid gap-x-6 gap-y-4 border-t border-border-strong pt-6 lg:grid-cols-12 lg:items-start">
+      <div className="space-y-4 lg:col-span-7">
+      <div className={sectionCls('evidence')}>
         <h2 className="font-display text-2xl font-medium tracking-tight">
           Why you should believe it
         </h2>
         <p className="measure mt-2 text-sm text-text-secondary">
-          Held-out accuracy and the constraint checks behind every action above.
+          Held-out accuracy: a rolling-origin backtest against a seasonal-naive baseline.
         </p>
       </div>
 
@@ -641,10 +670,31 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
           </div>
         ) : (
           <p className="mt-2 text-xs text-text-tertiary">
-            Not yet run in this session. The figure is computed on demand rather than cached from a
-            previous build, so what you see was produced now.
+            {/*
+              This said "computed on demand rather than cached from a previous
+              build, so what you see was produced now". The opposite is true:
+              the console requests no `compute`, the proxy forwards none, and the
+              service defaults to serving the stored artifact — "nothing computes
+              a backtest on request" (routes.py). A full run refits the model at
+              every origin and takes minutes, which is why it is a batch job.
+            */}
+            Not loaded yet. The backtest is served from a stored artifact built by the batch job, not
+            recomputed when you press the button — a full run refits the model at every origin and
+            takes minutes.
           </p>
         )}
+      </div>
+
+      </div>
+
+      <div className="space-y-4 lg:col-span-5">
+      <div className={sectionCls('actions')}>
+        <h2 className="font-display text-2xl font-medium tracking-tight">
+          What to do about it
+        </h2>
+        <p className="measure mt-2 text-sm text-text-secondary">
+          Corrective actions, each checked against the mine&rsquo;s constraints before it is shown.
+        </p>
       </div>
 
       {/* --- D-4 + C-5: recommendations, and what the engine rejected --- */}
@@ -722,6 +772,8 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             <p className="text-xs leading-snug text-text-tertiary">{recs.guardrail}</p>
           </div>
         )}
+      </div>
+      </div>
       </div>
     </section>
   )

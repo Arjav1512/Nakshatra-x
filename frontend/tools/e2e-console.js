@@ -60,7 +60,12 @@ async function main() {
   await sleep(Number(process.env.E2E_SETTLE || 15000))
 
   const portfolio = await page.evaluate((badges) => {
-    const cards = [...document.querySelectorAll('li')].filter((li) => li.querySelector('button'))
+    // Scoped to the mine list. This matched every <li> on the page that held a
+    // button, so when the breadcrumb became an ordered list of buttons (the
+    // track is part of the location now) it counted 12 "mine cards" and opened
+    // "production risk" as if it were a mine. A card is a mine because it is
+    // in the mine list, not because of the tags it happens to be made of.
+    const cards = [...document.querySelectorAll('[data-testid="mine-list"] > li')]
     return {
       count: cards.length,
       withNumber: cards.filter((c) => /\d/.test(c.innerText)).length,
@@ -105,7 +110,7 @@ async function main() {
     // nothing and every downstream check failed against a page that had never
     // been navigated. Match the name anywhere in the card instead: the guard is
     // about which mine opens, not about what the card looks like.
-    const li = [...document.querySelectorAll('li')].find((l) => l.innerText.includes(name))
+    const li = [...document.querySelectorAll('[data-testid="mine-list"] > li')].find((l) => l.innerText.includes(name))
     li?.querySelector('button')?.click()
   }, second)
   await sleep(12000)
@@ -125,7 +130,7 @@ async function main() {
     // Find Balaghat by name. The portfolio is ranked by expected shortfall now,
     // so Balaghat is not first and `startsWith` no longer matches a card that
     // opens with its rank.
-    const li = [...document.querySelectorAll('li')].find((l) => l.innerText.includes('Balaghat'))
+    const li = [...document.querySelectorAll('[data-testid="mine-list"] > li')].find((l) => l.innerText.includes('Balaghat'))
     li?.querySelector('button')?.click()
   })
   await sleep(20000)

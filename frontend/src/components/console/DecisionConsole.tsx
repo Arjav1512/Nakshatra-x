@@ -487,7 +487,11 @@ export function DecisionConsole() {
               )}
               </div>
 
-              <ul className="mt-4 grid list-none gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <ul
+                data-testid="mine-list"
+                aria-label="Mines, ordered by expected shortfall"
+                className="mt-4 grid list-none gap-3 sm:grid-cols-2 lg:grid-cols-3"
+              >
                 {ranked.map((m, rank) => {
                   const v = portfolio[m.id]
                   const isPilot = m.mine_code === PILOT_CODE
@@ -615,16 +619,20 @@ export function DecisionConsole() {
             {/* face/section level (D-6) */}
             {track === 'B' && telemetry ? (
               /*
-                Mobile order: the answer first, conditions after it. This block
-                is 488px tall at 375px and sat between the header and the
-                forecast, which put the figure a planner opened the page for
-                1,330px down. Desktop order is unchanged — there the whole
-                composition is visible at once.
+                The answer first, conditions after it — at every width now.
+
+                On mobile this block is 488px tall and sat between the header and
+                the forecast, which put the figure a planner opened the page for
+                1,330px down; it was moved for that. Desktop was left unchanged on
+                the stated grounds that "the whole composition is visible at
+                once". Measured at 1280x800 it was not: the page was 3,141px tall
+                and P(shortfall) began at 1,054px, below the fold. Conditions are
+                the forecast's inputs; they belong after the answer they feed.
               */
               <section
                 data-testid="live-conditions"
                 data-panel-live="true"
-                className="order-last md:order-none"
+                className="order-last"
               >
                 <h2 className="label">{selected.name} · conditions</h2>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
