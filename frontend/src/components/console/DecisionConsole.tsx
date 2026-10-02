@@ -309,7 +309,10 @@ export function DecisionConsole() {
             ) : null}
             <li className="flex items-center gap-2">
               <span aria-hidden="true" className="text-text-tertiary">/</span>
-              <span role="group" aria-label="Track" className="flex items-center gap-1">
+              {/* No role="group": the buttons' aria-current already says which
+                  track is the location, and the semantic element Biome would
+                  substitute — a form <fieldset> — is wrong inside a breadcrumb. */}
+              <span className="flex items-center gap-1">
                 {(['B', 'A'] as const).map((t, i) => (
                   <span key={t} className="flex items-center gap-1">
                     {i > 0 ? <span aria-hidden="true" className="text-text-tertiary">·</span> : null}
@@ -700,9 +703,7 @@ export function DecisionConsole() {
           real destination, which is what the nav entry points at.
         */}
         {level === 'portfolio' && track === 'A' ? (
-          <>
             <TrackAPanel />
-          </>
         ) : null}
 
         {level === 'mine' && selected ? (

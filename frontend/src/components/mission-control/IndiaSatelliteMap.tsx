@@ -976,8 +976,16 @@ export default function IndiaSatelliteMap({
   // A raster layer chosen before its definition arrived draws nothing; redraw
   // once the definitions are in. Separate from the effect above so that the
   // arrival of data does not also fly the map somewhere.
+  // Latest values through refs, so this effect runs when — and only when — the
+  // definitions arrive. Depending on `activeLayer` directly would redraw on
+  // every layer switch, duplicating the effect above, and `updateLayers` is a
+  // new function every render.
+  const activeLayerRef = useRef(activeLayer)
+  activeLayerRef.current = activeLayer
+  const updateLayersRef = useRef(updateLayers)
+  updateLayersRef.current = updateLayers
   useEffect(() => {
-    if (TILE_LAYER_IDS.has(activeLayer)) updateLayers()
+    if (tileDefs && TILE_LAYER_IDS.has(activeLayerRef.current)) updateLayersRef.current()
   }, [tileDefs])
 
   /**
@@ -1576,10 +1584,10 @@ export default function IndiaSatelliteMap({
               Layers:
             </span>
             {(['model', 'imagery'] as const).map((group) => (
-              <div key={group} role="radiogroup" aria-label={group === 'model' ? 'Model layers' : 'Imagery layers'} className="flex flex-col gap-0.5">
-                <span className="mt-1 text-xs font-mono text-text-tertiary">
+              <fieldset key={group} className="m-0 flex min-w-0 flex-col gap-0.5 border-0 p-0">
+                <legend className="mt-1 p-0 text-xs font-mono text-text-tertiary">
                   {group === 'model' ? 'Model and inputs' : 'Imagery · Planetary Computer'}
-                </span>
+                </legend>
                 {layers
                   .filter((l) => l.group === group)
                   .map((l) => {
@@ -1591,8 +1599,10 @@ export default function IndiaSatelliteMap({
                     return (
                       <button
                         type="button"
-                        role="radio"
-                        aria-checked={activeLayer === l.key}
+                        // Pressed, not role="radio": native buttons with a pressed
+                        // state are the semantic element for a one-of-N switch built
+                        // from buttons, and they need no ARIA role to be read right.
+                        aria-pressed={activeLayer === l.key}
                         key={l.key}
                         data-layer-button={l.key}
                         onClick={() => onChangeLayer(l.key)}
@@ -1611,7 +1621,7 @@ export default function IndiaSatelliteMap({
                       </button>
                     )
                   })}
-              </div>
+              </fieldset>
             ))}
           </div>
 

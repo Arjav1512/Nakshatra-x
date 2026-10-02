@@ -244,9 +244,9 @@ export function TrackAPanel() {
               found when the audit first covered this route. Focusable, named,
               and announced as a region now.
             */}
-            <div
+            <section
+              // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be reachable by keyboard (WCAG 2.1.1; axe scrollable-region-focusable). The two linters conflict here and the WCAG requirement wins.
               tabIndex={0}
-              role="region"
               aria-label="Ranked drill targets — scrolls horizontally"
               className="overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               data-provenance="derived"
@@ -286,7 +286,7 @@ export function TrackAPanel() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </section>
             <details className="mt-2" data-provenance="derived" data-provenance-model={targets.model_version}>
               <summary className="cursor-pointer text-xs uppercase tracking-wider text-text-tertiary hover:text-text-secondary">
                 evidence for rank 1
