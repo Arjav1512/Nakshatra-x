@@ -141,6 +141,30 @@ COPERNICUS_DEM_ATTRIBUTION = (
 )
 TILER_ATTRIBUTION = "Tiles: Microsoft Planetary Computer"
 
+# ---------------------------------------------------------------------------
+# COLORMAP STOPS — sampled from the tiler's own legend
+# ---------------------------------------------------------------------------
+# A legend bar is only honest if its colours are the ones the tiles were drawn
+# with. Rather than recall what "magma" and "terrain" look like, these were
+# sampled from the tiler's legend endpoint for the exact colormaps it renders:
+#
+#   https://planetarycomputer.microsoft.com/api/data/v1/legend/colormap/magma
+#   https://planetarycomputer.microsoft.com/api/data/v1/legend/colormap/terrain
+#
+# Each is a 387x11 horizontal gradient with no border; nine evenly spaced stops
+# were read from the middle row on 2026-10-02. Named matplotlib colormaps are
+# fixed definitions, so recording them costs nothing at runtime and keeps the
+# legend correct offline.
+COLORMAP_STOPS = {
+    "magma": ["#010103", "#1b1044", "#4f117b", "#802580", "#b43679",
+              "#e34e64", "#fa8560", "#fdbf84", "#faf9bc"],
+    "terrain": ["#333398", "#0984ea", "#01c96a", "#7de47f", "#fcfd97",
+                "#c1af78", "#7f5c54", "#bca9a5", "#fcfbfb"],
+}
+COLORMAP_SOURCE = (
+    "sampled from Planetary Computer's /legend/colormap/<name> on 2026-10-02"
+)
+
 
 def _sentinel_years(datetime_range: str) -> str:
     """
@@ -256,7 +280,8 @@ _SPECS: list[dict[str, Any]] = [
         # The colours mean nothing without these two, so they are first-class
         # legend facts rather than buried in the rendering string.
         "scale": {"rescale": [0.8, 2.5], "colormap": "magma",
-                  "low_label": "0.8 (low)", "high_label": "2.5 (high)"},
+                  "low_label": "0.8 (low)", "high_label": "2.5 (high)",
+                  "stops": COLORMAP_STOPS["magma"], "stops_source": COLORMAP_SOURCE},
         "caveat": (
             "Responds to ferric iron, bare soil and red roofing alike. It is not a "
             "manganese detector and says nothing about what lies below the surface "
@@ -274,7 +299,8 @@ _SPECS: list[dict[str, Any]] = [
         "rendering": "asset data, rescale 200-900 m, colormap terrain",
         "legend": "Ground elevation, 30 m posting. Terrain is a model feature.",
         "scale": {"rescale": [200, 900], "colormap": "terrain",
-                  "low_label": "200 m", "high_label": "900 m"},
+                  "low_label": "200 m", "high_label": "900 m",
+                  "stops": COLORMAP_STOPS["terrain"], "stops_source": COLORMAP_SOURCE},
         "caveat": (
             "Elevation only. Slope is derived from this inside the model and is not "
             "what is drawn here."

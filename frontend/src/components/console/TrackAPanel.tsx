@@ -9,7 +9,7 @@ import {
 } from '@/lib/console-api'
 import { cividis } from '@/lib/colormap'
 import { Metric } from './Evidence'
-import type { LayerType } from '@/components/mission-control/IndiaSatelliteMap'
+import { DEFAULT_LAYER, type LayerType } from '@/components/mission-control/IndiaSatelliteMap'
 import type { MineInfo } from '@/components/mission-control/types'
 
 /**
@@ -83,7 +83,11 @@ function Spinner({ label }: { label: string }) {
 
 export function TrackAPanel() {
   const [mapMine, setMapMine] = useState<MineInfo>(DEFAULT_MAP_MINE)
-  const [mapLayer, setMapLayer] = useState<LayerType>('prospectivity' as LayerType)
+  // This read `'prospectivity' as LayerType`. 'prospectivity' was never a layer —
+  // the type was 'satellite' | 'geology' — and the cast is what let it compile.
+  // So the map opened with no overlay and no layer button active, and the
+  // surface appeared only after a click. No cast now: the compiler checks it.
+  const [mapLayer, setMapLayer] = useState<LayerType>(DEFAULT_LAYER)
   const [metrics, setMetrics] = useState<TrackAMetrics | null>(null)
   const [mErr, setMErr] = useState<string | null>(null)
   const [targets, setTargets] = useState<DrillTargetsResponse | null>(null)

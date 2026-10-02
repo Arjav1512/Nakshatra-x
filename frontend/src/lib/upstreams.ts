@@ -50,3 +50,18 @@ export const UPSTREAMS = {
 
 /** True when the app has been started with every upstream pointed at the sink. */
 export const IS_OFFLINE = process.env.NAKSHATRA_OFFLINE === '1'
+
+/**
+ * The ESRI World Imagery basemap's required attribution.
+ *
+ * Quoted from the service's own `copyrightText`, not written from memory:
+ *   https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer?f=json
+ * retrieved 2026-10-02. It names Vantor where older copies of this notice say
+ * Maxar, which is exactly why it is read from the service and not recalled.
+ *
+ * The map previously set `attribution: 'Esri Satellite'` and then disabled the
+ * attribution control, so the basemap carried an invented credit that was never
+ * shown. It is now shown, and it is the licensor's.
+ */
+export const ESRI_WORLD_IMAGERY_ATTRIBUTION =
+  'Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community'
