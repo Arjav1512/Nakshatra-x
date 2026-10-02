@@ -102,6 +102,11 @@ export function DecisionConsole() {
     [selected, setPosition]
   )
   const [telemetry, setTelemetry] = useState<any>(null)
+  // Loading and failed are different states with different things to say. On
+  // failure `telemetry` stays null, which used to look exactly like "not asked
+  // yet" — and the integrity banner simply vanished.
+  const [telemetryState, setTelemetryState] = useState<'idle' | 'loading' | 'ok' | 'failed'>('idle')
+  const [telemetryError, setTelemetryError] = useState<string | null>(null)
   const [portfolio, setPortfolio] = useState<Record<number, Cell>>({})
 
   /**
@@ -206,9 +211,15 @@ export function DecisionConsole() {
   }, [mines])
 
   useEffect(() => {
-    if (!selected) { setTelemetry(null); return }
+    if (!selected) { setTelemetry(null); setTelemetryState('idle'); return }
     let alive = true
-    fetchTelemetry(selected.id).then((r) => { if (alive) setTelemetry(r.ok ? r.data : null) })
+    setTelemetryState('loading')
+    fetchTelemetry(selected.id).then((r) => {
+      if (!alive) return
+      setTelemetry(r.ok ? r.data : null)
+      setTelemetryState(r.ok ? 'ok' : 'failed')
+      setTelemetryError(r.ok ? null : r.error)
+    })
     return () => { alive = false }
   }, [selected])
 
@@ -405,7 +416,37 @@ export function DecisionConsole() {
           </div>
         ) : null}
 
-        {telemetry?.data_integrity ? <IntegrityBanner integrity={telemetry.data_integrity} /> : null}
+        {/*
+          The integrity banner's slot is held open while telemetry loads.
+
+          Telemetry comes from live weather services with variable latency, and
+          the banner sits above the answer. When it arrived after the forecast it
+          pushed the whole Track B panel down 129px at 375 — the 0.110 Lighthouse
+          measured there, reproduced exactly by delaying /telemetry 2s. The
+          placeholder is the banner's measured height at each breakpoint (97px,
+          77px from sm, 58px from lg): taller would shift content UP when the
+          banner lands, which counts too. And when telemetry fails, the slot says
+          so — the disclosure used to disappear without a word.
+        */}
+        {selected && telemetryState === 'loading' ? (
+          <div
+            role="status"
+            className="flex h-[97px] items-center rounded-md border border-border-default bg-surface-1 px-3 py-2 text-xs text-text-tertiary sm:h-[77px] lg:h-[58px]"
+          >
+            Checking which of {selected.name}&rsquo;s sources are live…
+          </div>
+        ) : selected && telemetryState === 'failed' ? (
+          <div
+            role="status"
+            className="min-h-[97px] rounded-md border border-status-caution/40 bg-status-caution/10 px-3 py-2 text-xs leading-relaxed text-text-primary sm:min-h-[77px] lg:min-h-[58px]"
+          >
+            Could not check which sources are live
+            {telemetryError ? <span className="text-text-secondary"> ({telemetryError})</span> : null}. No
+            weather figure is shown, and the operational figures are synthetic.
+          </div>
+        ) : telemetry?.data_integrity ? (
+          <IntegrityBanner integrity={telemetry.data_integrity} />
+        ) : null}
 
         {level === 'portfolio' && track === 'B' ? (
           <section>

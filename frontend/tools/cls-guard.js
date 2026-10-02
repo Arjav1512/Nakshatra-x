@@ -34,6 +34,20 @@ const LIMIT = 0.1
 const ROUTES = process.env.CLS_ROUTES
   ? process.env.CLS_ROUTES.split(',')
   : ['/', '/console', '/console?mine=1&track=b', '/console?track=a', '/production', '/blending', '/method', '/mine-twin']
+/**
+ * Orderings a fast local machine never produces on its own.
+ *
+ * The mine route passed this guard at first and still failed Lighthouse at 375
+ * (0.110): on a fast machine the live telemetry happened to arrive before the
+ * forecast, so the integrity banner was already in place. When it arrived after,
+ * the banner appeared above the answer and pushed it down 129px. Delaying
+ * /telemetry by 2s reproduced the shift exactly, so the guard now forces that
+ * ordering, and the failure path too, instead of relying on luck.
+ */
+const SCENARIOS = process.env.CLS_SCENARIOS === '0' ? [] : [
+  { route: '/console?mine=1&track=b', label: 'telemetry 2s late', match: '/telemetry', delay: 2000 },
+  { route: '/console?mine=1&track=b', label: 'telemetry fails', match: '/telemetry', fail: true },
+]
 const VIEWPORTS = [
   { w: 375, h: 812, mobile: true },
   { w: 1280, h: 800, mobile: false },
@@ -48,13 +62,24 @@ let failed = 0
     headless: 'new',
     args: ['--no-sandbox', '--disable-dev-shm-usage'],
   })
-  for (const route of ROUTES) {
-    for (const vp of VIEWPORTS) {
+  const jobs = []
+  for (const route of ROUTES) for (const vp of VIEWPORTS) jobs.push({ route, vp })
+  for (const sc of SCENARIOS) for (const vp of VIEWPORTS) jobs.push({ route: sc.route, vp, sc })
+  for (const { route, vp, sc } of jobs) {
+    {
       const totals = []
       let worstShifts = []
       for (let run = 0; run < RUNS; run++) {
         const page = await browser.newPage()
         await page.setViewport({ width: vp.w, height: vp.h, isMobile: vp.mobile })
+        if (sc) {
+          await page.setRequestInterception(true)
+          page.on('request', (req) => {
+            if (!req.url().includes(sc.match)) return req.continue().catch(() => {})
+            if (sc.fail) return req.abort('connectionrefused').catch(() => {})
+            setTimeout(() => req.continue().catch(() => {}), sc.delay)
+          })
+        }
         await page.evaluateOnNewDocument(() => {
           window.__shifts = []
           new PerformanceObserver((list) => {
@@ -83,8 +108,9 @@ let failed = 0
       const worst = Math.max(...totals)
       const ok = worst < LIMIT
       if (!ok) failed++
+      const name = sc ? `${route} (${sc.label})` : route
       console.log(
-        `  ${ok ? 'PASS' : 'FAIL'}  ${route.padEnd(26)} @${String(vp.w).padEnd(4)} worst ${worst.toFixed(3)}  runs [${totals.map((t) => t.toFixed(3)).join(', ')}]`
+        `  ${ok ? 'PASS' : 'FAIL'}  ${name.padEnd(26)} @${String(vp.w).padEnd(4)} worst ${worst.toFixed(3)}  runs [${totals.map((t) => t.toFixed(3)).join(', ')}]`
       )
       if (!ok) {
         for (const s of worstShifts.filter((x) => x.v >= 0.01).slice(0, 4)) {
