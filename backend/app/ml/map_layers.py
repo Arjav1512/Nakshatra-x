@@ -154,7 +154,15 @@ def _sentinel_years(datetime_range: str) -> str:
     return y0 if y0 == y1 else f"{y0}\u2013{y1}"
 #: Registrations are cheap but not free, and the tiler keeps them a while.
 TTL_SECONDS = 1800
-TIMEOUT_SECONDS = 20
+#: A result with a failed layer is retried much sooner, so a layer that was down
+#: because the network blipped comes back within a minute rather than half an
+#: hour.
+TTL_DEGRADED_SECONDS = 60
+#: A forced re-register is what the map asks for when a tile 404s. Many tiles
+#: 404 together when a mosaic is evicted, so the map dedupes on its side and this
+#: is the backstop on ours: one real re-register per window, however many ask.
+FORCE_MIN_INTERVAL_SECONDS = 10
+TIMEOUT_SECONDS = 10
 
 _LOCK = threading.Lock()
 _CACHE: dict[str, Any] = {}
@@ -449,16 +457,30 @@ def tile_layers(force: bool = False) -> dict[str, Any]:
     now = time.time()
     with _LOCK:
         cached = _CACHE.get("layers")
-        if cached and not force and now - cached["fetched_at"] < TTL_SECONDS:
-            return {**cached["payload"], "cached": True,
-                    "age_seconds": round(now - cached["fetched_at"], 1)}
+        if cached:
+            age = now - cached["fetched_at"]
+            ttl = TTL_DEGRADED_SECONDS if cached["payload"]["n_unavailable"] else TTL_SECONDS
+            fresh = age < ttl
+            # A forced refresh inside the minimum interval is answered from the
+            # registration that was just made. Re-registering is idempotent, so
+            # this changes nothing about the answer — it only stops a burst of
+            # 404s turning into a burst of POSTs at someone else's service.
+            recently_forced = force and age < FORCE_MIN_INTERVAL_SECONDS
+            if (fresh and not force) or recently_forced:
+                return {**cached["payload"], "cached": True, "age_seconds": round(age, 1),
+                        "force_throttled": bool(recently_forced)}
 
-    layers = []
-    for spec in _SPECS:
+    # Registered in parallel, so a dead network costs one timeout rather than
+    # three in a row on the request that happens to arrive first.
+    def _one(spec: dict[str, Any]) -> dict[str, Any]:
         try:
-            layers.append(_build(spec))
+            return _build(spec)
         except Exception as exc:  # noqa: BLE001 — one layer must not kill the rest
-            layers.append(_unavailable(spec, _reason_from(exc)))
+            return _unavailable(spec, _reason_from(exc))
+
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=len(_SPECS)) as pool:
+        layers = list(pool.map(_one, _SPECS))
 
     payload = {
         "layers": layers,
@@ -475,3 +497,29 @@ def tile_layers(force: bool = False) -> dict[str, Any]:
     with _LOCK:
         _CACHE["layers"] = {"fetched_at": now, "payload": payload}
     return {**payload, "cached": False, "age_seconds": 0.0}
+
+
+def warm_tile_layers() -> None:
+    """
+    Register every mosaic at startup, off the request path.
+
+    Registration is idempotent — the id is a hash of the search — so this cannot
+    produce a different mosaic from the one the map would get later. What it buys
+    is that the tiler's cache entry exists before the first visitor asks, and
+    that an id evicted while the service was down is re-created rather than
+    trusted. Runs in a daemon thread: an unreachable tiler must never hold up the
+    service from starting.
+    """
+    def _run() -> None:
+        try:
+            r = tile_layers(force=True)
+            print(
+                f"[tiles] registered {r['n_ok']} of {r['n_ok'] + r['n_unavailable']} "
+                f"tile layers at startup"
+                + (f"; unavailable: {[l['id'] for l in r['layers'] if l['status'] != 'ok']}"
+                   if r["n_unavailable"] else "")
+            )
+        except Exception as exc:  # noqa: BLE001 — startup must not die on this
+            print(f"[tiles] startup registration failed: {type(exc).__name__}: {exc}")
+
+    threading.Thread(target=_run, name="tile-layer-warm", daemon=True).start()
