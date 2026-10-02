@@ -81,7 +81,16 @@ export default function RootLayout({
         </a>
         <PWARegistry />
         <AppBar />
-        <div id="main">{children}</div>
+        {/*
+          At least one viewport tall, less the 56px app bar, so the footer starts
+          below the fold on the first paint. Every route fetches its content after
+          that paint, and while the page was still short the footer was drawn
+          mid-screen and then shoved off it as the content arrived — the largest
+          single layout shift on most routes (0.144 on a mine's detail, 0.145 on
+          /blending in one run of three, measured with a layout-shift observer).
+          Moving below the fold is a shift nobody sees, and CLS does not count it.
+        */}
+        <div id="main" className="min-h-[calc(100dvh-3.5rem)]">{children}</div>
         <IntegrityFooter />
         <GlobalCopilotWrapper />
         <OfflineIndicator />

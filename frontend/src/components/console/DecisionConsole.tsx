@@ -130,11 +130,33 @@ export function DecisionConsole() {
     })
   }, [mines, portfolio])
 
-  /** The single worst mine, if one is known — the screen's focal element. */
-  const worst = ranked.find((m) => {
-    const v = portfolio[m.id]
-    return v !== undefined && v !== null && !isFailure(v) && v.shortfall > 0
-  })
+  /**
+   * Every mine's forecast has resolved — loaded, failed or warming.
+   *
+   * The ranked list is not drawn until then. Forecasts are fetched one mine at
+   * a time and `ranked` re-sorted after each arrival, so cards hopped positions
+   * up to ten times in the first few hundred milliseconds: measured layout
+   * shift on /console of 0.093-0.229 on main and up to 0.255 here, the one
+   * route still over 0.1. Any scheme that shows named cards in one order and
+   * then another IS that shift, so until the order is known the list holds
+   * placeholders of exactly the card height, and then draws once. Every fetch
+   * resolves quickly — a warming mine answers at once with its warming state —
+   * so this waits for ten fast round trips, not for a model to fit.
+   */
+  const portfolioSettled =
+    !!mines && mines.length > 0 && mines.every((m) => portfolio[m.id] != null)
+
+  /**
+   * The single worst mine, if one is known — the screen's focal element. Only
+   * once every forecast is in: before that it named whichever mine was worst
+   * among those that happened to have arrived.
+   */
+  const worst = portfolioSettled
+    ? ranked.find((m) => {
+        const v = portfolio[m.id]
+        return v !== undefined && v !== null && !isFailure(v) && v.shortfall > 0
+      })
+    : undefined
 
   useEffect(() => {
     let alive = true
@@ -445,7 +467,17 @@ export function DecisionConsole() {
                 /console, against a target of 0.1. The portfolio cards were
                 already built this way for the same reason.
               */}
-              <div className="mt-4 min-h-[8.5rem]">
+              {/*
+                The reservation had gone stale. 8.5rem (136px) was right when
+                it was set; the band now renders 146px from md up and 170px at
+                375, where its line wraps. It filled in at settle and grew
+                10-34px, dragging the whole list below it down — the last 0.118
+                of layout shift on /console. Reserved at the measured maxima
+                now. Shorter-than-reserved leaves slack, which moves nothing;
+                only growth shifts. test:cls watches this so it cannot drift
+                again unseen.
+              */}
+              <div className="mt-4 min-h-[10.625rem] md:min-h-[9.125rem]">
               {worst ? (
                 <button
                   type="button"
@@ -492,14 +524,28 @@ export function DecisionConsole() {
                 aria-label="Mines, ordered by expected shortfall"
                 className="mt-4 grid list-none gap-3 sm:grid-cols-2 lg:grid-cols-3"
               >
-                {ranked.map((m, rank) => {
+                {!portfolioSettled
+                  ? (mines ?? []).map((m) => (
+                      // Same box as a real card, so swapping one for the other
+                      // moves nothing. No name: its slot is not known yet.
+                      <li key={m.id} aria-hidden="true">
+                        <Card className="h-full min-h-[10.625rem]">
+                          <div className="h-full w-full animate-pulse rounded-md bg-surface-2/40" />
+                        </Card>
+                      </li>
+                    ))
+                  : ranked.map((m, rank) => {
                   const v = portfolio[m.id]
                   const isPilot = m.mine_code === PILOT_CODE
                   return (
                     <li key={m.id}>
                       <Card
                         interactive
-                        className={`h-full ${
+                        // One height for every card. Content gives 146 or 170px, so
+                        // a placeholder could not know which would land in its slot
+                        // and rows would resize at settle; 170 is the measured
+                        // maximum (168 content + 2 border) at all four widths.
+                        className={`h-full min-h-[10.625rem] ${
                           worst && m.id === worst.id ? 'border-accent/50 bg-accent-muted/20' : ''
                         }`}
                       >
@@ -586,6 +632,11 @@ export function DecisionConsole() {
                   )
                 })}
               </ul>
+              {!portfolioSettled && mines?.length ? (
+                <p role="status" className="sr-only">
+                  Loading forecasts for {mines.length} mines.
+                </p>
+              ) : null}
               </>
             )}
 

@@ -219,6 +219,20 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
     setBtLoading(false)
   }
 
+  /**
+   * The forecast has loaded, failed, or is warming — anything but the first
+   * unresolved fetch.
+   *
+   * The evidence and actions row is held back until then. It was drawn
+   * straight away, under a one-line spinner, at about y=432 on a 1280x800
+   * screen; ~300 ms later the answer and drivers arrived above it and pushed it
+   * off the screen. That single move scored 0.193 of layout shift and took the
+   * page from main's 0.264 to as much as 0.379. Both sections describe the
+   * forecast — why to believe it, what to do about it — so they belong after
+   * it. While it warms they still render, so the backtest stays reachable on a
+   * cold start.
+   */
+  const forecastSettled = !!forecast || !!fErr || !!fWarm
   const grades = forecast?.grades ?? []
   /** The worst grade's shortfall probability — what the portfolio card shows. */
   const worstGradeP = grades.length
@@ -546,6 +560,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
         two separate questions they are. The old subtitle said "the constraint
         checks behind every action above" — the actions were below it.
       */}
+      {forecastSettled ? (
       <div className="grid gap-x-6 gap-y-4 border-t border-border-strong pt-6 lg:grid-cols-12 lg:items-start">
       <div className="space-y-4 lg:col-span-7">
       <div className={sectionCls('evidence')}>
@@ -775,6 +790,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
       </div>
       </div>
       </div>
+      ) : null}
     </section>
   )
 }
