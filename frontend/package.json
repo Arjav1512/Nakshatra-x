@@ -18,7 +18,8 @@
     "test:surface": "node tools/e2e-surface.js",
     "lint:literals": "node tools/lint-jsx-data-literals.js",
     "test:scenario": "node tools/e2e-scenario.js",
-    "test:map": "node tools/map-guard.js"
+    "test:map": "node tools/map-guard.js",
+    "test:nav": "node tools/e2e-navigation.js"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

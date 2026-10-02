@@ -239,26 +239,66 @@ export function DecisionConsole() {
       {/* Breadcrumb: portfolio -> mine -> track (D-6). Not sticky — the app bar
           already is, and two stacked sticky rows eat the viewport on a laptop. */}
       <div className="no-print flex flex-wrap items-center gap-x-2 gap-y-2 border-b border-border-subtle pb-3 text-sm">
-        <button
-          type="button"
-          onClick={() => { setSelected(null); setPosition(null, 'B') }}
-          className="rounded-md px-1.5 py-0.5 transition-colors duration-[120ms] ease-out hover:bg-surface-2 hover:text-text-primary"
-          aria-current={level === 'portfolio' ? 'page' : undefined}
-        >
-          <span className={level === 'portfolio' ? 'text-text-primary' : 'text-text-secondary'}>
-            Portfolio
-          </span>
-        </button>
-        {selected ? (
-          <>
-            <span aria-hidden="true" className="text-text-tertiary">/</span>
-            <span className="text-text-primary">{selected.name}</span>
-            <span aria-hidden="true" className="text-text-tertiary">/</span>
-            <span className="text-text-secondary">
-              {track === 'B' ? 'production risk' : 'prospectivity'}
-            </span>
-          </>
-        ) : null}
+        {/*
+          ONE NAVIGATION MODEL (B-1 confusion 5).
+
+          The track used to be chosen by a separate button pair — "Track B ·
+          production risk / Track A · prospectivity" — sitting under the
+          integrity banner in the same visual register as navigation, while this
+          breadcrumb described the same state in plain text. Two controls for one
+          fact, and a first-time user could not tell whether the buttons were
+          tabs within the mine, a filter, or a change of page.
+
+          Now the breadcrumb IS the navigation, and the track is part of the
+          location: Portfolio / Balaghat / production risk · prospectivity. Both
+          tracks are shown rather than hidden in a menu, so the one you are not
+          on is discoverable; the one you are on is marked as the current page.
+          The button pair is gone. It also only ever appeared once you were
+          already on Track A or inside a mine, so from the default view — where
+          most people land — Track A had no way in from the console at all.
+        */}
+        <nav aria-label="Location" className="min-w-0">
+          <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <li>
+              <button
+                type="button"
+                onClick={() => { setSelected(null); setPosition(null, track) }}
+                className="rounded-md px-1.5 py-0.5 text-text-secondary transition-colors duration-[120ms] ease-out hover:bg-surface-2 hover:text-text-primary"
+              >
+                Portfolio
+              </button>
+            </li>
+            {selected ? (
+              <li className="flex items-center gap-2">
+                <span aria-hidden="true" className="text-text-tertiary">/</span>
+                <span className="text-text-primary">{selected.name}</span>
+              </li>
+            ) : null}
+            <li className="flex items-center gap-2">
+              <span aria-hidden="true" className="text-text-tertiary">/</span>
+              <span role="group" aria-label="Track" className="flex items-center gap-1">
+                {(['B', 'A'] as const).map((t, i) => (
+                  <span key={t} className="flex items-center gap-1">
+                    {i > 0 ? <span aria-hidden="true" className="text-text-tertiary">·</span> : null}
+                    <button
+                      type="button"
+                      data-track-link={t}
+                      onClick={() => setTrack(t)}
+                      aria-current={track === t ? 'page' : undefined}
+                      className={`rounded-md px-1.5 py-0.5 transition-colors duration-[120ms] ease-out ${
+                        track === t
+                          ? 'font-medium text-text-primary underline decoration-accent decoration-2 underline-offset-4'
+                          : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'
+                      }`}
+                    >
+                      {t === 'B' ? 'production risk' : 'prospectivity'}
+                    </button>
+                  </span>
+                ))}
+              </span>
+            </li>
+          </ol>
+        </nav>
         {/*
           B-1 confusion 11. At 375px these two took a full row above the page
           title — prime position for actions a first-time user has no reason to
@@ -565,46 +605,12 @@ export function DecisionConsole() {
         */}
         {level === 'portfolio' && track === 'A' ? (
           <>
-            <nav aria-label="Track" className="no-print flex flex-wrap gap-2">
-              {(['B', 'A'] as const).map((t) => (
-                <button
-                  type="button"
-                  key={t}
-                  onClick={() => setTrack(t)}
-                  aria-pressed={track === t}
-                  className={`rounded-md border px-3 py-1.5 text-sm transition-colors duration-[120ms] ease-out ${
-                    track === t
-                      ? 'border-accent bg-accent-muted text-text-primary'
-                      : 'border-border-default text-text-secondary hover:bg-surface-2 hover:text-text-primary'
-                  }`}
-                >
-                  {t === 'B' ? 'Track B · production risk' : 'Track A · prospectivity'}
-                </button>
-              ))}
-            </nav>
             <TrackAPanel />
           </>
         ) : null}
 
         {level === 'mine' && selected ? (
           <>
-            <nav aria-label="Track" className="no-print flex flex-wrap gap-2">
-              {(['B', 'A'] as const).map((t) => (
-                <button
-                  type="button"
-                  key={t}
-                  onClick={() => setTrack(t)}
-                  aria-pressed={track === t}
-                  className={`rounded-md border px-3 py-1.5 text-sm transition-colors duration-[120ms] ease-out ${
-                    track === t
-                      ? 'border-accent bg-accent-muted text-text-primary'
-                      : 'border-border-default text-text-secondary hover:bg-surface-2 hover:text-text-primary'
-                  }`}
-                >
-                  {t === 'B' ? 'Track B · production risk' : 'Track A · prospectivity'}
-                </button>
-              ))}
-            </nav>
 
             {/* face/section level (D-6) */}
             {track === 'B' && telemetry ? (
