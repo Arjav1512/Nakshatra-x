@@ -9,6 +9,16 @@
 
 Two processes. The console reads live service-layer state; there is no mock path.
 
+**Check the ports first.** A server left running from an earlier session keeps
+the port, the new one fails to bind and exits, and the old one goes on answering
+with old code — which looks exactly like the new code being broken. This has
+already caused two phantom failures. The check prints the owner's PID, start
+time and command line, and refuses to start anything:
+
+```bash
+scripts/check_port.sh 8000 "FastAPI" && scripts/check_port.sh 3000 "Next.js"
+```
+
 ```bash
 # terminal 1 — FastAPI service layer (architecture L4)
 cd backend && python -m uvicorn app.main:app --port 8000
@@ -27,17 +37,23 @@ Open **http://localhost:3000/console**.
 
 ### The day before — regenerate every artifact, together
 
-**Do this once, the day before the demo.** One command, about eight minutes, and
-it is the difference between a forecast that covers next fortnight and one that
-covers a fortnight that has already been and gone.
+**Do this once, the day before the demo.** One command, about seventeen minutes,
+and it is the difference between a forecast that covers next fortnight and one
+that covers a fortnight that has already been and gone.
 
 ```bash
 cd backend && NAKSHATRA_DATA_END_DATE=$(date +%F) python -m app.api.batch all
 ```
 
-`all` regenerates the sample CSVs, all ten forecasts and the committed
-backtest(s) from **one** dataset, then verifies they agree and prints the
-identity it used. Check the dates it prints before you trust it.
+`all` regenerates the sample CSVs, all ten forecasts, the committed backtest(s)
+**and the calibration shown beside P(shortfall)** from **one** dataset, then
+verifies they agree and prints the identity it used. Check the dates it prints
+before you trust it.
+
+The calibration is in `all` because it describes the dataset too. A new end date
+changes the dataset, and the console refuses a calibration measured on a
+different one — so leaving it out would have put "Calibration unavailable:
+measured on a different model" on screen on demo day.
 
 **Regenerate them together, never one kind at a time.** Forecasts, backtests and
 the exported samples are all built from the same generated dataset. Regenerated
@@ -48,14 +64,38 @@ disagrees as `stale` rather than `ready`; `python -m app.api.batch check` answer
 the same question from the command line.
 
 Measured on a quiet 8-core laptop with the default two fit threads: samples
-0.5 s, forecasts 25 s each (250 s for ten), backtest 216 s — **about 8 minutes**
-in total.
+0.5 s, forecasts 25 s each (250 s for ten), backtest 216 s, calibration 525 s
+(it refits at 24 origins) — **about 17 minutes** in total.
 
 **Run it on a quiet machine.** This is CPU-bound and it is the one step that
 punishes contention. One run here took **5.8 hours** instead of 8 minutes because
 macOS `mediaanalysisd` had been sitting at 211% CPU for seventeen hours. The
 output was byte-identical — same MAPE, same coverage — it just took ninety-seven
 times as long. Check `ps -Ao pid,%cpu,comm -r | head -5` before you start.
+
+#### Map tiles — so the imagery survives the network
+
+The three imagery layers (Sentinel-2 true colour, the iron-oxide ratio and the
+Copernicus DEM) come from Microsoft Planetary Computer. Fetch a local copy the
+day before, so a hall with bad wifi does not take them off the map:
+
+```bash
+cd backend && python -m app.api.batch tiles
+```
+
+Measured: **39.3 MB, 560 s** — 2,625 tiles, z6 to z12 over the study area. That
+is every zoom the map flies to (it opens at 8.5, a selected mine is 11, a clicked
+one 12); past z12 the layers are live-only. It goes to `backend/.tile-cache/`,
+which is gitignored, with a manifest recording each layer's licence, required
+attribution and fetch date. Separate from `all` on purpose: it downloads from
+someone else's service rather than rebuilding anything from the commit.
+
+**What the map does with it.** It always asks Planetary Computer first. If a tile
+fails or times out, it reads the same tile from the cache and the layer's legend
+changes from **LIVE** to **CACHED · fetched <date>** — the date the tiles were
+actually fetched, never today's. The licensor's notice stays in the legend and in
+the map's attribution line either way. If Planetary Computer forgets a mosaic
+(its registrations are evicted), the map re-registers once and carries on live.
 
 #### If regeneration fails, roll back
 
@@ -91,9 +131,12 @@ files as modified. Commit them or don't, as you prefer — but do not edit them.
 
 ### Pre-flight — run this before every demo
 
-Three commands, in order. Do not start talking until all three are green.
+In order. Do not start talking until every one is green.
 
 ```bash
+# 0. Ports — nothing left over from an earlier session.
+scripts/check_port.sh 8000 "FastAPI" && scripts/check_port.sh 3000 "Next.js"
+
 # 1. Backend. One worker, and do not set NAKSHATRA_SKIP_WARM.
 cd backend && python -m uvicorn app.main:app --port 8000
 
@@ -104,7 +147,15 @@ curl -s http://localhost:8000/api/v1/readyz | python3 -m json.tool | head -20
 
 # 3. Frontend, then the browser checks.
 cd frontend && npm run test:e2e && npm run test:dates
+
+# 4. The map: every layer draws, is not blank, and credits its licensor —
+#    then the same with Planetary Computer blocked, which proves the cache.
+npm run test:map && npm run test:map -- --pc-blocked
 ```
+
+If `test:map` fails but `-- --pc-blocked` passes, Planetary Computer is down or
+unreachable from the hall and the demo will run from the cache — labelled as
+such. If both fail, run `python -m app.api.batch tiles` again.
 
 `npm run test:dates` is the one that catches a forgotten regeneration: it asserts
 the console shows the forecast's real origin and window dates, marks the forecast
@@ -315,7 +366,8 @@ coefficient.
 
 ## 2:30 — Track A: prospectivity (25 s)
 
-**Click "Track A · prospectivity".**
+**Click "prospectivity" in the breadcrumb** (Portfolio / production risk ·
+prospectivity). The track is part of where you are now, not a separate toggle.
 
 Three tiles: **LOMO AUC 0.85**, spectral-only 0.60, slope-only 0.51.
 
@@ -335,8 +387,11 @@ substituted*.
 Ranked drill targets below, each with **kriging uncertainty**. Expand
 `evidence for rank 1`.
 
-**Say:** a probability describes the feature values at a cell. Kriging variance
-says whether anything was measured nearby. A cell can be promising *and*
+**Say:** the score describes the feature values at a cell — it ranks cells, and
+it is not a probability that ore is present (it even dips just below zero where
+kriging extrapolates). Kriging variance says whether anything was measured
+nearby. The layer switcher shows both, and the 50 measured points they were
+built from. A cell can be promising *and*
 uncertain — that distinction is what decides where a rig goes.
 
 **Click "Dongri Buzurg (opencast pilot)" then "Score"** — the real model runs.
