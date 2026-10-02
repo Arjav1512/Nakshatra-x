@@ -98,7 +98,11 @@ def test_every_artifact_shares_one_seed_and_end_date():
           "`git checkout -- backend/artifacts data/synthetic`"
     )
     kinds = {r["kind"] for r in report["artifacts"]}
-    assert kinds == {"forecast", "backtest", "samples"}, kinds
+    # Calibration joined the family in PR B: it is measured on the same generated
+    # dataset, carries its identity, and the console refuses a stale one — so a
+    # regeneration that left it behind would put "calibration unavailable" on
+    # screen. Asserting the exact set means a kind cannot be silently dropped.
+    assert kinds == {"forecast", "backtest", "samples", "calibration"}, kinds
     assert report["consistent"] is True
 
 
