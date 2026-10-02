@@ -1324,48 +1324,245 @@ export default function IndiaSatelliteMap({
         </div>
       )}
 
-      {/* Cyber Digital Map Viewport */}
-      <div
-        className={`relative w-full ${
-          // Shorter at phone width. 560px of map on an 812px screen left
-          // nothing of the panel around it visible, so the legend, the layer
-          // switcher and the ranked targets all sat below the fold with no
-          // indication that they existed.
-          isFullscreen ? 'h-[calc(100vh-200px)]' : 'h-[380px] sm:h-[560px] lg:h-[620px]'
-        } bg-surface-0 overflow-hidden`}
-      >
+      {/*
+        Map and its legend, side by side from lg; stacked below it. The map
+        keeps only what belongs on it: imagery, markers, the selected mine's
+        card, zoom and the attribution line.
+      */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start">
+        <div className="min-w-0">
+          {/* Cyber Digital Map Viewport */}
+          <div
+            className={`relative w-full ${
+              // Shorter at phone width. 560px of map on an 812px screen left
+              // nothing of the panel around it visible, so the legend, the layer
+              // switcher and the ranked targets all sat below the fold with no
+              // indication that they existed.
+              isFullscreen ? 'h-[calc(100vh-200px)]' : 'h-[380px] sm:h-[560px] lg:h-[620px]'
+            } bg-surface-0 overflow-hidden`}
+          >
 
-        {radarSweepActive && <div className="cyber-radar-sweep-beam" />}
+            {radarSweepActive && <div className="cyber-radar-sweep-beam" />}
 
-        <div ref={mapContainerRef} className="w-full h-full" />
+            <div ref={mapContainerRef} className="w-full h-full" />
 
-        {/* Legend and layer switcher. Six of the eight layers here read no data and were captioned as ISRO measurements; see the removal note above. */}
-        <div className="absolute top-4 left-4 z-[400] flex max-h-[calc(100%-2rem)] max-w-xs flex-col gap-2.5 overflow-y-auto rounded-md border border-border-default bg-[rgba(8,12,18,0.88)] p-3.5 shadow-2xl">
-          {/*
-            The key only appears when there are markers for it to describe.
-            It states three plan-target thresholds, and with the register
-            unavailable there is nothing on the map they apply to — a legend for
-            an empty map is three numbers asserted for no reason.
-          */}
-          {hotspots.length > 0 ? (
-          <div className="space-y-1 pb-2 border-b border-border-default" data-provenance="reference">
-            <span className="text-xs font-mono font-semibold text-text-primary uppercase tracking-wider block mb-1">
-              Marker size = plan target (register)
-            </span>
-            <div className="flex items-center gap-2 text-xs font-mono text-status-critical">
-              <span className="w-2.5 h-2.5 rounded-full bg-status-critical" />
-              <span className="font-bold">Largest plan target:</span> &gt;14,000 T/m (register)
-            </div>
-            <div className="flex items-center gap-2 text-xs font-mono text-[var(--color-status-caution)]">
-              <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-status-caution)]" />
-              <span className="font-bold">Mid plan target:</span> 10,000&ndash;13,000 T/m
-            </div>
-            <div className="flex items-center gap-2 text-xs font-mono text-status-caution">
-              <span className="w-2.5 h-2.5 rounded-full bg-status-caution" />
-              <span className="font-bold">Smallest plan target:</span> &lt;10,000 T/m
-            </div>
+            {/* DEFAULT TELEMETRY CARD (Top Right - visible when search prediction report is not active) */}
+            {!activePrediction && !currentHotspotMeta && registerError ? (
+              <div className="absolute top-4 right-4 z-[400] max-w-xs rounded-md border border-border-default bg-[rgba(8,12,18,0.92)] p-4 text-xs shadow-2xl">
+                <p className="font-semibold text-status-caution">Mine register unavailable</p>
+                <p className="mt-1 leading-snug text-text-secondary">
+                  {registerError}. No mines are drawn: this map reads the register from the service
+                  layer and does not keep a copy of its own.
+                </p>
+              </div>
+            ) : null}
+
+            {!activePrediction && currentHotspotMeta && (
+              <div className="absolute top-4 right-4 z-[400] p-4 rounded-md bg-[rgba(8,12,18,0.92)] border border-border-default  max-w-xs shadow-2xl">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full " style={{ backgroundColor: currentHotspotMeta.color }} />
+                    <span className="text-xs font-mono font-semibold uppercase" style={{ color: currentHotspotMeta.color }}>
+                      {selectedMine.name} Hotspot
+                    </span>
+                  </div>
+                  <span
+                    className="text-xs"
+                    style={{
+                      backgroundColor: `${currentHotspotMeta.color}20`,
+                      borderColor: `${currentHotspotMeta.color}60`,
+                      color: currentHotspotMeta.color,
+                    }}
+                  >
+                    {currentHotspotMeta.priority} PLAN TARGET
+                  </span>
+                </div>
+
+                <div
+                  className="space-y-2 text-xs font-mono pt-1.5 border-t border-border-default"
+                  data-provenance="reference"
+                >
+                  <div className="flex justify-between text-text-tertiary">
+                    <span>Plan target (register):</span>
+                    <span className="font-bold text-text-primary">{currentHotspotMeta.rate}</span>
+                  </div>
+                  {/*
+                    An "Estimated Ore Grade" row sat here showing a per-mine Mn
+                    percentage from the literal table above. No grade data exists:
+                    Track A outputs a prospectivity score, which PRD §2.4 is
+                    explicit is not a grade and not a reserve.
+                  */}
+                  <div className="flex justify-between text-text-tertiary">
+                    <span>Coordinates:</span>
+                    <span className="text-accent">{selectedMine.lat}&deg;N, {selectedMine.lng}&deg;E</span>
+                  </div>
+                  <div className="flex justify-between text-text-tertiary">
+                    <span>Geological Belt:</span>
+                    <span className="text-text-primary">{selectedMine.state === 'MP' ? 'Central MP Syncline' : 'Western MH Corridor'}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* AI ML PROSPECTIVITY PREDICTION INSPECTOR REPORT (RIGHT-HAND SIDE PANEL) */}
+            {activePrediction && (
+              <div className="absolute top-4 right-4 z-[450] p-4 rounded-md bg-[rgba(6,12,24,0.95)] border border-accent/50  w-[90%] sm:w-[380px] max-h-[90%] overflow-y-auto text-xs font-mono text-text-primary animate-in slide-in-from-right-4 duration-300">
+                <div className="flex items-center justify-between pb-2.5 border-b border-border-default mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-md bg-accent/20 border border-accent/40 text-accent">
+                      <Cpu className="w-4 h-4 " />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-accent uppercase tracking-wider">
+                          AI Prospectivity Dossier
+                        </span>
+                      </div>
+                      <h5 className="font-bold text-text-primary text-xs truncate max-w-[210px]">
+                        {activePrediction.location_name}
+                      </h5>
+                      <span className="text-xs text-text-secondary">
+                        {activePrediction.lat?.toFixed(4)}°N, {activePrediction.lng?.toFixed(4)}°E
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setActivePrediction(null)}
+                    className="p-1 rounded-lg hover:bg-surface-3 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+                    title="Close Report"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Prospectivity score panel. This was a two-column grid; the
+                    second cell held the fabricated "Historical Success Ratio". */}
+                <div className="mb-3">
+                  <div className="p-3 rounded-md bg-gradient-to-br from-accent/10 to-transparent border border-accent/30">
+                    <span className="text-xs uppercase text-text-secondary block mb-0.5 font-bold">
+                      Manganese Possibility
+                    </span>
+                    <div className="text-xl font-semibold text-accent">
+                      {(activePrediction.probability * 100).toFixed(1)}%
+                    </div>
+                    <span className="text-xs text-accent uppercase font-bold">
+                      {activePrediction.confidence} Confidence
+                    </span>
+                  </div>
+                </div>
+
+                {/* Nearest Geological Fault Telemetry */}
+                <div className="p-2.5 rounded-md bg-status-caution/10 border border-status-caution/30 text-xs text-status-caution mb-2 font-mono flex items-center justify-between">
+                  <span>Structural Fault:</span>
+                  <span className="font-bold truncate max-w-[190px]">{activePrediction.nearest_fault_name || 'Regional Fault'} ({activePrediction.dist_to_fault_km || 4.2} km)</span>
+                </div>
+
+                {/* Geological Metrics Table */}
+                <div className="p-2.5 rounded-md bg-black/50 border border-border-default space-y-1.5 mb-3 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Iron Oxide Index:</span>
+                    <span className="text-text-primary font-bold">{activePrediction.features?.iron_oxide_index}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Ferrous Mineral Index:</span>
+                    <span className="text-text-primary font-bold">{activePrediction.features?.ferrous_mineral_index}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">SWIR B11/B12 Reflectance:</span>
+                    <span className="text-accent font-bold">{activePrediction.features?.swir_b11_reflectance || 0.32} / {activePrediction.features?.swir_b12_reflectance || 0.41}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Elevation & Slope:</span>
+                    <span className="text-accent">{activePrediction.features?.elevation_m}m &bull; {activePrediction.features?.slope_deg}°</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Precipitation Baseline:</span>
+                    <span className="text-status-caution">{activePrediction.features?.rainfall_mm} mm</span>
+                  </div>
+                </div>
+
+                {/* AI Natural Language Interpretation */}
+                <p className="text-xs text-text-secondary leading-relaxed mb-3 p-2.5 rounded-md bg-surface-2 border border-border-default">
+                  💡 <span className="font-bold text-text-primary">AI Geological Diagnostic:</span> {activePrediction.geological_interpretation}
+                </p>
+
+                {/* Direct Action Links */}
+                <div className="flex items-center gap-2 pt-1 border-t border-border-default">
+                  <a
+                    href="#smart-blending"
+                    className="rounded-md border border-border-interactive bg-surface-2 flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
+                  >
+                    3D Borehole Kriging
+                  </a>
+                  <a
+                    href="#smart-blending"
+                    className="rounded-md border border-border-interactive bg-surface-2 flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
+                  >
+                    Simulate Blending
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {/* Loading Indicator when user clicks or searches on Map */}
+            {isPredicting && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500] px-4 py-2 rounded-full bg-black/90 border border-accent text-accent font-mono text-xs font-bold flex items-center gap-2 ">
+                <Activity className="w-4 h-4 animate-spin" />
+                <span>Geocoding & Running AI Manganese Machine Learning Engine...</span>
+              </div>
+            )}
+
           </div>
-          ) : null}
+            {/*
+              Hotspot dock — under the map, not over it. Overlaid, it collided with
+              the attribution line, which the licences require to stay readable,
+              and at 375 the two were stacked on the same 50px of a 380px map.
+            */}
+            <div className="flex items-center gap-2 overflow-x-auto border-t border-border-default bg-surface-1 p-2">
+              <span className="text-xs font-mono font-bold text-text-tertiary uppercase px-2 shrink-0 hidden sm:inline">
+                HOTSPOTS:
+              </span>
+              {hotspots.map((m) => (
+                <button
+                  type="button"
+                  key={m.id}
+                  onClick={() => {
+                    const orig = MOIL_MINES.find((item) => item.id === m.id) || selectedMine
+                    onSelectMine(orig)
+                    triggerAIPrediction(m.lat, m.lng, `${m.name} Hotspot (${m.state})`)
+                  }}
+                  className={`px-3 py-1.5 rounded-md text-xs font-mono whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
+                    selectedMine.id === m.id
+                      ? 'text-black font-semibold shadow-lg'
+                      : 'bg-surface-2 border border-border-default text-text-tertiary hover:text-text-primary hover:bg-surface-3'
+                  }`}
+                  style={{
+                    backgroundColor: selectedMine.id === m.id ? m.color : undefined,
+                  }}
+                  data-provenance="reference"
+                >
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: m.color }} />
+                  {m.name} ({m.rate})
+                </button>
+              ))}
+            </div>
+        </div>
+
+        {/*
+          Legend and layer switcher — beside the map from lg, below it under lg.
+          Not overlaid on the map any more. As an overlay it covered the imagery
+          it described; at 1280 its lower part, including iron-oxide's scale and
+          its "not a manganese detector" caveat, sat hidden behind the hotspot
+          dock; at 375 the hotspot card was drawn over it. Six of the eight
+          layers this panel once listed read no data and were captioned as ISRO
+          measurements; see the removal note above.
+        */}
+        <aside
+          aria-label="Map layers and legend"
+          className="flex flex-col gap-3 border-t border-border-default bg-surface-1 p-4 lg:border-l lg:border-t-0"
+        >
 
           {/* Sensor Layers */}
           <div className="flex flex-col gap-1">
@@ -1416,205 +1613,35 @@ export default function IndiaSatelliteMap({
           <div className="border-t border-border-default pt-2.5">
             <MapLayerLegend model={legendModel} />
           </div>
-        </div>
 
-        {/* DEFAULT TELEMETRY CARD (Top Right - visible when search prediction report is not active) */}
-        {!activePrediction && !currentHotspotMeta && registerError ? (
-          <div className="absolute top-4 right-4 z-[400] max-w-xs rounded-md border border-border-default bg-[rgba(8,12,18,0.92)] p-4 text-xs shadow-2xl">
-            <p className="font-semibold text-status-caution">Mine register unavailable</p>
-            <p className="mt-1 leading-snug text-text-secondary">
-              {registerError}. No mines are drawn: this map reads the register from the service
-              layer and does not keep a copy of its own.
-            </p>
-          </div>
-        ) : null}
-
-        {!activePrediction && currentHotspotMeta && (
-          <div className="absolute top-4 right-4 z-[400] p-4 rounded-md bg-[rgba(8,12,18,0.92)] border border-border-default  max-w-xs shadow-2xl">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full " style={{ backgroundColor: currentHotspotMeta.color }} />
-                <span className="text-xs font-mono font-semibold uppercase" style={{ color: currentHotspotMeta.color }}>
-                  {selectedMine.name} Hotspot
-                </span>
-              </div>
-              <span
-                className="text-xs"
-                style={{
-                  backgroundColor: `${currentHotspotMeta.color}20`,
-                  borderColor: `${currentHotspotMeta.color}60`,
-                  color: currentHotspotMeta.color,
-                }}
-              >
-                {currentHotspotMeta.priority} PLAN TARGET
-              </span>
+          {/* Marker key last: the least of what this panel says. */}
+          {/*
+            The key only appears when there are markers for it to describe.
+            It states three plan-target thresholds, and with the register
+            unavailable there is nothing on the map they apply to — a legend for
+            an empty map is three numbers asserted for no reason.
+          */}
+          {hotspots.length > 0 ? (
+          <div className="space-y-1 border-t border-border-default pt-2.5" data-provenance="reference">
+            <span className="text-xs font-mono font-semibold text-text-primary uppercase tracking-wider block mb-1">
+              Marker size = plan target (register)
+            </span>
+            <div className="flex items-center gap-2 text-xs font-mono text-status-critical">
+              <span className="w-2.5 h-2.5 rounded-full bg-status-critical" />
+              <span className="font-bold">Largest plan target:</span> &gt;14,000 T/m (register)
             </div>
-
-            <div
-              className="space-y-2 text-xs font-mono pt-1.5 border-t border-border-default"
-              data-provenance="reference"
-            >
-              <div className="flex justify-between text-text-tertiary">
-                <span>Plan target (register):</span>
-                <span className="font-bold text-text-primary">{currentHotspotMeta.rate}</span>
-              </div>
-              {/*
-                An "Estimated Ore Grade" row sat here showing a per-mine Mn
-                percentage from the literal table above. No grade data exists:
-                Track A outputs a prospectivity score, which PRD §2.4 is
-                explicit is not a grade and not a reserve.
-              */}
-              <div className="flex justify-between text-text-tertiary">
-                <span>Coordinates:</span>
-                <span className="text-accent">{selectedMine.lat}&deg;N, {selectedMine.lng}&deg;E</span>
-              </div>
-              <div className="flex justify-between text-text-tertiary">
-                <span>Geological Belt:</span>
-                <span className="text-text-primary">{selectedMine.state === 'MP' ? 'Central MP Syncline' : 'Western MH Corridor'}</span>
-              </div>
+            <div className="flex items-center gap-2 text-xs font-mono text-[var(--color-status-caution)]">
+              <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-status-caution)]" />
+              <span className="font-bold">Mid plan target:</span> 10,000&ndash;13,000 T/m
+            </div>
+            <div className="flex items-center gap-2 text-xs font-mono text-status-caution">
+              <span className="w-2.5 h-2.5 rounded-full bg-status-caution" />
+              <span className="font-bold">Smallest plan target:</span> &lt;10,000 T/m
             </div>
           </div>
-        )}
+          ) : null}
+        </aside>
 
-        {/* AI ML PROSPECTIVITY PREDICTION INSPECTOR REPORT (RIGHT-HAND SIDE PANEL) */}
-        {activePrediction && (
-          <div className="absolute top-4 right-4 z-[450] p-4 rounded-md bg-[rgba(6,12,24,0.95)] border border-accent/50  w-[90%] sm:w-[380px] max-h-[90%] overflow-y-auto text-xs font-mono text-text-primary animate-in slide-in-from-right-4 duration-300">
-            <div className="flex items-center justify-between pb-2.5 border-b border-border-default mb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-md bg-accent/20 border border-accent/40 text-accent">
-                  <Cpu className="w-4 h-4 " />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-accent uppercase tracking-wider">
-                      AI Prospectivity Dossier
-                    </span>
-                  </div>
-                  <h5 className="font-bold text-text-primary text-xs truncate max-w-[210px]">
-                    {activePrediction.location_name}
-                  </h5>
-                  <span className="text-xs text-text-secondary">
-                    {activePrediction.lat?.toFixed(4)}°N, {activePrediction.lng?.toFixed(4)}°E
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setActivePrediction(null)}
-                className="p-1 rounded-lg hover:bg-surface-3 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-                title="Close Report"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Prospectivity score panel. This was a two-column grid; the
-                second cell held the fabricated "Historical Success Ratio". */}
-            <div className="mb-3">
-              <div className="p-3 rounded-md bg-gradient-to-br from-accent/10 to-transparent border border-accent/30">
-                <span className="text-xs uppercase text-text-secondary block mb-0.5 font-bold">
-                  Manganese Possibility
-                </span>
-                <div className="text-xl font-semibold text-accent">
-                  {(activePrediction.probability * 100).toFixed(1)}%
-                </div>
-                <span className="text-xs text-accent uppercase font-bold">
-                  {activePrediction.confidence} Confidence
-                </span>
-              </div>
-            </div>
-
-            {/* Nearest Geological Fault Telemetry */}
-            <div className="p-2.5 rounded-md bg-status-caution/10 border border-status-caution/30 text-xs text-status-caution mb-2 font-mono flex items-center justify-between">
-              <span>Structural Fault:</span>
-              <span className="font-bold truncate max-w-[190px]">{activePrediction.nearest_fault_name || 'Regional Fault'} ({activePrediction.dist_to_fault_km || 4.2} km)</span>
-            </div>
-
-            {/* Geological Metrics Table */}
-            <div className="p-2.5 rounded-md bg-black/50 border border-border-default space-y-1.5 mb-3 text-xs">
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Iron Oxide Index:</span>
-                <span className="text-text-primary font-bold">{activePrediction.features?.iron_oxide_index}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Ferrous Mineral Index:</span>
-                <span className="text-text-primary font-bold">{activePrediction.features?.ferrous_mineral_index}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">SWIR B11/B12 Reflectance:</span>
-                <span className="text-accent font-bold">{activePrediction.features?.swir_b11_reflectance || 0.32} / {activePrediction.features?.swir_b12_reflectance || 0.41}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Elevation & Slope:</span>
-                <span className="text-accent">{activePrediction.features?.elevation_m}m &bull; {activePrediction.features?.slope_deg}°</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Precipitation Baseline:</span>
-                <span className="text-status-caution">{activePrediction.features?.rainfall_mm} mm</span>
-              </div>
-            </div>
-
-            {/* AI Natural Language Interpretation */}
-            <p className="text-xs text-text-secondary leading-relaxed mb-3 p-2.5 rounded-md bg-surface-2 border border-border-default">
-              💡 <span className="font-bold text-text-primary">AI Geological Diagnostic:</span> {activePrediction.geological_interpretation}
-            </p>
-
-            {/* Direct Action Links */}
-            <div className="flex items-center gap-2 pt-1 border-t border-border-default">
-              <a
-                href="#smart-blending"
-                className="rounded-md border border-border-interactive bg-surface-2 flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
-              >
-                3D Borehole Kriging
-              </a>
-              <a
-                href="#smart-blending"
-                className="rounded-md border border-border-interactive bg-surface-2 flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
-              >
-                Simulate Blending
-              </a>
-            </div>
-          </div>
-        )}
-
-        {/* Loading Indicator when user clicks or searches on Map */}
-        {isPredicting && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500] px-4 py-2 rounded-full bg-black/90 border border-accent text-accent font-mono text-xs font-bold flex items-center gap-2 ">
-            <Activity className="w-4 h-4 animate-spin" />
-            <span>Geocoding & Running AI Manganese Machine Learning Engine...</span>
-          </div>
-        )}
-
-        {/* Bottom Fast-Switch Hotspot Dock */}
-        <div className="absolute bottom-4 left-4 right-16 z-[400] flex items-center gap-2 overflow-x-auto p-2 rounded-md bg-[rgba(6,10,14,0.88)] border border-border-default ">
-          <span className="text-xs font-mono font-bold text-text-tertiary uppercase px-2 shrink-0 hidden sm:inline">
-            HOTSPOTS:
-          </span>
-          {hotspots.map((m) => (
-            <button
-              type="button"
-              key={m.id}
-              onClick={() => {
-                const orig = MOIL_MINES.find((item) => item.id === m.id) || selectedMine
-                onSelectMine(orig)
-                triggerAIPrediction(m.lat, m.lng, `${m.name} Hotspot (${m.state})`)
-              }}
-              className={`px-3 py-1.5 rounded-md text-xs font-mono whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
-                selectedMine.id === m.id
-                  ? 'text-black font-semibold shadow-lg'
-                  : 'bg-surface-2 border border-border-default text-text-tertiary hover:text-text-primary hover:bg-surface-3'
-              }`}
-              style={{
-                backgroundColor: selectedMine.id === m.id ? m.color : undefined,
-              }}
-              data-provenance="reference"
-            >
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: m.color }} />
-              {m.name} ({m.rate})
-            </button>
-          ))}
-        </div>
       </div>
     </div>
   )

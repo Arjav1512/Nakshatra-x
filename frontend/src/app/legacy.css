@@ -82,3 +82,16 @@
    scale — depth from material rather than from light and value. 36 usages
    became layered near-black surfaces with token borders.
    --------------------------------------------------------------------------- */
+
+/*
+ * The attribution line carries the licensors' required notices, so it has to
+ * stay legible rather than shrink. At phone width it wrapped to three lines and
+ * ran underneath the zoom buttons in the opposite corner. The bottom-left corner
+ * now stops short of the zoom column, and the text wraps within it.
+ */
+.leaflet-bottom.leaflet-left {
+  right: 3.5rem;
+}
+.leaflet-bottom.leaflet-left .leaflet-control-attribution {
+  line-height: 1.35;
+}

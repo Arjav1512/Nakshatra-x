@@ -298,7 +298,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                         ? `, generated ${forecast.artifact_age_hours.toFixed(1)} h ago`
                         : ''}
                       , so it is a computed prediction rather than a live reading. The conditions
-                      panel above is measured live and carries its own vintage.
+                      panel, after the forecast, is measured live and carries its own vintage.
                     </>
                   )}
                 </p>
