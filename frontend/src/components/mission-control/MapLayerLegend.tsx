@@ -64,6 +64,14 @@ const KIND_BADGE: Record<string, { label: string; cls: string; title: string }> 
   },
 }
 
+/**
+ * A reason as a clause. Upstream reasons arrive as sentences, and the legend
+ * wraps them in its own — so "…stay off." became "…stay off.. Nothing is drawn".
+ */
+function clause(s: string | null | undefined): string {
+  return (s ?? '').trim().replace(/[.\s]+$/, '')
+}
+
 function TileSourcePill({ mode, fetchedAt }: { mode: TileSourceMode; fetchedAt: string | null }) {
   const date = fetchDate(fetchedAt)
   const text =
@@ -148,13 +156,13 @@ export default function MapLayerLegend({ model }: { model: LegendModel }) {
 
       {model.status === 'unavailable' && !(model.tile && (model.tile.mode === 'cache' || model.tile.mode === 'mixed')) ? (
         <p role="status" className="leading-snug text-status-caution">
-          Layer unavailable: {model.reason ?? 'no reason given'}. Nothing is drawn in its place.
+          Layer unavailable: {clause(model.reason) || 'no reason given'}. Nothing is drawn in its place.
         </p>
       ) : null}
 
       {model.tile?.liveReason && (model.tile.mode === 'cache' || model.tile.mode === 'mixed') ? (
         <p role="status" className="leading-snug text-text-secondary">
-          Live tiler failed: {model.tile.liveReason}.
+          Live tiler failed: {clause(model.tile.liveReason)}.
         </p>
       ) : null}
 
