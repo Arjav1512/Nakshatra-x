@@ -474,6 +474,63 @@ def map_cached_tile(layer_id: str, z: int, x: int, y: int):
     )
 
 
+@router.get("/calibration/cumulative")
+def calibration_cumulative(mine_code: str | None = None):
+    """
+    How well the 14-day total is calibrated, for display beside P(shortfall).
+
+    Served from a committed artifact built by
+    `measure_cumulative_calibration.py artifact`, stamped with the identity of
+    the model it measured. If the model being served is not that model, this
+    says the calibration is stale and returns no figures — a coverage number
+    measured on one model, shown beside another model's probability, would be
+    a claim about something nobody measured.
+    """
+    import json as _json
+    from pathlib import Path as _Path
+
+    from app.api.forecast_store import identity_matches
+
+    path = _Path(__file__).resolve().parents[2] / "artifacts" / "calibration" / "cumulative_coverage.json"
+    if not path.exists():
+        raise HTTPException(
+            status_code=503,
+            detail="No calibration artifact. Build it with measure_cumulative_calibration.py artifact.",
+        )
+    data = _json.loads(path.read_text())
+    ok, reason = identity_matches(data)
+    if not ok:
+        return {
+            "status": "stale",
+            "reason": (
+                f"The calibration was measured on a different model ({reason}). "
+                "Not shown until it is re-measured."
+            ),
+            "doc": data.get("doc"),
+        }
+    mine = data.get("per_mine", {}).get(mine_code) if mine_code else None
+    return {
+        "status": "ok",
+        "quantity": data["quantity"],
+        "nominal_coverage": data["nominal_coverage"],
+        "nominal_tail_frequency": data["nominal_tail_frequency"],
+        "model_version": data["model_version"],
+        "portfolio": data["portfolio"],
+        "mine_code": mine_code,
+        "mine": mine,
+        "mine_note": (
+            None if mine or not mine_code
+            else f"No per-mine calibration recorded for {mine_code}."
+        ),
+        "window": data["window"],
+        "method": data["method"],
+        "generated_at": data["generated_at"],
+        "records_sha256": data["records_sha256"],
+        "doc": data["doc"],
+        "provenance": data["provenance"],
+    }
+
+
 @router.get("/prospectivity/metrics")
 def prospectivity_metrics():
     """Leave-one-mine-out validation metrics. PRD A-8, D-7."""

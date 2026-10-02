@@ -15,7 +15,8 @@ Three things are asserted, each of which is a way the instrument could have lied
   2. the bootstrap really does cluster — resampling whole origin dates must widen
      the interval when a date's windows move together, and must not when they do
      not. A clustered bootstrap that silently behaved like a binomial one would
-     have reported intervals ~1.6x too narrow on the real data;
+     have reported intervals ~1.28x too narrow for the shipped model on the
+     real data (design effect 1.65; 1.58x for the worst arm measured);
   3. the verdict applies the pre-registered rule, including choosing the
      worse-looking loading when the pre-registered deciding statistic says so,
      and including refusing to claim it checked criterion 3.
@@ -223,3 +224,74 @@ if __name__ == "__main__":
     test_verdict_does_not_claim_to_have_checked_criterion_3()
     test_distance_helpers_use_the_declared_nominals()
     print("harness tests passed")
+
+
+# ---------------------------------------------------------------------------
+# The calibration artifact the console reads beside P(shortfall)
+# ---------------------------------------------------------------------------
+
+def _artifact():
+    import json
+    from pathlib import Path
+
+    p = Path(__file__).resolve().parent / "artifacts" / "calibration" / "cumulative_coverage.json"
+    assert p.exists(), "no calibration artifact — the console would show 'unavailable'"
+    return json.loads(p.read_text())
+
+
+def test_calibration_artifact_describes_the_model_that_ships():
+    """
+    The figures beside P(shortfall) must have been measured on the model serving
+    it. The artifact carries the same identity the forecast artifacts do, and it
+    has to match the code as it stands.
+    """
+    from app.api.forecast_store import identity_matches
+
+    data = _artifact()
+    ok, reason = identity_matches(data)
+    assert ok, f"calibration artifact was measured on a different model: {reason}"
+
+    p = data["portfolio"]
+    lo, hi = p["coverage_80_ci95"]
+    assert 0.0 <= lo <= p["coverage_80"] <= hi <= 1.0, p
+    assert p["n_windows"] > 0 and p["n_origin_dates"] > 0
+    # A per-mine figure exists for every mine in the register.
+    from app.ingestion.generator import MINES
+    missing = [m.code for m in MINES if m.code not in data["per_mine"]]
+    assert not missing, f"no per-mine calibration for {missing}"
+
+
+def test_calibration_endpoint_refuses_a_stale_artifact(monkeypatch):
+    """
+    If the model changes, the endpoint must say the calibration is stale and
+    return NO figures — a coverage number measured on one model, printed beside
+    another model's probability, describes something nobody measured.
+    """
+    from app.api import forecast_store
+    from app.api.routes import calibration_cumulative
+
+    ok = calibration_cumulative(mine_code="MOIL-BAL-01")
+    assert ok["status"] == "ok"
+    assert ok["mine"] is not None and ok["portfolio"] is not None
+
+    real = forecast_store.artifact_identity
+    monkeypatch.setattr(
+        forecast_store, "artifact_identity",
+        lambda: {**real(), "model_version": "a-different-model"},
+    )
+    stale = calibration_cumulative(mine_code="MOIL-BAL-01")
+    assert stale["status"] == "stale", stale
+    assert "portfolio" not in stale and "mine" not in stale, (
+        "a stale calibration still returned figures"
+    )
+    assert "different model" in stale["reason"]
+
+
+def test_calibration_endpoint_says_when_a_mine_has_no_figure():
+    """An unknown mine gets a note, not the portfolio figure dressed as its own."""
+    from app.api.routes import calibration_cumulative
+
+    r = calibration_cumulative(mine_code="MOIL-NOPE-99")
+    assert r["status"] == "ok"
+    assert r["mine"] is None
+    assert "No per-mine calibration" in (r["mine_note"] or "")

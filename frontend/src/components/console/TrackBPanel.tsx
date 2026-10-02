@@ -11,6 +11,7 @@ import {
   fetchBacktest, fetchForecast, fetchRecommendations,
 } from '@/lib/console-api'
 import { Metric } from './Evidence'
+import { ShortfallCalibration } from './ShortfallCalibration'
 
 /**
  * Track B — production shortfall (PRD B-5, B-6, B-7, B-10, C-1..C-5, D-2, D-3,
@@ -372,13 +373,23 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                   uncertainty: {
                     plus_minus: 0,
                     confidence: forecast.interval.nominal_coverage,
-                    basis: 'Daily intervals are conformalised; days treated as independent given covariates.',
+                    // Read from the forecast, not written here. This said
+                    // "days treated as independent given covariates", which
+                    // stopped being true when the days were aggregated by block
+                    // bootstrap of the model's residuals — the forecast's own
+                    // `aggregation` field has said "days correlated" since, and
+                    // the copy went on contradicting it.
+                    basis: grades[0]?.shortfall.aggregation ?? 'aggregation not reported by the forecast',
                   },
                 }
               ), () => String(grades.length
                   ? pct(Math.max(...grades.map((g) => g.shortfall.p_shortfall)))
                   : null))}
           />
+          </div>
+
+          <div className={sectionCls('answer')}>
+            <ShortfallCalibration mineCode={forecast.mine_code} mineName={mineName} />
           </div>
 
           <p className={`measure text-xs text-text-tertiary ${sectionCls('answer')}`}>
