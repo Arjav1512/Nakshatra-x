@@ -52,6 +52,10 @@ DAILY_HORIZONS = (1, 3, 7, 14)
 UNIFORM_PIT_SD = 1.0 / np.sqrt(12.0)
 N_BOOT = 2000
 BOOT_SEED = 20260921
+#: The confidence level of every interval this script reports. Defined once and
+#: written into the artifact, so a page that labels the intervals reads the
+#: level from the same place the intervals came from rather than typing "95%".
+CI_LEVEL = 0.95
 
 try:  # this branch
     from app.ml.forecaster import cumulative_paths
@@ -218,7 +222,8 @@ def _boot_indices(keys: list[str], by: dict[str, list[int]], n_boot: int):
 
 
 def _ci(samples: np.ndarray) -> list[float]:
-    lo, hi = np.percentile(samples, [2.5, 97.5])
+    tail = (1.0 - CI_LEVEL) / 2.0 * 100.0
+    lo, hi = np.percentile(samples, [tail, 100.0 - tail])
     return [round(float(lo), 4), round(float(hi), 4)]
 
 
@@ -628,6 +633,7 @@ def artifact(args: argparse.Namespace) -> int:
         "quantity": "share of realised 14-day totals inside the forecast's 80% band",
         "nominal_coverage": 0.80,
         "nominal_tail_frequency": 0.10,
+        "ci_level": CI_LEVEL,
         "model_version": MODEL_VERSION,
         "portfolio": portfolio,
         "per_mine": per_mine,
@@ -639,7 +645,7 @@ def artifact(args: argparse.Namespace) -> int:
         },
         "method": (
             "Rolling-origin: refit before every origin, score the next 14 days. "
-            "95% intervals from a cluster bootstrap resampling whole origin dates "
+            f"{CI_LEVEL:.0%} intervals from a cluster bootstrap resampling whole origin dates "
             f"({args.n_boot} resamples, seed {BOOT_SEED}), because a date's windows "
             "share weather and equipment state and are not independent."
         ),

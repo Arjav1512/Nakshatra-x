@@ -3,6 +3,7 @@
   "quantity": "share of realised 14-day totals inside the forecast's 80% band",
   "nominal_coverage": 0.8,
   "nominal_tail_frequency": 0.1,
+  "ci_level": 0.95,
   "model_version": "nakshatra-gbt-cqr-v1",
   "portfolio": {
     "coverage_80": 0.738,
@@ -190,7 +191,7 @@
   },
   "method": "Rolling-origin: refit before every origin, score the next 14 days. 95% intervals from a cluster bootstrap resampling whole origin dates (2000 resamples, seed 20260921), because a date's windows share weather and equipment state and are not independent.",
   "records_sha256": "b72eb220251f16ea69e2a456b92b67a8b2a0a57ecc077eb56c442f23a8336e72",
-  "generated_at": "2026-10-02T17:15:07Z",
+  "generated_at": "2026-10-02T22:39:15Z",
   "generated_by": "python measure_cumulative_calibration.py artifact --records <run output>",
   "artifact_identity": {
     "generator": "nakshatra-synthetic-v1",

@@ -36,6 +36,8 @@ type CalibrationResponse = {
   reason?: string
   error?: string
   nominal_coverage?: number
+  /** Confidence level of the intervals, from the artifact. */
+  ci_level?: number | null
   model_version?: string
   portfolio?: Stat
   mine?: Stat | null
@@ -133,8 +135,9 @@ export function ShortfallCalibration({ mineCode, mineName }: { mineCode: string;
         <p className="text-text-tertiary">{data.mine_note ?? `No per-mine figure for ${mineName}.`}</p>
       )}
       <p className="text-text-tertiary">
-        Held-out rolling-origin backtest, 95% intervals from a bootstrap over whole origin dates. Synthetic
-        data.{' '}
+        Held-out rolling-origin backtest;{' '}
+        {data.ci_level != null ? `${Math.round(data.ci_level * 100)}% intervals` : 'intervals'} from a
+        bootstrap over whole origin dates. Synthetic data.{' '}
         {data.doc ? (
           <a
             href={`${DOCS_BASE}${data.doc}`}

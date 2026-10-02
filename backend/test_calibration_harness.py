@@ -295,3 +295,19 @@ def test_calibration_endpoint_says_when_a_mine_has_no_figure():
     assert r["status"] == "ok"
     assert r["mine"] is None
     assert "No per-mine calibration" in (r["mine_note"] or "")
+
+
+def test_calibration_artifact_records_its_interval_level():
+    """
+    The console labels the intervals with their confidence level, read from the
+    artifact rather than typed into copy. It must be the level the harness
+    actually used — defined once, in CI_LEVEL — and the endpoint must pass it on.
+    """
+    from app.api.routes import calibration_cumulative
+
+    data = _artifact()
+    assert data.get("ci_level") == H.CI_LEVEL, (
+        f"artifact says {data.get('ci_level')}, harness computes {H.CI_LEVEL}"
+    )
+    assert f"{H.CI_LEVEL:.0%}" in data["method"]
+    assert calibration_cumulative(mine_code="MOIL-BAL-01")["ci_level"] == H.CI_LEVEL

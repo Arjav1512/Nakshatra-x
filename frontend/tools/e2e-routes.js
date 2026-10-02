@@ -48,7 +48,10 @@ const ROUTES = [
     // the anti-empty-shell assertion: ten cards each with a real probability
     custom: async (page) => {
       const r = await page.evaluate(() => {
-        const cards = [...document.querySelectorAll('li')].filter((l) => l.querySelector('button'))
+        // Scoped to the mine list: the breadcrumb is an ordered list of buttons
+        // now (the track is part of the location), and counting every <li>
+        // with a button counted its two items as mine cards — 12, not 10.
+        const cards = [...document.querySelectorAll('[data-testid="mine-list"] > li')]
         return {
           cards: cards.length,
           withProb: cards.filter((c) => /P\s*\d+%/.test(c.innerText)).length,

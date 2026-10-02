@@ -514,6 +514,9 @@ def calibration_cumulative(mine_code: str | None = None):
         "quantity": data["quantity"],
         "nominal_coverage": data["nominal_coverage"],
         "nominal_tail_frequency": data["nominal_tail_frequency"],
+        # Read, not defaulted: an artifact without it is older than the field,
+        # and the page then says "intervals" without claiming a level.
+        "ci_level": data.get("ci_level"),
         "model_version": data["model_version"],
         "portfolio": data["portfolio"],
         "mine_code": mine_code,
