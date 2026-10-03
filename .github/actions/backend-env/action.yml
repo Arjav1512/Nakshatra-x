@@ -1,0 +1,19 @@
+name: Backend environment
+description: >
+  Python 3.13 and backend/.venv, built by backend/scripts/setup_dev.sh — the
+  same script a developer runs, so CI cannot drift from a local setup.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+        cache: pip
+        cache-dependency-path: |
+          backend/requirements.txt
+          backend/requirements-dev.txt
+    - name: backend/scripts/setup_dev.sh
+      shell: bash
+      env:
+        PYTHON: python3
+      run: backend/scripts/setup_dev.sh

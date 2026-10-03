@@ -1,0 +1,25 @@
+name: Frontend environment
+description: >
+  Node and frontend/node_modules from the lockfile, plus Next's build cache.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "22"
+        cache: npm
+        cache-dependency-path: frontend/package-lock.json
+    - name: npm ci
+      shell: bash
+      working-directory: frontend
+      run: npm ci --no-audit --no-fund
+    # The build fetches its three fonts from Google (next/font/google). A cold
+    # build fails if fonts.googleapis.com is unreachable — measured — and one
+    # with this cache restored does not, so after the first successful build
+    # per lockfile a Google outage cannot turn the build red (docs/CI.md).
+    - uses: actions/cache@v4
+      with:
+        path: frontend/.next/cache
+        key: next-cache-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}-${{ github.sha }}
+        restore-keys: |
+          next-cache-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}-
