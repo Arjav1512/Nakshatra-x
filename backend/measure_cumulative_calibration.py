@@ -595,7 +595,7 @@ def artifact(args: argparse.Namespace) -> int:
     import hashlib
     import time as _time
 
-    from app.api.forecast_store import artifact_identity
+    from app.api.forecast_store import artifact_identity, file_fingerprint, says_the_same
     from app.ml.forecaster import MODEL_VERSION
 
     raw = open(args.records, "rb").read()
@@ -653,6 +653,10 @@ def artifact(args: argparse.Namespace) -> int:
         "generated_at": _time.strftime("%Y-%m-%dT%H:%M:%SZ", _time.gmtime()),
         "generated_by": "python measure_cumulative_calibration.py artifact --records <run output>",
         "artifact_identity": artifact_identity(),
+        # This script is outside the forecast's import chain, so a change to how
+        # calibration is measured would not move `artifact_identity`. Recorded so
+        # `batch all` can tell a current measurement from one by an older harness.
+        "harness_fingerprint": file_fingerprint(__import__("pathlib").Path(__file__)),
         "doc": "docs/CALIBRATION.md",
         "provenance": {
             "source_kind": "derived",
@@ -670,9 +674,13 @@ def artifact(args: argparse.Namespace) -> int:
     }
     dest = __import__("pathlib").Path(args.out) if args.out else CALIBRATION_ARTIFACT
     dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text(json.dumps(out, indent=2) + "\n")
     p = portfolio
-    print(f"wrote {dest}")
+    if dest.exists() and says_the_same(dest, out):
+        # Same records, same figures: the file and its `generated_at` stay.
+        print(f"unchanged {dest} — identical apart from generated_at; not rewritten")
+    else:
+        dest.write_text(json.dumps(out, indent=2) + "\n")
+        print(f"wrote {dest}")
     print(f"  portfolio  coverage {p['coverage_80']} {p['coverage_80_ci95']}  "
           f"tails {p['pit_at_extremes']}  n={p['n_windows']} at {p['n_origin_dates']} dates  "
           f"ESS {p['effective_sample_size']}")

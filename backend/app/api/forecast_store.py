@@ -41,10 +41,32 @@ from typing import Any, Callable
 
 FORECAST_DIR = Path(__file__).resolve().parents[2] / "artifacts" / "forecasts"
 
-# Artifacts older than this are refreshed by the warmer. The generator is
-# seeded, so a refresh reproduces the same numbers unless the code changed —
-# staleness is about code and model version, not drift.
-STALE_AFTER_HOURS = 24.0
+# STALENESS IS IDENTITY, NOT AGE.
+#
+# An artifact is stale when its dataset identity or code fingerprint no longer
+# matches the running code — that is the only thing that changes what it says.
+# The generator is seeded, so recomputing an artifact whose identity matches
+# reproduces the same numbers; the only thing a recompute could change is the
+# timestamp.
+#
+# This used to be a 24-hour window on the file's modification time, and that
+# was wrong both ways. Regenerating the day before a demo, as docs/DEMO.md
+# says to, put every artifact past the window by the time the demo started, so
+# the backend refitted all ten forecasts on stage — minutes of "Computing" on
+# every mine, for byte-identical numbers under a new `vintage`. And a fresh
+# checkout sets every file time to the moment of checkout, so an artifact
+# generated weeks earlier counted as brand new.
+#
+# Age is still reported (`artifact_age_hours`), read from the `vintage` the
+# artifact recorded when it was generated rather than from the file. Past this
+# threshold /readyz carries a warning for the pre-flight to print. It never
+# forces a recompute and never affects readiness.
+AGE_WARN_AFTER_HOURS = 48.0
+
+#: Keys that record *when* an artifact was written rather than *what* it says,
+#: at any depth (`vintage` also appears in each figure's provenance envelope).
+#: A rewrite that would change only these is not a change, so it is not made.
+GENERATION_STAMPS = frozenset({"vintage", "computed_at", "generated_at"})
 
 # Bounded on purpose. The fit is CPU-bound and already threads internally
 # through numpy/scikit-learn; more workers than this stopped helping and
@@ -259,6 +281,64 @@ def identity_matches(data: dict[str, Any]) -> tuple[bool, str | None]:
     return True, None
 
 
+def file_fingerprint(path: Path) -> str:
+    """Hash of one file, in the same form as `code_fingerprint`."""
+    import hashlib
+
+    return hashlib.sha256(path.read_bytes()).hexdigest()[:16]
+
+
+def _without_stamps(obj: Any) -> Any:
+    if isinstance(obj, dict):
+        return {k: _without_stamps(v) for k, v in obj.items() if k not in GENERATION_STAMPS}
+    if isinstance(obj, list):
+        return [_without_stamps(v) for v in obj]
+    return obj
+
+
+def says_the_same(path: Path, payload: dict[str, Any]) -> bool:
+    """
+    Does the artifact at `path` already say what `payload` says?
+
+    Everything is compared — figures, identity, wording — except the generation
+    stamps. Every artifact writer asks this before writing, so recomputing
+    identical inputs leaves the file, and the `vintage` or `generated_at` it
+    records, exactly as it was.
+
+    Content is compared rather than identity alone so that the rule cannot hide
+    a gap in the identity: if some input the identity does not capture moved
+    the numbers, the file differs and is rewritten.
+    """
+    try:
+        existing = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return False
+    # Round-trip the payload so dates and other `default=str` values compare as
+    # they will be stored.
+    fresh = json.loads(json.dumps(payload, default=str))
+    return _without_stamps(existing) == _without_stamps(fresh)
+
+
+def recorded_age_hours(data: dict[str, Any], field: str = "vintage") -> float | None:
+    """
+    Hours since the artifact says it was generated, or None if it does not say.
+
+    Read from the artifact, never from the file. A checkout, a copy or a
+    `git checkout -- backend/artifacts` sets the file time to "now", so the file
+    cannot tell you how old the numbers in it are.
+    """
+    raw = data.get(field)
+    if not raw:
+        return None
+    try:
+        at = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if at.tzinfo is None:
+        at = at.replace(tzinfo=timezone.utc)
+    return round((datetime.now(timezone.utc) - at).total_seconds() / 3600.0, 2)
+
+
 class Warming(Exception):
     """Raised when an artifact is not available yet. Carries an ETA in seconds."""
 
@@ -320,12 +400,12 @@ def artifact_path(mine_code: str, horizon_days: int) -> Path:
     return FORECAST_DIR / f"{_key(mine_code, horizon_days)}.json"
 
 
-def _age_hours(path: Path) -> float:
-    return (time.time() - path.stat().st_mtime) / 3600.0
-
-
 def read_artifact(mine_code: str, horizon_days: int) -> dict[str, Any] | None:
-    """Return the persisted forecast, annotated with its age, or None."""
+    """
+    Return the persisted forecast, annotated with its age, or None.
+
+    None means missing, unreadable or produced by other code — never "old".
+    """
     path = artifact_path(mine_code, horizon_days)
     if not path.exists():
         return None
@@ -340,28 +420,45 @@ def read_artifact(mine_code: str, horizon_days: int) -> dict[str, Any] | None:
         return None
 
     data["served_from"] = "artifact"
-    data["artifact_age_hours"] = round(_age_hours(path), 2)
-    data["artifact_stale"] = data["artifact_age_hours"] > STALE_AFTER_HOURS
+    # Informational. An artifact that reaches this line is servable whatever its
+    # age; there used to be an age-derived `artifact_stale` flag here, removed
+    # because under identity-based staleness it could only ever be false.
+    data["artifact_age_hours"] = recorded_age_hours(data)
     return data
 
 
-def write_artifact(mine_code: str, horizon_days: int, payload: dict[str, Any]) -> Path:
+def write_artifact(
+    mine_code: str, horizon_days: int, payload: dict[str, Any]
+) -> tuple[Path, bool]:
+    """
+    Persist a forecast. Returns (path, written).
+
+    `written` is False when the artifact on disk already says the same thing —
+    then the file, and the `vintage` it records, are left exactly as they were.
+    """
     FORECAST_DIR.mkdir(parents=True, exist_ok=True)
     payload = dict(payload)
     payload["vintage"] = datetime.now(timezone.utc).isoformat()
     payload["artifact_identity"] = artifact_identity()
     path = artifact_path(mine_code, horizon_days)
+    if path.exists() and says_the_same(path, payload):
+        return path, False
     # Write-then-rename, so a reader never sees a half-written artifact.
     tmp = path.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(payload, indent=2, default=str))
     tmp.replace(path)
-    return path
+    return path, True
 
 
 def is_fresh(mine_code: str, horizon_days: int) -> bool:
-    """Fresh means: present, within the staleness window, AND produced by this code."""
+    """
+    Fresh means: present AND produced by this code and this dataset.
+
+    Age is not part of it. The startup warmer recomputes exactly the artifacts
+    this rejects, so an age test here is a recompute of identical inputs.
+    """
     path = artifact_path(mine_code, horizon_days)
-    if not path.exists() or _age_hours(path) > STALE_AFTER_HOURS:
+    if not path.exists():
         return False
     try:
         data = json.loads(path.read_text())
@@ -455,10 +552,11 @@ def status(mine_codes: list[str], horizon_days: int = 14) -> dict[str, Any]:
     mines = []
     ready = 0
     failed = 0
+    ages: list[float] = []
     for code in mine_codes:
         path = artifact_path(code, horizon_days)
         exists = path.exists()
-        age = round(_age_hours(path), 2) if exists else None
+        age: float | None = None
 
         # Identity is checked here, not only in read_artifact.
         #
@@ -468,19 +566,20 @@ def status(mine_codes: list[str], horizon_days: int = 14) -> dict[str, Any]:
         # a green demo that the forecast endpoint would not deliver. Whatever
         # decides "servable" has to be the same in both places.
         #
-        # Why the distinction is surfaced: "present but from another model" is a
-        # different problem from "present but old", and they need different
-        # fixes.
+        # Identity is now the whole test. Age is reported beside it, from the
+        # artifact's own `vintage`, and does not enter `fresh`.
         identity_ok, identity_reason = (True, None)
         if exists:
             try:
-                identity_ok, identity_reason = identity_matches(json.loads(path.read_text()))
+                data = json.loads(path.read_text())
+                identity_ok, identity_reason = identity_matches(data)
+                age = recorded_age_hours(data)
             except (json.JSONDecodeError, OSError) as exc:
                 identity_ok, identity_reason = False, f"unreadable: {exc}"
+        if age is not None:
+            ages.append(age)
 
-        fresh = bool(
-            exists and identity_ok and age is not None and age <= STALE_AFTER_HOURS
-        )
+        fresh = bool(exists and identity_ok)
         if fresh:
             ready += 1
         k = _key(code, horizon_days)
@@ -518,12 +617,23 @@ def status(mine_codes: list[str], horizon_days: int = 14) -> dict[str, Any]:
             }
         mines.append(entry)
 
+    oldest = max(ages) if ages else None
     return {
         "ready": ready == len(mine_codes) and len(mine_codes) > 0,
         "mines_ready": ready,
         "mines_failed": failed,
         "mines_total": len(mine_codes),
-        "stale_after_hours": STALE_AFTER_HOURS,
+        # Informational, for the pre-flight. Never affects `ready`.
+        "oldest_artifact_age_hours": oldest,
+        "age_warn_after_hours": AGE_WARN_AFTER_HOURS,
+        "age_warning": (
+            f"The oldest forecast artifact was generated {oldest:.0f} h ago "
+            f"(warning above {AGE_WARN_AFTER_HOURS:.0f} h). It matches the running "
+            "code, so it is served as it is and nothing is recomputed. If the demo "
+            "is today, check its forecast window has not ended (docs/DEMO.md, "
+            "'The day before')."
+            if oldest is not None and oldest > AGE_WARN_AFTER_HOURS else None
+        ),
         "warm_workers": MAX_WARM_WORKERS,
         "artifact_identity": artifact_identity(),
         "mines": mines,

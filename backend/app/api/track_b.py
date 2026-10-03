@@ -200,6 +200,7 @@ from app.api.forecast_store import (
     identity_matches,
     is_fresh,
     read_artifact,
+    says_the_same,
     status as store_status,
     warm,
 )
@@ -241,6 +242,10 @@ def compute_backtest(mine_code: str, span_days: int = 150, step_days: int = 14) 
 
     BACKTEST_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     path = _backtest_cache_path(mine_code, span_days, step_days)
+    if path.exists() and says_the_same(path, res):
+        # Same inputs, same backtest. The file and its `computed_at` stay as
+        # they were, and the caller gets what is on disk so memory agrees.
+        return json.loads(path.read_text())
     tmp = path.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(res, indent=2))
     tmp.replace(path)

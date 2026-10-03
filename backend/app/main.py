@@ -22,8 +22,10 @@ async def lifespan(_app: FastAPI):
 
     Artifacts are committed to the repository, so a fresh checkout serves every
     mine immediately and this loop finds nothing to do. It exists for the cases
-    that are not fresh: a changed model version, an artifact past its staleness
-    window, or a mine added since the artifacts were generated.
+    that are not fresh: a changed model, code, library or dataset identity, or a
+    mine added since the artifacts were generated. An artifact's age is not one
+    of them — recomputing matching inputs reproduces the same numbers
+    (forecast_store, "STALENESS IS IDENTITY, NOT AGE").
 
     Warming is submitted to the same bounded pool the request path uses, so a
     cold start cannot spawn ten simultaneous fits. Set NAKSHATRA_SKIP_WARM=1 to

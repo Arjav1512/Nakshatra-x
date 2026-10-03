@@ -191,7 +191,7 @@
   },
   "method": "Rolling-origin: refit before every origin, score the next 14 days. 95% intervals from a cluster bootstrap resampling whole origin dates (2000 resamples, seed 20260921), because a date's windows share weather and equipment state and are not independent.",
   "records_sha256": "b72eb220251f16ea69e2a456b92b67a8b2a0a57ecc077eb56c442f23a8336e72",
-  "generated_at": "2026-10-02T22:39:15Z",
+  "generated_at": "2026-10-03T08:06:02Z",
   "generated_by": "python measure_cumulative_calibration.py artifact --records <run output>",
   "artifact_identity": {
     "generator": "nakshatra-synthetic-v1",
@@ -199,13 +199,14 @@
     "generator_seed": 20260921,
     "data_end_date": "2026-09-20",
     "model_version": "nakshatra-gbt-cqr-v1",
-    "code_fingerprint": "560a855179768a09",
+    "code_fingerprint": "e7d44df53c54e72e",
     "library_versions": {
       "numpy": "2.2.0",
       "pydantic": "2.13.5",
       "sklearn": "1.6.0"
     }
   },
+  "harness_fingerprint": "b4bf576cd4fd9291",
   "doc": "docs/CALIBRATION.md",
   "provenance": {
     "source_kind": "derived",

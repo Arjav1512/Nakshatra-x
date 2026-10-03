@@ -7,6 +7,7 @@ batch that writes an artifact, not on a request path. The API then serves the
 artifact and reports how old it is.
 
     python -m app.api.batch all                   # EVERYTHING, one dataset
+    python -m app.api.batch all --force           # recompute even what matches
     python -m app.api.batch tiles                 # map tiles for offline demo
     python -m app.api.batch check                 # do the artifacts agree?
     python -m app.api.batch backtest              # all mines
@@ -18,6 +19,13 @@ sample CSVs all come from the same generated dataset; regenerated separately
 they drift, and a screen showing a forecast next to a backtest MAPE would be
 comparing two datasets under one label. If it fails, the previous set is still
 in git: `git checkout -- backend/artifacts data/synthetic`.
+
+Nothing whose identity matches the running code is recomputed, and nothing that
+comes out the same is rewritten. Running `all` twice therefore changes nothing
+the second time, and an artifact's `vintage`, `computed_at` or `generated_at` is
+when its content last changed — not when someone last ran this. `--force`
+recomputes anyway, as a determinism check: an artifact that comes out identical
+is still left as it was.
 
 The forecast window follows the last day of generated actuals. That date is a
 parameter with a committed default; override it at generation time to move the
@@ -47,36 +55,69 @@ BACKEND_DIR = Path(__file__).resolve().parents[2]
 CALIBRATION_ARTIFACT = BACKEND_DIR / "artifacts" / "calibration" / "cumulative_coverage.json"
 
 
-def run_backtests(codes: list[str] | None = None) -> int:
+def _mtime_ns(path: Path) -> int | None:
+    try:
+        return path.stat().st_mtime_ns
+    except OSError:
+        return None
+
+
+def _backtest_is_current(code: str, span_days: int = 150, step_days: int = 14) -> bool:
+    """A backtest artifact exists and was produced by this code and dataset."""
+    from app.api.forecast_store import identity_matches
+    from app.api.track_b import _backtest_cache_path
+
+    try:
+        data = json.loads(_backtest_cache_path(code, span_days, step_days).read_text())
+    except (OSError, json.JSONDecodeError):
+        return False
+    return identity_matches(data)[0]
+
+
+def _backtest(code: str, span_days: int, step_days: int, force: bool) -> str:
+    """Bring one backtest up to date. Returns what happened, for the log."""
+    from app.api.track_b import _backtest_cache_path
+
+    if not force and _backtest_is_current(code, span_days, step_days):
+        return "unchanged — identity matches the running code; not recomputed"
+    path = _backtest_cache_path(code, span_days, step_days)
+    before = _mtime_ns(path)
+    res = compute_backtest(code, span_days=span_days, step_days=step_days)
+    verb = "identical — not rewritten" if before is not None and _mtime_ns(path) == before else "written"
+    return (
+        f"MAPE {res['model']['mape_pct']:.2f}% vs baseline "
+        f"{res['baseline']['mape_pct']:.2f}%  coverage {res['model'].get('coverage_80')}  ({verb})"
+    )
+
+
+def run_backtests(codes: list[str] | None = None, force: bool = False) -> int:
     targets = codes or [m.code for m in MINES]
     failures = 0
     for code in targets:
         started = time.time()
         try:
-            res = compute_backtest(code)
-            took = time.time() - started
-            print(
-                f"  {code:14} ok   {took:6.1f}s  "
-                f"MAPE {res['model']['mape_pct']:.2f}% vs baseline "
-                f"{res['baseline']['mape_pct']:.2f}%  coverage {res['model'].get('coverage_80')}"
-            )
+            outcome = _backtest(code, 150, 14, force)
+            print(f"  {code:14} ok   {time.time() - started:6.1f}s  {outcome}")
         except Exception as exc:  # noqa: BLE001 — a batch must not die on one mine
             failures += 1
             print(f"  {code:14} FAIL {time.time() - started:6.1f}s  {type(exc).__name__}: {exc}")
     return failures
 
 
-def run_forecasts(codes: list[str] | None = None, horizon_days: int = 14) -> int:
+def run_forecasts(
+    codes: list[str] | None = None, horizon_days: int = 14, force: bool = False
+) -> int:
     """
-    Generate every forecast artifact, sequentially.
+    Bring every forecast artifact up to date, sequentially.
 
     The generator is seeded, so this is reproducible: the same commit produces
     byte-identical forecasts. That is what makes committing the artifacts
-    honest rather than a snapshot of one lucky run.
+    honest rather than a snapshot of one lucky run — and it is why an artifact
+    whose identity already matches is skipped rather than recomputed.
     """
     from app.api.routes import DEFAULT_MINES
     from app.api.track_b import compute_forecast
-    from app.api.forecast_store import write_artifact, artifact_path
+    from app.api.forecast_store import is_fresh, write_artifact
 
     from app.ingestion.generator import resolve_data_end_date
     from datetime import timedelta
@@ -90,10 +131,14 @@ def run_forecasts(codes: list[str] | None = None, horizon_days: int = 14) -> int
 
     targets = codes or [m["mine_code"] for m in DEFAULT_MINES]
     for i, code in enumerate(targets, 1):
+        if not force and is_fresh(code, horizon_days):
+            print(f"  [{i}/{len(targets)}] {code}: unchanged — identity matches the running code; not recomputed")
+            continue
         t0 = time.time()
         payload = compute_forecast(code, horizon_days=horizon_days)
-        path = write_artifact(code, horizon_days, payload)
-        print(f"  [{i}/{len(targets)}] {code}: {time.time() - t0:.1f}s -> {path.name}")
+        path, written = write_artifact(code, horizon_days, payload)
+        verb = "written" if written else "identical — not rewritten"
+        print(f"  [{i}/{len(targets)}] {code}: {time.time() - t0:.1f}s -> {path.name} ({verb})")
     return 0
 
 
@@ -117,7 +162,7 @@ def committed_backtest_specs() -> list[tuple[str, int, int]]:
     return specs
 
 
-def run_all() -> int:
+def run_all(force: bool = False) -> int:
     """
     Regenerate every synthetic-derived artifact from one dataset.
 
@@ -132,6 +177,10 @@ def run_all() -> int:
     afterwards. If verification fails the previous set is still in git:
 
         git checkout -- backend/artifacts data/synthetic
+
+    An artifact whose identity already matches is not recomputed, and one that
+    comes out identical is not rewritten (module docstring). `force` recomputes
+    every kind regardless.
     """
     from app.ingestion.export import export_samples
     from app.ingestion.generator import dataset_identity, resolve_data_end_date
@@ -145,27 +194,32 @@ def run_all() -> int:
 
     print("1/4  Sample CSVs (data/synthetic)")
     t0 = time.time()
-    counts = export_samples()
-    print(f"  {sum(counts.values()):,} rows across {len(counts)} entities in {time.time() - t0:.1f}s\n")
+    written: list[str] = []
+    counts = export_samples(written=written)
+    print(
+        f"  {sum(counts.values()):,} rows across {len(counts)} entities in {time.time() - t0:.1f}s — "
+        + (f"written: {', '.join(written)}" if written else "identical — nothing rewritten")
+        + "\n"
+    )
 
     print("2/4  Forecast artifacts")
-    failures += run_forecasts()
+    failures += run_forecasts(force=force)
     print()
 
     specs = committed_backtest_specs()
-    print(f"3/4  Backtest artifacts ({len(specs)} committed; ~216 s each)")
+    print(f"3/4  Backtest artifacts ({len(specs)} committed; ~216 s each when recomputed)")
     for code, span, step in specs:
         t0 = time.time()
         try:
-            compute_backtest(code, span_days=span, step_days=step)
-            print(f"  {code:14} ok   {time.time() - t0:6.1f}s")
+            outcome = _backtest(code, span, step, force)
+            print(f"  {code:14} ok   {time.time() - t0:6.1f}s  {outcome}")
         except Exception as exc:  # noqa: BLE001 — a batch must not die on one mine
             failures += 1
             print(f"  {code:14} FAIL {time.time() - t0:6.1f}s  {type(exc).__name__}: {exc}")
     print()
 
-    print("4/4  Calibration artifact (~9 min: refits at 24 origins)")
-    failures += run_calibration()
+    print("4/4  Calibration artifact (~9 min when re-measured: refits at 24 origins)")
+    failures += run_calibration(force=force)
     print()
 
     print("Verifying every artifact agrees on one dataset…")
@@ -180,7 +234,31 @@ def run_all() -> int:
     return failures
 
 
-def run_calibration() -> int:
+CALIBRATION_HARNESS = BACKEND_DIR / "measure_cumulative_calibration.py"
+
+
+def calibration_is_current() -> bool:
+    """
+    The calibration artifact describes this model AND was measured by this harness.
+
+    The model's identity alone is not enough here. The harness lives outside the
+    forecast's import chain, so a change to how calibration is measured leaves
+    `artifact_identity` untouched; the artifact records the harness's own
+    fingerprint so that change is seen too.
+    """
+    from app.api.forecast_store import file_fingerprint, identity_matches
+
+    try:
+        data = json.loads(CALIBRATION_ARTIFACT.read_text())
+    except (OSError, json.JSONDecodeError):
+        return False
+    return (
+        identity_matches(data)[0]
+        and data.get("harness_fingerprint") == file_fingerprint(CALIBRATION_HARNESS)
+    )
+
+
+def run_calibration(force: bool = False) -> int:
     """
     Re-measure the 14-day calibration the console shows beside P(shortfall).
 
@@ -193,8 +271,13 @@ def run_calibration() -> int:
     import subprocess
     import tempfile
 
-    script = BACKEND_DIR / "measure_cumulative_calibration.py"
+    if not force and calibration_is_current():
+        print("  calibration unchanged — identity and harness match; not re-measured")
+        return 0
+
+    script = CALIBRATION_HARNESS
     t0 = time.time()
+    before = _mtime_ns(CALIBRATION_ARTIFACT)
     with tempfile.TemporaryDirectory() as tmp:
         records = Path(tmp) / "records.jsonl"
         for args in (["run", "--out", str(records)], ["artifact", "--records", str(records)]):
@@ -203,7 +286,8 @@ def run_calibration() -> int:
             if r.returncode != 0:
                 print(f"  calibration FAIL ({args[0]}): {(r.stderr or r.stdout).strip()[-400:]}")
                 return 1
-    print(f"  calibration ok   {time.time() - t0:6.1f}s -> {CALIBRATION_ARTIFACT.name}")
+    verb = "identical — not rewritten" if before is not None and _mtime_ns(CALIBRATION_ARTIFACT) == before else "written"
+    print(f"  calibration ok   {time.time() - t0:6.1f}s -> {CALIBRATION_ARTIFACT.name} ({verb})")
     return 0
 
 
@@ -314,7 +398,7 @@ def run_tiles(argv: list[str]) -> int:
 def main(argv: list[str]) -> int:
     if len(argv) < 2 or argv[1] not in ("backtest", "forecast", "all", "check", "tiles"):
         print(__doc__)
-        print("\nusage: python -m app.api.batch {all|check|tiles|backtest|forecast} [MINE_CODE ...]")
+        print("\nusage: python -m app.api.batch {all|check|tiles|backtest|forecast} [--force] [MINE_CODE ...]")
         return 2
 
     # Tiles take their own flags and touch no artifact, so they are handled
@@ -322,7 +406,8 @@ def main(argv: list[str]) -> int:
     if argv[1] == "tiles":
         return run_tiles(argv[2:])
 
-    codes = argv[2:] or None
+    force = "--force" in argv[2:]
+    codes = [a for a in argv[2:] if a != "--force"] or None
     started = time.time()
 
     if argv[1] == "check":
@@ -331,16 +416,16 @@ def main(argv: list[str]) -> int:
         return 0 if report["consistent"] else 1
 
     if argv[1] == "all":
-        failures = run_all()
+        failures = run_all(force=force)
         print(f"Done in {time.time() - started:.1f}s · {failures} failure(s)")
         return 1 if failures else 0
 
     if argv[1] == "forecast":
-        print(f"Computing forecasts for {len(codes) if codes else 10} mine(s)…")
-        failures = run_forecasts(codes)
+        print(f"Forecasts for {len(codes) if codes else 10} mine(s){' (--force)' if force else ''}…")
+        failures = run_forecasts(codes, force=force)
     else:
-        print(f"Computing backtests for {len(codes) if codes else len(MINES)} mine(s)…")
-        failures = run_backtests(codes)
+        print(f"Backtests for {len(codes) if codes else len(MINES)} mine(s){' (--force)' if force else ''}…")
+        failures = run_backtests(codes, force=force)
 
     print(f"Done in {time.time() - started:.1f}s · {failures} failure(s)")
     return 1 if failures else 0

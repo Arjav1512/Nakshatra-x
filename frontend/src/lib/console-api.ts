@@ -125,8 +125,12 @@ export interface ForecastResponse {
   provenance: Record<string, any>
   /** Set when the response came from a persisted artifact rather than memory. */
   served_from?: string
-  artifact_age_hours?: number
-  artifact_stale?: boolean
+  /**
+   * Hours since the artifact was generated, from its own `vintage` (null if it
+   * does not record one). Informational: a served artifact is never stale by
+   * age — staleness is an identity mismatch, and those are not served.
+   */
+  artifact_age_hours?: number | null
   vintage?: string
   artifact_identity?: { model_version: string; generator_seed: number; code_fingerprint: string }
   data_integrity: any

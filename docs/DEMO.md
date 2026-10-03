@@ -73,6 +73,37 @@ macOS `mediaanalysisd` had been sitting at 211% CPU for seventeen hours. The
 output was byte-identical — same MAPE, same coverage — it just took ninety-seven
 times as long. Check `ps -Ao pid,%cpu,comm -r | head -5` before you start.
 
+#### Regenerating the day before is safe — and why
+
+The backend decides an artifact is stale by **identity alone**: its dataset
+identity (generator, contract, seed, end date) or its code fingerprint (model
+version, every module in the forecast's import chain, library versions) differs
+from the code that is running. That is the only thing that changes what an
+artifact says — the generator is seeded, so recomputing matching inputs gives
+the same numbers. **Age never triggers a recompute.**
+
+It used to. Freshness was a 24-hour window on the file's modification time, so
+artifacts regenerated the day before had crossed it by the time the demo
+started, and the backend refitted all ten forecasts at startup: `/readyz` at
+503 and "Computing" on every card while it refitted ten forecasts two at a time
+(about two minutes on a quiet machine, by the timings above), for byte-identical
+numbers under a new date. Now they are served the moment the backend is up.
+
+Re-running is harmless too. `batch all` skips every artifact whose identity
+already matches, and rewrites nothing that comes out the same, so a second run
+with the same date changes no file and finishes in seconds. A file's `vintage`,
+`computed_at` or `generated_at` is therefore when its content last changed, not
+when someone last ran the batch. `batch all --force` recomputes everything
+anyway — a determinism check — and still leaves identical output untouched.
+
+Age is still shown, never acted on. While the window is current, the forecast
+panel says "generated N h ago", read from the artifact's own `vintage` (a
+checkout resets file times, so the file cannot say). `/readyz` carries an `age_warning` once the oldest forecast is more
+than 48 hours old, which means it was not regenerated the day before; pre-flight
+step 2 prints it. It does not affect readiness. What matters on the day is
+whether the forecast window has ended, and `npm run test:dates` checks exactly
+that.
+
 #### Map tiles — so the imagery survives the network
 
 The three imagery layers (Sentinel-2 true colour, the iron-oxide ratio and the
@@ -126,8 +157,10 @@ already ended"* — rather than presenting a stale fortnight as a plan. That is
 survivable; it is not what you want on stage. `docs/DECISIONS.md` D-030 records
 why it works this way.
 
-Regenerating changes the artifact identity, so `git status` will show the ten
-files as modified. Commit them or don't, as you prefer — but do not edit them.
+Regenerating with a new date changes the artifact identity, so `git status` will
+show the forecasts, the backtest, the calibration and the samples as modified.
+Running it again with the same date changes nothing further. Commit them or
+don't, as you prefer — but do not edit them.
 
 ### Pre-flight — run this before every demo
 
@@ -141,9 +174,13 @@ scripts/check_port.sh 8000 "FastAPI" && scripts/check_port.sh 3000 "Next.js"
 cd backend && python -m uvicorn app.main:app --port 8000
 
 # 2. Wait for readiness — every mine must report "ready".
-#    Committed artifacts make this near-instant (measured: 1.34 s from launch).
+#    Committed artifacts make this near-instant (measured: 1.34 s from launch),
+#    however old they are — age never triggers a recompute.
 until curl -sf http://localhost:8000/api/v1/readyz >/dev/null; do sleep 1; done
 curl -s http://localhost:8000/api/v1/readyz | python3 -m json.tool | head -20
+#    Informational: warns if the oldest forecast is over 48 h, i.e. it was not
+#    regenerated the day before. Not a failure — but run test:dates in step 3.
+curl -s http://localhost:8000/api/v1/readyz | python3 -c 'import json,sys; print(json.load(sys.stdin)["age_warning"] or "artifact age: ok")'
 
 # 3. Frontend, then the browser checks.
 cd frontend && npm run test:e2e && npm run test:dates

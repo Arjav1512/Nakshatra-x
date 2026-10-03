@@ -835,3 +835,33 @@ against main rather than against `rho = 0`.
 
 **What the rule should have said**, for next time: the comparison that decides is
 against the current shipped behaviour, not against a within-branch baseline.
+
+## D-041 — Staleness is identity, not age
+
+An artifact is stale when its dataset identity or code fingerprint no longer
+matches the running code, and only then. Freshness used to be a 24-hour window
+on the file's modification time, which was wrong both ways: following
+`docs/DEMO.md` and regenerating the day before put every artifact past the window
+by demo time, so the backend refitted all ten forecasts at startup for
+byte-identical numbers under a new `vintage`; and a checkout resets file times,
+so artifacts generated weeks earlier counted as brand new.
+
+Three rules follow, each tested in `backend/test_staleness.py`:
+
+- **Identity decides.** `/readyz`, the startup warmer and `batch` all ask the same
+  question. Age is reported (`artifact_age_hours`, from the artifact's own
+  `vintage`) and `/readyz` warns above 48 h, but neither affects readiness or
+  causes a recompute.
+- **Identical output is not rewritten.** Every writer — forecasts, backtests,
+  calibration, sample CSVs — compares what it would write with what is there,
+  ignoring only the generation stamps (`vintage`, `computed_at`, `generated_at`,
+  and each sample row's `ingested_at`). Content is compared rather than identity
+  alone, so an input the identity fails to capture still reaches disk.
+- **`batch` skips what matches.** `--force` recomputes anyway, as a determinism
+  check; identical output is still left as it was. The calibration artifact also
+  records the harness's own fingerprint, because the harness sits outside the
+  forecast's import chain and a change to it would not move `artifact_identity`.
+
+The tile cache manifest is out of scope: it is a download log whose per-run
+counts change legitimately, and its date label already comes from the tiles'
+own modification times.
