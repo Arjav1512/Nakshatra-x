@@ -3,7 +3,8 @@ Staleness is identity, never age (forecast_store, "STALENESS IS IDENTITY, NOT AG
 
 An artifact is stale when its dataset identity or code fingerprint no longer
 matches the running code. Age is reported, and the pre-flight can warn on it,
-but it never forces a recompute.
+but it never forces a recompute — and recomputing identical inputs never
+re-stamps `vintage`, `computed_at` or `generated_at`.
 
 The tests that boot the real app (its lifespan runs the startup warmer) do so
 against a copy of the committed forecasts, and record every forecast
@@ -13,6 +14,7 @@ all ten mines.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import time
@@ -158,3 +160,147 @@ def test_age_warning_is_informational(store, recomputes, hours, warns):
     assert ready.status_code == 200 and recomputes == []
     assert (body["age_warning"] is not None) is warns, body["age_warning"]
     assert body["age_warn_after_hours"] == fs.AGE_WARN_AFTER_HOURS
+
+
+# ---------------------------------------------------------------------------
+# Recomputing identical inputs rewrites nothing
+# ---------------------------------------------------------------------------
+
+def test_an_identical_forecast_is_not_rewritten(tmp_path, monkeypatch):
+    monkeypatch.setattr(fs, "FORECAST_DIR", tmp_path)
+    payload = {"mine_code": "X", "grades": [{"q50": 1.0, "provenance": {"vintage": "first"}}]}
+
+    path, written = fs.write_artifact("X", 14, payload)
+    assert written
+    before = (path.read_bytes(), path.stat().st_mtime_ns)
+    time.sleep(0.01)
+
+    # Same content, new stamps at both depths: not a change.
+    again = {"mine_code": "X", "grades": [{"q50": 1.0, "provenance": {"vintage": "second"}}]}
+    _, written = fs.write_artifact("X", 14, again)
+    assert not written
+    assert (path.read_bytes(), path.stat().st_mtime_ns) == before
+
+    # A real change is written.
+    _, written = fs.write_artifact("X", 14, {"mine_code": "X", "grades": [{"q50": 2.0}]})
+    assert written
+
+
+def test_an_identical_backtest_keeps_its_computed_at(tmp_path, monkeypatch):
+    from datetime import date
+
+    from app.api import track_b
+
+    class _Result:
+        def to_dict(self):
+            return {"model": {"mape_pct": 11.67}, "baseline": {"mape_pct": 14.0}}
+
+    monkeypatch.setattr(track_b, "BACKTEST_CACHE_DIR", tmp_path)
+    monkeypatch.setattr(track_b, "_state", lambda: {
+        "end": date(2026, 9, 20), "series": None, "cov": None, "opencast": None,
+    })
+    monkeypatch.setattr(track_b, "rolling_origin_backtest", lambda *_a, **_k: _Result())
+
+    first = track_b.compute_backtest("X")
+    path = tmp_path / "X_150d_14step.json"
+    before = (path.read_bytes(), path.stat().st_mtime_ns)
+    time.sleep(0.01)
+    second = track_b.compute_backtest("X")
+
+    assert (path.read_bytes(), path.stat().st_mtime_ns) == before
+    assert second["computed_at"] == first["computed_at"]
+
+
+def test_an_identical_calibration_keeps_its_generated_at(tmp_path):
+    import measure_cumulative_calibration as H
+
+    records = tmp_path / "records.jsonl"
+    lines = [{"type": "meta", "first_origin": "2026-01-01", "last_origin": "2026-01-06",
+              "step_days": 14, "n_origins": 6}]
+    for d in range(6):
+        for m in range(3):
+            lines.append({"type": "cum", "origin": f"2026-01-{d + 1:02d}", "mine": f"M{m}",
+                          "grade": "g", "realised": 100.0,
+                          "arms": {"rho0": {"pit": 0.5, "inside": (d + m) % 5 != 0, "rho": 0.0}}})
+    records.write_text("".join(json.dumps(r) + "\n" for r in lines))
+    out = tmp_path / "cumulative_coverage.json"
+    args = argparse.Namespace(records=str(records), out=str(out), n_boot=50)
+
+    assert H.artifact(args) == 0
+    before = (out.read_bytes(), out.stat().st_mtime_ns)
+    time.sleep(1.1)  # `generated_at` has one-second resolution
+    assert H.artifact(args) == 0
+
+    assert (out.read_bytes(), out.stat().st_mtime_ns) == before
+
+
+def test_re_exporting_identical_samples_rewrites_nothing(tmp_path, monkeypatch):
+    """Every row carries `ingested_at = now`; that alone must not rewrite a file."""
+    from app.ingestion import export
+
+    monkeypatch.setattr(export, "SAMPLE_DIR", tmp_path)
+    first: list[str] = []
+    export.export_samples(rows_per_entity=20, written=first)
+    assert len(first) == len(export.ENTITY_ORDER) + 2, first  # + identity, README
+    before = {f.name: (f.read_bytes(), f.stat().st_mtime_ns) for f in tmp_path.iterdir()}
+    time.sleep(0.01)
+
+    second: list[str] = []
+    export.export_samples(rows_per_entity=20, written=second)
+    assert second == []
+    assert {f.name: (f.read_bytes(), f.stat().st_mtime_ns) for f in tmp_path.iterdir()} == before
+
+    # A changed row is written.
+    csv_path = tmp_path / "borehole.sample.csv"
+    csv_path.write_text(csv_path.read_text().replace("MOIL-BAL-01-BH-001", "EDITED", 1))
+    third: list[str] = []
+    export.export_samples(rows_per_entity=20, written=third)
+    assert third == ["borehole.sample.csv"]
+
+
+# ---------------------------------------------------------------------------
+# The batch job follows the same rule
+# ---------------------------------------------------------------------------
+
+def test_batch_skips_matching_forecasts_and_force_rewrites_nothing_identical(store, monkeypatch):
+    from app.api import batch, track_b
+
+    _age(store, recorded_hours=48, file_hours=48)
+    before = _snapshot(store)
+
+    def must_not_run(*_a, **_k):
+        pytest.fail("batch recomputed a forecast whose identity matches")
+
+    monkeypatch.setattr(track_b, "compute_forecast", must_not_run)
+    assert batch.run_forecasts() == 0
+    assert _snapshot(store) == before
+
+    # --force recomputes; identical output is still not written.
+    stored = {f.name.removesuffix("_14d.json"): json.loads(f.read_text()) for f in store.glob("*_14d.json")}
+    monkeypatch.setattr(track_b, "compute_forecast", lambda code, horizon_days=14: {
+        k: v for k, v in stored[code].items() if k not in ("vintage", "artifact_identity")
+    })
+    assert batch.run_forecasts(force=True) == 0
+    assert _snapshot(store) == before
+
+
+def test_batch_does_not_re_measure_a_current_calibration(tmp_path, monkeypatch):
+    import subprocess
+
+    from app.api import batch
+
+    art = json.loads(batch.CALIBRATION_ARTIFACT.read_text())
+    art["artifact_identity"] = fs.artifact_identity()
+    art["harness_fingerprint"] = fs.file_fingerprint(batch.CALIBRATION_HARNESS)
+    path = tmp_path / "cumulative_coverage.json"
+    path.write_text(json.dumps(art))
+    monkeypatch.setattr(batch, "CALIBRATION_ARTIFACT", path)
+    monkeypatch.setattr(subprocess, "run", lambda *_a, **_k: pytest.fail("re-measured a current calibration"))
+
+    assert batch.calibration_is_current()
+    assert batch.run_calibration() == 0
+
+    # Measured by a different harness: not current, even with a matching model.
+    art["harness_fingerprint"] = "0" * 16
+    path.write_text(json.dumps(art))
+    assert not batch.calibration_is_current()
