@@ -4,6 +4,11 @@ sqlalchemy==2.0.36
 psycopg[binary]==3.2.3
 geoalchemy2==0.15.2
 pydantic-settings==2.7.0
+# Pinned because it is part of every committed artifact's identity
+# (forecast_store.library_versions: numpy, pydantic, sklearn). It arrived only
+# transitively through pydantic-settings, so a clean install - CI's - could
+# resolve a different version and refuse every committed artifact as stale.
+pydantic==2.13.5
 python-dotenv==1.0.1
 httpx==0.28.1
 python-jose[cryptography]==3.3.0
