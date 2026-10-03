@@ -52,6 +52,10 @@ DAILY_HORIZONS = (1, 3, 7, 14)
 UNIFORM_PIT_SD = 1.0 / np.sqrt(12.0)
 N_BOOT = 2000
 BOOT_SEED = 20260921
+#: The confidence level of every interval this script reports. Defined once and
+#: written into the artifact, so a page that labels the intervals reads the
+#: level from the same place the intervals came from rather than typing "95%".
+CI_LEVEL = 0.95
 
 try:  # this branch
     from app.ml.forecaster import cumulative_paths
@@ -218,7 +222,8 @@ def _boot_indices(keys: list[str], by: dict[str, list[int]], n_boot: int):
 
 
 def _ci(samples: np.ndarray) -> list[float]:
-    lo, hi = np.percentile(samples, [2.5, 97.5])
+    tail = (1.0 - CI_LEVEL) / 2.0 * 100.0
+    lo, hi = np.percentile(samples, [tail, 100.0 - tail])
     return [round(float(lo), 4), round(float(hi), 4)]
 
 
@@ -568,6 +573,114 @@ def _verdict(report: dict) -> dict:
             "lines": lines}
 
 
+CALIBRATION_ARTIFACT = (
+    __import__("pathlib").Path(__file__).resolve().parent
+    / "artifacts" / "calibration" / "cumulative_coverage.json"
+)
+
+
+def artifact(args: argparse.Namespace) -> int:
+    """
+    Write the calibration artifact the console reads beside P(shortfall).
+
+    The console must not carry these numbers in its copy: they describe a model,
+    and a figure typed into a component outlives the model it described. So they
+    are computed here from measurement records, written with the identity of the
+    model they measured, and served. If the model changes, the identity stops
+    matching and the API says the calibration is stale rather than showing it.
+
+    Only the shipped configuration is reported — the `rho0` arm, which is the
+    model as it runs. The declined loading's arms are in docs/CALIBRATION.md.
+    """
+    import hashlib
+    import time as _time
+
+    from app.api.forecast_store import artifact_identity
+    from app.ml.forecaster import MODEL_VERSION
+
+    raw = open(args.records, "rb").read()
+    meta, cum, _daily = _load(args.records)
+    if not cum:
+        print("no cumulative records")
+        return 1
+
+    def stats_for(recs: list[dict]) -> dict | None:
+        keys, by = _clusters(recs)
+        boots = list(_boot_indices(keys, by, args.n_boot))
+        st = _arm_stats(recs, "rho0", boots)
+        if not st:
+            return None
+        return {
+            "coverage_80": st["coverage_80"],
+            "coverage_80_ci95": st["coverage_80_ci"],
+            "pit_at_extremes": st["pit_at_extremes"],
+            "pit_at_extremes_ci95": st["pit_at_extremes_ci"],
+            "n_windows": st["n_windows"],
+            "n_origin_dates": len(keys),
+            "effective_sample_size": st.get("effective_sample_size"),
+            "design_effect": st.get("design_effect"),
+        }
+
+    portfolio = stats_for(cum)
+    per_mine = {}
+    for mine in sorted({r["mine"] for r in cum}):
+        st = stats_for([r for r in cum if r["mine"] == mine])
+        if st:
+            per_mine[mine] = st
+
+    out = {
+        "kind": "cumulative_calibration",
+        "quantity": "share of realised 14-day totals inside the forecast's 80% band",
+        "nominal_coverage": 0.80,
+        "nominal_tail_frequency": 0.10,
+        "ci_level": CI_LEVEL,
+        "model_version": MODEL_VERSION,
+        "portfolio": portfolio,
+        "per_mine": per_mine,
+        "window": {
+            "first_origin": meta.get("first_origin"),
+            "last_origin": meta.get("last_origin"),
+            "step_days": meta.get("step_days"),
+            "n_origins": meta.get("n_origins"),
+        },
+        "method": (
+            "Rolling-origin: refit before every origin, score the next 14 days. "
+            f"{CI_LEVEL:.0%} intervals from a cluster bootstrap resampling whole origin dates "
+            f"({args.n_boot} resamples, seed {BOOT_SEED}), because a date's windows "
+            "share weather and equipment state and are not independent."
+        ),
+        "records_sha256": hashlib.sha256(raw).hexdigest(),
+        "generated_at": _time.strftime("%Y-%m-%dT%H:%M:%SZ", _time.gmtime()),
+        "generated_by": "python measure_cumulative_calibration.py artifact --records <run output>",
+        "artifact_identity": artifact_identity(),
+        "doc": "docs/CALIBRATION.md",
+        "provenance": {
+            "source_kind": "derived",
+            "is_live": False,
+            "is_synthetic": True,
+            "source": (
+                "Held-out rolling-origin backtest of the production forecaster on the "
+                "seeded synthetic dataset"
+            ),
+            "note": (
+                "Describes the model's behaviour on synthetic data generated to the "
+                "ingestion contract, not on MOIL's operations (PRD 8.2)."
+            ),
+        },
+    }
+    dest = __import__("pathlib").Path(args.out) if args.out else CALIBRATION_ARTIFACT
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps(out, indent=2) + "\n")
+    p = portfolio
+    print(f"wrote {dest}")
+    print(f"  portfolio  coverage {p['coverage_80']} {p['coverage_80_ci95']}  "
+          f"tails {p['pit_at_extremes']}  n={p['n_windows']} at {p['n_origin_dates']} dates  "
+          f"ESS {p['effective_sample_size']}")
+    for m, st in per_mine.items():
+        print(f"  {m:14} coverage {st['coverage_80']} {st['coverage_80_ci95']}  n={st['n_windows']}")
+    return 0
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -588,6 +701,12 @@ def main(argv: list[str]) -> int:
     a.add_argument("--n-boot", type=int, default=N_BOOT)
     a.add_argument("--out", default="")
     a.set_defaults(fn=analyse)
+
+    t = sub.add_parser("artifact")
+    t.add_argument("--records", required=True)
+    t.add_argument("--n-boot", type=int, default=N_BOOT)
+    t.add_argument("--out", default="")
+    t.set_defaults(fn=artifact)
 
     args = ap.parse_args(argv)
     return args.fn(args)

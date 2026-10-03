@@ -102,6 +102,11 @@ export function DecisionConsole() {
     [selected, setPosition]
   )
   const [telemetry, setTelemetry] = useState<any>(null)
+  // Loading and failed are different states with different things to say. On
+  // failure `telemetry` stays null, which used to look exactly like "not asked
+  // yet" — and the integrity banner simply vanished.
+  const [telemetryState, setTelemetryState] = useState<'idle' | 'loading' | 'ok' | 'failed'>('idle')
+  const [telemetryError, setTelemetryError] = useState<string | null>(null)
   const [portfolio, setPortfolio] = useState<Record<number, Cell>>({})
 
   /**
@@ -130,11 +135,33 @@ export function DecisionConsole() {
     })
   }, [mines, portfolio])
 
-  /** The single worst mine, if one is known — the screen's focal element. */
-  const worst = ranked.find((m) => {
-    const v = portfolio[m.id]
-    return v !== undefined && v !== null && !isFailure(v) && v.shortfall > 0
-  })
+  /**
+   * Every mine's forecast has resolved — loaded, failed or warming.
+   *
+   * The ranked list is not drawn until then. Forecasts are fetched one mine at
+   * a time and `ranked` re-sorted after each arrival, so cards hopped positions
+   * up to ten times in the first few hundred milliseconds: measured layout
+   * shift on /console of 0.093-0.229 on main and up to 0.255 here, the one
+   * route still over 0.1. Any scheme that shows named cards in one order and
+   * then another IS that shift, so until the order is known the list holds
+   * placeholders of exactly the card height, and then draws once. Every fetch
+   * resolves quickly — a warming mine answers at once with its warming state —
+   * so this waits for ten fast round trips, not for a model to fit.
+   */
+  const portfolioSettled =
+    !!mines && mines.length > 0 && mines.every((m) => portfolio[m.id] != null)
+
+  /**
+   * The single worst mine, if one is known — the screen's focal element. Only
+   * once every forecast is in: before that it named whichever mine was worst
+   * among those that happened to have arrived.
+   */
+  const worst = portfolioSettled
+    ? ranked.find((m) => {
+        const v = portfolio[m.id]
+        return v !== undefined && v !== null && !isFailure(v) && v.shortfall > 0
+      })
+    : undefined
 
   useEffect(() => {
     let alive = true
@@ -184,9 +211,15 @@ export function DecisionConsole() {
   }, [mines])
 
   useEffect(() => {
-    if (!selected) { setTelemetry(null); return }
+    if (!selected) { setTelemetry(null); setTelemetryState('idle'); return }
     let alive = true
-    fetchTelemetry(selected.id).then((r) => { if (alive) setTelemetry(r.ok ? r.data : null) })
+    setTelemetryState('loading')
+    fetchTelemetry(selected.id).then((r) => {
+      if (!alive) return
+      setTelemetry(r.ok ? r.data : null)
+      setTelemetryState(r.ok ? 'ok' : 'failed')
+      setTelemetryError(r.ok ? null : r.error)
+    })
     return () => { alive = false }
   }, [selected])
 
@@ -239,26 +272,69 @@ export function DecisionConsole() {
       {/* Breadcrumb: portfolio -> mine -> track (D-6). Not sticky — the app bar
           already is, and two stacked sticky rows eat the viewport on a laptop. */}
       <div className="no-print flex flex-wrap items-center gap-x-2 gap-y-2 border-b border-border-subtle pb-3 text-sm">
-        <button
-          type="button"
-          onClick={() => { setSelected(null); setPosition(null, 'B') }}
-          className="rounded-md px-1.5 py-0.5 transition-colors duration-[120ms] ease-out hover:bg-surface-2 hover:text-text-primary"
-          aria-current={level === 'portfolio' ? 'page' : undefined}
-        >
-          <span className={level === 'portfolio' ? 'text-text-primary' : 'text-text-secondary'}>
-            Portfolio
-          </span>
-        </button>
-        {selected ? (
-          <>
-            <span aria-hidden="true" className="text-text-tertiary">/</span>
-            <span className="text-text-primary">{selected.name}</span>
-            <span aria-hidden="true" className="text-text-tertiary">/</span>
-            <span className="text-text-secondary">
-              {track === 'B' ? 'production risk' : 'prospectivity'}
-            </span>
-          </>
-        ) : null}
+        {/*
+          ONE NAVIGATION MODEL (B-1 confusion 5).
+
+          The track used to be chosen by a separate button pair — "Track B ·
+          production risk / Track A · prospectivity" — sitting under the
+          integrity banner in the same visual register as navigation, while this
+          breadcrumb described the same state in plain text. Two controls for one
+          fact, and a first-time user could not tell whether the buttons were
+          tabs within the mine, a filter, or a change of page.
+
+          Now the breadcrumb IS the navigation, and the track is part of the
+          location: Portfolio / Balaghat / production risk · prospectivity. Both
+          tracks are shown rather than hidden in a menu, so the one you are not
+          on is discoverable; the one you are on is marked as the current page.
+          The button pair is gone. It also only ever appeared once you were
+          already on Track A or inside a mine, so from the default view — where
+          most people land — Track A had no way in from the console at all.
+        */}
+        <nav aria-label="Location" className="min-w-0">
+          <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <li>
+              <button
+                type="button"
+                onClick={() => { setSelected(null); setPosition(null, track) }}
+                className="rounded-md px-1.5 py-0.5 text-text-secondary transition-colors duration-[120ms] ease-out hover:bg-surface-2 hover:text-text-primary"
+              >
+                Portfolio
+              </button>
+            </li>
+            {selected ? (
+              <li className="flex items-center gap-2">
+                <span aria-hidden="true" className="text-text-tertiary">/</span>
+                <span className="text-text-primary">{selected.name}</span>
+              </li>
+            ) : null}
+            <li className="flex items-center gap-2">
+              <span aria-hidden="true" className="text-text-tertiary">/</span>
+              {/* No role="group": the buttons' aria-current already says which
+                  track is the location, and the semantic element Biome would
+                  substitute — a form <fieldset> — is wrong inside a breadcrumb. */}
+              <span className="flex items-center gap-1">
+                {(['B', 'A'] as const).map((t, i) => (
+                  <span key={t} className="flex items-center gap-1">
+                    {i > 0 ? <span aria-hidden="true" className="text-text-tertiary">·</span> : null}
+                    <button
+                      type="button"
+                      data-track-link={t}
+                      onClick={() => setTrack(t)}
+                      aria-current={track === t ? 'page' : undefined}
+                      className={`rounded-md px-1.5 py-0.5 transition-colors duration-[120ms] ease-out ${
+                        track === t
+                          ? 'font-medium text-text-primary underline decoration-accent decoration-2 underline-offset-4'
+                          : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'
+                      }`}
+                    >
+                      {t === 'B' ? 'production risk' : 'prospectivity'}
+                    </button>
+                  </span>
+                ))}
+              </span>
+            </li>
+          </ol>
+        </nav>
         {/*
           B-1 confusion 11. At 375px these two took a full row above the page
           title — prime position for actions a first-time user has no reason to
@@ -343,7 +419,37 @@ export function DecisionConsole() {
           </div>
         ) : null}
 
-        {telemetry?.data_integrity ? <IntegrityBanner integrity={telemetry.data_integrity} /> : null}
+        {/*
+          The integrity banner's slot is held open while telemetry loads.
+
+          Telemetry comes from live weather services with variable latency, and
+          the banner sits above the answer. When it arrived after the forecast it
+          pushed the whole Track B panel down 129px at 375 — the 0.110 Lighthouse
+          measured there, reproduced exactly by delaying /telemetry 2s. The
+          placeholder is the banner's measured height at each breakpoint (97px,
+          77px from sm, 58px from lg): taller would shift content UP when the
+          banner lands, which counts too. And when telemetry fails, the slot says
+          so — the disclosure used to disappear without a word.
+        */}
+        {selected && telemetryState === 'loading' ? (
+          <div
+            role="status"
+            className="flex h-[97px] items-center rounded-md border border-border-default bg-surface-1 px-3 py-2 text-xs text-text-tertiary sm:h-[77px] lg:h-[58px]"
+          >
+            Checking which of {selected.name}&rsquo;s sources are live…
+          </div>
+        ) : selected && telemetryState === 'failed' ? (
+          <div
+            role="status"
+            className="min-h-[97px] rounded-md border border-status-caution/40 bg-status-caution/10 px-3 py-2 text-xs leading-relaxed text-text-primary sm:min-h-[77px] lg:min-h-[58px]"
+          >
+            Could not check which sources are live
+            {telemetryError ? <span className="text-text-secondary"> ({telemetryError})</span> : null}. No
+            weather figure is shown, and the operational figures are synthetic.
+          </div>
+        ) : telemetry?.data_integrity ? (
+          <IntegrityBanner integrity={telemetry.data_integrity} />
+        ) : null}
 
         {level === 'portfolio' && track === 'B' ? (
           <section>
@@ -405,7 +511,17 @@ export function DecisionConsole() {
                 /console, against a target of 0.1. The portfolio cards were
                 already built this way for the same reason.
               */}
-              <div className="mt-4 min-h-[8.5rem]">
+              {/*
+                The reservation had gone stale. 8.5rem (136px) was right when
+                it was set; the band now renders 146px from md up and 170px at
+                375, where its line wraps. It filled in at settle and grew
+                10-34px, dragging the whole list below it down — the last 0.118
+                of layout shift on /console. Reserved at the measured maxima
+                now. Shorter-than-reserved leaves slack, which moves nothing;
+                only growth shifts. test:cls watches this so it cannot drift
+                again unseen.
+              */}
+              <div className="mt-4 min-h-[10.625rem] md:min-h-[9.125rem]">
               {worst ? (
                 <button
                   type="button"
@@ -447,15 +563,33 @@ export function DecisionConsole() {
               )}
               </div>
 
-              <ul className="mt-4 grid list-none gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {ranked.map((m, rank) => {
+              <ul
+                data-testid="mine-list"
+                aria-label="Mines, ordered by expected shortfall"
+                className="mt-4 grid list-none gap-3 sm:grid-cols-2 lg:grid-cols-3"
+              >
+                {!portfolioSettled
+                  ? (mines ?? []).map((m) => (
+                      // Same box as a real card, so swapping one for the other
+                      // moves nothing. No name: its slot is not known yet.
+                      <li key={m.id} aria-hidden="true">
+                        <Card className="h-full min-h-[10.625rem]">
+                          <div className="h-full w-full animate-pulse rounded-md bg-surface-2/40" />
+                        </Card>
+                      </li>
+                    ))
+                  : ranked.map((m, rank) => {
                   const v = portfolio[m.id]
                   const isPilot = m.mine_code === PILOT_CODE
                   return (
                     <li key={m.id}>
                       <Card
                         interactive
-                        className={`h-full ${
+                        // One height for every card. Content gives 146 or 170px, so
+                        // a placeholder could not know which would land in its slot
+                        // and rows would resize at settle; 170 is the measured
+                        // maximum (168 content + 2 border) at all four widths.
+                        className={`h-full min-h-[10.625rem] ${
                           worst && m.id === worst.id ? 'border-accent/50 bg-accent-muted/20' : ''
                         }`}
                       >
@@ -542,6 +676,11 @@ export function DecisionConsole() {
                   )
                 })}
               </ul>
+              {!portfolioSettled && mines?.length ? (
+                <p role="status" className="sr-only">
+                  Loading forecasts for {mines.length} mines.
+                </p>
+              ) : null}
               </>
             )}
 
@@ -564,61 +703,29 @@ export function DecisionConsole() {
           real destination, which is what the nav entry points at.
         */}
         {level === 'portfolio' && track === 'A' ? (
-          <>
-            <nav aria-label="Track" className="no-print flex flex-wrap gap-2">
-              {(['B', 'A'] as const).map((t) => (
-                <button
-                  type="button"
-                  key={t}
-                  onClick={() => setTrack(t)}
-                  aria-pressed={track === t}
-                  className={`rounded-md border px-3 py-1.5 text-sm transition-colors duration-[120ms] ease-out ${
-                    track === t
-                      ? 'border-accent bg-accent-muted text-text-primary'
-                      : 'border-border-default text-text-secondary hover:bg-surface-2 hover:text-text-primary'
-                  }`}
-                >
-                  {t === 'B' ? 'Track B · production risk' : 'Track A · prospectivity'}
-                </button>
-              ))}
-            </nav>
             <TrackAPanel />
-          </>
         ) : null}
 
         {level === 'mine' && selected ? (
           <>
-            <nav aria-label="Track" className="no-print flex flex-wrap gap-2">
-              {(['B', 'A'] as const).map((t) => (
-                <button
-                  type="button"
-                  key={t}
-                  onClick={() => setTrack(t)}
-                  aria-pressed={track === t}
-                  className={`rounded-md border px-3 py-1.5 text-sm transition-colors duration-[120ms] ease-out ${
-                    track === t
-                      ? 'border-accent bg-accent-muted text-text-primary'
-                      : 'border-border-default text-text-secondary hover:bg-surface-2 hover:text-text-primary'
-                  }`}
-                >
-                  {t === 'B' ? 'Track B · production risk' : 'Track A · prospectivity'}
-                </button>
-              ))}
-            </nav>
 
             {/* face/section level (D-6) */}
             {track === 'B' && telemetry ? (
               /*
-                Mobile order: the answer first, conditions after it. This block
-                is 488px tall at 375px and sat between the header and the
-                forecast, which put the figure a planner opened the page for
-                1,330px down. Desktop order is unchanged — there the whole
-                composition is visible at once.
+                The answer first, conditions after it — at every width now.
+
+                On mobile this block is 488px tall and sat between the header and
+                the forecast, which put the figure a planner opened the page for
+                1,330px down; it was moved for that. Desktop was left unchanged on
+                the stated grounds that "the whole composition is visible at
+                once". Measured at 1280x800 it was not: the page was 3,141px tall
+                and P(shortfall) began at 1,054px, below the fold. Conditions are
+                the forecast's inputs; they belong after the answer they feed.
               */
               <section
                 data-testid="live-conditions"
                 data-panel-live="true"
-                className="order-last md:order-none"
+                className="order-last"
               >
                 <h2 className="label">{selected.name} · conditions</h2>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

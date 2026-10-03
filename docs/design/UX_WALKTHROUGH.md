@@ -200,3 +200,59 @@ Same four tasks, desktop and 375 px, against the tranche-2 build. Screenshots in
 Confusion 5 is untouched. Confusion 6 is improved rather than fixed: the desktop
 mine detail remains a long column beneath its two headings, and a genuine
 two-column or progressive layout there is the next thing worth doing.
+
+---
+
+# Re-run — PR B, confusions 5 and 6 (2026-10-03)
+
+The two left open after tranche 2. Desktop 1280×800 and 1440×900, and 375×812,
+against the final PR B build. Screenshots in `docs/design/after-v3/` (main in
+`docs/design/before-v3/`).
+
+| # | Confusion | Status | Evidence |
+|---|---|---|---|
+| 5 | Track toggle competes with breadcrumb | **fixed** | One navigation model. The breadcrumb is the only track control and the track is part of the location: *Portfolio / Balaghat / production risk · prospectivity*. Both tracks shown, the current one carrying `aria-current="page"` — exactly one current location at every step. The button pair is gone from both places it was rendered. |
+| 6 | Everything at equal weight, one long column | **fixed** (desktop); unchanged at 375 | Answer and drivers on top, then two structured columns: *Why you should believe it* (backtest) beside *What to do about it* (actions), each under its own heading. Conditions follow the answer at every width. |
+
+### Confusion 5, walked
+
+| step | URL | breadcrumb | current |
+|---|---|---|---|
+| open the console | `/console` | Portfolio / production risk · prospectivity | production risk |
+| choose prospectivity | `/console?track=a` | same | prospectivity |
+| open Balaghat | `/console?mine=1&track=b` | Portfolio / Balaghat / production risk · prospectivity | production risk |
+| choose prospectivity | `/console?mine=1&track=a` | same | prospectivity |
+| go up to Portfolio | `/console?track=a` | Portfolio / production risk · prospectivity | prospectivity |
+
+Step 2 was **impossible before**: the button pair appeared only once you were on
+Track A or inside a mine, so from `/console` — where most people land — there was
+no way into Track A from the console at all. Going up to Portfolio now keeps the
+track (it used to reset to Track B); in a location model, moving up a level
+should not also switch tracks.
+
+`npm run test:nav` asserts all of it. Against main (`cbe675a`): **8 failures**.
+
+### Confusion 6, measured — 1280×800, `/console?mine=1&track=b`
+
+| | main | PR B |
+|---|---|---|
+| page height | 3,141 px | **2,445 px** |
+| P(shortfall) card | 1,054 px — below the fold | **562 px — above** |
+| calibration (how far to trust it) | — | 692 px, beside the drivers |
+| by-grade drivers | 1,383 px | **692 px — above** |
+| trajectory chart starts | 1,538 px | **847 px** |
+| backtest / actions | 1,896 / 2,282 px, stacked | 1,125 / 1,225 px, **side by side** |
+
+The largest single cause was a bug, not density: the four answer cards sat one per
+row at full width because the mobile tabs' `md:block` overrode the metric grid's
+`display:grid` at every desktop width — 456 px for what is one 114 px row.
+
+## Still open, honestly
+
+- **The trajectory chart starts 47 px below an 800 px fold** (inside a 900 px
+  one). The answer and the by-grade drivers are fully above it. Clearing the last
+  ~270 px at 800 px tall would mean collapsing the forecast-window note or the
+  integrity banner, both placed prominently on purpose by earlier PRs. Not done.
+- **The selected-mine card still covers the top of the map at 375.** It did on
+  main too. The legend no longer sits under it (it moved beside or below the map),
+  so it overlaps nothing now — it just takes ~130 px of a 380 px map.

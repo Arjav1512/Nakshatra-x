@@ -88,6 +88,8 @@ export interface ShortfallBlock {
   target_tonnes: number
   expected_shortfall_tonnes: number
   method: string
+  /** How the days were combined into the 14-day total — read, not assumed. */
+  aggregation: string
   assumption: string
 }
 

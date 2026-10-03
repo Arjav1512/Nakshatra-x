@@ -55,10 +55,28 @@ do.
 
 ### Why the intervals are wide
 
-**Design effect 2.49x. Effective sample 328 of 816 windows.** A date's windows
-share weather and equipment state, so they do not count as independent. A
-binomial interval would have been about 1.6x too narrow and would have made
-several of the comparisons below look conclusive.
+**The design effect depends on the arm**, because it is a property of how the
+coverage statistic clusters under each model, not of the windows alone. For the
+model that ships — `main`, whose figures the console shows — it is **1.65×**: an
+effective sample of **494 of 816** windows, so a binomial interval would have been
+about **1.28×** too narrow. A date's windows share weather and equipment state,
+so they do not count as independent.
+
+| arm | design effect | effective sample | binomial CI too narrow by |
+|---|---|---|---|
+| `main` b045369 (ships) | 1.65× | 494 of 816 | 1.28× |
+| split only, `rho = 0` | 2.49× | 328 of 816 | 1.58× |
+| split + pooled loading | 1.60× | 509 of 816 | 1.26× |
+| split + per-mine loading | 1.49× | 547 of 816 | 1.22× |
+
+*Corrected 2026-10-02.* This section first said "Design effect 2.49x. Effective
+sample 328 of 816 windows" for the measurement as a whole. That is the split-only
+arm's figure — the worst of the four — printed by the analysis for its `rho0` arm,
+which in the branch records was the split-only model rather than `main`. It was
+caught when the calibration artifact the console reads was regenerated for `main`
+and reported 494. Every interval in the tables below was computed from its own
+arm's bootstrap and is unaffected; only this summary was misattributed, and no
+conclusion changes — clustering widens the interval for every arm.
 
 ### Four arms, identical windows
 

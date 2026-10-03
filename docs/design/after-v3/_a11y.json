@@ -1,0 +1,240 @@
+[
+  {
+    "route": "/",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/console",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/production",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/blending",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/mine-twin",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/flood-alert",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/method",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/about",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/login",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/admin",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/admin/login",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/admin/setup",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/admin/profile",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/auth/callback",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/nope-does-not-exist",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/console?mine=1&track=b",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/console?track=a",
+    "viewport": "desktop",
+    "width": 1280,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/console",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/production",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/blending",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/mine-twin",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/flood-alert",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/method",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/about",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/login",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/admin",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/admin/login",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/admin/setup",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/admin/profile",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/auth/callback",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/nope-does-not-exist",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/console?mine=1&track=b",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  },
+  {
+    "route": "/console?track=a",
+    "viewport": "mobile",
+    "width": 375,
+    "violations": [],
+    "seriousOrCritical": 0
+  }
+]

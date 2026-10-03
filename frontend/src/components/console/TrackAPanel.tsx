@@ -9,7 +9,7 @@ import {
 } from '@/lib/console-api'
 import { cividis } from '@/lib/colormap'
 import { Metric } from './Evidence'
-import type { LayerType } from '@/components/mission-control/IndiaSatelliteMap'
+import { DEFAULT_LAYER, type LayerType } from '@/components/mission-control/IndiaSatelliteMap'
 import type { MineInfo } from '@/components/mission-control/types'
 
 /**
@@ -83,7 +83,11 @@ function Spinner({ label }: { label: string }) {
 
 export function TrackAPanel() {
   const [mapMine, setMapMine] = useState<MineInfo>(DEFAULT_MAP_MINE)
-  const [mapLayer, setMapLayer] = useState<LayerType>('prospectivity' as LayerType)
+  // This read `'prospectivity' as LayerType`. 'prospectivity' was never a layer —
+  // the type was 'satellite' | 'geology' — and the cast is what let it compile.
+  // So the map opened with no overlay and no layer button active, and the
+  // surface appeared only after a click. No cast now: the compiler checks it.
+  const [mapLayer, setMapLayer] = useState<LayerType>(DEFAULT_LAYER)
   const [metrics, setMetrics] = useState<TrackAMetrics | null>(null)
   const [mErr, setMErr] = useState<string | null>(null)
   const [targets, setTargets] = useState<DrillTargetsResponse | null>(null)
@@ -233,8 +237,18 @@ export function TrackAPanel() {
               {targets.n_candidates.toLocaleString()} candidate cells · {targets.n_observations} measured
               observations · {targets.ranked_by}
             </p>
-            <div
-              className="overflow-x-auto"
+            {/*
+              A scroll container holding only a table has nothing focusable, so a
+              keyboard user could not scroll it to the columns past the edge at
+              375 — axe "scrollable-region-focusable", serious. Pre-existing;
+              found when the audit first covered this route. Focusable, named,
+              and announced as a region now.
+            */}
+            <section
+              // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be reachable by keyboard (WCAG 2.1.1; axe scrollable-region-focusable). The two linters conflict here and the WCAG requirement wins.
+              tabIndex={0}
+              aria-label="Ranked drill targets — scrolls horizontally"
+              className="overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               data-provenance="derived"
               data-provenance-model={targets.model_version}
             >
@@ -272,7 +286,7 @@ export function TrackAPanel() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </section>
             <details className="mt-2" data-provenance="derived" data-provenance-model={targets.model_version}>
               <summary className="cursor-pointer text-xs uppercase tracking-wider text-text-tertiary hover:text-text-secondary">
                 evidence for rank 1

@@ -321,7 +321,11 @@ async function scan(page, route) {
   await browser.close()
   const total = results.reduce((a, r) => a + r.violations.length, 0)
   fs.writeFileSync(
-    path.resolve(__dirname, '..', '..', 'docs', 'design', 'after-v2', '_provenance-guard.json'),
+    // GUARD_OUT redirects the report. The default is tranche 2's evidence
+    // directory, which every later run was silently overwriting.
+    process.env.GUARD_OUT
+      ? path.resolve(process.env.GUARD_OUT)
+      : path.resolve(__dirname, '..', '..', 'docs', 'design', 'after-v2', '_provenance-guard.json'),
     JSON.stringify({ base: BASE, routes: results }, null, 2)
   )
   const label = OFFLINE ? 'data-shaped value(s) rendered with the backend down' : 'unattributed data-shaped value(s)'

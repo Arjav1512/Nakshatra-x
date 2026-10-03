@@ -1,0 +1,26 @@
+[
+  {
+    "layer": "satellite",
+    "width": 1280,
+    "file": "satellite@1280.png",
+    "source": null
+  },
+  {
+    "layer": "geology",
+    "width": 1280,
+    "file": "geology@1280.png",
+    "source": null
+  },
+  {
+    "layer": "satellite",
+    "width": 375,
+    "file": "satellite@375.png",
+    "source": null
+  },
+  {
+    "layer": "geology",
+    "width": 375,
+    "file": "geology@375.png",
+    "source": null
+  }
+]

@@ -5,7 +5,15 @@ import type { MineInfo } from './types'
 import { MOIL_MINES } from './data'
 import { cividis } from '@/lib/colormap'
 import { type MineRow, fetchMines } from '@/lib/console-api'
-import { UPSTREAMS } from '@/lib/upstreams'
+import { ESRI_WORLD_IMAGERY_ATTRIBUTION, UPSTREAMS } from '@/lib/upstreams'
+import {
+  type TileLayerDef,
+  type TileLayersResponse,
+  type TileSourceState,
+  attributionHtml,
+  createResilientTileLayer,
+} from '@/lib/map-tile-layers'
+import MapLayerLegend, { CIVIDIS_STOPS, type LegendModel } from './MapLayerLegend'
 import {
   Layers,
   MapPin,
@@ -25,14 +33,35 @@ import {
 } from 'lucide-react'
 
 /**
- * The two layers this map actually has.
+ * The six layers this map has, each backed by a service that says where it
+ * came from.
  *
- * It previously declared eight. Six of them ('ndvi', 'moisture', 'thermal',
+ * It once declared eight, and six of those ('ndvi', 'moisture', 'thermal',
  * 'isro-bhuvan', 'isro-risat', 'isro-cartosat') read no data and drew a
  * sin()/cos() grid captioned as ISRO Resourcesat, EOS-04 and Cartosat
- * measurements. They are gone; see the comment at the removal site.
+ * measurements. They are gone; see the comment at the removal site. Then it
+ * declared two. These six replace them:
+ *
+ *   probability     the kriged prospectivity score       derived
+ *   uncertainty     its kriging standard deviation        derived
+ *   measured        the 50 points the model was fitted on measured
+ *   s2-true-colour  Sentinel-2 L2A mosaic                 measured, tiles
+ *   iron-oxide      Sentinel-2 B04/B02 ratio              measured, tiles
+ *   dem             Copernicus DEM GLO-30                 measured, tiles
+ *
+ * The ESRI basemap sits under all of them and is not a selectable layer.
  */
-export type LayerType = 'satellite' | 'geology'
+export type LayerType =
+  | 'probability'
+  | 'uncertainty'
+  | 'measured'
+  | 's2-true-colour'
+  | 'iron-oxide'
+  | 'dem'
+
+export const DEFAULT_LAYER: LayerType = 'probability'
+
+const TILE_LAYER_IDS = new Set<LayerType>(['s2-true-colour', 'iron-oxide', 'dem'])
 
 interface Props {
   selectedMine: MineInfo
@@ -244,6 +273,42 @@ export default function IndiaSatelliteMap({
     error: string | null
   }>({ modelVersion: null, nCells: null, error: null })
 
+  // Raster tile layer definitions, fetched once. Each carries its own status,
+  // reason, legend facts, attribution and what the local cache holds.
+  const [tileDefs, setTileDefs] = useState<TileLayerDef[] | null>(null)
+  const [tileDefsError, setTileDefsError] = useState<string | null>(null)
+  const [tileState, setTileState] = useState<Record<string, TileSourceState>>({})
+  // The grid and the measured points, kept once fetched so switching between
+  // the three vector layers does not refetch 1,710 cells each time.
+  const [gridData, setGridData] = useState<any | null>(null)
+  const [gridError, setGridError] = useState<string | null>(null)
+  const [measuredData, setMeasuredData] = useState<any | null>(null)
+  const [measuredError, setMeasuredError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let alive = true
+    fetch('/api/v1/map/tile-layers', { cache: 'no-store' })
+      .then(async (r) => {
+        const body = (await r.json().catch(() => null)) as TileLayersResponse | null
+        if (!alive) return
+        if (body && Array.isArray(body.layers) && body.layers.length) {
+          setTileDefs(body.layers)
+          setTileDefsError(null)
+        } else {
+          setTileDefs([])
+          setTileDefsError(body?.note || body?.error || `tile layers: ${r.status}`)
+        }
+      })
+      .catch((e) => {
+        if (!alive) return
+        setTileDefs([])
+        setTileDefsError(String(e?.message || e))
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
+
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [radarSweepActive, setRadarSweepActive] = useState(true)
 
@@ -261,77 +326,185 @@ export default function IndiaSatelliteMap({
 
   const LRef = useRef<any>(null)
   const overlayGroupRef = useRef<any>(null)
+  // The raster layer currently on the map, if any, and the attribution string
+  // it contributed — kept so the next switch can remove exactly that.
+  const activeTileLayerRef = useRef<any>(null)
+  const attributionCtrlRef = useRef<any>(null)
+  const tileAttributionRef = useRef<string | null>(null)
+  // Incremented on every layer change. An async draw that finishes after the
+  // user has already switched again checks this and draws nothing, so a slow
+  // fetch for the old layer cannot paint over the new one.
+  const layerGenRef = useRef(0)
   const targetMarkerRef = useRef<any>(null)
+
+  const setTileAttribution = (next: string | null) => {
+    const ctrl = attributionCtrlRef.current
+    if (!ctrl) return
+    if (tileAttributionRef.current) ctrl.removeAttribution(tileAttributionRef.current)
+    if (next) ctrl.addAttribution(next)
+    tileAttributionRef.current = next
+  }
 
   const updateLayers = async () => {
     const L = LRef.current
     const overlay = overlayGroupRef.current
-    if (!L || !overlay) return
+    const map = mapInstanceRef.current
+    if (!L || !overlay || !map) return
 
+    const gen = ++layerGenRef.current
     overlay.clearLayers()
+    if (activeTileLayerRef.current) {
+      map.removeLayer(activeTileLayerRef.current)
+      activeTileLayerRef.current = null
+    }
+    setTileAttribution(null)
 
-    if (activeLayer === 'geology') {
+    // ---- raster tiles from Planetary Computer, live first, cache second ----
+    if (TILE_LAYER_IDS.has(activeLayer)) {
+      const def = tileDefs?.find((d) => d.id === activeLayer)
+      // Definitions not in yet, or the service layer is down: draw nothing and
+      // let the legend say why. No stand-in imagery.
+      if (!def) return
+      const live = def.status === 'ok'
+      const cached = !!def.cache?.available
+      if (!live && !cached) return
+
+      const layer = createResilientTileLayer(L, def, (state) => {
+        if (gen !== layerGenRef.current) return
+        setTileState((prev) => ({ ...prev, [def.id]: state }))
+        // The attribution names the licensor in every state and says whether
+        // these pixels are live or cached, so the control is rewritten whenever
+        // what is on screen changes.
+        setTileAttribution(attributionHtml(def, state))
+      })
+      if (gen !== layerGenRef.current) return
+      layer.addTo(map)
+      activeTileLayerRef.current = layer
+      return
+    }
+
+    // ---- the kriged surface: score or its uncertainty ----------------------
+    if (activeLayer === 'probability' || activeLayer === 'uncertainty') {
       // The honest surface, scored by the model that is loaded.
       //
-      // This used to fetch a committed `prospectivity.geojson` — 1,326 cells
+      // This once fetched a committed `prospectivity.geojson` — 1,326 cells
       // from the superseded model, with `dist_to_fault_km`, `temp_c` and
       // `rainfall_mm` in every popup. Two of those are features the honest
       // rebuild dropped for leaking the labels; one the model never had. The
       // popup called the file "LIVE ML" and "Real-Time Telemetry". It was a
       // static asset from a retired model, badged as a live feed.
-      try {
-        const res = await fetch('/api/v1/prospectivity')
-        if (!res.ok) throw new Error(`prospectivity surface: ${res.status}`)
-        const data = await res.json()
-        const cells: any[] = data.cells ?? []
-        if (!cells.length) throw new Error('prospectivity surface returned no cells')
-
-        cells.forEach((c: any) => {
-          const score = c.prospectivity_score
-          const sd = c.uncertainty_sd
-          // cividis (D-027: a quantity gets a sequential colormap, never a
-          // status colour). The previous layer used red/amber/green thresholds,
-          // which read a continuous score as three states.
-          const fill = cividis(score)
-          const alpha = 0.15 + score * 0.65
-
-          const circle = L.circle([c.lat, c.lng], {
-            radius: 1600,
-            fillColor: fill,
-            fillOpacity: alpha,
-            color: fill,
-            weight: 0.4,
-            opacity: 0.5,
-          })
-
-          circle.bindPopup(
-            `<div class="prospectivity-popup-body" data-provenance="derived">
-               <strong>Prospectivity</strong><br/>
-               ${c.lat.toFixed(3)}, ${c.lng.toFixed(3)}<br/>
-               score <strong>${score.toFixed(3)}</strong> &plusmn; ${sd.toFixed(3)} (kriging sd)<br/>
-               <span class="prospectivity-popup-note">
-                 ${data.model_version} &middot; derived, not a live reading.
-                 A surface score, not a grade and not a reserve (PRD 2.4).
-               </span>
-             </div>`,
-            { className: 'prospectivity-popup' }
-          )
-          circle.on('click', () => {
-            triggerAIPrediction(c.lat, c.lng, `Grid cell (${c.lat.toFixed(3)}, ${c.lng.toFixed(3)})`)
-          })
-          overlay.addLayer(circle)
-        })
-
-        setSurfaceMeta({
-          modelVersion: data.model_version,
-          nCells: data.n_cells ?? cells.length,
-          error: null,
-        })
-      } catch (err: any) {
-        // No surface rather than a drawn one.
-        setSurfaceMeta({ modelVersion: null, nCells: null, error: String(err?.message || err) })
+      let data = gridData
+      if (!data) {
+        try {
+          const res = await fetch('/api/v1/prospectivity')
+          if (!res.ok) throw new Error(`prospectivity surface: ${res.status}`)
+          data = await res.json()
+          if (!data?.cells?.length) throw new Error('prospectivity surface returned no cells')
+          setGridData(data)
+          setGridError(null)
+        } catch (err: any) {
+          // No surface rather than a drawn one.
+          const msg = String(err?.message || err)
+          setGridError(msg)
+          setSurfaceMeta({ modelVersion: null, nCells: null, error: msg })
+          return
+        }
       }
+      if (gen !== layerGenRef.current) return
+
+      const legend = data.legends?.[activeLayer]
+      const domain: [number, number] | null = legend?.scale?.domain ?? null
+      const norm = (v: number) =>
+        domain && domain[1] > domain[0] ? (v - domain[0]) / (domain[1] - domain[0]) : v
+
+      data.cells.forEach((c: any) => {
+        const score = c.prospectivity_score
+        const sd = c.uncertainty_sd
+        const value = activeLayer === 'probability' ? score : sd
+        // cividis (D-027: a quantity gets a sequential colormap, never a
+        // status colour). The domain is the one the service reported for this
+        // response, so the colours span the data that is actually there.
+        const t = Math.min(1, Math.max(0, norm(value)))
+        const fill = cividis(t)
+        const circle = L.circle([c.lat, c.lng], {
+          radius: 1600,
+          fillColor: fill,
+          fillOpacity: 0.2 + t * 0.6,
+          color: fill,
+          weight: 0.4,
+          opacity: 0.5,
+        })
+        circle.bindPopup(
+          `<div class="prospectivity-popup-body" data-provenance="derived" data-provenance-model="${data.model_version}">
+             <strong>${activeLayer === 'probability' ? 'Prospectivity score' : 'Kriging uncertainty'}</strong><br/>
+             ${c.lat.toFixed(3)}, ${c.lng.toFixed(3)}<br/>
+             score <strong>${score.toFixed(3)}</strong> &plusmn; ${sd.toFixed(3)} (kriging sd)<br/>
+             <span class="prospectivity-popup-note">
+               ${data.model_version} &middot; derived, not a live reading.
+               A surface score, not a grade and not a reserve (PRD 2.4).
+             </span>
+           </div>`,
+          { className: 'prospectivity-popup' }
+        )
+        circle.on('click', () => {
+          triggerAIPrediction(c.lat, c.lng, `Grid cell (${c.lat.toFixed(3)}, ${c.lng.toFixed(3)})`)
+        })
+        overlay.addLayer(circle)
+      })
+
+      setSurfaceMeta({ modelVersion: data.model_version, nCells: data.n_cells ?? data.cells.length, error: null })
+      return
     }
+
+    // ---- the points the model was fitted on --------------------------------
+    if (activeLayer === 'measured') {
+      let data = measuredData
+      if (!data) {
+        try {
+          const res = await fetch('/api/v1/prospectivity/measured')
+          if (!res.ok) throw new Error(`measured points: ${res.status}`)
+          data = await res.json()
+          if (!data?.points?.length) throw new Error('measured points returned none')
+          setMeasuredData(data)
+          setMeasuredError(null)
+        } catch (err: any) {
+          setMeasuredError(String(err?.message || err))
+          return
+        }
+      }
+      if (gen !== layerGenRef.current) return
+
+      data.points.forEach((p: any) => {
+        const known = p.label === 1
+        // A category, not a quantity, so not cividis: a known mine is filled,
+        // a background site is a ring.
+        const marker = L.circleMarker([p.lat, p.lng], {
+          radius: known ? 7 : 5,
+          color: known ? 'var(--color-accent)' : 'var(--color-text-primary)',
+          weight: known ? 1.5 : 1.25,
+          fillColor: 'var(--color-accent)',
+          fillOpacity: known ? 0.85 : 0,
+        })
+        marker.bindPopup(
+          `<div class="prospectivity-popup-body">
+             <strong>${known ? 'Known mine (label 1)' : 'Background site (label 0)'}</strong><br/>
+             ${p.lat.toFixed(3)}, ${p.lng.toFixed(3)}
+             <div data-provenance="measured">
+               iron-oxide ratio ${p.iron_oxide_ratio.toFixed(3)} &middot; NDVI ${p.ndvi.toFixed(3)}
+               &middot; slope ${p.slope_deg.toFixed(1)}&deg;
+               <span class="prospectivity-popup-note">Sentinel-2 L2A and SRTM, sampled at this site.</span>
+             </div>
+             <div data-provenance="derived" data-provenance-model="${data.model_version}">
+               fitted score ${p.fitted_score.toFixed(3)}
+               <span class="prospectivity-popup-note">${data.model_version} &middot; model output, not a measurement.</span>
+             </div>
+           </div>`,
+          { className: 'prospectivity-popup' }
+        )
+        overlay.addLayer(marker)
+      })
+    }
+
     // REMOVED: six fabricated overlay layers.
     //
     // `ndvi`, `moisture`, `thermal`, `isro-bhuvan`, `isro-risat` and
@@ -347,13 +520,8 @@ export default function IndiaSatelliteMap({
     // None of it existed. Bhuvan and MOSDAC are not sources of this project —
     // docs/READINESS.md records GSI Bhukosh as unreachable and lithology as
     // omitted rather than substituted — and "Ore Horizon Boundary Verified" is
-    // a claim about ore that nothing here can make.
-    //
-    // The map now carries what is real: the ESRI World Imagery base layer, and
-    // the prospectivity surface scored by the loaded model, with its kriging
-    // spread in every popup. Until this change that second layer was a
-    // committed file from the superseded model; the comment claiming otherwise
-    // was written before anyone checked which file the route served.
+    // a claim about ore that nothing here can make. Every layer above is read
+    // from a service that names its source.
   }
 
   const createFallbackPrediction = (lat: number, lng: number, customLocationName?: string) => {
@@ -647,8 +815,16 @@ export default function IndiaSatelliteMap({
         center: [selectedMine.lat, selectedMine.lng],
         zoom: 8.5,
         zoomControl: false,
+        // Leaflet's default control is replaced, not kept: it prefixes every
+        // credit with "Leaflet", which is not a licensor of any pixel here.
         attributionControl: false,
       })
+      // Attribution, which this map did not have at all before: the control was
+      // disabled, so no layer — basemap included — ever credited its licensor.
+      // Each layer's required notice is shown while that layer is visible.
+      const attribution = L.control.attribution({ prefix: false, position: 'bottomleft' })
+      attribution.addTo(map)
+      attributionCtrlRef.current = attribution
 
       mapInstanceRef.current = map
       LRef.current = L
@@ -673,7 +849,7 @@ export default function IndiaSatelliteMap({
       L.tileLayer( `${UPSTREAMS.esriTiles}/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}`,
         {
           maxZoom: 18,
-          attribution: 'Esri Satellite',
+          attribution: `<span data-attribution-layer="esri-basemap">${ESRI_WORLD_IMAGERY_ATTRIBUTION}</span>`,
         }
       ).addTo(map)
 
@@ -797,6 +973,21 @@ export default function IndiaSatelliteMap({
     updateLayers()
   }, [selectedMine, activeLayer])
 
+  // A raster layer chosen before its definition arrived draws nothing; redraw
+  // once the definitions are in. Separate from the effect above so that the
+  // arrival of data does not also fly the map somewhere.
+  // Latest values through refs, so this effect runs when — and only when — the
+  // definitions arrive. Depending on `activeLayer` directly would redraw on
+  // every layer switch, duplicating the effect above, and `updateLayers` is a
+  // new function every render.
+  const activeLayerRef = useRef(activeLayer)
+  activeLayerRef.current = activeLayer
+  const updateLayersRef = useRef(updateLayers)
+  updateLayersRef.current = updateLayers
+  useEffect(() => {
+    if (tileDefs && TILE_LAYER_IDS.has(activeLayerRef.current)) updateLayersRef.current()
+  }, [tileDefs])
+
   /**
    * Two layers, named for what they are.
    *
@@ -806,10 +997,116 @@ export default function IndiaSatelliteMap({
    * which claims a mineral probability the model does not produce — it outputs
    * a prospectivity score, explicitly not a grade or a reserve (PRD §2.4).
    */
-  const layers = [
-    { key: 'satellite' as const, label: 'Satellite imagery (ESRI World Imagery)', color: 'var(--color-text-tertiary)' },
-    { key: 'geology' as const, label: 'Prospectivity score with kriging uncertainty', color: 'var(--color-accent)' },
+  const layers: { key: LayerType; label: string; group: 'model' | 'imagery' }[] = [
+    { key: 'probability', label: 'Prospectivity score', group: 'model' },
+    { key: 'uncertainty', label: 'Kriging uncertainty', group: 'model' },
+    { key: 'measured', label: 'Measured points', group: 'model' },
+    { key: 's2-true-colour', label: 'Sentinel-2 true colour', group: 'imagery' },
+    { key: 'iron-oxide', label: 'Iron-oxide ratio', group: 'imagery' },
+    { key: 'dem', label: 'Copernicus DEM', group: 'imagery' },
   ]
+
+  /**
+   * The legend for the active layer, assembled from what its service returned.
+   * Nothing in here is authored: facts, scales, caveats and attribution are all
+   * read from the response.
+   */
+  const legendModel: LegendModel = (() => {
+    if (TILE_LAYER_IDS.has(activeLayer)) {
+      const def = tileDefs?.find((d) => d.id === activeLayer)
+      if (!def) {
+        return {
+          layerId: activeLayer,
+          name: layers.find((l) => l.key === activeLayer)?.label ?? activeLayer,
+          kind: 'measured',
+          status: tileDefs === null ? 'loading' : 'unavailable',
+          reason: tileDefs === null ? null : tileDefsError ?? 'no definition returned for this layer',
+          facts: [],
+        }
+      }
+      const st = tileState[def.id]
+      const cachedOnScreen = st?.mode === 'cache' || st?.mode === 'mixed'
+      return {
+        layerId: def.id,
+        name: def.name,
+        kind: 'measured',
+        status: def.status === 'ok' || cachedOnScreen || def.cache?.available ? 'ok' : 'unavailable',
+        reason: def.status === 'ok' ? null : def.reason ?? null,
+        tile: {
+          mode: st?.mode ?? (def.status === 'ok' || def.cache?.available ? 'loading' : 'unavailable'),
+          fetchedAt: def.cache?.fetched_at ?? null,
+          liveReason: def.status === 'ok' ? (st?.lastError ?? null) : def.reason ?? null,
+          tilejsonUrl: def.tilejson_url ?? null,
+        },
+        facts: def.legend_facts,
+        scale: def.scale
+          ? {
+              stops: (def.scale as any).stops ?? [],
+              low: def.scale.low_label,
+              high: def.scale.high_label,
+              colormap: def.scale.colormap,
+              stopsSource: (def.scale as any).stops_source ?? null,
+            }
+          : null,
+        caveat: def.caveat,
+        attribution: {
+          required: def.attribution.required,
+          tiler: def.attribution.tiler,
+          licenceName: def.attribution.licence_name,
+          licenceUrl: def.attribution.licence_url,
+        },
+      }
+    }
+    if (activeLayer === 'probability' || activeLayer === 'uncertainty') {
+      const lg = gridData?.legends?.[activeLayer]
+      if (!lg) {
+        return {
+          layerId: activeLayer,
+          name: activeLayer === 'probability' ? 'Prospectivity score' : 'Kriging uncertainty',
+          kind: 'derived',
+          status: gridError ? 'unavailable' : 'loading',
+          reason: gridError,
+          facts: [],
+        }
+      }
+      return {
+        layerId: activeLayer,
+        name: lg.name,
+        kind: 'derived',
+        status: 'ok',
+        facts: lg.legend_facts,
+        scale: {
+          stops: CIVIDIS_STOPS,
+          low: lg.scale.low_label,
+          high: lg.scale.high_label,
+          domain: lg.scale.domain,
+          colormap: lg.scale.colormap,
+        },
+        caveat: lg.caveat,
+        modelVersion: gridData.model_version,
+      }
+    }
+    const lg = measuredData?.legend
+    if (!lg) {
+      return {
+        layerId: 'measured',
+        name: 'Measured points',
+        kind: 'measured',
+        status: measuredError ? 'unavailable' : 'loading',
+        reason: measuredError,
+        facts: [],
+      }
+    }
+    return {
+      layerId: 'measured',
+      name: lg.name,
+      kind: 'measured',
+      status: 'ok',
+      facts: lg.legend_facts,
+      caveat: lg.caveat,
+      modelVersion: measuredData.model_version,
+    }
+  })()
 
   const zoomToIndia = () => {
     if (mapInstanceRef.current) {
@@ -861,7 +1158,7 @@ export default function IndiaSatelliteMap({
               Click a cell, or search a place, to score it against the Track A prospectivity model. The score is a ranking signal from surface geology and terrain — not a grade, not a reserve, and not evidence of ore at depth.
             </h4>
             {/* What is actually drawn, reported by the service that drew it. */}
-            {activeLayer === 'geology' ? (
+            {activeLayer === 'probability' || activeLayer === 'uncertainty' ? (
               surfaceMeta.error ? (
                 <p className="mt-1 text-xs text-status-caution">
                   No surface is drawn: {surfaceMeta.error}. A drawn stand-in would not be the
@@ -915,6 +1212,11 @@ export default function IndiaSatelliteMap({
           <button
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
+            // Icon-only, so it had no accessible name: axe "button-name",
+            // critical. Pre-existing; found when the audit first covered this
+            // route (it had never visited /console?track=a).
+            aria-label={isFullscreen ? 'Exit full-screen map' : 'Full-screen map'}
+            aria-pressed={isFullscreen}
             className="rounded-md border border-border-interactive bg-surface-2 p-2 rounded-full text-text-primary hover:text-accent transition-colors cursor-pointer"
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -1035,23 +1337,299 @@ export default function IndiaSatelliteMap({
         </div>
       )}
 
-      {/* Cyber Digital Map Viewport */}
-      <div
-        className={`relative w-full ${
-          // Shorter at phone width. 560px of map on an 812px screen left
-          // nothing of the panel around it visible, so the legend, the layer
-          // switcher and the ranked targets all sat below the fold with no
-          // indication that they existed.
-          isFullscreen ? 'h-[calc(100vh-200px)]' : 'h-[380px] sm:h-[560px] lg:h-[620px]'
-        } bg-surface-0 overflow-hidden`}
-      >
+      {/*
+        Map and its legend, side by side from lg; stacked below it. The map
+        keeps only what belongs on it: imagery, markers, the selected mine's
+        card, zoom and the attribution line.
+      */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start">
+        <div className="min-w-0">
+          {/* Cyber Digital Map Viewport */}
+          <div
+            className={`relative w-full ${
+              // Shorter at phone width. 560px of map on an 812px screen left
+              // nothing of the panel around it visible, so the legend, the layer
+              // switcher and the ranked targets all sat below the fold with no
+              // indication that they existed.
+              isFullscreen ? 'h-[calc(100vh-200px)]' : 'h-[380px] sm:h-[560px] lg:h-[620px]'
+            } bg-surface-0 overflow-hidden`}
+          >
 
-        {radarSweepActive && <div className="cyber-radar-sweep-beam" />}
+            {radarSweepActive && <div className="cyber-radar-sweep-beam" />}
 
-        <div ref={mapContainerRef} className="w-full h-full" />
+            <div ref={mapContainerRef} className="w-full h-full" />
 
-        {/* Legend and layer switcher. Six of the eight layers here read no data and were captioned as ISRO measurements; see the removal note above. */}
-        <div className="absolute top-4 left-4 z-[400] flex flex-col gap-2.5 p-3.5 rounded-md bg-[rgba(8,12,18,0.88)] border border-border-default  max-w-xs shadow-2xl">
+            {/* DEFAULT TELEMETRY CARD (Top Right - visible when search prediction report is not active) */}
+            {!activePrediction && !currentHotspotMeta && registerError ? (
+              <div className="absolute top-4 right-4 z-[400] max-w-xs rounded-md border border-border-default bg-[rgba(8,12,18,0.92)] p-4 text-xs shadow-2xl">
+                <p className="font-semibold text-status-caution">Mine register unavailable</p>
+                <p className="mt-1 leading-snug text-text-secondary">
+                  {registerError}. No mines are drawn: this map reads the register from the service
+                  layer and does not keep a copy of its own.
+                </p>
+              </div>
+            ) : null}
+
+            {!activePrediction && currentHotspotMeta && (
+              <div className="absolute top-4 right-4 z-[400] p-4 rounded-md bg-[rgba(8,12,18,0.92)] border border-border-default  max-w-xs shadow-2xl">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full " style={{ backgroundColor: currentHotspotMeta.color }} />
+                    <span className="text-xs font-mono font-semibold uppercase" style={{ color: currentHotspotMeta.color }}>
+                      {selectedMine.name} Hotspot
+                    </span>
+                  </div>
+                  <span
+                    className="text-xs"
+                    style={{
+                      backgroundColor: `${currentHotspotMeta.color}20`,
+                      borderColor: `${currentHotspotMeta.color}60`,
+                      color: currentHotspotMeta.color,
+                    }}
+                  >
+                    {currentHotspotMeta.priority} PLAN TARGET
+                  </span>
+                </div>
+
+                <div
+                  className="space-y-2 text-xs font-mono pt-1.5 border-t border-border-default"
+                  data-provenance="reference"
+                >
+                  <div className="flex justify-between text-text-tertiary">
+                    <span>Plan target (register):</span>
+                    <span className="font-bold text-text-primary">{currentHotspotMeta.rate}</span>
+                  </div>
+                  {/*
+                    An "Estimated Ore Grade" row sat here showing a per-mine Mn
+                    percentage from the literal table above. No grade data exists:
+                    Track A outputs a prospectivity score, which PRD §2.4 is
+                    explicit is not a grade and not a reserve.
+                  */}
+                  <div className="flex justify-between text-text-tertiary">
+                    <span>Coordinates:</span>
+                    <span className="text-accent">{selectedMine.lat}&deg;N, {selectedMine.lng}&deg;E</span>
+                  </div>
+                  <div className="flex justify-between text-text-tertiary">
+                    <span>Geological Belt:</span>
+                    <span className="text-text-primary">{selectedMine.state === 'MP' ? 'Central MP Syncline' : 'Western MH Corridor'}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* AI ML PROSPECTIVITY PREDICTION INSPECTOR REPORT (RIGHT-HAND SIDE PANEL) */}
+            {activePrediction && (
+              <div className="absolute top-4 right-4 z-[450] p-4 rounded-md bg-[rgba(6,12,24,0.95)] border border-accent/50  w-[90%] sm:w-[380px] max-h-[90%] overflow-y-auto text-xs font-mono text-text-primary animate-in slide-in-from-right-4 duration-300">
+                <div className="flex items-center justify-between pb-2.5 border-b border-border-default mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-md bg-accent/20 border border-accent/40 text-accent">
+                      <Cpu className="w-4 h-4 " />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-accent uppercase tracking-wider">
+                          AI Prospectivity Dossier
+                        </span>
+                      </div>
+                      <h5 className="font-bold text-text-primary text-xs truncate max-w-[210px]">
+                        {activePrediction.location_name}
+                      </h5>
+                      <span className="text-xs text-text-secondary">
+                        {activePrediction.lat?.toFixed(4)}°N, {activePrediction.lng?.toFixed(4)}°E
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setActivePrediction(null)}
+                    className="p-1 rounded-lg hover:bg-surface-3 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+                    title="Close Report"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Prospectivity score panel. This was a two-column grid; the
+                    second cell held the fabricated "Historical Success Ratio". */}
+                <div className="mb-3">
+                  <div className="p-3 rounded-md bg-gradient-to-br from-accent/10 to-transparent border border-accent/30">
+                    <span className="text-xs uppercase text-text-secondary block mb-0.5 font-bold">
+                      Manganese Possibility
+                    </span>
+                    <div className="text-xl font-semibold text-accent">
+                      {(activePrediction.probability * 100).toFixed(1)}%
+                    </div>
+                    <span className="text-xs text-accent uppercase font-bold">
+                      {activePrediction.confidence} Confidence
+                    </span>
+                  </div>
+                </div>
+
+                {/* Nearest Geological Fault Telemetry */}
+                <div className="p-2.5 rounded-md bg-status-caution/10 border border-status-caution/30 text-xs text-status-caution mb-2 font-mono flex items-center justify-between">
+                  <span>Structural Fault:</span>
+                  <span className="font-bold truncate max-w-[190px]">{activePrediction.nearest_fault_name || 'Regional Fault'} ({activePrediction.dist_to_fault_km || 4.2} km)</span>
+                </div>
+
+                {/* Geological Metrics Table */}
+                <div className="p-2.5 rounded-md bg-black/50 border border-border-default space-y-1.5 mb-3 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Iron Oxide Index:</span>
+                    <span className="text-text-primary font-bold">{activePrediction.features?.iron_oxide_index}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Ferrous Mineral Index:</span>
+                    <span className="text-text-primary font-bold">{activePrediction.features?.ferrous_mineral_index}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">SWIR B11/B12 Reflectance:</span>
+                    <span className="text-accent font-bold">{activePrediction.features?.swir_b11_reflectance || 0.32} / {activePrediction.features?.swir_b12_reflectance || 0.41}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Elevation & Slope:</span>
+                    <span className="text-accent">{activePrediction.features?.elevation_m}m &bull; {activePrediction.features?.slope_deg}°</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Precipitation Baseline:</span>
+                    <span className="text-status-caution">{activePrediction.features?.rainfall_mm} mm</span>
+                  </div>
+                </div>
+
+                {/* AI Natural Language Interpretation */}
+                <p className="text-xs text-text-secondary leading-relaxed mb-3 p-2.5 rounded-md bg-surface-2 border border-border-default">
+                  💡 <span className="font-bold text-text-primary">AI Geological Diagnostic:</span> {activePrediction.geological_interpretation}
+                </p>
+
+                {/* Direct Action Links */}
+                <div className="flex items-center gap-2 pt-1 border-t border-border-default">
+                  <a
+                    href="#smart-blending"
+                    className="rounded-md border border-border-interactive bg-surface-2 flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
+                  >
+                    3D Borehole Kriging
+                  </a>
+                  <a
+                    href="#smart-blending"
+                    className="rounded-md border border-border-interactive bg-surface-2 flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
+                  >
+                    Simulate Blending
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {/* Loading Indicator when user clicks or searches on Map */}
+            {isPredicting && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500] px-4 py-2 rounded-full bg-black/90 border border-accent text-accent font-mono text-xs font-bold flex items-center gap-2 ">
+                <Activity className="w-4 h-4 animate-spin" />
+                <span>Geocoding & Running AI Manganese Machine Learning Engine...</span>
+              </div>
+            )}
+
+          </div>
+            {/*
+              Hotspot dock — under the map, not over it. Overlaid, it collided with
+              the attribution line, which the licences require to stay readable,
+              and at 375 the two were stacked on the same 50px of a 380px map.
+            */}
+            <div className="flex items-center gap-2 overflow-x-auto border-t border-border-default bg-surface-1 p-2">
+              <span className="text-xs font-mono font-bold text-text-tertiary uppercase px-2 shrink-0 hidden sm:inline">
+                HOTSPOTS:
+              </span>
+              {hotspots.map((m) => (
+                <button
+                  type="button"
+                  key={m.id}
+                  onClick={() => {
+                    const orig = MOIL_MINES.find((item) => item.id === m.id) || selectedMine
+                    onSelectMine(orig)
+                    triggerAIPrediction(m.lat, m.lng, `${m.name} Hotspot (${m.state})`)
+                  }}
+                  className={`px-3 py-1.5 rounded-md text-xs font-mono whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
+                    selectedMine.id === m.id
+                      ? 'text-black font-semibold shadow-lg'
+                      : 'bg-surface-2 border border-border-default text-text-tertiary hover:text-text-primary hover:bg-surface-3'
+                  }`}
+                  style={{
+                    backgroundColor: selectedMine.id === m.id ? m.color : undefined,
+                  }}
+                  data-provenance="reference"
+                >
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: m.color }} />
+                  {m.name} ({m.rate})
+                </button>
+              ))}
+            </div>
+        </div>
+
+        {/*
+          Legend and layer switcher — beside the map from lg, below it under lg.
+          Not overlaid on the map any more. As an overlay it covered the imagery
+          it described; at 1280 its lower part, including iron-oxide's scale and
+          its "not a manganese detector" caveat, sat hidden behind the hotspot
+          dock; at 375 the hotspot card was drawn over it. Six of the eight
+          layers this panel once listed read no data and were captioned as ISRO
+          measurements; see the removal note above.
+        */}
+        <aside
+          aria-label="Map layers and legend"
+          className="flex flex-col gap-3 border-t border-border-default bg-surface-1 p-4 lg:border-l lg:border-t-0"
+        >
+
+          {/* Sensor Layers */}
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-mono font-bold text-text-tertiary uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-accent" />
+              Layers:
+            </span>
+            {(['model', 'imagery'] as const).map((group) => (
+              <fieldset key={group} className="m-0 flex min-w-0 flex-col gap-0.5 border-0 p-0">
+                <legend className="mt-1 p-0 text-xs font-mono text-text-tertiary">
+                  {group === 'model' ? 'Model and inputs' : 'Imagery · Planetary Computer'}
+                </legend>
+                {layers
+                  .filter((l) => l.group === group)
+                  .map((l) => {
+                    const def = TILE_LAYER_IDS.has(l.key) ? tileDefs?.find((d) => d.id === l.key) : undefined
+                    // A raster layer that cannot be drawn live or from cache is
+                    // still listed, so its absence is visible rather than silent.
+                    const dead =
+                      !!def && def.status !== 'ok' && !def.cache?.available
+                    return (
+                      <button
+                        type="button"
+                        // Pressed, not role="radio": native buttons with a pressed
+                        // state are the semantic element for a one-of-N switch built
+                        // from buttons, and they need no ARIA role to be read right.
+                        aria-pressed={activeLayer === l.key}
+                        key={l.key}
+                        data-layer-button={l.key}
+                        onClick={() => onChangeLayer(l.key)}
+                        className={`px-3 py-1 rounded-md text-left text-xs font-mono transition-colors flex items-center justify-between gap-3 cursor-pointer ${
+                          activeLayer === l.key
+                            ? 'bg-white/20 text-text-primary font-bold border border-border-interactive shadow-md'
+                            : 'text-text-tertiary hover:text-text-primary hover:bg-surface-2'
+                        }`}
+                      >
+                        <span className="truncate">{l.label}</span>
+                        {dead ? (
+                          <span className="text-xs text-status-caution shrink-0">unavailable</span>
+                        ) : activeLayer === l.key ? (
+                          <span className="text-xs font-bold text-accent shrink-0">ON</span>
+                        ) : null}
+                      </button>
+                    )
+                  })}
+              </fieldset>
+            ))}
+          </div>
+
+          <div className="border-t border-border-default pt-2.5">
+            <MapLayerLegend model={legendModel} />
+          </div>
+
+          {/* Marker key last: the least of what this panel says. */}
           {/*
             The key only appears when there are markers for it to describe.
             It states three plan-target thresholds, and with the register
@@ -1059,7 +1637,7 @@ export default function IndiaSatelliteMap({
             an empty map is three numbers asserted for no reason.
           */}
           {hotspots.length > 0 ? (
-          <div className="space-y-1 pb-2 border-b border-border-default" data-provenance="reference">
+          <div className="space-y-1 border-t border-border-default pt-2.5" data-provenance="reference">
             <span className="text-xs font-mono font-semibold text-text-primary uppercase tracking-wider block mb-1">
               Marker size = plan target (register)
             </span>
@@ -1077,237 +1655,8 @@ export default function IndiaSatelliteMap({
             </div>
           </div>
           ) : null}
+        </aside>
 
-          {/* Sensor Layers */}
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-mono font-bold text-text-tertiary uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-accent" />
-              Layers:
-            </span>
-            {layers.map((l) => (
-              <button
-                type="button"
-                key={l.key}
-                data-layer-button={l.key}
-                onClick={() => onChangeLayer(l.key)}
-                className={`px-3 py-1 rounded-md text-left text-xs font-mono transition-colors flex items-center justify-between gap-3 cursor-pointer ${
-                  activeLayer === l.key
-                    ? 'bg-white/20 text-text-primary font-bold border border-border-interactive shadow-md'
-                    : 'text-text-tertiary hover:text-text-primary hover:bg-surface-2'
-                }`}
-              >
-                <span className="flex items-center gap-2 truncate text-xs">
-                  <span
-                    className="h-2 w-2 rounded-full shrink-0"
-                    style={{ backgroundColor: l.color }}
-                  />
-                  <span className="truncate">{l.label}</span>
-                </span>
-                {activeLayer === l.key && (
-                  <span className="text-xs font-bold text-accent shrink-0">ON</span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* DEFAULT TELEMETRY CARD (Top Right - visible when search prediction report is not active) */}
-        {!activePrediction && !currentHotspotMeta && registerError ? (
-          <div className="absolute top-4 right-4 z-[400] max-w-xs rounded-md border border-border-default bg-[rgba(8,12,18,0.92)] p-4 text-xs shadow-2xl">
-            <p className="font-semibold text-status-caution">Mine register unavailable</p>
-            <p className="mt-1 leading-snug text-text-secondary">
-              {registerError}. No mines are drawn: this map reads the register from the service
-              layer and does not keep a copy of its own.
-            </p>
-          </div>
-        ) : null}
-
-        {!activePrediction && currentHotspotMeta && (
-          <div className="absolute top-4 right-4 z-[400] p-4 rounded-md bg-[rgba(8,12,18,0.92)] border border-border-default  max-w-xs shadow-2xl">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full " style={{ backgroundColor: currentHotspotMeta.color }} />
-                <span className="text-xs font-mono font-semibold uppercase" style={{ color: currentHotspotMeta.color }}>
-                  {selectedMine.name} Hotspot
-                </span>
-              </div>
-              <span
-                className="text-xs"
-                style={{
-                  backgroundColor: `${currentHotspotMeta.color}20`,
-                  borderColor: `${currentHotspotMeta.color}60`,
-                  color: currentHotspotMeta.color,
-                }}
-              >
-                {currentHotspotMeta.priority} PLAN TARGET
-              </span>
-            </div>
-
-            <div
-              className="space-y-2 text-xs font-mono pt-1.5 border-t border-border-default"
-              data-provenance="reference"
-            >
-              <div className="flex justify-between text-text-tertiary">
-                <span>Plan target (register):</span>
-                <span className="font-bold text-text-primary">{currentHotspotMeta.rate}</span>
-              </div>
-              {/*
-                An "Estimated Ore Grade" row sat here showing a per-mine Mn
-                percentage from the literal table above. No grade data exists:
-                Track A outputs a prospectivity score, which PRD §2.4 is
-                explicit is not a grade and not a reserve.
-              */}
-              <div className="flex justify-between text-text-tertiary">
-                <span>Coordinates:</span>
-                <span className="text-accent">{selectedMine.lat}&deg;N, {selectedMine.lng}&deg;E</span>
-              </div>
-              <div className="flex justify-between text-text-tertiary">
-                <span>Geological Belt:</span>
-                <span className="text-text-primary">{selectedMine.state === 'MP' ? 'Central MP Syncline' : 'Western MH Corridor'}</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* AI ML PROSPECTIVITY PREDICTION INSPECTOR REPORT (RIGHT-HAND SIDE PANEL) */}
-        {activePrediction && (
-          <div className="absolute top-4 right-4 z-[450] p-4 rounded-md bg-[rgba(6,12,24,0.95)] border border-accent/50  w-[90%] sm:w-[380px] max-h-[90%] overflow-y-auto text-xs font-mono text-text-primary animate-in slide-in-from-right-4 duration-300">
-            <div className="flex items-center justify-between pb-2.5 border-b border-border-default mb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-md bg-accent/20 border border-accent/40 text-accent">
-                  <Cpu className="w-4 h-4 " />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-accent uppercase tracking-wider">
-                      AI Prospectivity Dossier
-                    </span>
-                  </div>
-                  <h5 className="font-bold text-text-primary text-xs truncate max-w-[210px]">
-                    {activePrediction.location_name}
-                  </h5>
-                  <span className="text-xs text-text-secondary">
-                    {activePrediction.lat?.toFixed(4)}°N, {activePrediction.lng?.toFixed(4)}°E
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setActivePrediction(null)}
-                className="p-1 rounded-lg hover:bg-surface-3 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-                title="Close Report"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Prospectivity score panel. This was a two-column grid; the
-                second cell held the fabricated "Historical Success Ratio". */}
-            <div className="mb-3">
-              <div className="p-3 rounded-md bg-gradient-to-br from-accent/10 to-transparent border border-accent/30">
-                <span className="text-xs uppercase text-text-secondary block mb-0.5 font-bold">
-                  Manganese Possibility
-                </span>
-                <div className="text-xl font-semibold text-accent">
-                  {(activePrediction.probability * 100).toFixed(1)}%
-                </div>
-                <span className="text-xs text-accent uppercase font-bold">
-                  {activePrediction.confidence} Confidence
-                </span>
-              </div>
-            </div>
-
-            {/* Nearest Geological Fault Telemetry */}
-            <div className="p-2.5 rounded-md bg-status-caution/10 border border-status-caution/30 text-xs text-status-caution mb-2 font-mono flex items-center justify-between">
-              <span>Structural Fault:</span>
-              <span className="font-bold truncate max-w-[190px]">{activePrediction.nearest_fault_name || 'Regional Fault'} ({activePrediction.dist_to_fault_km || 4.2} km)</span>
-            </div>
-
-            {/* Geological Metrics Table */}
-            <div className="p-2.5 rounded-md bg-black/50 border border-border-default space-y-1.5 mb-3 text-xs">
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Iron Oxide Index:</span>
-                <span className="text-text-primary font-bold">{activePrediction.features?.iron_oxide_index}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Ferrous Mineral Index:</span>
-                <span className="text-text-primary font-bold">{activePrediction.features?.ferrous_mineral_index}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">SWIR B11/B12 Reflectance:</span>
-                <span className="text-accent font-bold">{activePrediction.features?.swir_b11_reflectance || 0.32} / {activePrediction.features?.swir_b12_reflectance || 0.41}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Elevation & Slope:</span>
-                <span className="text-accent">{activePrediction.features?.elevation_m}m &bull; {activePrediction.features?.slope_deg}°</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Precipitation Baseline:</span>
-                <span className="text-status-caution">{activePrediction.features?.rainfall_mm} mm</span>
-              </div>
-            </div>
-
-            {/* AI Natural Language Interpretation */}
-            <p className="text-xs text-text-secondary leading-relaxed mb-3 p-2.5 rounded-md bg-surface-2 border border-border-default">
-              💡 <span className="font-bold text-text-primary">AI Geological Diagnostic:</span> {activePrediction.geological_interpretation}
-            </p>
-
-            {/* Direct Action Links */}
-            <div className="flex items-center gap-2 pt-1 border-t border-border-default">
-              <a
-                href="#smart-blending"
-                className="rounded-md border border-border-interactive bg-surface-2 flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
-              >
-                3D Borehole Kriging
-              </a>
-              <a
-                href="#smart-blending"
-                className="rounded-md border border-border-interactive bg-surface-2 flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
-              >
-                Simulate Blending
-              </a>
-            </div>
-          </div>
-        )}
-
-        {/* Loading Indicator when user clicks or searches on Map */}
-        {isPredicting && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500] px-4 py-2 rounded-full bg-black/90 border border-accent text-accent font-mono text-xs font-bold flex items-center gap-2 ">
-            <Activity className="w-4 h-4 animate-spin" />
-            <span>Geocoding & Running AI Manganese Machine Learning Engine...</span>
-          </div>
-        )}
-
-        {/* Bottom Fast-Switch Hotspot Dock */}
-        <div className="absolute bottom-4 left-4 right-16 z-[400] flex items-center gap-2 overflow-x-auto p-2 rounded-md bg-[rgba(6,10,14,0.88)] border border-border-default ">
-          <span className="text-xs font-mono font-bold text-text-tertiary uppercase px-2 shrink-0 hidden sm:inline">
-            HOTSPOTS:
-          </span>
-          {hotspots.map((m) => (
-            <button
-              type="button"
-              key={m.id}
-              onClick={() => {
-                const orig = MOIL_MINES.find((item) => item.id === m.id) || selectedMine
-                onSelectMine(orig)
-                triggerAIPrediction(m.lat, m.lng, `${m.name} Hotspot (${m.state})`)
-              }}
-              className={`px-3 py-1.5 rounded-md text-xs font-mono whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
-                selectedMine.id === m.id
-                  ? 'text-black font-semibold shadow-lg'
-                  : 'bg-surface-2 border border-border-default text-text-tertiary hover:text-text-primary hover:bg-surface-3'
-              }`}
-              style={{
-                backgroundColor: selectedMine.id === m.id ? m.color : undefined,
-              }}
-              data-provenance="reference"
-            >
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: m.color }} />
-              {m.name} ({m.rate})
-            </button>
-          ))}
-        </div>
       </div>
     </div>
   )

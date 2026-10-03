@@ -24,6 +24,9 @@ const ALL_ROUTES = [
   '/', '/console', '/production', '/blending', '/mine-twin', '/flood-alert',
   '/method', '/about', '/login', '/admin', '/admin/login', '/admin/setup',
   '/admin/profile', '/auth/callback', '/nope-does-not-exist',
+  // A mine's detail and the prospectivity map are where PR B changed the most,
+  // and neither was in this list: they are deep links, not top-level routes.
+  '/console?mine=1&track=b', '/console?track=a',
 ]
 
 function arg(name, fallback) {

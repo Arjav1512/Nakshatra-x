@@ -58,6 +58,14 @@ async def lifespan(_app: FastAPI):
                 else:
                     print(f"[warm] all {len(DEFAULT_MINES)} forecast artifacts are fresh")
 
+    # Mosaic registrations live in Planetary Computer's cache, which evicts
+    # (it tracks `lastused`). Re-registering at startup means an id evicted while
+    # this service was down is re-created rather than trusted. Non-blocking.
+    if os.environ.get("NAKSHATRA_SKIP_WARM") != "1":
+        from app.ml.map_layers import warm_tile_layers
+
+        warm_tile_layers()
+
     yield
 
     from app.api.forecast_store import shutdown

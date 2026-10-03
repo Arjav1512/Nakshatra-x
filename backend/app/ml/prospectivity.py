@@ -254,9 +254,51 @@ def scored_grid() -> dict:
     lng = np.array([c[1] for c in grid])
     est, sd = st["kriging"].uncertainty(lat, lng)
 
+    est_l = [float(e) for e in est]
+    sd_l = [float(v) for v in sd]
+    method = (
+        "Ordinary kriging over a gradient-boosting model of measured "
+        "Sentinel-2 L2A band ratios and SRTM terrain"
+    )
+    # Legend facts are produced here, beside the numbers they describe, so the
+    # map renders provenance it was given rather than provenance it wrote.
+    common = [
+        {"label": "Model", "value": MODEL_VERSION},
+        {"label": "Method", "value": method},
+        {"label": "Grid", "value": f"{len(grid)} cells at {GRID_STEP_DEG} degrees"},
+        {"label": "Source kind", "value": "derived — model output, not a measurement"},
+    ]
+    legends = {
+        "probability": {
+            "name": "Prospectivity score",
+            "legend_facts": [{"label": "Quantity",
+                              # Not "0-1": kriging interpolates past the
+                              # fitted values and the surface reaches -0.0023,
+                              # which no probability can. That is also why this
+                              # is called a score — it ranks cells; it is not a
+                              # probability that ore is present.
+                              "value": "prospectivity score (a ranking, not a probability of ore)"}] + common,
+            "scale": {"domain": [round(min(est_l), 4), round(max(est_l), 4)],
+                      "colormap": "cividis", "low_label": "lower", "high_label": "higher"},
+            "caveat": ("A surface score. Not a grade, not a reserve, and not "
+                       "evidence of ore at depth (PRD 2.4)."),
+        },
+        "uncertainty": {
+            "name": "Kriging uncertainty",
+            "legend_facts": [{"label": "Quantity",
+                              "value": "kriging standard deviation of the score"}] + common,
+            "scale": {"domain": [round(min(sd_l), 4), round(max(sd_l), 4)],
+                      "colormap": "cividis", "low_label": "more certain",
+                      "high_label": "less certain"},
+            "caveat": ("High where the 50 measured points are sparse. Read the score "
+                       "where this is low; treat it as a guess where this is high."),
+        },
+    }
+
     return {
         "model_version": MODEL_VERSION,
         "n_cells": len(grid),
+        "legends": legends,
         "grid": {
             "lat_range": list(GRID_LAT_RANGE),
             "lng_range": list(GRID_LNG_RANGE),
@@ -285,6 +327,75 @@ def scored_grid() -> dict:
             "note": (
                 "A surface prospectivity score with its kriging spread. Not a "
                 "grade, not a reserve, and not a live reading (PRD 2.4)."
+            ),
+        },
+    }
+
+
+def measured_points() -> dict:
+    """
+    The points the model was fitted on (PRD A-3), for the map's measured layer.
+
+    The grid layers are kriged output — derived. These are the inputs: real
+    Sentinel-2 L2A band ratios and SRTM terrain at real coordinates, with the
+    binary site label. Showing them beside the surface is the difference between
+    "the model says this area scores high" and "here is what it was told".
+
+    `source_kind` is `measured` for the bands and terrain. The labels are public
+    MOIL mine locations, which is reference data, and the note says so rather
+    than letting one envelope cover two different kinds of fact.
+    """
+    st = _load()
+    df = st["table"]
+    scores = st["train_scores"]
+
+    points = [
+        {
+            "lat": round(float(r.lat), 4),
+            "lng": round(float(r.lng), 4),
+            "label": int(r.label),
+            "fitted_score": round(float(sc), 4),
+            "iron_oxide_ratio": round(float(r.iron_oxide_ratio), 4),
+            "slope_deg": round(float(r.slope_deg), 2),
+            "ndvi": round(float(r.ndvi), 4),
+        }
+        for r, sc in zip(df.itertuples(), scores)
+    ]
+
+    n_pos = int(sum(p["label"] for p in points))
+    legend = {
+        "name": "Measured points",
+        "legend_facts": [
+            {"label": "Quantity", "value": "training observations the model was fitted on"},
+            {"label": "Points", "value": f"{len(points)} sites, {n_pos} known mines and "
+                                          f"{len(points) - n_pos} background"},
+            {"label": "Bands", "value": "Sentinel-2 L2A band ratios, sampled per site"},
+            {"label": "Terrain", "value": "SRTM elevation and slope, sampled per site"},
+            {"label": "Labels", "value": "public MOIL mine locations (reference data)"},
+            {"label": "Source kind", "value": "measured — inputs, not model output"},
+        ],
+        "caveat": ("These are what the model was told, not what it predicts. "
+                   "Each point's fitted score is shown in its popup and is derived."),
+    }
+    return {
+        "model_version": MODEL_VERSION,
+        "n_points": len(points),
+        "n_positive": n_pos,
+        "legend": legend,
+        "quantity": "training observations",
+        "points": points,
+        "guardrails": _guardrails(),
+        "provenance": {
+            "source_kind": "measured",
+            "source": (
+                "Sentinel-2 L2A band ratios and SRTM terrain sampled at each site; "
+                "site labels are public MOIL mine locations (reference)"
+            ),
+            "model_version": MODEL_VERSION,
+            "note": (
+                "The observations the model was fitted on, not its output. "
+                "`fitted_score` is the model's probability at that point and is "
+                "derived; the bands and terrain are measured."
             ),
         },
     }

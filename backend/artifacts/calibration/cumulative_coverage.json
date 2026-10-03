@@ -1,0 +1,217 @@
+{
+  "kind": "cumulative_calibration",
+  "quantity": "share of realised 14-day totals inside the forecast's 80% band",
+  "nominal_coverage": 0.8,
+  "nominal_tail_frequency": 0.1,
+  "ci_level": 0.95,
+  "model_version": "nakshatra-gbt-cqr-v1",
+  "portfolio": {
+    "coverage_80": 0.738,
+    "coverage_80_ci95": [
+      0.6997,
+      0.777
+    ],
+    "pit_at_extremes": 0.165,
+    "pit_at_extremes_ci95": [
+      0.1299,
+      0.2022
+    ],
+    "n_windows": 816,
+    "n_origin_dates": 24,
+    "effective_sample_size": 493.5,
+    "design_effect": 1.65
+  },
+  "per_mine": {
+    "MOIL-BAL-01": {
+      "coverage_80": 0.667,
+      "coverage_80_ci95": [
+        0.5208,
+        0.8021
+      ],
+      "pit_at_extremes": 0.25,
+      "pit_at_extremes_ci95": [
+        0.125,
+        0.3854
+      ],
+      "n_windows": 96,
+      "n_origin_dates": 24,
+      "effective_sample_size": 41.9,
+      "design_effect": 2.29
+    },
+    "MOIL-BEL-10": {
+      "coverage_80": 0.542,
+      "coverage_80_ci95": [
+        0.3889,
+        0.6944
+      ],
+      "pit_at_extremes": 0.264,
+      "pit_at_extremes_ci95": [
+        0.1389,
+        0.3889
+      ],
+      "n_windows": 72,
+      "n_origin_dates": 24,
+      "effective_sample_size": 44.3,
+      "design_effect": 1.63
+    },
+    "MOIL-BHR-02": {
+      "coverage_80": 0.781,
+      "coverage_80_ci95": [
+        0.6458,
+        0.8958
+      ],
+      "pit_at_extremes": 0.146,
+      "pit_at_extremes_ci95": [
+        0.0521,
+        0.2708
+      ],
+      "n_windows": 96,
+      "n_origin_dates": 24,
+      "effective_sample_size": 38.9,
+      "design_effect": 2.47
+    },
+    "MOIL-CHK-06": {
+      "coverage_80": 0.76,
+      "coverage_80_ci95": [
+        0.6664,
+        0.8542
+      ],
+      "pit_at_extremes": 0.156,
+      "pit_at_extremes_ci95": [
+        0.0729,
+        0.2604
+      ],
+      "n_windows": 96,
+      "n_origin_dates": 24,
+      "effective_sample_size": 80.1,
+      "design_effect": 1.2
+    },
+    "MOIL-DON-05": {
+      "coverage_80": 0.625,
+      "coverage_80_ci95": [
+        0.4896,
+        0.7604
+      ],
+      "pit_at_extremes": 0.271,
+      "pit_at_extremes_ci95": [
+        0.1458,
+        0.4167
+      ],
+      "n_windows": 96,
+      "n_origin_dates": 24,
+      "effective_sample_size": 48.0,
+      "design_effect": 2.0
+    },
+    "MOIL-GUM-09": {
+      "coverage_80": 0.778,
+      "coverage_80_ci95": [
+        0.6667,
+        0.875
+      ],
+      "pit_at_extremes": 0.111,
+      "pit_at_extremes_ci95": [
+        0.0417,
+        0.1809
+      ],
+      "n_windows": 72,
+      "n_origin_dates": 24,
+      "effective_sample_size": 62.3,
+      "design_effect": 1.15
+    },
+    "MOIL-KAN-08": {
+      "coverage_80": 0.847,
+      "coverage_80_ci95": [
+        0.7361,
+        0.9444
+      ],
+      "pit_at_extremes": 0.069,
+      "pit_at_extremes_ci95": [
+        0.0,
+        0.1667
+      ],
+      "n_windows": 72,
+      "n_origin_dates": 24,
+      "effective_sample_size": 43.7,
+      "design_effect": 1.65
+    },
+    "MOIL-MAN-07": {
+      "coverage_80": 0.792,
+      "coverage_80_ci95": [
+        0.6667,
+        0.9028
+      ],
+      "pit_at_extremes": 0.097,
+      "pit_at_extremes_ci95": [
+        0.0139,
+        0.2083
+      ],
+      "n_windows": 72,
+      "n_origin_dates": 24,
+      "effective_sample_size": 44.5,
+      "design_effect": 1.62
+    },
+    "MOIL-TIR-04": {
+      "coverage_80": 0.722,
+      "coverage_80_ci95": [
+        0.5694,
+        0.8472
+      ],
+      "pit_at_extremes": 0.181,
+      "pit_at_extremes_ci95": [
+        0.0833,
+        0.2917
+      ],
+      "n_windows": 72,
+      "n_origin_dates": 24,
+      "effective_sample_size": 40.5,
+      "design_effect": 1.78
+    },
+    "MOIL-UKW-03": {
+      "coverage_80": 0.903,
+      "coverage_80_ci95": [
+        0.8333,
+        0.9583
+      ],
+      "pit_at_extremes": 0.056,
+      "pit_at_extremes_ci95": [
+        0.0,
+        0.125
+      ],
+      "n_windows": 72,
+      "n_origin_dates": 24,
+      "effective_sample_size": 68.3,
+      "design_effect": 1.05
+    }
+  },
+  "window": {
+    "first_origin": "2025-10-15",
+    "last_origin": "2026-09-02",
+    "step_days": 14,
+    "n_origins": 24
+  },
+  "method": "Rolling-origin: refit before every origin, score the next 14 days. 95% intervals from a cluster bootstrap resampling whole origin dates (2000 resamples, seed 20260921), because a date's windows share weather and equipment state and are not independent.",
+  "records_sha256": "b72eb220251f16ea69e2a456b92b67a8b2a0a57ecc077eb56c442f23a8336e72",
+  "generated_at": "2026-10-02T22:39:15Z",
+  "generated_by": "python measure_cumulative_calibration.py artifact --records <run output>",
+  "artifact_identity": {
+    "generator": "nakshatra-synthetic-v1",
+    "contract_version": "1.0.0",
+    "generator_seed": 20260921,
+    "data_end_date": "2026-09-20",
+    "model_version": "nakshatra-gbt-cqr-v1",
+    "code_fingerprint": "560a855179768a09",
+    "library_versions": {
+      "numpy": "2.2.0",
+      "pydantic": "2.13.5",
+      "sklearn": "1.6.0"
+    }
+  },
+  "doc": "docs/CALIBRATION.md",
+  "provenance": {
+    "source_kind": "derived",
+    "is_live": false,
+    "is_synthetic": true,
+    "source": "Held-out rolling-origin backtest of the production forecaster on the seeded synthetic dataset",
+    "note": "Describes the model's behaviour on synthetic data generated to the ingestion contract, not on MOIL's operations (PRD 8.2)."
+  }
+}

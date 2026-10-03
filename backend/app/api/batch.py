@@ -7,6 +7,7 @@ batch that writes an artifact, not on a request path. The API then serves the
 artifact and reports how old it is.
 
     python -m app.api.batch all                   # EVERYTHING, one dataset
+    python -m app.api.batch tiles                 # map tiles for offline demo
     python -m app.api.batch check                 # do the artifacts agree?
     python -m app.api.batch backtest              # all mines
     python -m app.api.batch backtest MOIL-BAL-01  # one mine
@@ -42,6 +43,8 @@ from app.ingestion.export import SAMPLE_DIR
 from app.ingestion.generator import MINES
 
 SAMPLE_IDENTITY = SAMPLE_DIR / "_dataset_identity.json"
+BACKEND_DIR = Path(__file__).resolve().parents[2]
+CALIBRATION_ARTIFACT = BACKEND_DIR / "artifacts" / "calibration" / "cumulative_coverage.json"
 
 
 def run_backtests(codes: list[str] | None = None) -> int:
@@ -140,17 +143,17 @@ def run_all() -> int:
 
     failures = 0
 
-    print("1/3  Sample CSVs (data/synthetic)")
+    print("1/4  Sample CSVs (data/synthetic)")
     t0 = time.time()
     counts = export_samples()
     print(f"  {sum(counts.values()):,} rows across {len(counts)} entities in {time.time() - t0:.1f}s\n")
 
-    print("2/3  Forecast artifacts")
+    print("2/4  Forecast artifacts")
     failures += run_forecasts()
     print()
 
     specs = committed_backtest_specs()
-    print(f"3/3  Backtest artifacts ({len(specs)} committed; ~216 s each)")
+    print(f"3/4  Backtest artifacts ({len(specs)} committed; ~216 s each)")
     for code, span, step in specs:
         t0 = time.time()
         try:
@@ -159,6 +162,10 @@ def run_all() -> int:
         except Exception as exc:  # noqa: BLE001 — a batch must not die on one mine
             failures += 1
             print(f"  {code:14} FAIL {time.time() - t0:6.1f}s  {type(exc).__name__}: {exc}")
+    print()
+
+    print("4/4  Calibration artifact (~9 min: refits at 24 origins)")
+    failures += run_calibration()
     print()
 
     print("Verifying every artifact agrees on one dataset…")
@@ -171,6 +178,33 @@ def run_all() -> int:
         print("\n  Artifacts disagree. The previous set is still in git:")
         print("    git checkout -- backend/artifacts data/synthetic")
     return failures
+
+
+def run_calibration() -> int:
+    """
+    Re-measure the 14-day calibration the console shows beside P(shortfall).
+
+    Runs the measurement script as a subprocess rather than importing it, so
+    there is one implementation of the measurement and `batch all` cannot drift
+    from what `measure_cumulative_calibration.py` does by hand. The environment
+    is inherited, so NAKSHATRA_DATA_END_DATE reaches it and the calibration is
+    measured on the same dataset as everything else in this run.
+    """
+    import subprocess
+    import tempfile
+
+    script = BACKEND_DIR / "measure_cumulative_calibration.py"
+    t0 = time.time()
+    with tempfile.TemporaryDirectory() as tmp:
+        records = Path(tmp) / "records.jsonl"
+        for args in (["run", "--out", str(records)], ["artifact", "--records", str(records)]):
+            r = subprocess.run([sys.executable, str(script), *args], cwd=BACKEND_DIR,
+                               capture_output=True, text=True)
+            if r.returncode != 0:
+                print(f"  calibration FAIL ({args[0]}): {(r.stderr or r.stdout).strip()[-400:]}")
+                return 1
+    print(f"  calibration ok   {time.time() - t0:6.1f}s -> {CALIBRATION_ARTIFACT.name}")
+    return 0
 
 
 def dataset_consistency() -> dict:
@@ -208,6 +242,16 @@ def dataset_consistency() -> dict:
         add("forecast", f)
     for f in sorted(BACKTEST_DIR.glob("*.json")):
         add("backtest", f)
+    # The calibration shown beside P(shortfall) is measured on this dataset too.
+    # Left out of this check, a regeneration with a new end date would leave it
+    # describing the old dataset — the console refuses a stale one, so the
+    # demo would show "calibration unavailable" instead of the figure.
+    calibration = CALIBRATION_ARTIFACT
+    if calibration.exists():
+        add("calibration", calibration)
+    else:
+        rows.append({"kind": "calibration", "path": calibration.name, "consistent": False,
+                     "reason": "missing — run `python -m app.api.batch all`", "identity": None})
     samples = SAMPLE_IDENTITY
     if samples.exists():
         add("samples", samples)
@@ -226,11 +270,57 @@ def dataset_consistency() -> dict:
     }
 
 
+def run_tiles(argv: list[str]) -> int:
+    """
+    Fetch the map's raster tiles so a demo survives the network.
+
+    Separate from `all` on purpose: `all` regenerates artifacts from the
+    synthetic dataset and is reproducible from the commit. This downloads tiles
+    from someone else's service — 39.3 MB in 560 s at z6-z12, measured — and is a
+    convenience rather than a build output. Running it nightly would be rude.
+    """
+    import argparse
+
+    from app.ml.tile_cache import DEFAULT_ZMAX, DEFAULT_ZMIN, count_tiles, fetch_all
+
+    ap = argparse.ArgumentParser(prog="batch tiles")
+    ap.add_argument("--zmin", type=int, default=DEFAULT_ZMIN)
+    ap.add_argument("--zmax", type=int, default=DEFAULT_ZMAX)
+    ap.add_argument("--force", action="store_true", help="refetch tiles already on disk")
+    args = ap.parse_args(argv)
+
+    n = count_tiles(args.zmin, args.zmax)
+    print(f"Map tile cache — z{args.zmin}-z{args.zmax}, {n} tiles per layer")
+    t0 = time.time()
+    try:
+        m = fetch_all(zmin=args.zmin, zmax=args.zmax, force=args.force)
+    except RuntimeError as exc:
+        print(f"\n  FAILED: {exc}")
+        return 1
+    print(
+        f"\n  {m['total_mb']} MB on disk in {time.time() - t0:.0f}s "
+        f"({len(m['layers'])} layers cached, {len(m['skipped'])} skipped)"
+    )
+    for sk in m["skipped"]:
+        print(f"  skipped {sk['layer']}: {sk['reason']}")
+    print(f"  manifest: backend/.tile-cache/_manifest.json")
+    print(
+        "  The map asks the live tiler first and falls back to these, labelled "
+        "with the fetch date."
+    )
+    return 0
+
+
 def main(argv: list[str]) -> int:
-    if len(argv) < 2 or argv[1] not in ("backtest", "forecast", "all", "check"):
+    if len(argv) < 2 or argv[1] not in ("backtest", "forecast", "all", "check", "tiles"):
         print(__doc__)
-        print("\nusage: python -m app.api.batch {all|check|backtest|forecast} [MINE_CODE ...]")
+        print("\nusage: python -m app.api.batch {all|check|tiles|backtest|forecast} [MINE_CODE ...]")
         return 2
+
+    # Tiles take their own flags and touch no artifact, so they are handled
+    # before the mine-code parsing the others share.
+    if argv[1] == "tiles":
+        return run_tiles(argv[2:])
 
     codes = argv[2:] or None
     started = time.time()

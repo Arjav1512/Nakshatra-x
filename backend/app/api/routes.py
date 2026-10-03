@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Response
 from sqlalchemy.orm import Session
 from app.db.session import get_db, resolve_mine_code
 from app.models.mine import MineSite
@@ -9,7 +9,15 @@ from app.api.track_b import NoBacktest, backtest_mine, forecast_mine, forecast_s
 from app.api.forecast_store import Warming
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from app.ml.prospectivity import model_metrics, predict_point, rank_drill_targets, scored_grid
+from app.ml.map_layers import tile_layers
+from app.ml.tile_cache import cache_status, read_tile
+from app.ml.prospectivity import (
+    measured_points,
+    model_metrics,
+    predict_point,
+    rank_drill_targets,
+    scored_grid,
+)
 from app.api.telemetry import build_mine_telemetry
 from app.services.recommendations import generate_action_recommendations
 from app.ml.risk_model import calculate_shortfall_risk
@@ -395,6 +403,135 @@ def prospectivity_grid():
         return scored_grid()
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
+
+
+@router.get("/prospectivity/measured")
+def prospectivity_measured():
+    """
+    The training observations behind the surface (PRD A-3).
+
+    The map can draw the kriged surface and the points it was kriged from. Only
+    one of those is a measurement, and the layer switcher now lets a reader see
+    both and tell them apart.
+    """
+    try:
+        return measured_points()
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+
+
+@router.get("/map/tile-layers")
+def map_tile_layers(force: bool = False):
+    """
+    Raster tile layers from Planetary Computer, with provenance (PRD A-3).
+
+    Always 200: a layer that cannot be produced comes back with
+    `status: "unavailable"` and the upstream's reason. A 503 for the whole
+    endpoint would lose the distinction between "no imagery at all" and "the DEM
+    mosaic is refusing", and the screen needs to be able to say which.
+
+    Each layer also carries what the local tile cache holds for it, so the map
+    knows before it asks for a tile whether a fallback exists and what date to
+    label it with.
+    """
+    payload = tile_layers(force=force)
+    cache = cache_status()
+    for layer in payload["layers"]:
+        layer["cache"] = cache.get("layers", {}).get(
+            layer["id"], {"available": False, "reason": cache.get("reason", "not cached")}
+        )
+    return {**payload, "cache": {k: v for k, v in cache.items() if k != "layers"}}
+
+
+@router.get("/map/cached-tiles/{layer_id}/{z}/{x}/{y}")
+def map_cached_tile(layer_id: str, z: int, x: int, y: int):
+    """
+    One tile from the local cache.
+
+    The map uses this only after the live tiler has failed it, and the layer is
+    relabelled "cached" before any of these are drawn — a cached pixel must never
+    be presented as a live one. A tile that was never fetched is a 404, not a
+    placeholder image.
+    """
+    hit = read_tile(layer_id, z, x, y)
+    if hit is None:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"no cached tile for {layer_id} z{z}/{x}/{y}. The cache covers the "
+                f"study area over its manifest's zoom range; run "
+                f"`python -m app.api.batch tiles` to build it."
+            ),
+        )
+    body, ctype = hit
+    return Response(
+        content=body,
+        media_type=ctype,
+        headers={
+            "Cache-Control": "public, max-age=86400",
+            "X-Tile-Source": "local-cache",
+        },
+    )
+
+
+@router.get("/calibration/cumulative")
+def calibration_cumulative(mine_code: str | None = None):
+    """
+    How well the 14-day total is calibrated, for display beside P(shortfall).
+
+    Served from a committed artifact built by
+    `measure_cumulative_calibration.py artifact`, stamped with the identity of
+    the model it measured. If the model being served is not that model, this
+    says the calibration is stale and returns no figures — a coverage number
+    measured on one model, shown beside another model's probability, would be
+    a claim about something nobody measured.
+    """
+    import json as _json
+    from pathlib import Path as _Path
+
+    from app.api.forecast_store import identity_matches
+
+    path = _Path(__file__).resolve().parents[2] / "artifacts" / "calibration" / "cumulative_coverage.json"
+    if not path.exists():
+        raise HTTPException(
+            status_code=503,
+            detail="No calibration artifact. Build it with measure_cumulative_calibration.py artifact.",
+        )
+    data = _json.loads(path.read_text())
+    ok, reason = identity_matches(data)
+    if not ok:
+        return {
+            "status": "stale",
+            "reason": (
+                f"The calibration was measured on a different model ({reason}). "
+                "Not shown until it is re-measured."
+            ),
+            "doc": data.get("doc"),
+        }
+    mine = data.get("per_mine", {}).get(mine_code) if mine_code else None
+    return {
+        "status": "ok",
+        "quantity": data["quantity"],
+        "nominal_coverage": data["nominal_coverage"],
+        "nominal_tail_frequency": data["nominal_tail_frequency"],
+        # Read, not defaulted: an artifact without it is older than the field,
+        # and the page then says "intervals" without claiming a level.
+        "ci_level": data.get("ci_level"),
+        "model_version": data["model_version"],
+        "portfolio": data["portfolio"],
+        "mine_code": mine_code,
+        "mine": mine,
+        "mine_note": (
+            None if mine or not mine_code
+            else f"No per-mine calibration recorded for {mine_code}."
+        ),
+        "window": data["window"],
+        "method": data["method"],
+        "generated_at": data["generated_at"],
+        "records_sha256": data["records_sha256"],
+        "doc": data["doc"],
+        "provenance": data["provenance"],
+    }
 
 
 @router.get("/prospectivity/metrics")

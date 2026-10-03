@@ -25,6 +25,9 @@ const ROUTES = [
   '/', '/console', '/production', '/blending', '/mine-twin', '/flood-alert',
   '/method', '/about', '/login', '/admin', '/admin/login', '/admin/setup',
   '/admin/profile', '/auth/callback',
+  // The two views PR B changes most: a mine's detail and the prospectivity map.
+  // They are real destinations with their own URLs, so they get their own shots.
+  '/console?mine=1&track=b', '/console?track=a',
 ]
 
 function arg(name, fallback) {
@@ -37,7 +40,12 @@ const BASE = arg('base', 'http://localhost:3000')
 const ONLY = arg('only', null)
 const routes = ONLY ? ONLY.split(',') : ROUTES
 
-const slug = (r) => (r === '/' ? 'root' : r.replace(/^\//, '').replace(/\//g, '_'))
+// Query strings become part of the name without the characters that make
+// filenames awkward: /console?mine=1&track=b -> console__mine-1_track-b
+const slug = (r) =>
+  r === '/'
+    ? 'root'
+    : r.replace(/^\//, '').replace(/\//g, '_').replace(/\?/, '__').replace(/=/g, '-').replace(/&/g, '_')
 
 ;(async () => {
   fs.mkdirSync(OUT, { recursive: true })
