@@ -58,6 +58,11 @@ fi
 for i in $(seq 1 120); do
   if curl -sf -o /dev/null http://localhost:8000/api/v1/readyz && curl -sf -o /dev/null http://localhost:3000/; then
     echo "servers up ($MODE) after ${i}s — readyz 200, web 200"
+    if [[ "$MODE" == offline ]]; then
+      # Show, in the job log, that the Next server is resolving only this
+      # machine — and refuse to go on if it is not.
+      grep -m1 "node-offline" "$LOGS/frontend.log" || { echo "the Next server did not load scripts/ci/node-offline.cjs"; exit 1; }
+    fi
     exit 0
   fi
   sleep 1

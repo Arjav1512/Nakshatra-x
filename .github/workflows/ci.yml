@@ -117,7 +117,8 @@ jobs:
         run: scripts/ci/browser-suites.sh ${{ matrix.group }}
       - name: Server logs
         if: ${{ failure() }}
-        run: tail -n 80 "$RUNNER_TEMP/servers/backend.log" "$RUNNER_TEMP/servers/frontend.log"
+        # Never a failure of its own: a build that failed started no server.
+        run: tail -n 80 "$RUNNER_TEMP/servers/backend.log" "$RUNNER_TEMP/servers/frontend.log" || true
 
   network:
     name: Network — live services (non-blocking)
