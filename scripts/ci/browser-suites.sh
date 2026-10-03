@@ -10,6 +10,9 @@ GROUP="${1:?usage: browser-suites.sh console|routes-provenance|cls}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 LOGS="${RUNNER_TEMP:-/tmp}/servers"
 cd "$ROOT/frontend"
+# The provenance guard writes its report to a committed evidence file unless
+# told otherwise; keep CI's (and a local run's) out of the tree.
+export GUARD_OUT="$LOGS/provenance-guard.json"
 
 failed=0
 run() {
@@ -26,7 +29,7 @@ case "$GROUP" in
   console)
     for s in test:e2e test:dates test:pilot test:scenario test:surface test:nav test:auth test:motion; do run "$s"; done ;;
   routes-provenance)
-    run test:routes
+    run test:routes -- --external-offline
     run test:provenance
     # The offline guard's question is "what renders with the service layer
     # stopped?", so the backend is stopped for it.
