@@ -17,10 +17,8 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
-from fastapi.testclient import TestClient
 
 from app.api import forecast_store as fs
-from app.main import app
 
 REPO = Path(__file__).resolve().parents[1]
 MINE_CODES = [
@@ -28,45 +26,17 @@ MINE_CODES = [
     "MOIL-CHK-06", "MOIL-MAN-07", "MOIL-KAN-08", "MOIL-GUM-09", "MOIL-BEL-10",
 ]
 
+#: The committed forecasts themselves. During a test session the store reads
+#: and writes a copy (conftest.py), so a test judging what is committed reads
+#: these by path — the copy may have been refreshed by a warmer.
+COMMITTED_FORECASTS = REPO / "backend" / "artifacts" / "forecasts"
 
-@pytest.fixture(scope="module")
-def client():
-    with TestClient(app) as c:
-        yield c
-
-
-@pytest.fixture(scope="session", autouse=True)
-def committed_artifacts_are_not_modified_by_this_suite():
-    """
-    Structural guard: no test may write into the committed artifacts directory.
-
-    One test did, through a race (see test_single_flight_shares_one_computation),
-    and the damage reached a commit. Fixing that one test is necessary and not
-    sufficient — the next test to forget a tmp_path would do it again, silently,
-    and the only symptom would be a demo mine with no numbers. This fails the
-    run instead.
-    """
-    import hashlib
-
-    def digest():
-        out = {}
-        for f in sorted(fs.FORECAST_DIR.glob("*.json")):
-            out[f.name] = hashlib.sha256(f.read_bytes()).hexdigest()
-        return out
-
-    before = digest()
-    yield
-    after = digest()
-    changed = sorted(
-        set(before) ^ set(after)
-        | {k for k in set(before) & set(after) if before[k] != after[k]}
-    )
-    assert not changed, (
-        "the test suite modified committed artifacts: "
-        + ", ".join(changed)
-        + " — a test is missing `monkeypatch.setattr(fs, 'FORECAST_DIR', tmp_path)`, "
-        "or is not waiting for its flight to finish before the patch is undone"
-    )
+# The `client` fixture and the committed-artifacts guard used to live here. Both
+# moved to conftest.py: the guard was module-local, watched forecasts only and
+# ran its final check before a test client's running fits had finished, so it
+# was outrun by the startup warmer (see conftest.py, WHY THIS EXISTS). It was
+# first added after a race in test_single_flight_shares_one_computation wrote a
+# stub into the committed directory and the stub reached a commit.
 
 
 # ---------------------------------------------------------------------------
@@ -199,7 +169,7 @@ def test_committed_artifacts_match_current_code():
     want = fs.artifact_identity()
     mismatches = []
     for code in MINE_CODES:
-        path = fs.artifact_path(code, 14)
+        path = COMMITTED_FORECASTS / f"{code}_14d.json"
         assert path.exists(), f"missing artifact for {code} — run `python -m app.api.batch forecast`"
         data = json.loads(path.read_text())
         ok, reason = fs.identity_matches(data)
@@ -228,7 +198,7 @@ def test_committed_artifacts_are_complete_forecasts():
     """
     problems = []
     for code in MINE_CODES:
-        d = json.loads(fs.artifact_path(code, 14).read_text())
+        d = json.loads((COMMITTED_FORECASTS / f"{code}_14d.json").read_text())
         grades = d.get("grades") or []
         if not grades:
             problems.append(f"{code}: no grades")
