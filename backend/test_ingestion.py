@@ -192,3 +192,8 @@ if __name__ == "__main__":
     test_production_is_grade_aware()
     test_covariates_actually_drive_production()
     print("\nALL INGESTION CONTRACT TESTS PASSED.")
+
+
+def test_deliberate_ci_failure_proof():
+    """DELIBERATE CI-PROOF BREAKAGE: this assertion is false on purpose."""
+    assert 1 + 1 == 3, "deliberate failing assertion — CI failure proof, branch ci-proof/deliberately-broken"

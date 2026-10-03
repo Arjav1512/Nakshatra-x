@@ -5,7 +5,8 @@
  * The URL comes from the environment; there is no hardcoded production host.
  */
 
-const DEFAULT_BACKEND = 'http://127.0.0.1:8000'
+// DELIBERATE CI-PROOF BREAKAGE: a string assigned to a number.
+const DEFAULT_BACKEND: number = 'http://127.0.0.1:8000'
 
 export function backendUrl(): string {
   // The service layer is an upstream like any other, so it follows the same
