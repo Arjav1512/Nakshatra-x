@@ -30,7 +30,10 @@ case "$GROUP" in
     run test:provenance
     # The offline guard's question is "what renders with the service layer
     # stopped?", so the backend is stopped for it.
-    kill "$(cat "$LOGS/backend.pid")" && sleep 2
+    # By pattern, not by the recorded PID: a macOS venv's python is a launcher
+    # that starts the real interpreter as a child, so the PID is not the server.
+    pkill -f "uvicorn app.main:app --port 8000"; sleep 2
+    if curl -s -o /dev/null http://127.0.0.1:8000/api/v1/healthz; then echo "backend still up"; exit 1; fi
     run test:provenance -- --offline ;;
   cls)
     run test:cls ;;

@@ -11,7 +11,12 @@
 #   - backend: NAKSHATRA_OFFLINE=1 points NASA POWER, STAC and Open-Meteo at the
 #     discard port, and HTTP(S)_PROXY at the same port refuses anything else it
 #     reaches over httpx (Planetary Computer mosaic registration);
-#   - frontend: NAKSHATRA_OFFLINE=1 does the same for its own upstreams;
+#   - frontend: each external upstream it calls from Node (Open-Meteo, STAC,
+#     Photon, Nominatim, ESRI) is pointed at the discard port by its own
+#     override. Not NAKSHATRA_OFFLINE=1: in the Next server that switch also
+#     cuts off the backend, by design, because the offline provenance guard
+#     asks what renders with the service layer gone. Set here, it left the
+#     console with no data and nine suites failing (measured);
 #   - the browser: CHROME_PATH=scripts/ci/chrome-offline, which can resolve
 #     only this machine.
 #
@@ -26,13 +31,15 @@ mkdir -p "$LOGS"
 "$ROOT/scripts/check_port.sh" 8000 "FastAPI"
 "$ROOT/scripts/check_port.sh" 3000 "Next.js"
 
+SINK=http://127.0.0.1:9
 if [[ "$MODE" == offline ]]; then
-  export NAKSHATRA_OFFLINE=1
-  SINK=http://127.0.0.1:9
-  (cd "$ROOT/backend" && HTTP_PROXY=$SINK HTTPS_PROXY=$SINK http_proxy=$SINK https_proxy=$SINK \
+  (cd "$ROOT/backend" && NAKSHATRA_OFFLINE=1 \
+     HTTP_PROXY=$SINK HTTPS_PROXY=$SINK http_proxy=$SINK https_proxy=$SINK \
      NO_PROXY=localhost,127.0.0.1 no_proxy=localhost,127.0.0.1 \
      nohup .venv/bin/python -m uvicorn app.main:app --port 8000 > "$LOGS/backend.log" 2>&1 &
    echo $! > "$LOGS/backend.pid")
+  export NAKSHATRA_OPEN_METEO_URL=$SINK NAKSHATRA_STAC_URL=$SINK NAKSHATRA_PHOTON_URL=$SINK \
+         NAKSHATRA_NOMINATIM_URL=$SINK NAKSHATRA_ESRI_TILES_URL=$SINK
 else
   (cd "$ROOT/backend" && nohup .venv/bin/python -m uvicorn app.main:app --port 8000 > "$LOGS/backend.log" 2>&1 &
    echo $! > "$LOGS/backend.pid")

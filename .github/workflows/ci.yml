@@ -152,11 +152,20 @@ jobs:
           CHROME_PATH: /usr/bin/google-chrome
         working-directory: frontend
         run: npm run test:map
+      - name: test:map --evicted — re-registration after eviction, live
+        id: map_evicted
+        if: ${{ steps.servers.outcome == 'success' }}
+        continue-on-error: true
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        working-directory: frontend
+        run: npm run test:map -- --evicted
       - name: Report
         if: ${{ always() }}
         env:
           PYTEST: ${{ steps.pytest_live.outcome }}
           MAP: ${{ steps.map_live.outcome }}
+          EVICTED: ${{ steps.map_evicted.outcome }}
         run: |
           {
             echo "### Live external services (non-blocking)"
@@ -165,7 +174,8 @@ jobs:
             echo "|---|---|---|"
             echo "| \`pytest -m network\` | NASA POWER, Earth Search STAC | $PYTEST |"
             echo "| \`npm run test:map\` | Planetary Computer, ESRI basemap | ${MAP:-not run} |"
+            echo "| \`npm run test:map -- --evicted\` | Planetary Computer (re-registration) | ${EVICTED:-not run} |"
           } >> "$GITHUB_STEP_SUMMARY"
-          for pair in "pytest -m network=$PYTEST" "test:map=${MAP:-skipped}"; do
+          for pair in "pytest -m network=$PYTEST" "test:map=${MAP:-skipped}" "test:map --evicted=${EVICTED:-skipped}"; do
             [[ "${pair#*=}" == success ]] || echo "::warning title=Live service check::${pair%%=*}: ${pair#*=} — an external service may be down; this does not fail the PR"
           done
