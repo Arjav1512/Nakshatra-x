@@ -16,7 +16,10 @@
 #     override. Not NAKSHATRA_OFFLINE=1: in the Next server that switch also
 #     cuts off the backend, by design, because the offline provenance guard
 #     asks what renders with the service layer gone. Set here, it left the
-#     console with no data and nine suites failing (measured);
+#     console with no data and nine suites failing (measured). And a preload
+#     (scripts/ci/node-offline.cjs) lets the Node process resolve only this
+#     machine, which covers what the overrides do not — the auth integrations
+#     (Supabase, GitHub, Resend) that /admin/setup reaches during the suites;
 #   - the browser: CHROME_PATH=scripts/ci/chrome-offline, which can resolve
 #     only this machine.
 #
@@ -40,6 +43,7 @@ if [[ "$MODE" == offline ]]; then
    echo $! > "$LOGS/backend.pid")
   export NAKSHATRA_OPEN_METEO_URL=$SINK NAKSHATRA_STAC_URL=$SINK NAKSHATRA_PHOTON_URL=$SINK \
          NAKSHATRA_NOMINATIM_URL=$SINK NAKSHATRA_ESRI_TILES_URL=$SINK
+  export NODE_OPTIONS="--require $ROOT/scripts/ci/node-offline.cjs${NODE_OPTIONS:+ $NODE_OPTIONS}"
 else
   (cd "$ROOT/backend" && nohup .venv/bin/python -m uvicorn app.main:app --port 8000 > "$LOGS/backend.log" 2>&1 &
    echo $! > "$LOGS/backend.pid")
