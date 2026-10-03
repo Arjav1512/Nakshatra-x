@@ -1,8 +1,26 @@
 """
-Test-session safety for the committed artifacts.
+Test-session safety: the committed artifacts, and the network.
 
-WHY THIS EXISTS
----------------
+THE NETWORK
+-----------
+Every test runs with outbound connections refused, except tests marked
+`@pytest.mark.network`. No test that CI requires may depend on NASA POWER,
+STAC, Planetary Computer or Open-Meteo being up: an unmarked test that reaches
+for one meets a refusal every time, so its result cannot depend on whether the
+service is up, slow or erroring. The marked tests run in their own non-blocking
+CI job (docs/CI.md lists them).
+
+Measured before this was written, with every non-loopback connection refused
+and logged by test: all 75 backend tests outside Track B passed, and only
+test_api's NASA POWER and STAC steps reached out. The app's background mosaic
+registration also reaches Planetary Computer at boot; it degrades on refusal
+and no test depends on it.
+
+The block is at the Python socket layer, so a C-level client would pass it —
+GDAL's HTTP reads, say. No unmarked test uses one (also measured).
+
+THE COMMITTED ARTIFACTS
+-----------------------
 The committed artifacts are what the demo serves. PR #16 guarded them with a
 session fixture in test_demo_hardening.py that hashed `artifacts/forecasts`
 before and after the run. During the staleness change it stayed silent while
@@ -34,7 +52,9 @@ So, for every test in every module:
 from __future__ import annotations
 
 import hashlib
+import ipaddress
 import shutil
+import socket
 import threading
 import time
 from pathlib import Path
@@ -168,3 +188,84 @@ def artifact_digest():
 def drain_flights():
     """`drain_forecast_flights`, for tests of the guard's timing."""
     return drain_forecast_flights
+
+
+# ---------------------------------------------------------------------------
+# The network (module docstring, THE NETWORK)
+# ---------------------------------------------------------------------------
+
+#: Set only while a test marked `network` runs. Read by the patched socket
+#: functions, which background threads use too — so the app's own threads are
+#: offline for the whole session, not only inside unmarked tests.
+_network_allowed = threading.Event()
+
+_LOCAL_NAMES = {"localhost", "testserver"}
+
+
+def _is_local(host) -> bool:
+    if host is None:
+        return True
+    name = host.decode() if isinstance(host, bytes) else str(host)
+    if name in _LOCAL_NAMES:
+        return True
+    try:
+        ip = ipaddress.ip_address(name.split("%")[0])
+    except ValueError:
+        return False
+    return ip.is_loopback or ip.is_unspecified
+
+
+def _refusal(host) -> str:
+    return (
+        f"{host!r}: outbound network is off for tests not marked "
+        "@pytest.mark.network (backend/conftest.py, THE NETWORK)"
+    )
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers",
+        "network: reaches an external service (NASA POWER, STAC, Planetary "
+        "Computer, Open-Meteo); runs in CI's non-blocking network job only",
+    )
+
+
+def pytest_report_header(config):
+    n = len(committed_digest())
+    return [
+        f"committed-artifact guard: active — {n} committed files watched; "
+        "forecast and backtest writes go to a session copy",
+        "network: off, except in tests marked @pytest.mark.network",
+    ]
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _network_off_for_the_session():
+    real_getaddrinfo, real_connect = socket.getaddrinfo, socket.socket.connect
+
+    def getaddrinfo(host, *args, **kwargs):
+        if not _network_allowed.is_set() and not _is_local(host):
+            raise socket.gaierror(socket.EAI_NONAME, _refusal(host))
+        return real_getaddrinfo(host, *args, **kwargs)
+
+    def connect(self, address):
+        host = address[0] if isinstance(address, tuple) else None
+        if host is not None and not _network_allowed.is_set() and not _is_local(host):
+            raise ConnectionRefusedError(_refusal(host))
+        return real_connect(self, address)
+
+    socket.getaddrinfo, socket.socket.connect = getaddrinfo, connect
+    yield
+    socket.getaddrinfo, socket.socket.connect = real_getaddrinfo, real_connect
+
+
+@pytest.fixture(autouse=True)
+def _network_only_when_marked(request):
+    if request.node.get_closest_marker("network") is None:
+        yield
+        return
+    _network_allowed.set()
+    try:
+        yield
+    finally:
+        _network_allowed.clear()

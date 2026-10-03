@@ -3,6 +3,13 @@
  *
  *   npm run test:routes        (all routes)
  *   npm run test:routes -- --only /production,/method
+ *   npm run test:routes -- --external-offline
+ *
+ * --external-offline is for runs where every external service is unreachable
+ * on purpose (CI's browser jobs, docs/CI.md). The few checks that need one —
+ * the basemap tiles, which come from ESRI — are reported as SKIP with the
+ * reason instead of failing, and counted separately, never as passes. CI's
+ * non-blocking network job runs this suite without the flag.
  *
  * Needs FastAPI on :8000 and this app on :3000. See docs/DEMO.md.
  *
@@ -24,6 +31,7 @@ const CHROME =
   process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 const BASE = process.env.E2E_BASE || 'http://localhost:3000'
 const SETTLE = Number(process.env.E2E_SETTLE || 9000)
+const EXTERNAL_OFFLINE = process.argv.includes('--external-offline')
 
 /** Strings that must never appear anywhere again. */
 const GLOBAL_BANNED = [
@@ -108,7 +116,7 @@ const ROUTES = [
 
       return [
         ['map container taller than 300px', m.height > 300, `${m.height}px`],
-        ['at least 8 tiles loaded', m.tilesLoaded >= 8, `${m.tilesLoaded} tiles`],
+        ['at least 8 tiles loaded', m.tilesLoaded >= 8, `${m.tilesLoaded} tiles`, 'the ESRI basemap'],
         ['prospectivity overlay present', m.overlayPaths > 0, `${m.overlayPaths} paths`],
         ['mine markers plotted', m.markers >= 5, `${m.markers} markers`],
         [
@@ -202,6 +210,13 @@ const REDIRECTS = [
 let failed = 0
 const results = []
 
+let skipped = 0
+function skip(route, name, needs) {
+  results.push({ route, name, ok: null, detail: `needs ${needs}` })
+  skipped++
+  console.log(`    SKIP  ${name}  — needs ${needs}, unreachable by design (--external-offline)`)
+}
+
 function check(route, name, ok, detail = '') {
   results.push({ route, name, ok, detail })
   if (!ok) failed++
@@ -269,8 +284,9 @@ async function main() {
     }
 
     if (route.custom) {
-      for (const [name, ok, detail] of await route.custom(page)) {
-        check(route.path, name, ok, detail)
+      for (const [name, ok, detail, needs] of await route.custom(page)) {
+        if (needs && EXTERNAL_OFFLINE) skip(route.path, name, needs)
+        else check(route.path, name, ok, detail)
       }
     }
 
@@ -290,8 +306,10 @@ async function main() {
   }
 
   await browser.close()
-  const passed = results.length - failed
-  console.log(`\n${failed === 0 ? 'PASS' : 'FAIL'} — ${passed}/${results.length} checks across ${routes.length} route(s)\n`)
+  const counted = results.length - skipped
+  const passed = counted - failed
+  const skipNote = skipped ? ` (${skipped} skipped: need an external service)` : ''
+  console.log(`\n${failed === 0 ? 'PASS' : 'FAIL'} — ${passed}/${counted} checks across ${routes.length} route(s)${skipNote}\n`)
   process.exit(failed === 0 ? 0 : 1)
 }
 

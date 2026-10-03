@@ -1,5 +1,25 @@
+"""
+API pipeline tests.
+
+Split by what they need (backend/conftest.py, THE NETWORK):
+
+- test_full_pipeline: every endpoint that answers from this process. Offline.
+- test_upstreams_degrade_honestly_when_unreachable: /environment and /satellite
+  with NASA POWER and STAC refused — the path a demo hall with bad wifi takes.
+  Offline, and required in CI.
+- test_live_upstreams: the same two endpoints against the real services.
+  Marked `network`; runs in CI's non-blocking network job.
+
+The two upstream steps used to sit inside test_full_pipeline and assert only
+HTTP 200, which the degraded path also returns — so the test could not tell
+"NASA POWER answered" from "NASA POWER was down". Each case now asserts what
+it is about.
+"""
+import pytest
 from fastapi.testclient import TestClient
+
 from app.main import app
+
 
 def test_full_pipeline():
     client = TestClient(app)
@@ -16,16 +36,9 @@ def test_full_pipeline():
     assert len(mines) >= 10, f"Expected 10 mines, got {len(mines)}"
     print(f"✓ Seeded Mines: {len(mines)} mines available")
     
-    # 3. Environment data for Mine #1 (Balaghat)
-    res = client.get("/api/v1/mines/1/environment")
-    assert res.status_code == 200, f"Environment check failed: {res.text}"
-    print("✓ NASA POWER Weather for Balaghat:", res.json())
-    
-    # 4. Satellite STAC imagery for Mine #1
-    res = client.get("/api/v1/mines/1/satellite")
-    assert res.status_code == 200, f"Satellite STAC check failed: {res.text}"
-    print("✓ Sentinel-2 STAC Metadata for Balaghat:", res.json()["provider"])
-    
+    # 3-4. Environment (NASA POWER) and satellite (STAC) need an upstream: see
+    # test_upstreams_degrade_honestly_when_unreachable and test_live_upstreams.
+
     # 5. Risk & Decision-Support Actions for Mine #1
     res = client.get("/api/v1/mines/1/risk?downtime_hours=16.0&blasting_delay_days=1.5&planned_tonnes=18000&available_tonnes=15400")
     assert res.status_code == 200, f"Risk check failed: {res.text}"
@@ -148,7 +161,55 @@ def test_full_pipeline():
     report_res = res.json()
     print(f"✓ Ministry Compliance Export: {report_res['report_id']} - {report_res['compliance_status']}")
 
-    print("\nALL 9 API BACKEND & REAL CASE TESTS PASSED SUCCESSFULLY.")
+    print("\nALL API BACKEND & REAL CASE TESTS PASSED SUCCESSFULLY.")
+
+
+def test_upstreams_degrade_honestly_when_unreachable(monkeypatch):
+    """
+    NASA POWER and STAC refused: both endpoints still answer, and say so.
+
+    The upstreams are pointed at the discard port (NAKSHATRA_OFFLINE's sink), so
+    this is deterministic whatever the real services are doing.
+    """
+    from app.core.config import OFFLINE_SINK, settings
+
+    monkeypatch.setattr(settings, "nasa_power_base_url", f"{OFFLINE_SINK}/api")
+    monkeypatch.setattr(settings, "stac_base_url", OFFLINE_SINK)
+    client = TestClient(app)
+
+    res = client.get("/api/v1/mines/1/environment")
+    assert res.status_code == 200, res.text
+    env = res.json()
+    assert env["is_live"] is False, env
+    assert env["is_synthetic"] is True, env
+    assert "Not observed data" in env["source"], env
+    assert env.get("degraded_reason"), env
+
+    res = client.get("/api/v1/mines/1/satellite")
+    assert res.status_code == 200, res.text
+    sat = res.json()
+    assert sat["is_live"] is False, sat
+    assert sat["scene_count"] == 0 and sat["recent_scenes"] == [], sat
+    assert sat.get("error"), sat
+
+
+@pytest.mark.network
+def test_live_upstreams():
+    """NASA POWER and STAC, for real. Non-blocking in CI: it reports, it does not gate."""
+    client = TestClient(app)
+
+    res = client.get("/api/v1/mines/1/environment")
+    assert res.status_code == 200, f"Environment check failed: {res.text}"
+    env = res.json()
+    assert env["is_live"] is True, f"NASA POWER did not answer: {env.get('degraded_reason')}"
+    print("✓ NASA POWER Weather for Balaghat:", env)
+
+    res = client.get("/api/v1/mines/1/satellite")
+    assert res.status_code == 200, f"Satellite STAC check failed: {res.text}"
+    sat = res.json()
+    assert sat["is_live"] is True, f"STAC did not answer: {sat.get('error')}"
+    print("✓ Sentinel-2 STAC Metadata for Balaghat:", sat["provider"])
+
 
 if __name__ == "__main__":
     test_full_pipeline()
