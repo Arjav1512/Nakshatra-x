@@ -9,7 +9,7 @@ artifact and reports how old it is.
     python -m app.api.batch all                   # EVERYTHING, one dataset
     python -m app.api.batch all --force           # recompute even what matches
     python -m app.api.batch tiles                 # map tiles for offline demo
-    python -m app.api.batch check                 # do the artifacts agree?
+    python -m app.api.batch check                 # agree, and built by this code?
     python -m app.api.batch backtest              # all mines
     python -m app.api.batch backtest MOIL-BAL-01  # one mine
     python -m app.api.batch forecast              # all forecast artifacts
@@ -354,6 +354,68 @@ def dataset_consistency() -> dict:
     }
 
 
+def code_identity_report() -> dict:
+    """
+    Was every committed artifact produced by the code that is checked out now?
+
+    `dataset_consistency` asks whether the artifacts agree on a dataset; this
+    asks the stricter question CI needs — the same one the server asks before
+    serving (D-041). Per kind:
+
+    - forecasts and backtests: the full identity — dataset, model version, code
+      fingerprint, library versions — and a forecast for every mine;
+    - calibration: that identity, plus the measuring harness's fingerprint;
+    - samples: regenerated in memory and compared with what is committed,
+      ignoring only each row's `ingested_at` stamp. They carry no code identity,
+      so the content itself is the test.
+
+    Reads only; writes nothing.
+    """
+    from app.api.forecast_store import FORECAST_DIR, file_fingerprint, identity_matches
+    from app.api.routes import DEFAULT_MINES
+    from app.ingestion.export import export_samples
+
+    rows: list[dict] = []
+
+    def judge(kind: str, path: Path, extra=None) -> None:
+        try:
+            data = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError) as exc:
+            rows.append({"kind": kind, "path": path.name, "ok": False, "reason": f"unreadable: {exc}"})
+            return
+        ok, reason = identity_matches(data)
+        if ok and extra is not None:
+            ok, reason = extra(data)
+        rows.append({"kind": kind, "path": path.name, "ok": ok, "reason": reason})
+
+    for m in DEFAULT_MINES:
+        path = FORECAST_DIR / f"{m['mine_code']}_14d.json"
+        if path.exists():
+            judge("forecast", path)
+        else:
+            rows.append({"kind": "forecast", "path": path.name, "ok": False, "reason": "missing"})
+    for path in sorted(BACKTEST_DIR.glob("*.json")):
+        judge("backtest", path)
+
+    def harness_matches(data: dict) -> tuple[bool, str | None]:
+        want = file_fingerprint(CALIBRATION_HARNESS)
+        got = data.get("harness_fingerprint")
+        return (got == want, None if got == want else f"harness_fingerprint: artifact has {got!r}, harness is {want!r}")
+
+    if CALIBRATION_ARTIFACT.exists():
+        judge("calibration", CALIBRATION_ARTIFACT, harness_matches)
+    else:
+        rows.append({"kind": "calibration", "path": CALIBRATION_ARTIFACT.name, "ok": False, "reason": "missing"})
+
+    differs: list[str] = []
+    export_samples(written=differs, dry_run=True)
+    rows.append({
+        "kind": "samples", "path": SAMPLE_IDENTITY.parent.name, "ok": not differs,
+        "reason": ("regenerating would change: " + ", ".join(differs)) if differs else None,
+    })
+    return {"ok": all(r["ok"] for r in rows), "artifacts": rows}
+
+
 def run_tiles(argv: list[str]) -> int:
     """
     Fetch the map's raster tiles so a demo survives the network.
@@ -413,7 +475,15 @@ def main(argv: list[str]) -> int:
     if argv[1] == "check":
         report = dataset_consistency()
         print(json.dumps(report, indent=2))
-        return 0 if report["consistent"] else 1
+        # Then the stricter question: produced by THIS code? (code_identity_report)
+        ident = code_identity_report()
+        print("\nProduced by the code checked out now?")
+        for row in ident["artifacts"]:
+            mark = "ok  " if row["ok"] else "STALE"
+            print(f"  {mark} {row['kind']:11} {row['path']}" + (f"  — {row['reason']}" if row["reason"] else ""))
+        if not ident["ok"]:
+            print("\n  Regenerate with `python -m app.api.batch all` (docs/DEMO.md).")
+        return 0 if report["consistent"] and ident["ok"] else 1
 
     if argv[1] == "all":
         failures = run_all(force=force)

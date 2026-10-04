@@ -97,3 +97,16 @@ def test_the_guard_waits_for_flights_a_closed_client_left_running(monkeypatch, d
                 f.unlink()
         for f, data in saved.items():
             f.write_bytes(data)
+
+
+def test_the_guard_and_the_session_copy_are_in_force(request):
+    """Confirms, in whatever session runs this — CI's included — that both are active."""
+    from pathlib import Path
+
+    from app.api import track_b
+
+    committed = Path(__file__).resolve().parent / "artifacts"
+    assert "committed_artifacts_are_untouched" in request.fixturenames
+    assert "_artifact_writes_go_to_a_session_copy" in request.fixturenames
+    assert fs.FORECAST_DIR != committed / "forecasts", "forecast writes would reach the committed set"
+    assert track_b.BACKTEST_CACHE_DIR != committed / "backtests", "backtest writes would reach the committed set"

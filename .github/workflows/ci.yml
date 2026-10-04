@@ -1,0 +1,192 @@
+# Pull-request checks. What each job runs, what is deliberately left out and
+# why, and every job's measured runtime: docs/CI.md.
+#
+# Required (their result cannot depend on an external service):
+#   frontend · backend · track-b · artifacts · browser (3 groups)
+# Non-blocking (reports, never fails the PR):
+#   network — the tests that need NASA POWER, STAC or Planetary Computer.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend — tsc, lint:literals, Biome, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # the Biome gate checks out the base commit
+      - uses: ./.github/actions/frontend-env
+      # Each check runs even if an earlier one failed, so one run reports all.
+      - name: tsc
+        working-directory: frontend
+        run: npx tsc --noEmit
+      - name: lint:literals
+        if: ${{ !cancelled() }}
+        working-directory: frontend
+        run: npm run lint:literals
+      - name: Biome — no worse than the base commit
+        if: ${{ !cancelled() }}
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/base" "$BASE_SHA"
+          node frontend/tools/biome-no-worse.js "$RUNNER_TEMP/base/frontend"
+      - name: build
+        if: ${{ !cancelled() }}
+        working-directory: frontend
+        run: npm run build
+
+  backend:
+    name: Backend — fast suites (network off)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/backend-env
+      - name: pytest — every suite except Track B, network-marked tests deselected
+        working-directory: backend
+        run: |
+          set -o pipefail
+          .venv/bin/python -m pytest -m "not network" --ignore=test_track_b.py \
+            -p no:cacheprovider -rfE --durations=10 | tee "$RUNNER_TEMP/pytest.txt"
+      - name: Confirm the artifact guard and the network block were active
+        if: ${{ !cancelled() }}
+        run: |
+          grep -F "committed-artifact guard: active" "$RUNNER_TEMP/pytest.txt"
+          grep -F "network: off, except in tests marked @pytest.mark.network" "$RUNNER_TEMP/pytest.txt"
+      - name: Committed artifacts unchanged on the runner
+        if: ${{ !cancelled() }}
+        run: git diff --exit-code --stat -- backend/artifacts data/synthetic
+
+  track-b:
+    name: Backend — Track B
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/backend-env
+      - name: pytest test_track_b.py
+        working-directory: backend
+        run: .venv/bin/python -m pytest test_track_b.py -p no:cacheprovider -rfE --durations=5
+
+  artifacts:
+    name: Artifacts — produced by this code (batch check)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/backend-env
+      - name: python -m app.api.batch check
+        working-directory: backend
+        run: .venv/bin/python -m app.api.batch check
+
+  browser:
+    name: Browser — ${{ matrix.group }} (external services unreachable)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [console, routes-provenance, cls]
+    env:
+      CHROME_PATH: ${{ github.workspace }}/scripts/ci/chrome-offline
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/backend-env
+      - uses: ./.github/actions/frontend-env
+      - name: build
+        working-directory: frontend
+        run: npm run build
+      - name: Start both servers, every external service unreachable
+        run: scripts/ci/start-servers.sh offline
+      - name: Suites — ${{ matrix.group }}
+        run: scripts/ci/browser-suites.sh ${{ matrix.group }}
+      - name: Server logs
+        if: ${{ failure() }}
+        # Never a failure of its own: a build that failed started no server.
+        run: tail -n 80 "$RUNNER_TEMP/servers/backend.log" "$RUNNER_TEMP/servers/frontend.log" || true
+
+  network:
+    name: Network — live services (non-blocking)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/backend-env
+      - uses: ./.github/actions/frontend-env
+      # Each live check may fail without failing the job: these report on NASA
+      # POWER, STAC and Planetary Computer, they do not gate the PR.
+      - name: pytest -m network — NASA POWER, STAC
+        id: pytest_live
+        continue-on-error: true
+        working-directory: backend
+        run: .venv/bin/python -m pytest -m network -p no:cacheprovider -rA
+      - name: build
+        id: build
+        continue-on-error: true
+        working-directory: frontend
+        run: npm run build
+      - name: Start both servers, live
+        id: servers
+        if: ${{ steps.build.outcome == 'success' }}
+        continue-on-error: true
+        run: scripts/ci/start-servers.sh live
+      - name: test:map — every layer, live Planetary Computer
+        id: map_live
+        if: ${{ steps.servers.outcome == 'success' }}
+        continue-on-error: true
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        working-directory: frontend
+        run: npm run test:map
+      - name: test:map --evicted — re-registration after eviction, live
+        id: map_evicted
+        if: ${{ steps.servers.outcome == 'success' }}
+        continue-on-error: true
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        working-directory: frontend
+        run: npm run test:map -- --evicted
+      - name: test:routes — including the ESRI basemap tiles
+        id: routes_live
+        if: ${{ steps.servers.outcome == 'success' }}
+        continue-on-error: true
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        working-directory: frontend
+        run: npm run test:routes
+      - name: Report
+        if: ${{ always() }}
+        env:
+          PYTEST: ${{ steps.pytest_live.outcome }}
+          MAP: ${{ steps.map_live.outcome }}
+          EVICTED: ${{ steps.map_evicted.outcome }}
+          ROUTES: ${{ steps.routes_live.outcome }}
+        run: |
+          {
+            echo "### Live external services (non-blocking)"
+            echo
+            echo "| Check | Services | Outcome |"
+            echo "|---|---|---|"
+            echo "| \`pytest -m network\` | NASA POWER, Earth Search STAC | $PYTEST |"
+            echo "| \`npm run test:map\` | Planetary Computer, ESRI basemap | ${MAP:-not run} |"
+            echo "| \`npm run test:map -- --evicted\` | Planetary Computer (re-registration) | ${EVICTED:-not run} |"
+            echo "| \`npm run test:routes\` (with the basemap check) | ESRI basemap | ${ROUTES:-not run} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          for pair in "pytest -m network=$PYTEST" "test:map=${MAP:-skipped}" "test:map --evicted=${EVICTED:-skipped}" "test:routes=${ROUTES:-skipped}"; do
+            [[ "${pair#*=}" == success ]] || echo "::warning title=Live service check::${pair%%=*}: ${pair#*=} — an external service may be down; this does not fail the PR"
+          done

@@ -72,9 +72,12 @@ def _rows(text: str, ignore: tuple[str, ...]) -> list[dict[str, str]]:
     ]
 
 
-def _replace_if_changed(path: Path, text: str, ignore_columns: tuple[str, ...] = ()) -> bool:
+def _replace_if_changed(
+    path: Path, text: str, ignore_columns: tuple[str, ...] = (), write: bool = True
+) -> bool:
     """
-    Write `text` to `path` unless the file already says the same. True if written.
+    Write `text` to `path` unless the file already says the same. True if it
+    differs (and, unless `write` is False, was written).
 
     Write-then-rename, like the forecast and backtest artifacts: a crashed
     regeneration must leave the previous committed sample in place, not a
@@ -90,6 +93,8 @@ def _replace_if_changed(path: Path, text: str, ignore_columns: tuple[str, ...] =
         )
         if same:
             return False
+    if not write:
+        return True
     tmp = path.with_suffix(path.suffix + ".tmp")
     with tmp.open("w", newline="") as fh:
         fh.write(text)
@@ -101,14 +106,20 @@ def export_samples(
     rows_per_entity: int = 500,
     seed: int = DEFAULT_SEED,
     written: list[str] | None = None,
+    dry_run: bool = False,
 ) -> dict[str, int]:
     """
     Write a bounded sample per entity — enough to validate a mapping.
 
     A file whose content would not change is left alone, timestamps included.
     The names of files that were rewritten are appended to `written`.
+
+    `dry_run` writes nothing and appends the files that WOULD change — that is
+    `batch check` asking whether the committed samples are what this code
+    generates.
     """
-    SAMPLE_DIR.mkdir(parents=True, exist_ok=True)
+    if not dry_run:
+        SAMPLE_DIR.mkdir(parents=True, exist_ok=True)
     data = generate_all(seed=seed)
     counts: dict[str, int] = {}
     changed = written if written is not None else []
@@ -122,7 +133,7 @@ def export_samples(
         w = csv.DictWriter(buf, fieldnames=list(dicts[0].keys()))
         w.writeheader()
         w.writerows(dicts)
-        if _replace_if_changed(path, buf.getvalue(), ignore_columns=ROW_STAMPS):
+        if _replace_if_changed(path, buf.getvalue(), ignore_columns=ROW_STAMPS, write=not dry_run):
             changed.append(path.name)
         counts[entity] = len(rows)
 
@@ -136,6 +147,7 @@ def export_samples(
     if _replace_if_changed(
         identity_path,
         json.dumps({"artifact_identity": identity, "window": data["window"]}, indent=2) + "\n",
+        write=not dry_run,
     ):
         changed.append(identity_path.name)
 
@@ -164,6 +176,7 @@ Samples alone (same seed and end date) with `python -m app.ingestion.export`.
 """
         + "\n".join(f"| `{k}` | {v:,} |" for k, v in counts.items())
         + "\n",
+        write=not dry_run,
     ):
         changed.append(readme.name)
     return counts

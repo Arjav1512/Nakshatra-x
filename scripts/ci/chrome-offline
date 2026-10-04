@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Chrome that can resolve only this machine. Point CHROME_PATH here and every
+# browser suite runs as if every external service were down, without any
+# change to the suites themselves (docs/CI.md).
+exec "${REAL_CHROME:-/usr/bin/google-chrome}" \
+  --host-resolver-rules="MAP * ~NOTFOUND, EXCLUDE localhost, EXCLUDE 127.0.0.1" "$@"

@@ -304,3 +304,36 @@ def test_batch_does_not_re_measure_a_current_calibration(tmp_path, monkeypatch):
     art["harness_fingerprint"] = "0" * 16
     path.write_text(json.dumps(art))
     assert not batch.calibration_is_current()
+
+
+def test_batch_check_refuses_artifacts_this_code_did_not_produce(monkeypatch, tmp_path):
+    """`batch check` is CI's artifacts gate: each kind of staleness must fail it."""
+    import shutil
+
+    from app.api import batch
+    from app.ingestion import export
+
+    assert batch.code_identity_report()["ok"], "precondition: the committed set is current"
+
+    # A different model: every forecast, the backtest and the calibration.
+    monkeypatch.setattr("app.ml.forecaster.MODEL_VERSION", "nakshatra-gbt-cqr-v99")
+    rows = batch.code_identity_report()["artifacts"]
+    stale = {r["kind"] for r in rows if not r["ok"]}
+    assert stale == {"forecast", "backtest", "calibration"}, rows
+    monkeypatch.undo()
+
+    # A different measuring harness: the calibration alone.
+    monkeypatch.setattr(batch, "CALIBRATION_HARNESS", Path(__file__))
+    rows = batch.code_identity_report()["artifacts"]
+    assert [r["kind"] for r in rows if not r["ok"]] == ["calibration"], rows
+    monkeypatch.undo()
+
+    # A committed sample the generator would not produce.
+    samples = tmp_path / "synthetic"
+    shutil.copytree(export.SAMPLE_DIR, samples)
+    f = samples / "borehole.sample.csv"
+    f.write_text(f.read_text().replace("MOIL-BAL-01-BH-001", "EDITED", 1))
+    monkeypatch.setattr(export, "SAMPLE_DIR", samples)
+    rows = batch.code_identity_report()["artifacts"]
+    bad = [r for r in rows if not r["ok"]]
+    assert [r["kind"] for r in bad] == ["samples"] and "borehole.sample.csv" in bad[0]["reason"], rows
