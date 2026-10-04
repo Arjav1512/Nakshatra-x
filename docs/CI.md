@@ -10,18 +10,19 @@ in the non-blocking network job, which reports and never fails.
 
 | Job | What it runs | Gates the PR | Runtime on the runner |
 |---|---|---|---|
-| **Frontend** | `tsc --noEmit`, `lint:literals`, Biome no worse than the base commit, `npm run build` | yes | 0:40 (0:27–0:40) |
-| **Backend — fast suites** | every backend suite except Track B, network-marked tests deselected; then confirms the artifact guard and network block were active, and that no committed artifact changed | yes | 1:17 (1:16–1:39) |
-| **Backend — Track B** | `test_track_b.py` | yes | 8:52 (8:52–12:35) |
-| **Artifacts** | `python -m app.api.batch check` | yes | 0:45 (0:33–0:45) |
-| **Browser — console** | `test:e2e`, `test:dates`, `test:pilot`, `test:scenario`, `test:surface`, `test:nav`, `test:auth`, `test:motion` | yes | 5:30 (5:30–5:34) |
-| **Browser — routes-provenance** | `test:routes -- --external-offline`, `test:provenance`, then `test:provenance -- --offline` with the backend stopped | yes | 9:51 |
+| **Frontend** | `tsc --noEmit`, `lint:literals`, Biome no worse than the base commit, `npm run build` | yes | 0:35 (0:27–0:40) |
+| **Backend — fast suites** | every backend suite except Track B, network-marked tests deselected; then confirms the artifact guard and network block were active, and that no committed artifact changed | yes | 1:24 (1:16–1:39) |
+| **Backend — Track B** | `test_track_b.py` | yes | 12:30 (8:52–12:35) |
+| **Artifacts** | `python -m app.api.batch check` | yes | 0:39 (0:33–0:45) |
+| **Browser — console** | `test:e2e`, `test:dates`, `test:pilot`, `test:scenario`, `test:surface`, `test:nav`, `test:auth`, `test:motion` | yes | 5:18 (5:18–5:34) |
+| **Browser — routes-provenance** | `test:routes -- --external-offline`, `test:provenance`, then `test:provenance -- --offline` with the backend stopped | yes | 9:49 (9:49–9:51) |
 | **Browser — cls** | `test:cls` | yes | 9:22 (9:18–9:22) |
-| **Network — live services** | `pytest -m network`; `test:map`, `test:map -- --evicted` and `test:routes` (basemap check included) against the live services | **no** — writes its outcome to the job summary and a warning annotation | 4:04 |
+| **Network — live services** | `pytest -m network`; `test:map`, `test:map -- --evicted` and `test:routes` (basemap check included) against the live services | **no** — writes its outcome to the job summary and a warning annotation | 4:26 (4:04–4:26) |
 
-Runtimes are job wall-clock times on `ubuntu-latest`, setup included: the first
-figure from the first all-green run (37145888229), the range across the runs of
-PR #25 in which that job ran the same steps and passed. A PR's checks take as
+Runtimes are job wall-clock times on `ubuntu-latest`, setup included, measured
+on PR #25's runs 37142797797 to 37147556491: the first figure is from the last
+of those (all green), the range covers every one of them in which the job ran the
+same steps and passed. A PR's checks take as
 long as the longest job — about ten minutes — not the sum.
 
 Every job sets up the same way a developer does: Python 3.13 and
@@ -130,9 +131,9 @@ change to the app rather than to CI.
 
 ## Track B
 
-Measured on the runner: jobs of 12:35, 12:31 and 8:52, of which the tests took
-11:53 and 8:10 where recorded — two to three times the 4 minutes they take on an
-8-core laptop, and under the ~15-minute line at which it would stop running on
+Measured on the runner: jobs of 12:35, 12:31, 8:52 and 12:30, of which the tests
+took 11:53, 8:10 and 11:37 where recorded — two to three times the 4 minutes
+they take on an 8-core laptop, and under the ~15-minute line at which it would stop running on
 every PR. So it runs on every PR, in its own job, in parallel with the rest.
 
 If it passes 15 minutes, move it off the PR path rather than make every PR wait:
