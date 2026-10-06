@@ -19,11 +19,8 @@ from app.ml.prospectivity import (
     scored_grid,
 )
 from app.api.telemetry import build_mine_telemetry
-from app.services.recommendations import generate_action_recommendations
-from app.ml.risk_model import calculate_shortfall_risk
 from app.ml.reserve_model import reserve_model
 from app.ml.forecasting_model import forecasting_model
-from app.ml.shap_explainer import shap_explainer
 import csv
 import io
 
@@ -607,68 +604,6 @@ async def get_production_forecast(
         "forecast": forecast
     }
 
-@router.get("/mines/{mine_id}/risk")
-async def mine_risk(
-    mine_id: int,
-    downtime_hours: float = 14.5,
-    blasting_delay_days: float = 1.2,
-    planned_tonnes: float = 18000.0,
-    available_tonnes: float = 15400.0,
-    db: Session = Depends(get_db),
-):
-    ensure_seed_mines(db)
-    mine = db.get(MineSite, mine_id)
-    if not mine:
-        raise HTTPException(status_code=404, detail="Mine not found")
-
-    weather = await fetch_weather_signal(mine.latitude, mine.longitude)
-    stac_data = await query_sentinel_stac(mine.latitude, mine.longitude)
-
-    risk = calculate_shortfall_risk(
-        rainfall_14d_mm=weather["rainfall_14d_mm"],
-        equipment_downtime_hours=downtime_hours,
-        blasting_delay_days=blasting_delay_days,
-        planned_tonnes=planned_tonnes,
-        available_tonnes=available_tonnes,
-    )
-
-    actions = generate_action_recommendations(
-        mine_name=mine.name,
-        rainfall_14d_mm=weather["rainfall_14d_mm"],
-        downtime_hours=downtime_hours,
-        blasting_delay_days=blasting_delay_days,
-        planned_tonnes=planned_tonnes,
-        available_tonnes=available_tonnes,
-    )
-
-    shap_data = shap_explainer.compute_shap_breakdown(
-        rainfall_14d_mm=weather["rainfall_14d_mm"],
-        downtime_hours=downtime_hours,
-        blasting_delay_days=blasting_delay_days,
-        stockpile_days=6.0,
-        planned_tonnes=planned_tonnes,
-        actual_tonnes=available_tonnes,
-    )
-
-    return {
-        "mine_id": mine.id,
-        "mine_name": mine.name,
-        "state": mine.state,
-        "coordinates": {"lat": mine.latitude, "lng": mine.longitude},
-        "weather": weather,
-        "satellite": stac_data,
-        "risk": risk,
-        "shap_explainability": shap_data,
-        "recommended_actions": actions,
-        "disclaimer": "Decision Support / Prototype Only: Multi-spectral surface proxies require validation by MOIL geological core drillings and field assays.",
-        "audit": {
-            "satellite_source": "Copernicus Sentinel-2 L2A & NASA POWER Daily",
-            "model_version": "v2.1-nakshatra-hybrid-ml",
-            "geologist_review_status": "PENDING_CORE_DRILL_VALIDATION",
-            "last_evaluated": "2026-08-30T01:45:00Z"
-        }
-    }
-
 @router.post("/upload-operational-csv")
 async def upload_operational_csv(file: UploadFile = File(...)):
     MAX_SIZE = 5 * 1024 * 1024
@@ -812,64 +747,3 @@ async def dispatch_alert_endpoint(req: AlertDispatchRequest):
 @router.get("/alerts")
 async def get_alerts_endpoint(mine_id: int = None):
     return get_active_dispatched_alerts(mine_id=mine_id)
-
-# ============================================================
-# REAL CASE 4: MINISTRY OF STEEL COMPLIANCE & RECONCILIATION EXPORT
-# ============================================================
-
-@router.get("/mines/{mine_id}/export-compliance-report")
-async def export_compliance_report(mine_id: int, db: Session = Depends(get_db)):
-    ensure_seed_mines(db)
-    mine = db.get(MineSite, mine_id)
-    if not mine:
-        raise HTTPException(status_code=404, detail="Mine not found")
-
-    weather = await fetch_weather_signal(mine.latitude, mine.longitude)
-    pred = reserve_model.predict_reserve_hotspot(ndvi=0.72, soil_moisture=42.0, land_temp=34.2)
-    fc = forecasting_model.forecast_production(
-        planned_monthly_tonnes=mine.target_tonnes,
-        current_daily_rate=mine.target_tonnes / 30,
-        rainfall_14d_mm=weather["rainfall_14d_mm"],
-        downtime_hours_weekly=14.5,
-        blasting_ready=True,
-        days_horizon=14,
-    )
-
-    return {
-        "report_id": f"GOI-STEEL-MOIL-{mine.mine_code}-2026-Q3",
-        "ministry": "Ministry of Steel, Government of India",
-        "organization": "MOIL Limited (A Miniratna Category-I CPSE)",
-        "competition": "Smart India Hackathon 2026",
-        "problem_statement_id": "26009",
-        "evaluation_timestamp": "2026-08-30T02:20:00Z",
-        "mine_profile": {
-            "mine_name": mine.name,
-            "mine_code": mine.mine_code,
-            "state": mine.state,
-            "zone": mine.zone,
-            "monthly_target_tonnes": mine.target_tonnes,
-        },
-        "satellite_intelligence_audit": {
-            "satellite_provider": "Copernicus Sentinel-2 & NASA POWER",
-            "14d_rainfall_mm": weather["rainfall_14d_mm"],
-            "reserve_prospectivity_confidence_pct": pred["confidence_score"],
-            "estimated_ore_grade": pred["estimated_ore_grade"],
-            # Guardrail: this project does not produce statutory reserve
-            # classifications. The hardcoded "UNFC 111 (Proved Mineral Reserve)"
-            # here was a fabricated regulatory claim.
-            "reserve_classification": None,
-            "reserve_classification_note": (
-                "Not assigned. Decision-support output only; a UNFC class "
-                "requires a competent person's assessment, which this system "
-                "does not perform."
-            ),
-        },
-        "shortfall_reconciliation": {
-            "planned_tonnes_14d": fc["total_planned_tonnes"],
-            "predicted_tonnes_14d": fc["total_predicted_tonnes"],
-            "projected_shortfall_tonnes": fc["projected_shortfall_tonnes"],
-            "mitigation_plan": "Simplex Blending from High-Grade SP-1 + Haul Road Gravel Resurfacing",
-        },
-        "compliance_status": "APPROVED_FOR_DIRECTOR_REVIEW"
-    }
-

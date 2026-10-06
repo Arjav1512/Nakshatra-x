@@ -39,12 +39,10 @@ def test_full_pipeline():
     # 3-4. Environment (NASA POWER) and satellite (STAC) need an upstream: see
     # test_upstreams_degrade_honestly_when_unreachable and test_live_upstreams.
 
-    # 5. Risk & Decision-Support Actions for Mine #1
-    res = client.get("/api/v1/mines/1/risk?downtime_hours=16.0&blasting_delay_days=1.5&planned_tonnes=18000&available_tonnes=15400")
-    assert res.status_code == 200, f"Risk check failed: {res.text}"
-    risk_data = res.json()
-    print("✓ Risk Score & Level:", risk_data["risk"]["risk_score"], f"({risk_data['risk']['severity']})")
-    
+    # 5. /mines/{id}/risk was removed: it returned a fixed "last_evaluated"
+    #    timestamp and silently defaulted the operational inputs it scored.
+    #    test_route_table.py keeps that class of endpoint out.
+
     # 6. Real Case 1: Scipy Simplex Ore Blending Optimizer
     blend_payload = {
         "target_tonnes": 5000.0,
@@ -155,11 +153,10 @@ def test_full_pipeline():
     alert_res = res.json()
     print(f"✓ Incident Alert Dispatcher: Alert {alert_res['dispatched_alert']['alert_id']} triggered ({alert_res['dispatched_alert']['escalation_tier']})")
 
-    # 9. Real Case 4: Ministry Compliance Report Export
-    res = client.get("/api/v1/mines/1/export-compliance-report")
-    assert res.status_code == 200, f"Compliance report failed: {res.text}"
-    report_res = res.json()
-    print(f"✓ Ministry Compliance Export: {report_res['report_id']} - {report_res['compliance_status']}")
+    # 9. /mines/{id}/export-compliance-report was removed: a "Ministry of Steel"
+    #    report with a GOI-styled id, a fixed timestamp, figures from invented
+    #    constant inputs and an approval status nobody gave. Both endpoints are
+    #    asserted absent in test_route_table.py.
 
     print("\nALL API BACKEND & REAL CASE TESTS PASSED SUCCESSFULLY.")
 
