@@ -11,7 +11,7 @@ in the non-blocking network job, which reports and never fails.
 | Job | What it runs | Gates the PR | Runtime on the runner |
 |---|---|---|---|
 | **Frontend** | `tsc --noEmit`, `lint:literals`, Biome no worse than the base commit, `npm run build`, workflow hardening (`scripts/ci/check-workflow.js`) | yes | 0:35 (0:27–0:40) |
-| **Backend — fast suites** | every backend suite except Track B, network-marked tests deselected; then confirms the artifact guard and network block were active, and that no committed artifact changed | yes | 1:24 (1:16–1:39) |
+| **Backend — fast suites** | every backend suite except Track B, network-marked tests deselected — the API provenance guard (`test_api_provenance.py`) among them; then confirms the artifact guard, the network block and the API guard ran, and that no committed artifact changed | yes | 1:24 (1:16–1:39) |
 | **Backend — Track B** | `test_track_b.py` | yes | 12:30 (8:52–12:35) |
 | **Artifacts** | `python -m app.api.batch check` | yes | 0:39 (0:33–0:45) |
 | **Browser — console** | `test:e2e`, `test:dates`, `test:pilot`, `test:scenario`, `test:surface`, `test:nav`, `test:auth`, `test:motion`, `test:fonts` | yes | 5:18 (5:18–5:34) |
@@ -92,6 +92,22 @@ the whole session, the app's background threads included, and is checked by
 non-loopback connection refused, all 75 backend tests outside Track B passed,
 and only two steps of `test_api` reached out. Track B passes under the same
 block.
+
+**The API provenance guard** (`test_api_provenance.py`) reads the API rather
+than the page. It enumerates the live FastAPI route table, calls every GET route
+with valid inputs (a route with no call fails the test), and fails on any number
+in a JSON response that is neither inside a provenance envelope or header nor on
+a short allowlist, each entry with a category (id, count, extent, request echo,
+or /readyz's own service state) and a reason. It also fails on any
+`<name>-v<N>` version string that is not a version constant the code defines.
+It exists because `/health` named a model that does not exist, and two
+endpoints scored invented inputs, and no rendered-page check could see any of
+it: nothing on screen called them. Against commit `2096fbc`, which still had
+all three, it names `random-forest-prospectivity-v1` and
+`scipy-linprog-blend-v1` on `/health`, `heuristic-surface-indicator-score-v1`
+on `/reserve-prediction`, and every figure of both endpoints among 143
+numbers with no provenance. It runs with the network blocked, so the live
+upstreams answer with their labelled fallbacks.
 
 | Test | Needs | Where it runs |
 |---|---|---|

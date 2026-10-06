@@ -73,11 +73,13 @@ jobs:
           set -o pipefail
           .venv/bin/python -m pytest -m "not network" --ignore=test_track_b.py \
             -p no:cacheprovider -rfE --durations=10 | tee "$RUNNER_TEMP/pytest.txt"
-      - name: Confirm the artifact guard and the network block were active
+      - name: Confirm the artifact guard, the network block and the API provenance guard ran
         if: ${{ !cancelled() }}
         run: |
           grep -F "committed-artifact guard: active" "$RUNNER_TEMP/pytest.txt"
           grep -F "network: off, except in tests marked @pytest.mark.network" "$RUNNER_TEMP/pytest.txt"
+          # Collected, and every test in it passed (dots only, no F or E).
+          grep -E "^test_api_provenance\.py \.+ +\[" "$RUNNER_TEMP/pytest.txt"
       - name: Committed artifacts unchanged on the runner
         if: ${{ !cancelled() }}
         run: git diff --exit-code --stat -- backend/artifacts data/synthetic
