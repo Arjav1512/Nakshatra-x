@@ -19,8 +19,6 @@ from app.ml.prospectivity import (
     scored_grid,
 )
 from app.api.telemetry import build_mine_telemetry
-from app.ml.reserve_model import reserve_model
-from app.ml.forecasting_model import forecasting_model
 import csv
 import io
 
@@ -561,62 +559,6 @@ async def mine_satellite_imagery(mine_id: int, db: Session = Depends(get_db)):
     if not mine:
         raise HTTPException(status_code=404, detail="Mine not found")
     return await query_sentinel_stac(mine.latitude, mine.longitude)
-
-@router.get("/mines/{mine_id}/reserve-prediction")
-async def get_reserve_prediction(
-    mine_id: int,
-    ndvi: float = Query(0.72, ge=0.0, le=1.0),
-    soil_moisture: float = Query(42.0, ge=0.0, le=100.0),
-    land_temp: float = Query(34.2, ge=0.0, le=60.0),
-    db: Session = Depends(get_db)
-):
-    ensure_seed_mines(db)
-    mine = db.get(MineSite, mine_id)
-    if not mine:
-        raise HTTPException(status_code=404, detail="Mine not found")
-
-    pred = reserve_model.predict_reserve_hotspot(
-        ndvi=ndvi,
-        soil_moisture=soil_moisture,
-        land_temp=land_temp,
-        swir_anomaly=0.82 if mine.state == "Madhya Pradesh" else 0.68,
-        historical_grade_pct=41.5 if "Balaghat" in mine.name else 36.0,
-    )
-    return {
-        "mine_id": mine.id,
-        "mine_name": mine.name,
-        "state": mine.state,
-        "coordinates": {"lat": mine.latitude, "lng": mine.longitude},
-        "reserve_intelligence": pred
-    }
-
-@router.get("/mines/{mine_id}/production-forecast")
-async def get_production_forecast(
-    mine_id: int,
-    days: int = Query(14, ge=7, le=60),
-    rainfall_mm: float = Query(118.0, ge=0.0),
-    downtime_hrs: float = Query(14.5, ge=0.0),
-    blasting_ready: bool = Query(True),
-    db: Session = Depends(get_db)
-):
-    ensure_seed_mines(db)
-    mine = db.get(MineSite, mine_id)
-    if not mine:
-        raise HTTPException(status_code=404, detail="Mine not found")
-
-    forecast = forecasting_model.forecast_production(
-        planned_monthly_tonnes=mine.target_tonnes or 18000.0,
-        current_daily_rate=(mine.target_tonnes or 18000.0) / 30.0,
-        rainfall_14d_mm=rainfall_mm,
-        downtime_hours_weekly=downtime_hrs,
-        blasting_ready=blasting_ready,
-        days_horizon=days
-    )
-    return {
-        "mine_id": mine.id,
-        "mine_name": mine.name,
-        "forecast": forecast
-    }
 
 @router.post("/upload-operational-csv")
 async def upload_operational_csv(file: UploadFile = File(...)):

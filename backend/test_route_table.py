@@ -37,6 +37,11 @@ TIME_OR_ID_KEY = re.compile(r"(timestamp|evaluated|_at$|^at$)", re.I)
 REMOVED = (
     "/api/v1/mines/{mine_id}/risk",
     "/api/v1/mines/{mine_id}/export-compliance-report",
+    # Same class, removed in the commit after: a "reserve" score from default
+    # NDVI/soil/temperature and per-mine constants keyed on state and name, and
+    # a production forecast from default rainfall and downtime.
+    "/api/v1/mines/{mine_id}/reserve-prediction",
+    "/api/v1/mines/{mine_id}/production-forecast",
 )
 
 
