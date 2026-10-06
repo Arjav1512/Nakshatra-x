@@ -1,0 +1,149 @@
+{
+  "steps": [
+    {
+      "step": "0:00 thesis line",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "0:20 portfolio — ten mines with P(shortfall)",
+      "ok": true,
+      "detail": "10 cards, 10 probabilities"
+    },
+    {
+      "step": "0:20 Balaghat marked as Track B pilot",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "0:45 condition tiles (rainfall, temperature, downtime, blasts)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "0:45 SYNTHETIC badge on operational tiles",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "0:45 \"+ evidence\" opens provenance",
+      "ok": true,
+      "detail": "NASA POWER Analysis-Ready API"
+    },
+    {
+      "step": "1:05 headline tiles",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "1:05 per-grade breakdown (PRD B-5)",
+      "ok": true,
+      "detail": "ferro manganese, silico manganese, blast furnace, dioxide"
+    },
+    {
+      "step": "1:05 chart states its interval and baseline",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "1:05 calibration shown beside P(shortfall)",
+      "ok": true,
+      "detail": "How far to trust P(shortfall): share of real 14-day totals inside the 80% band (a calibrated band holds 0.80)\n\nAll ten mines: 0.683 [0.636, 0.728] (816 windows "
+    },
+    {
+      "step": "1:35 backtest on screen without a click (model and baseline MAPE)",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "1:35 interval coverage reported",
+      "ok": true,
+      "detail": "coverage 0.8"
+    },
+    {
+      "step": "2:05 approved actions with the checks they passed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "2:05 rejection panel states its result either way",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "2:05 constraint scope line",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "2:20 run on the default plan: constraint check passed",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "2:20 +6 h: the old verdict is gone, \"Inputs changed — run again\"",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "2:20 +6 h delay, run again: rejected by name",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "2:30 prospectivity opens from the breadcrumb",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "2:30 LOMO AUC with ablations",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "2:30 ranked drill targets with kriging uncertainty",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "2:55 guardrail statement present",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "2:55 Export CSV available",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "step": "no 5xx during the walk",
+      "ok": true,
+      "detail": null
+    }
+  ],
+  "findings": [],
+  "facts": {
+    "fonts": {
+      "body": "Inter",
+      "webFontsLoaded": [
+        "Inter",
+        "Inter Fallback",
+        "Sora",
+        "IBM Plex Mono"
+      ]
+    },
+    "weather_badge": "LIVE",
+    "evidence_source": "NASA POWER Analysis-Ready API",
+    "calibration_beside_p": "How far to trust P(shortfall): share of real 14-day totals inside the 80% band (a calibrated band holds 0.80)\n\nAll ten mines: 0.683 [0.636, 0.728] (816 windows ",
+    "map_layers": [
+      "probability: Prospectivity score ON",
+      "uncertainty: Kriging uncertainty",
+      "measured: Measured points",
+      "s2-true-colour: Sentinel-2 true colour",
+      "iron-oxide: Iron-oxide ratio",
+      "dem: Copernicus DEM"
+    ],
+    "tile_sources": [],
+    "seconds": 71
+  }
+}
