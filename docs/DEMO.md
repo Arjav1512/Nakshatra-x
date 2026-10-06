@@ -384,12 +384,15 @@ non-goal. The PRD wins.
 
 ## 2:20 — The constraint engine says no (15 s)
 
-Open **Operations → Mine twin**. The what-if calculator is already on a feasible
+Open **Operations → Mine twin**. The what-if calculator starts on a feasible
 plan: the 06:00–14:00 shift with no blast delay, which puts the blast inside the
-permitted 06:00–07:00 window. The constraint check reads **passed**.
+permitted 06:00–07:00 window. Click **Run what-if simulation** — the constraint
+check reads **passed**.
 
-Now move **Blasting delay** to **+6 h**. The blast moves to 12:00, outside both
-permitted windows, and the engine rejects it by name:
+Now choose **+6H delay**. The old verdict disappears at once and the panel says
+*Inputs changed — run again*: a result is only ever shown for the controls as
+they are. Click **Run what-if simulation** again. The blast moves to 12:00,
+outside both permitted windows, and the engine rejects it by name:
 
 > *Proposed 12:00 is outside the underground inter-shift blasting windows
 > (06:00-07:00, 14:00-15:00).*

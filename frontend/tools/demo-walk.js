@@ -146,14 +146,19 @@ async function main() {
   // 2:20 — Mine twin: the engine says no
   await page.goto(`${BASE}/mine-twin`, { waitUntil: 'networkidle2', timeout: 60000 })
   await sleep(6000)
-  // The verdict appears only after a run, and changing a control does not clear
-  // it: "+6H" alone leaves the previous "passed" on screen until Run again.
+  // The verdict appears only after a run. Changing a control clears it at once
+  // ("Inputs changed — run again"); it used to leave the old "passed" on screen.
   const ran1 = await clickByText(page, 'button', /RUN WHAT-IF SIMULATION/)
   await sleep(6000)
   t = await text()
   record('2:20 run on the default plan: constraint check passed', ran1 && /Constraint check passed/i.test(t),
     ran1 ? null : 'Run button not found')
   const delayed = await clickByText(page, 'button', /^\+6H DELAY$/)
+  await sleep(300)
+  t = await text()
+  record('2:20 +6 h: the old verdict is gone, "Inputs changed — run again"',
+    delayed && !/Constraint check (passed|failed)/i.test(t) && /Inputs changed — run again/i.test(t),
+    delayed ? null : '+6H DELAY button not found')
   const ran2 = delayed && (await clickByText(page, 'button', /RUN WHAT-IF SIMULATION/))
   await sleep(6000)
   t = await text()
