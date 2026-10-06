@@ -17,6 +17,8 @@ in the non-blocking network job, which reports and never fails.
 | **Browser — console** | `test:e2e`, `test:dates`, `test:pilot`, `test:scenario`, `test:surface`, `test:nav`, `test:auth`, `test:motion`, `test:fonts` | yes | 5:18 (5:18–5:34) |
 | **Browser — routes-provenance** | `test:routes -- --external-offline`, `test:provenance`, then `test:provenance -- --offline` with the backend stopped | yes | 9:49 (9:49–9:51) |
 | **Browser — cls** | `test:cls` | yes | 9:22 (9:18–9:22) |
+| **Browser — a11y-routes** | `test:a11y`: axe on all 17 routes at 1280 and 375, plus every status label measured | yes | not yet measured on the runner (locally 2:02 for the suite) |
+| **Browser — a11y-map** | `test:a11y-map`: axe on every map layer at 1280 and 375, plus every status label measured | yes | not yet measured on the runner (locally 1:04 for the suite) |
 | **Network — live services** | `pytest -m network`; `test:map`, `test:map -- --evicted` and `test:routes` (basemap check included) against the live services | **no** — writes its outcome to the job summary and a warning annotation | 4:26 (4:04–4:26) |
 
 Runtimes are job wall-clock times on `ubuntu-latest`, setup included, measured
@@ -31,8 +33,9 @@ Node 22 and `npm ci` (`.github/actions/frontend-env`).
 
 **Required checks are a repository setting**, not something this file can set.
 To make the gating jobs required, add them under *Settings → Branches → Branch
-protection → Require status checks*: the seven "gates the PR" rows above. Leave
-"Network — live services" out.
+protection → Require status checks*: the nine "gates the PR" rows above. Leave
+"Network — live services" out. (As of this writing `main` has no branch
+protection, so "gates the PR" means a red check, not a blocked merge.)
 
 ## Biome: no worse than the base, and how the baseline is pinned
 
@@ -99,6 +102,26 @@ hostname, which a resolver block cannot see; the app makes none.
 and are applied with Chrome unable to resolve anything but this machine, so the
 fonts are proven to come from the app, not from Google.
 
+### Accessibility: axe, and every status label measured
+
+`test:a11y` (`tools/a11y.js`) audits all 17 routes, and `test:a11y-map`
+(`tools/a11y-map-layers.js`) selects every map layer in turn, each at 1280 and
+375 px. Both run axe-core's WCAG 2.2 AA rules and fail on any serious or
+critical violation. On the same page state, both also run
+`tools/status-labels.js`, which finds every element whose text is in a status
+or accent colour and measures its contrast against what is actually under it
+(4.5:1, or 3:1 for large text). It exists because axe reports a node as a
+violation, a pass or "incomplete", and in one online run it reported the
+layer switcher's labels as none of the three. A label the script cannot
+measure (over an image, or with no opaque background) fails too.
+
+They run with external services unreachable, like every required browser job.
+The map is then degraded, which is when the switcher's "unavailable" labels
+exist at all. Before the fix these audits failed on `main` exactly there: the
+active layer's "ON" at 3.86:1 and "unavailable" at 4.43:1 on the raw
+`bg-white/20` fill. The fix gave the selected layer the `accent-muted` token;
+those labels are now 5.19:1 and 5.96:1.
+
 One check in those suites needs an external service by nature: `test:routes`'
 "at least 8 tiles loaded", which counts ESRI basemap tiles. Measured offline it
 was the only failure (107 of 108 passed). The required job runs the suite with
@@ -118,7 +141,6 @@ without the flag, so the basemap is still checked against the live service.
 | Tool | Why it is not in CI |
 |---|---|
 | `npm run test:map -- --pc-blocked` | Proves the map falls back to the local tile cache. That cache is 39.3 MB fetched from Planetary Computer by `python -m app.api.batch tiles` (560 s) and is gitignored; a CI copy would have to be downloaded from the service the test is about. It is in the DEMO.md pre-flight instead. |
-| `tools/a11y.js`, `tools/a11y-map-layers.js` | **Not yet — they fail offline, on a real defect.** Both gate (exit 1 on any serious violation), and both were run under the same unreachable-services setup as the browser jobs: every route passed except the map, `/console?track=a`, where axe flags two labels in the layer switcher's degraded state — the active layer's "ON" (`#6aa5f0` on `#414447`, 3.85:1 against the 4.5:1 required for 12 px text) and each unreachable tile layer's "unavailable". In an online run made to compare, axe did not evaluate those labels at all — they appear in none of its violations, incomplete or passes — so earlier clean online audits do not show they pass. Fixing them is a change to the app, outside this CI change; once fixed, both audits belong in the browser jobs. |
 | `tools/capture*.js`, `tools/demo-walk.js`, Lighthouse (`npx lighthouse`) | Screenshot and score generators for evidence, not checks. |
 | `python -m app.api.batch all` / `tiles` | Regenerate artifacts and download tiles; CI checks the committed set with `batch check` instead. |
 

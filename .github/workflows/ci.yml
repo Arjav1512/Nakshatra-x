@@ -2,7 +2,7 @@
 # why, and every job's measured runtime: docs/CI.md.
 #
 # Required (their result cannot depend on an external service):
-#   frontend · backend · track-b · artifacts · browser (3 groups)
+#   frontend · backend · track-b · artifacts · browser (5 groups)
 # Non-blocking (reports, never fails the PR):
 #   network — the tests that need NASA POWER, STAC or Planetary Computer.
 
@@ -101,7 +101,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        group: [console, routes-provenance, cls]
+        group: [console, routes-provenance, cls, a11y-routes, a11y-map]
     env:
       CHROME_PATH: ${{ github.workspace }}/scripts/ci/chrome-offline
     steps:

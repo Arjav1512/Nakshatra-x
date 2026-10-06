@@ -21,7 +21,9 @@
     "test:map": "node tools/map-guard.js",
     "test:nav": "node tools/e2e-navigation.js",
     "test:cls": "node tools/cls-guard.js",
-    "test:fonts": "node tools/fonts-guard.js"
+    "test:fonts": "node tools/fonts-guard.js",
+    "test:a11y": "node tools/a11y.js",
+    "test:a11y-map": "node tools/a11y-map-layers.js"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
