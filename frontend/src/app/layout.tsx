@@ -65,12 +65,22 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    // The font variables go on <html>, not <body>. The tokens that use them
+    // (--font-sans, --font-mono, --font-display, tokens.css) are emitted by
+    // @theme on :root — which is <html> — so a variable defined only on <body>
+    // does not exist where they are resolved. That is what happened: every page
+    // rendered in the system font, with Inter, Sora and IBM Plex Mono declared,
+    // downloaded at build time and never used. `npm run test:fonts` asserts it.
+    <html
+      lang="en"
+      className={`dark ${inter.variable} ${plexMono.variable} ${sora.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <link rel="apple-touch-icon" href="/favicon.ico" />
       </head>
       <body
-        className={`${inter.variable} ${plexMono.variable} ${sora.variable} bg-surface-0 text-text-primary antialiased`}
+        className="bg-surface-0 text-text-primary antialiased"
         suppressHydrationWarning
       >
         <a

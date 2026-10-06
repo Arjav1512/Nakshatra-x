@@ -449,12 +449,16 @@ def run_tiles(argv: list[str]) -> int:
     )
     for sk in m["skipped"]:
         print(f"  skipped {sk['layer']}: {sk['reason']}")
+    failed = sum(e.get("n_failed", 0) for e in m["layers"])
+    if failed:
+        print(f"\n  {failed} tile(s) failed on the network. Run `batch tiles` again —")
+        print("  it reuses every tile already on disk and fetches only the missing ones.")
     print(f"  manifest: backend/.tile-cache/_manifest.json")
     print(
         "  The map asks the live tiler first and falls back to these, labelled "
         "with the fetch date."
     )
-    return 0
+    return 1 if failed else 0
 
 
 def main(argv: list[str]) -> int:
@@ -462,6 +466,14 @@ def main(argv: list[str]) -> int:
         print(__doc__)
         print("\nusage: python -m app.api.batch {all|check|tiles|backtest|forecast} [--force] [MINE_CODE ...]")
         return 2
+
+    # The same rule the server follows: no NAKSHATRA_DATA_END_DATE means the
+    # dataset the last `batch all` generated, so `check` judges the artifacts
+    # that are actually there and a re-run reproduces them (served_dataset).
+    from app.core.served_dataset import adopt_recorded_end_date
+
+    end, source = adopt_recorded_end_date()
+    print(f"dataset end date: {end or 'committed default'} — {source}")
 
     # Tiles take their own flags and touch no artifact, so they are handled
     # before the mine-code parsing the others share.

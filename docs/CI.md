@@ -14,7 +14,7 @@ in the non-blocking network job, which reports and never fails.
 | **Backend — fast suites** | every backend suite except Track B, network-marked tests deselected; then confirms the artifact guard and network block were active, and that no committed artifact changed | yes | 1:24 (1:16–1:39) |
 | **Backend — Track B** | `test_track_b.py` | yes | 12:30 (8:52–12:35) |
 | **Artifacts** | `python -m app.api.batch check` | yes | 0:39 (0:33–0:45) |
-| **Browser — console** | `test:e2e`, `test:dates`, `test:pilot`, `test:scenario`, `test:surface`, `test:nav`, `test:auth`, `test:motion` | yes | 5:18 (5:18–5:34) |
+| **Browser — console** | `test:e2e`, `test:dates`, `test:pilot`, `test:scenario`, `test:surface`, `test:nav`, `test:auth`, `test:motion`, `test:fonts` | yes | 5:18 (5:18–5:34) |
 | **Browser — routes-provenance** | `test:routes -- --external-offline`, `test:provenance`, then `test:provenance -- --offline` with the backend stopped | yes | 9:49 (9:49–9:51) |
 | **Browser — cls** | `test:cls` | yes | 9:22 (9:18–9:22) |
 | **Network — live services** | `pytest -m network`; `test:map`, `test:map -- --evicted` and `test:routes` (basemap check included) against the live services | **no** — writes its outcome to the job summary and a warning annotation | 4:26 (4:04–4:26) |
@@ -94,6 +94,10 @@ The required browser jobs run with **every external service unreachable**
 So an outage cannot change their result: they already run as if everything
 external were down. The one gap is a request to an IP address rather than a
 hostname, which a resolver block cannot see; the app makes none.
+
+`test:fonts` runs there for the same reason: it asserts the three families load
+and are applied with Chrome unable to resolve anything but this machine, so the
+fonts are proven to come from the app, not from Google.
 
 One check in those suites needs an external service by nature: `test:routes`'
 "at least 8 tiles loaded", which counts ESRI basemap tiles. Measured offline it

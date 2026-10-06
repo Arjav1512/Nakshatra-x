@@ -20,7 +20,8 @@
     "test:scenario": "node tools/e2e-scenario.js",
     "test:map": "node tools/map-guard.js",
     "test:nav": "node tools/e2e-navigation.js",
-    "test:cls": "node tools/cls-guard.js"
+    "test:cls": "node tools/cls-guard.js",
+    "test:fonts": "node tools/fonts-guard.js"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

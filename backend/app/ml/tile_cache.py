@@ -108,8 +108,24 @@ def read_tile(layer_id: str, z: int, x: int, y: int) -> tuple[bytes, str] | None
     return None
 
 
+class TileFetchFailed(Exception):
+    """A tile the network would not deliver after retries — not the tiler's 404."""
+
+
 def _fetch_one(url: str) -> tuple[bytes, str] | None:
+    """
+    (bytes, content type); None for the tiler's 404 (a real answer: no imagery
+    there); TileFetchFailed when the network fails it four times running.
+
+    The first version retried URLError only. A timeout while *reading* the body
+    is a plain TimeoutError, which escaped, ended the worker pool and with it
+    the whole run — no manifest written, so a cache of 1,900 good tiles was
+    left unlabelled over one slow tile. Found by the cold-start rehearsal
+    (docs/DEMO.md). Every transient network error is now retried, and a tile
+    that still fails is counted, not fatal.
+    """
     req = urllib.request.Request(url, headers={"User-Agent": "nakshatra-x-tile-cache"})
+    last: Exception | None = None
     for attempt in range(4):
         try:
             with urllib.request.urlopen(req, context=_ctx(), timeout=TIMEOUT_SECONDS) as r:
@@ -118,16 +134,14 @@ def _fetch_one(url: str) -> tuple[bytes, str] | None:
             # 404 over water or outside coverage is a real answer, not a failure.
             if exc.code == 404:
                 return None
-            if exc.code in (429, 502, 503, 504) and attempt < 3:
-                time.sleep(1.5 * (attempt + 1))
-                continue
-            raise
-        except urllib.error.URLError:
-            if attempt < 3:
-                time.sleep(1.5 * (attempt + 1))
-                continue
-            raise
-    return None
+            if exc.code not in (429, 500, 502, 503, 504):
+                raise TileFetchFailed(f"HTTP {exc.code}") from exc
+            last = exc
+        except (urllib.error.URLError, TimeoutError, ConnectionError, ssl.SSLError, OSError) as exc:
+            last = exc
+        if attempt < 3:
+            time.sleep(1.5 * (attempt + 1))
+    raise TileFetchFailed(f"{type(last).__name__}: {last}")
 
 
 def fetch_all(
@@ -157,7 +171,7 @@ def fetch_all(
             log(f"  {lid:16} SKIPPED — {layer.get('reason')}")
             continue
 
-        got = missing = reused = 0
+        got = missing = reused = failed = 0
         layer_bytes = 0
         t0 = time.time()
 
@@ -167,7 +181,10 @@ def fetch_all(
                 return (z, x, y, -1)
             url = (layer["tile_url"].replace("{z}", str(z))
                    .replace("{x}", str(x)).replace("{y}", str(y)))
-            res = _fetch_one(url)
+            try:
+                res = _fetch_one(url)
+            except TileFetchFailed:
+                return (z, x, y, -2)
             if res is None:
                 return None
             body, ctype = res
@@ -180,6 +197,8 @@ def fetch_all(
             for res in pool.map(work, tiles):
                 if res is None:
                     missing += 1
+                elif res[3] == -2:
+                    failed += 1
                 elif res[3] < 0:
                     reused += 1
                 else:
@@ -220,6 +239,9 @@ def fetch_all(
             "n_fetched": got,
             "n_reused": reused,
             "n_missing": missing,
+            # Network failures, not "no imagery here". Non-zero means run again:
+            # it reuses every tile already on disk and fetches only these.
+            "n_failed": failed,
             "bytes": on_disk,
             "bytes_fetched_this_run": layer_bytes,
             "fetched_at": oldest,
@@ -245,7 +267,7 @@ def fetch_all(
             "source_of_wording": layer["attribution"]["source_of_wording"],
         })
         log(
-            f"  {lid:16} {got:5} fetched  {reused:5} reused  {missing:4} none  "
+            f"  {lid:16} {got:5} fetched  {reused:5} reused  {missing:4} none  {failed:4} failed  "
             f"{on_disk / 1048576:7.1f} MB on disk  {time.time() - t0:5.1f}s"
         )
         if total_bytes > BUDGET_BYTES:

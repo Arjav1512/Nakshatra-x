@@ -124,6 +124,43 @@ const SEEDED = ['16,620', '2,420', '13,850', '1,650', '14,200', '12,200']
       (text.match(/Constraint check[^.]{0,80}/i) || [''])[0])
   }
 
+  // ---- a changed control invalidates the result at once (DEMO.md 2:20) ----
+  //
+  // Changing a control used to leave the previous "Constraint check passed" on
+  // screen until the next run, and the summary described the new settings
+  // beside the old figures. The verdict has to go in the same render as the
+  // change — so the check waits one frame, not a network round trip.
+  {
+    const clickButton = (re) =>
+      page.evaluate((src) => {
+        const b = [...document.querySelectorAll('button')].find((x) => new RegExp(src, 'i').test(x.innerText.trim()))
+        if (b) { b.click(); return true }
+        return false
+      }, re.source)
+
+    let text = await body()
+    check('the default plan passes the constraint check', /Constraint check passed/i.test(text),
+      (text.match(/Constraint check[^.]{0,60}/i) || ['no verdict'])[0])
+
+    const moved = await clickButton(/^\+6H DELAY$/)
+    await sleep(300)
+    text = await body()
+    check('+6 h: the previous verdict is gone at once', moved && !/Constraint check (passed|failed)/i.test(text),
+      moved ? (text.match(/Constraint check[^.]{0,60}/i) || ['gone'])[0] : '+6H DELAY button not found')
+    // The result card, not the assumptions panel's standing note (which says
+    // "Assumption-based estimate, not a forecast." whether or not anything ran).
+    check('+6 h: the previous figures are gone too',
+      !/Assumption-based estimate — not a forecast/i.test(text) && !/combined multiplier \d/i.test(text))
+    check('+6 h: the screen says to run again', /Inputs changed — run again/i.test(text))
+
+    const ranAgain = await clickButton(/RUN WHAT-IF SIMULATION/)
+    await sleep(6000)
+    text = await body()
+    check('run again: rejected, with its reason',
+      ranAgain && /Constraint check failed/i.test(text) && /outside the underground inter-shift blasting windows/i.test(text),
+      (text.match(/outside the underground[^.]{0,60}/i) || [(text.match(/Constraint check[^.]{0,60}/i) || ['no verdict'])[0]])[0])
+  }
+
   await browser.close()
   console.log(`\n${failed === 0 ? 'PASS' : 'FAIL'} — ${failed} failing check(s)\n`)
   process.exit(failed === 0 ? 0 : 1)

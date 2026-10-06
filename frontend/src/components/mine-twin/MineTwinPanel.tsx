@@ -151,6 +151,21 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
     checks: { action_type: string; description: string; feasible: boolean; violations: { rule: string; detail: string }[] }[]
   } | null>(null)
 
+  /**
+   * The inputs the result on screen was computed from.
+   *
+   * A result and a verdict describe the controls they were run with, so they
+   * are shown only while the controls still say that. Changing any control used
+   * to leave the previous "Constraint check passed" on screen until the next
+   * run — and the summary sentence then described the new settings beside the
+   * old figures. Found in the cold-start rehearsal (docs/DEMO.md, 2:20): a
+   * presenter who moved the blast delay and looked up saw the old verdict. Now
+   * both disappear in the same render as the change, replaced by "Inputs
+   * changed — run again". A run whose inputs changed while it was in flight
+   * lands already out of date, for the same reason.
+   */
+  const [ranWith, setRanWith] = useState<string | null>(null)
+
   const [history, setHistory] = useState<Scenario[]>([])
   const [loading, setLoading] = useState(false)
   const [comparedScenario, setComparedScenario] = useState<Scenario | null>(null)
@@ -202,7 +217,13 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   const maxVal = Math.max(...fullTimeline.map((d) => d.value || 1), 1)
   const minVal = Math.min(...fullTimeline.map((d) => d.value || 0))
 
+  const inputsKey = JSON.stringify({ mine: selectedMine.id, ...selectionOf, factors })
+  const inputsChanged = ranWith !== null && ranWith !== inputsKey
+  const result = inputsChanged ? null : simResult
+  const verdict = inputsChanged ? null : constraints
+
   const runSimulation = async () => {
+    const ranKey = inputsKey
     if (baselineProd === null) {
       setSimError(
         'No baseline is available for this mine, so there is nothing to apply the assumptions to.'
@@ -237,6 +258,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
           note: data.model_note ?? ASSUMPTION_NOTE,
         })
         setSimError(null)
+        setRanWith(ranKey)
         setHistory(data.scenarios || [])
 
         // Check the controls against the operating rules, in parallel with
@@ -350,8 +372,9 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
     trajectory && trajectory.length
       ? Math.round(trajectory.reduce((a, d) => a + d.median, 0))
       : null
-  const estimatedProd = simResult?.estimated ?? null
-  const differenceVal = simResult?.difference ?? null
+  const estimatedProd = result?.estimated ?? null
+  const differenceVal = result?.difference ?? null
+  const runAgain = 'Inputs changed — run again.'
 
   return (
     <div className="rounded-md border border-border-default bg-surface-1 p-6 border border-border-interactive rounded-md space-y-6 shadow-2xl relative overflow-hidden">
@@ -539,7 +562,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               label="Estimate under assumptions"
               emphasis
               data={
-                estimatedProd !== null && simResult
+                estimatedProd !== null && result
                   ? measuredValue(
                       assumption(
                         estimatedProd,
@@ -549,33 +572,33 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                           label: g.label,
                           value: factors[g.id] ?? 1,
                         })),
-                        { method: simResult.note }
+                        { method: result.note }
                       )
                     )
                   : null
               }
-              unavailable="Set the assumptions below and run the scenario. Nothing is shown until you do."
+              unavailable={inputsChanged ? runAgain : 'Set the assumptions below and run the scenario. Nothing is shown until you do.'}
             />
 
             <Metric
               label="Difference vs baseline"
               data={
-                differenceVal !== null && simResult
+                differenceVal !== null && result
                   ? measuredValue(
                       assumption(
                         differenceVal,
                         't',
-                        `Estimate minus baseline, combined multiplier ${simResult.multiplier}`,
+                        `Estimate minus baseline, combined multiplier ${result.multiplier}`,
                         ASSUMPTION_GROUPS.map((g) => ({
                           label: g.label,
                           value: factors[g.id] ?? 1,
                         })),
-                        { method: simResult.note }
+                        { method: result.note }
                       )
                     )
                   : null
               }
-              unavailable="Run the scenario to compare it against the baseline."
+              unavailable={inputsChanged ? runAgain : 'Run the scenario to compare it against the baseline.'}
             />
           </div>
 
@@ -885,6 +908,18 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 </p>
               </div>
             </div>
+          ) : inputsChanged ? (
+            <div
+              className="p-4 rounded-md border border-status-caution/40 bg-surface-2 flex items-start gap-3"
+              data-mine-twin-state="inputs-changed"
+              role="status"
+            >
+              <Sparkles className="w-5 h-5 text-status-caution shrink-0 mt-0.5" />
+              <p className="measure text-xs text-text-secondary leading-relaxed">
+                <span className="font-medium text-text-primary">{runAgain}</span> The previous result
+                and its constraint check described different settings, so they are no longer shown.
+              </p>
+            </div>
           ) : differenceVal === null ? (
             <div className="p-4 rounded-md border border-border-default bg-surface-2 flex items-start gap-3">
               <Sparkles className="w-5 h-5 text-text-tertiary shrink-0 mt-0.5" />
@@ -903,7 +938,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 Assumption-based estimate &mdash; not a forecast
               </span>
               <span className="font-mono text-xs text-text-tertiary tabular-nums">
-                combined multiplier {simResult?.multiplier}
+                combined multiplier {result?.multiplier}
               </span>
             </div>
             <p className="measure mt-2 text-sm text-text-primary">
@@ -917,21 +952,21 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               over 14 days.
             </p>
             {/* The route's own caveat, on screen rather than in a field nobody reads. */}
-            <p className="measure mt-2 text-xs text-text-tertiary">{simResult?.note}</p>
+            <p className="measure mt-2 text-xs text-text-tertiary">{result?.note}</p>
 
-            {constraints ? (
+            {verdict ? (
               <div className="mt-3 border-t border-border-subtle pt-3">
                 <p
                   className={`text-xs font-medium ${
-                    constraints.feasible ? 'text-status-nominal' : 'text-status-critical'
+                    verdict.feasible ? 'text-status-nominal' : 'text-status-critical'
                   }`}
                 >
-                  {constraints.feasible
+                  {verdict.feasible
                     ? 'Constraint check passed — these controls can be run as configured.'
                     : 'Constraint check failed — these controls cannot be run as configured.'}
                 </p>
                 <ul className="mt-1 space-y-1">
-                  {constraints.checks.map((c) => (
+                  {verdict.checks.map((c) => (
                     <li key={c.action_type} className="text-xs text-text-secondary">
                       <span className="font-mono text-text-tertiary">{c.action_type}</span>{' '}
                       {c.feasible ? (
