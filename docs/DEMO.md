@@ -7,33 +7,30 @@
 
 ## Before you start
 
-Two processes. The console reads live service-layer state; there is no mock path.
+Everything below runs from the repository root unless a block says `cd`. Where a
+block says *terminal*, give it its own: the servers stay in the foreground.
 
-**Check the ports first.** A server left running from an earlier session keeps
-the port, the new one fails to bind and exits, and the old one goes on answering
-with old code — which looks exactly like the new code being broken. This has
-already caused two phantom failures. The check prints the owner's PID, start
-time and command line, and refuses to start anything:
+Commands use `backend/.venv/bin/python`, not `python`. The venv is what has the
+dependencies, and on macOS there is often no `python` command at all — only
+`python3`. The first cold-start rehearsal from a fresh clone stopped right there,
+on the first command this document used to give.
 
-```bash
-scripts/check_port.sh 8000 "FastAPI" && scripts/check_port.sh 3000 "Next.js"
-```
+### Once, on a new machine — install and build
 
 ```bash
-# terminal 1 — FastAPI service layer (architecture L4)
-cd backend && python -m uvicorn app.main:app --port 8000
-
-# terminal 2 — Next.js
-cd frontend && BACKEND_URL=http://127.0.0.1:8000 \
-  SESSION_SECRET="$(node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))")" \
-  npm run start
+backend/scripts/setup_dev.sh                  # Python 3.13 venv at backend/.venv
+(cd frontend && npm ci && npm run build)      # dependencies, then the production build
 ```
 
-Open **http://localhost:3000/console**.
+Rebuild (`npm run build`) after pulling new code; `npm run start` serves the
+last build. The build downloads its fonts from Google the first time, so do this
+with a network (`docs/CI.md`).
 
-> If you skip `SESSION_SECRET`, auth routes return 500 by design — the app fails
-> closed rather than signing cookies with a guessable key. The console itself
-> does not need auth.
+Measured in two fresh clones on 2026-10-06 (8-core laptop): the clone took
+31 s and 252 s (371 MB; same machine, same day — it is the network), then
+`setup_dev.sh` 18–20 s, `npm ci` 4–5 s, `npm run build` 7–8 s, with this
+machine's package caches already warm. A machine that has never downloaded these
+packages takes several minutes longer. Clone the day before, not the morning of.
 
 ### The day before — regenerate every artifact, together
 
@@ -42,13 +39,21 @@ and it is the difference between a forecast that covers next fortnight and one
 that covers a fortnight that has already been and gone.
 
 ```bash
-cd backend && NAKSHATRA_DATA_END_DATE=$(date +%F) python -m app.api.batch all
+(cd backend && NAKSHATRA_DATA_END_DATE=$(date +%F) .venv/bin/python -m app.api.batch all)
 ```
 
 `all` regenerates the sample CSVs, all ten forecasts, the committed backtest(s)
 **and the calibration shown beside P(shortfall)** from **one** dataset, then
 verifies they agree and prints the identity it used. Check the dates it prints
 before you trust it.
+
+**You do not set the date again tomorrow.** `batch all` records it with the
+artifacts (`data/synthetic/_dataset_identity.json`), and the backend serves the
+recorded dataset whenever `NAKSHATRA_DATA_END_DATE` is unset (`DECISIONS.md`
+D-042); its first log line says which date it is serving. It did not use to:
+the first cold-start rehearsal regenerated for 6 October, started the backend as
+this document said, and watched it refit all ten forecasts for the old window
+over the new ones while `/readyz` stayed 503 — the step undone by the next one.
 
 The calibration is in `all` because it describes the dataset too. A new end date
 changes the dataset, and the console refuses a calibration measured on a
@@ -60,12 +65,14 @@ the exported samples are all built from the same generated dataset. Regenerated
 separately they drift, and a screen showing a forecast next to a backtest MAPE is
 then comparing two datasets under one label — nothing in the numbers would look
 wrong. `/readyz` checks the agreement and reports any mine whose artifact
-disagrees as `stale` rather than `ready`; `python -m app.api.batch check` answers
+disagrees as `stale` rather than `ready`; `.venv/bin/python -m app.api.batch check` answers
 the same question from the command line.
 
 Measured on a quiet 8-core laptop with the default two fit threads: samples
 0.5 s, forecasts 25 s each (250 s for ten), backtest 216 s, calibration 525 s
-(it refits at 24 origins) — **about 17 minutes** in total.
+(it refits at 24 origins) — **about 17 minutes** in total. The cold-start
+rehearsals measured 1,065 s on a quiet machine and 1,134 s with other work
+running (2026-10-06).
 
 **Run it on a quiet machine.** This is CPU-bound and it is the one step that
 punishes contention. One run here took **5.8 hours** instead of 8 minutes because
@@ -111,14 +118,20 @@ Copernicus DEM) come from Microsoft Planetary Computer. Fetch a local copy the
 day before, so a hall with bad wifi does not take them off the map:
 
 ```bash
-cd backend && python -m app.api.batch tiles
+(cd backend && .venv/bin/python -m app.api.batch tiles)
 ```
 
-Measured: **39.3 MB, 560 s** — 2,625 tiles, z6 to z12 over the study area. That
+Measured: **39.3 MB, 470–560 s** — 2,625 tiles, z6 to z12 over the study area. That
 is every zoom the map flies to (it opens at 8.5, a selected mine is 11, a clicked
 one 12); past z12 the layers are live-only. It goes to `backend/.tile-cache/`,
 which is gitignored, with a manifest recording each layer's licence, required
-attribution and fetch date. Separate from `all` on purpose: it downloads from
+attribution and fetch date.
+
+**If it reports failed tiles, run it again.** A slow network can fail a tile;
+the run counts it, finishes, writes the manifest and exits 1 with a message. A
+re-run reuses every tile on disk and fetches only the failed ones — in the
+rehearsal, 368 tiles in 60 s. (It used to die with a traceback on the first
+timeout, leaving no manifest; fixed in the same pass.) Separate from `all` on purpose: it downloads from
 someone else's service rather than rebuilding anything from the commit.
 
 **What the map does with it.** It always asks Planetary Computer first. If a tile
@@ -134,7 +147,7 @@ The previous artifact set is committed in git, so it is always the fallback:
 
 ```bash
 git checkout -- backend/artifacts data/synthetic     # back to the committed set
-cd backend && python -m app.api.batch check          # confirm it agrees
+(cd backend && .venv/bin/python -m app.api.batch check)   # confirm it agrees
 ```
 
 `batch all` verifies at the end and tells you to do exactly this if the check
@@ -164,35 +177,54 @@ don't, as you prefer — but do not edit them.
 
 ### Pre-flight — run this before every demo
 
-In order. Do not start talking until every one is green.
+In order, in three terminals. Do not start talking until every one is green.
 
 ```bash
-# 0. Ports — nothing left over from an earlier session.
+# Terminal 1 — 0. ports: nothing left over from an earlier session; then
+#              1. the backend. One worker, and do not set NAKSHATRA_SKIP_WARM.
 scripts/check_port.sh 8000 "FastAPI" && scripts/check_port.sh 3000 "Next.js"
+cd backend && .venv/bin/python -m uvicorn app.main:app --port 8000
+```
 
-# 1. Backend. One worker, and do not set NAKSHATRA_SKIP_WARM.
-cd backend && python -m uvicorn app.main:app --port 8000
+Its first line names the dataset it serves —
+`[dataset] end date … — recorded by batch all …`. It should be the date you
+regenerated for.
 
-# 2. Wait for readiness — every mine must report "ready".
-#    Committed artifacts make this near-instant (measured: 1.34 s from launch),
-#    however old they are — age never triggers a recompute.
+```bash
+# Terminal 2 — 2. readiness: every mine "ready", every artifact on one dataset.
 until curl -sf http://localhost:8000/api/v1/readyz >/dev/null; do sleep 1; done
 curl -s http://localhost:8000/api/v1/readyz | python3 -m json.tool | head -20
 #    Informational: warns if the oldest forecast is over 48 h, i.e. it was not
-#    regenerated the day before. Not a failure — but run test:dates in step 3.
+#    regenerated the day before. Not a failure — but run test:dates below.
 curl -s http://localhost:8000/api/v1/readyz | python3 -c 'import json,sys; print(json.load(sys.stdin)["age_warning"] or "artifact age: ok")'
+#            3. the frontend.
+cd frontend && BACKEND_URL=http://127.0.0.1:8000 \
+  SESSION_SECRET="$(node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))")" \
+  npm run start
+```
 
-# 3. Frontend, then the browser checks.
+```bash
+# Terminal 3 — 4. the browser checks.
 cd frontend && npm run test:e2e && npm run test:dates
-
-# 4. The map: every layer draws, is not blank, and credits its licensor —
-#    then the same with Planetary Computer blocked, which proves the cache.
+#            5. the map: every layer draws, is not blank and credits its
+#               licensor — then the same with Planetary Computer blocked,
+#               which proves the tile cache.
 npm run test:map && npm run test:map -- --pc-blocked
 ```
 
+Open **http://localhost:3000/console**. If you skip `SESSION_SECRET`, auth
+routes return 500 by design — the app fails closed rather than signing cookies
+with a guessable key. The console itself does not need auth.
+
+Measured in the cold-start rehearsal (2026-10-06, artifacts regenerated the
+"day before"): `/readyz` green 2.8 s after the backend started, serving the
+regenerated dataset with no refit; the frontend answering 0.5 s after start;
+`test:e2e` 64 s, `test:dates` 27 s, `test:map` 7 s, `test:map -- --pc-blocked`
+6 s — under two minutes from an empty terminal to all green.
+
 If `test:map` fails but `-- --pc-blocked` passes, Planetary Computer is down or
 unreachable from the hall and the demo will run from the cache — labelled as
-such. If both fail, run `python -m app.api.batch tiles` again.
+such. If both fail, run `(cd backend && .venv/bin/python -m app.api.batch tiles)` again.
 
 `npm run test:dates` is the one that catches a forgotten regeneration: it asserts
 the console shows the forecast's real origin and window dates, marks the forecast
@@ -305,8 +337,8 @@ vintage, model version, method, and how old the reading is.
 Four headline tiles: plan target, expected production, expected shortfall,
 worst-grade P(shortfall).
 
-**Grade matters.** Click through the grade chips — `ferro_manganese`,
-`silico_manganese`, `blast_furnace`, `dioxide` each carry their own probability.
+**Grade matters.** The per-grade breakdown lists ferro manganese, silico
+manganese, blast furnace and dioxide, each with its own probability.
 
 **Say:** PRD §3 — a shortfall in one grade is not fungible with a surplus in
 another, so B-5 makes per-grade forecasting P0. These are four different
@@ -319,7 +351,8 @@ The chart shows the median with its **80% prediction interval**, and the
 
 ## 1:35 — The backtest (30 s) ← *the credibility moment*
 
-**Click "Run rolling-origin backtest".** It takes a minute; say this while it runs:
+The backtest is already on screen — it is read from the stored artifact when
+the mine opens, so there is nothing to click and nothing to wait for. Say:
 
 > Most teams show an accuracy number from a random split. That is wrong for a
 > time series — it lets the model see the future. This refits at every origin
@@ -329,13 +362,19 @@ Result:
 
 | | MAPE | Coverage |
 |---|---|---|
-| GBT + conformal, pilot mine | ~10–12% | **0.82** |
-| Seasonal-naive, pilot mine | ~15% | — |
-| GBT + conformal, all ten mines | ~10% | **0.761** [0.733, 0.786] |
+| GBT + conformal, pilot mine | 11.67% | **0.812** |
+| Seasonal-naive, pilot mine | 14.81% | — |
+| GBT + conformal, all ten mines | 10.00% | **0.761** [0.733, 0.786] |
+
+**The figures depend on the dataset.** The table quotes the committed artifacts
+(data to 20 September). After the day-before regeneration the screen shows that
+dataset's figures instead — in the rehearsal, regenerated for 6 October: pilot
+MAPE 11.00% vs 13.22%, coverage 0.819; 14-day calibration 0.683. **Read the
+numbers off the screen**, not off this page; the points below hold for both.
 
 **Say two things, and scope the second one.** First, the model beats the
 baseline — the comparison is like-for-like, same origins and targets. Second, and
-rarer: the 80% interval covers **82%** of actuals *on the pilot mine*. Do not
+rarer: the 80% interval covers **81%** of actuals (0.812) *on the pilot mine*. Do not
 generalise that figure. Across all ten mines daily coverage is **0.761**
 [0.733, 0.786] and the 14-day cumulative total is too narrow at **0.738**
 [0.700, 0.777] — if a judge asks, that is the honest answer and it is written up
@@ -472,7 +511,34 @@ Verified:
 
 ---
 
+## If the network goes
+
+Rehearsed 2026-10-06: a complete pre-flight, then every external service made
+unreachable for the backend, the Next server and the browser, and the whole
+script walked — **all 24 beats pass**. What changes on screen:
+
+- **Weather** turns SYNTHETIC with a red banner — *"DEGRADED — live upstream
+  unavailable. Displayed values are synthetic and must not be read as
+  observations."* Say so; it is the N-6 point made live.
+- **Imagery layers** draw from the tile cache, labelled **CACHED · fetched
+  <date>** — only if `batch tiles` ran the day before.
+- **The basemap** is blank: it has no cache. The model layers still draw.
+- **"fetch live Sentinel-2"** answers at once with the kriged score and *"Live
+  satellite read failed; only the kriged surface is returned."* Leave it unticked.
+- **Unchanged:** every forecast, the backtest, the calibration, the model layers,
+  Mine twin and its constraint engine, and the fonts (served by the app).
+
+The rehearsal cut the app off from the network rather than the machine, and
+restarted the servers — the harsher case. **Before the real demo, do it once
+for real:** complete the pre-flight, turn Wi-Fi off, walk the script. Every
+failure mode, beat by beat, is in `docs/DEMO_RISKS.md`.
+
+---
+
 ## Likely questions
+
+The full set — fifteen hard questions with honest answers and their evidence —
+is `docs/JURY_QA.md`. The four most likely:
 
 **"Is the production data real?"** No, and we say so on every tile. MOIL's
 records are proprietary (PRD §8.2). We publish the schema MOIL maps onto and
