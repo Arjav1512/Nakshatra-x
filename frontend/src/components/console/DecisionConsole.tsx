@@ -739,7 +739,12 @@ export function DecisionConsole() {
                     .map((k) => (
                       <Metric
                         key={k}
-                        label={k.split('.')[1].replace(/_/g, ' ')}
+                        // Titles come from the field name, except where the name
+                        // says something the value is not: the API's
+                        // `live_downtime_hours` is synthetic, and a tile titled
+                        // "LIVE DOWNTIME HOURS" over a SYNTHETIC badge reads as a
+                        // live reading. Found in the network-loss rehearsal.
+                        label={k === 'risk.live_downtime_hours' ? 'downtime hours' : k.split('.')[1].replace(/_/g, ' ')}
                         data={measuredOrNull(telemetry.provenance[k])}
                         unit={telemetry.provenance[k].unit}
             unavailable="The service returned no value for this field, so none is shown."
