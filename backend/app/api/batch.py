@@ -463,6 +463,14 @@ def main(argv: list[str]) -> int:
         print("\nusage: python -m app.api.batch {all|check|tiles|backtest|forecast} [--force] [MINE_CODE ...]")
         return 2
 
+    # The same rule the server follows: no NAKSHATRA_DATA_END_DATE means the
+    # dataset the last `batch all` generated, so `check` judges the artifacts
+    # that are actually there and a re-run reproduces them (served_dataset).
+    from app.core.served_dataset import adopt_recorded_end_date
+
+    end, source = adopt_recorded_end_date()
+    print(f"dataset end date: {end or 'committed default'} — {source}")
+
     # Tiles take their own flags and touch no artifact, so they are handled
     # before the mine-code parsing the others share.
     if argv[1] == "tiles":

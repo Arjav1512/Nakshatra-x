@@ -865,3 +865,24 @@ Three rules follow, each tested in `backend/test_staleness.py`:
 The tile cache manifest is out of scope: it is a download log whose per-run
 counts change legitimately, and its date label already comes from the tiles'
 own modification times.
+
+## D-042 — An unset end date means the dataset `batch all` last generated
+
+D-030 made the synthetic end date a generation-time parameter, and DEMO.md's
+"day before" step regenerates everything for a new one. The cold-start rehearsal
+then followed the document word for word and found that the parameter never
+reached the server: the pre-flight starts the backend without
+`NAKSHATRA_DATA_END_DATE`, and it could not carry it anyway — `$(date +%F)` on
+demo day is a different date. So the backend judged every regenerated artifact
+stale against the committed default, refitted all ten forecasts for the old,
+already-ended window over the new ones, and `/readyz` stayed 503 indefinitely,
+because the backtest, calibration and samples still described the new date.
+Following the document undid the step it exists for.
+
+`batch all` already records the end date it used, with the rest of the dataset
+identity, in `data/synthetic/_dataset_identity.json`. An unset variable now means
+that record (`app/core/served_dataset.py`), in the server and in every `batch`
+command; an explicit value still wins. The record travels with the artifacts, so
+`git checkout -- backend/artifacts data/synthetic` restores the committed default
+with them. The module sits outside the forecast's import chain, so no
+artifact's code fingerprint moved.

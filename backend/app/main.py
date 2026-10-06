@@ -4,6 +4,13 @@ import os
 # by anything below. Import order is load-bearing here.
 from app.api import forecast_store as _forecast_store  # noqa: F401
 
+# Serve the dataset `batch all` last generated unless told otherwise. Before
+# anything resolves the end date — see app/core/served_dataset.py for what
+# happened without it (D-042).
+from app.core.served_dataset import adopt_recorded_end_date
+
+_SERVED_END_DATE, _SERVED_END_DATE_FROM = adopt_recorded_end_date()
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -32,6 +39,7 @@ async def lifespan(_app: FastAPI):
     skip it — the concurrency test does, so it can measure a genuinely cold
     backend.
     """
+    print(f"[dataset] end date {_SERVED_END_DATE or 'committed default'} — {_SERVED_END_DATE_FROM}")
     if os.environ.get("NAKSHATRA_SKIP_WARM") == "1":
         # Test-only. It exists so the concurrency test can measure a genuinely
         # cold backend; startup warming would otherwise mask the behaviour the
