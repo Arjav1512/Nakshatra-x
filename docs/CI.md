@@ -92,11 +92,12 @@ The required browser jobs run with **every external service unreachable**
   `--host-resolver-rules` so the browser can resolve only this machine.
 
 So an outage cannot change their result: they already run as if everything
-external were down.
+external were down. The one gap is a request to an IP address rather than a
+hostname, which a resolver block cannot see; the app makes none.
+
 `test:fonts` runs there for the same reason: it asserts the three families load
 and are applied with Chrome unable to resolve anything but this machine, so the
-fonts are proven to come from the app, not from Google. The one gap is a request to an IP address rather than a
-hostname, which a resolver block cannot see; the app makes none.
+fonts are proven to come from the app, not from Google.
 
 One check in those suites needs an external service by nature: `test:routes`'
 "at least 8 tiles loaded", which counts ESRI basemap tiles. Measured offline it
