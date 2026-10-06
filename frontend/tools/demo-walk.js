@@ -106,9 +106,12 @@ async function main() {
   t = await text()
   record('0:45 condition tiles (rainfall, temperature, downtime, blasts)',
     /rainfall/i.test(t) && /temp/i.test(t) && /downtime/i.test(t) && /blast/i.test(t))
-  facts.weather_live = /\bLIVE\b/.test(t)
+  // The rainfall tile's own badge, not any "LIVE" on the page: a tile title
+  // once read "LIVE DOWNTIME HOURS" over a synthetic value, and a page-wide
+  // match reported live weather with the network cut.
+  facts.weather_badge = (t.match(/RAINFALL 14D MM\s*\n\s*([A-Z]+)/i) || [null, null])[1]
   record('0:45 SYNTHETIC badge on operational tiles', /\bSYNTHETIC\b/.test(t))
-  console.log(`        weather LIVE badge on screen: ${facts.weather_live}`)
+  console.log(`        rainfall tile badge: ${facts.weather_badge}`)
   const opened = await clickByText(page, 'button', /evidence/)
   await sleep(1500)
   t = await text()
