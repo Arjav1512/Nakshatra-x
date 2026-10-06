@@ -90,21 +90,35 @@ def ensure_seed_mines(db: Session):
 
 @router.get("/health")
 def health():
+    # Every model named here is read from the constant that model stamps on its
+    # own output, and every source is one the code calls — nothing is typed in.
+    # This list used to name a "random-forest-prospectivity-v1
+    # (RandomForestClassifier)" that does not exist, leave out the forecaster
+    # that does, and list USGS Landsat-8, which nothing reads
+    # (test_route_table.py::test_health_names_only_what_runs).
+    from app.api.telemetry import ATTRIBUTION_VERSION, MODEL_VERSION as CONDITIONS_MODEL
+    from app.ml.forecaster import MODEL_VERSION as FORECASTER
+    from app.ml.prospectivity import MODEL_VERSION as PROSPECTIVITY
+
     return {
         "status": "ok",
         "service": "NAKSHATRA-X MOIL Space Intelligence Engine",
         "competition": "Smart India Hackathon 2026",
         "problem_id": "26009",
         "organization": "MOIL Ltd. / Ministry of Steel",
-        # Names must match code that actually runs. Prophet, XGBoost and SHAP
-        # are not dependencies of this project and are not used anywhere.
         "models_active": [
-            "random-forest-prospectivity-v1 (scikit-learn RandomForestClassifier)",
-            "nakshatra-drag-model-v1 (deterministic additive drag model)",
-            "additive-driver-attribution-v1 (exact linear decomposition)",
-            "scipy-linprog-blend-v1 (SciPy HiGHS linear program)"
+            f"{PROSPECTIVITY} (Track A prospectivity: gradient boosting, validated leave-one-mine-out)",
+            f"{FORECASTER} (Track B forecaster: gradient-boosted quantile regression, conformalised)",
+            f"{CONDITIONS_MODEL} (mine-conditions trajectory: deterministic additive drag model)",
+            f"{ATTRIBUTION_VERSION} (exact linear decomposition of the drivers)",
+            "ore blend optimiser (SciPy linprog, HiGHS)",
         ],
-        "telemetry_sources": ["Copernicus Sentinel-2 L2A", "NASA POWER Daily Meteorology", "USGS Landsat-8"]
+        "telemetry_sources": [
+            "NASA POWER daily meteorology",
+            "Open-Meteo forecast weather",
+            "Earth Search STAC (Sentinel-2 L2A scene metadata)",
+            "Microsoft Planetary Computer (Sentinel-2 L2A, Copernicus DEM)",
+        ],
     }
 
 @router.get("/healthz")

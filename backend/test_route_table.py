@@ -96,3 +96,20 @@ def test_no_date_time_literal_anywhere_in_the_service_code():
                     and id(node) not in docs and ISO_DATETIME.search(node.value)):
                 offenders.append(f"{path.relative_to(root.parent)}:{node.lineno}: {node.value!r}")
     assert not offenders, "\n".join(offenders)
+
+
+def test_health_names_only_what_runs():
+    """/health named a random-forest model that does not exist and a Landsat source nothing reads."""
+    from fastapi.testclient import TestClient
+
+    from app.api.telemetry import ATTRIBUTION_VERSION, MODEL_VERSION as CONDITIONS_MODEL
+    from app.ml.forecaster import MODEL_VERSION as FORECASTER
+    from app.ml.prospectivity import MODEL_VERSION as PROSPECTIVITY
+
+    body = TestClient(app).get("/api/v1/health").json()
+    named = [m.split(" (")[0] for m in body["models_active"]]
+    assert set(named) >= {PROSPECTIVITY, FORECASTER, CONDITIONS_MODEL, ATTRIBUTION_VERSION}, named
+    real = {PROSPECTIVITY, FORECASTER, CONDITIONS_MODEL, ATTRIBUTION_VERSION, "ore blend optimiser"}
+    assert set(named) <= real, f"names no code: {set(named) - real}"
+    text = str(body).lower()
+    assert "landsat" not in text and "random-forest" not in text and "randomforest" not in text
