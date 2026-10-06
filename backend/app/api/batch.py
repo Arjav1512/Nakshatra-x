@@ -449,12 +449,16 @@ def run_tiles(argv: list[str]) -> int:
     )
     for sk in m["skipped"]:
         print(f"  skipped {sk['layer']}: {sk['reason']}")
+    failed = sum(e.get("n_failed", 0) for e in m["layers"])
+    if failed:
+        print(f"\n  {failed} tile(s) failed on the network. Run `batch tiles` again —")
+        print("  it reuses every tile already on disk and fetches only the missing ones.")
     print(f"  manifest: backend/.tile-cache/_manifest.json")
     print(
         "  The map asks the live tiler first and falls back to these, labelled "
         "with the fetch date."
     )
-    return 0
+    return 1 if failed else 0
 
 
 def main(argv: list[str]) -> int:
