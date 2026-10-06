@@ -11,6 +11,7 @@
  */
 const puppeteer = require('puppeteer-core')
 const AXE_SOURCE = require('axe-core').source
+const { auditStatusLabels } = require('./status-labels')
 
 const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 const i = process.argv.indexOf('--base')
@@ -19,6 +20,7 @@ const BASE = i > -1 ? process.argv[i + 1] : 'http://localhost:3000'
 ;(async () => {
   const browser = await puppeteer.launch({ executablePath: CHROME, headless: 'new', args: ['--no-sandbox'] })
   let total = 0
+  let totalStatus = 0
   for (const [w, h] of [[1280, 900], [375, 812]]) {
     const page = await browser.newPage()
     await page.setViewport({ width: w, height: h, isMobile: w < 768 })
@@ -40,10 +42,13 @@ const BASE = i > -1 ? process.argv[i + 1] : 'http://localhost:3000'
       total += res.length
       console.log(`  ${res.length ? 'FAIL' : 'PASS'}  ${key.padEnd(16)} @${w}  ${res.length} serious/critical`)
       for (const v of res) console.log(`          ${v.impact.toUpperCase()} ${v.id} (${v.n})  ${v.html}`)
+      totalStatus += (await auditStatusLabels(page, `${key} @${w}`)).fails.length
+      await page.evaluate(() => window.scrollTo(0, 0))
     }
     await page.close()
   }
   await browser.close()
-  console.log(`\n${total === 0 ? 'PASS' : 'FAIL'} — ${total} serious/critical across every map layer at 1280 and 375\n`)
-  process.exit(total === 0 ? 0 : 1)
+  const ok = total === 0 && totalStatus === 0
+  console.log(`\n${ok ? 'PASS' : 'FAIL'} — ${total} serious/critical and ${totalStatus} status label(s) below threshold or unverifiable across every map layer at 1280 and 375\n`)
+  process.exit(ok ? 0 : 1)
 })().catch((e) => { console.error(e); process.exit(1) })
