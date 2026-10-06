@@ -13,10 +13,14 @@ on:
   push:
     branches: [main]
 
+# A new push to a PR cancels that PR's run in progress. On main nothing is
+# cancelled: every merge commit gets a complete run.
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# Read-only token for every job: they check out and test, and write nothing
+# back to the repository (the step summary and annotations need no scope).
 permissions:
   contents: read
 
@@ -26,9 +30,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0  # the Biome gate checks out the base commit
+          persist-credentials: false
       - uses: ./.github/actions/frontend-env
       # Each check runs even if an earlier one failed, so one run reports all.
       - name: tsc
@@ -49,13 +54,18 @@ jobs:
         if: ${{ !cancelled() }}
         working-directory: frontend
         run: npm run build
+      - name: Workflow hardening — pinned actions, scoped token, timeouts
+        if: ${{ !cancelled() }}
+        run: node scripts/ci/check-workflow.js
 
   backend:
     name: Backend — fast suites (network off)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/backend-env
       - name: pytest — every suite except Track B, network-marked tests deselected
         working-directory: backend
@@ -77,7 +87,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/backend-env
       - name: pytest test_track_b.py
         working-directory: backend
@@ -88,7 +100,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/backend-env
       - name: python -m app.api.batch check
         working-directory: backend
@@ -105,7 +119,9 @@ jobs:
     env:
       CHROME_PATH: ${{ github.workspace }}/scripts/ci/chrome-offline
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/backend-env
       - uses: ./.github/actions/frontend-env
       - name: build
@@ -125,7 +141,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/backend-env
       - uses: ./.github/actions/frontend-env
       # Each live check may fail without failing the job: these report on NASA

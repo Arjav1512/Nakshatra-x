@@ -10,7 +10,7 @@ in the non-blocking network job, which reports and never fails.
 
 | Job | What it runs | Gates the PR | Runtime on the runner |
 |---|---|---|---|
-| **Frontend** | `tsc --noEmit`, `lint:literals`, Biome no worse than the base commit, `npm run build` | yes | 0:35 (0:27–0:40) |
+| **Frontend** | `tsc --noEmit`, `lint:literals`, Biome no worse than the base commit, `npm run build`, workflow hardening (`scripts/ci/check-workflow.js`) | yes | 0:35 (0:27–0:40) |
 | **Backend — fast suites** | every backend suite except Track B, network-marked tests deselected; then confirms the artifact guard and network block were active, and that no committed artifact changed | yes | 1:24 (1:16–1:39) |
 | **Backend — Track B** | `test_track_b.py` | yes | 12:30 (8:52–12:35) |
 | **Artifacts** | `python -m app.api.batch check` | yes | 0:39 (0:33–0:45) |
@@ -36,6 +36,34 @@ To make the gating jobs required, add them under *Settings → Branches → Bran
 protection → Require status checks*: the nine "gates the PR" rows above. Leave
 "Network — live services" out. (As of this writing `main` has no branch
 protection, so "gates the PR" means a red check, not a blocked merge.)
+
+## Workflow hardening
+
+What the workflow does about its own attack surface, and the check that keeps
+it so (`scripts/ci/check-workflow.js`, last step of the Frontend job):
+
+- **Third-party actions are pinned to full commit SHAs**, with the release
+  they correspond to in a comment (`actions/checkout@11d5960… # v4.4.0`). A
+  tag such as `v4` can be moved to different code by whoever controls the
+  action's repository; a SHA cannot. The pins are the commits `v4`/`v5`
+  pointed to when they were set, so the change altered no behaviour. Updating
+  an action means looking up the new release's SHA, by hand or with a bot
+  such as Dependabot (not set up here).
+- **`actions/checkout` runs with `persist-credentials: false`**, so the job's
+  token is not left in `.git/config` for later steps to read. No job pushes.
+- **The token is read-only** (`permissions: contents: read`, top level): the
+  jobs check out and test; step summaries and annotations need no scope.
+- **`concurrency`**: a new push to a PR cancels that PR's run in progress; on
+  `main` nothing is cancelled, so every merge commit gets a complete run.
+- **Every job has `timeout-minutes`**, so a hung server or browser costs at
+  most that long, not GitHub's six-hour default.
+
+The check fails on an unpinned action, a checkout without
+`persist-credentials: false`, a missing or write-granting `permissions:`
+block, a missing `concurrency:` block with `cancel-in-progress`, or a job
+without `timeout-minutes`. Against `main`'s workflow files before this change
+it found 15 problems: nine unpinned actions, and six checkouts that kept
+their credentials.
 
 ## Biome: no worse than the base, and how the baseline is pinned
 
