@@ -53,7 +53,9 @@ const ROUTES = [
   {
     path: '/console',
     mustRender: ['Decision support for MOIL', 'Portfolio', 'MOIL-BAL-01'],
-    // the anti-empty-shell assertion: ten cards each with a real probability
+    // The anti-empty-shell assertion: ten cards, each with a real expected
+    // shortfall in tonnes. It asked for a probability until P(shortfall) was
+    // withdrawn from the screen (DECISIONS.md D-044); now none may show one.
     custom: async (page) => {
       const r = await page.evaluate(() => {
         // Scoped to the mine list: the breadcrumb is an ordered list of buttons
@@ -62,13 +64,15 @@ const ROUTES = [
         const cards = [...document.querySelectorAll('[data-testid="mine-list"] > li')]
         return {
           cards: cards.length,
-          withProb: cards.filter((c) => /P\s*\d+%/.test(c.innerText)).length,
+          withTonnes: cards.filter((c) => /−[\d,]+\s*t expected/.test(c.innerText)).length,
+          withPercent: cards.filter((c) => /\d\s*%/.test(c.innerText)).length,
           withBadge: cards.filter((c) => /SYNTHETIC|DERIVED|LIVE|REFERENCE/.test(c.innerText)).length,
         }
       })
       return [
         ['ten mine cards', r.cards === 10, `${r.cards}`],
-        ['every card shows a probability', r.withProb === 10, `${r.withProb}/10`],
+        ['every card shows an expected shortfall in tonnes', r.withTonnes === 10, `${r.withTonnes}/10`],
+        ['no card shows a probability (D-044)', r.withPercent === 0, `${r.withPercent} with a percentage`],
         ['every card carries a provenance badge', r.withBadge === 10, `${r.withBadge}/10`],
       ]
     },
