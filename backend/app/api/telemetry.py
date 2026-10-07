@@ -27,9 +27,10 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+from app.api.response_provenance import header
 from app.core.provenance import data_integrity, derived, measured, reference, synthetic
 from app.core.ttl_cache import cached
-from app.core.synthetic import SYNTHETIC_CALIBRATION, mine_stream, operating_day, rnd
+from app.core.synthetic import SYNTHETIC_CALIBRATION, SYNTHETIC_OPS_VERSION, mine_stream, operating_day, rnd
 from app.services.nasa_power import fetch_weather_signal
 from app.services.satellite import query_sentinel_stac
 
@@ -211,6 +212,16 @@ async def build_mine_telemetry(mine) -> dict:
             "blasting_delay_drag_pct": rnd(b_drag * 100, 1),
         },
         "trajectory": trajectory,
+        # Every number above is the drag model's. The `provenance` map at the
+        # top of the payload is more specific for the two it names.
+        "provenance": header(
+            "Nakshatra-X drag model", "derived", model_version=MODEL_VERSION,
+            method=(
+                "Bounded additive drag over 14-day rainfall (measured, or synthetic "
+                "fallback when NASA POWER is unreachable) and synthetic equipment "
+                "and blasting inputs, applied to the register plan target."
+            ),
+        ),
     }
 
     risk = {
@@ -222,6 +233,13 @@ async def build_mine_telemetry(mine) -> dict:
         "stockpile_risk_score": None,
         "predicted_shortfall_tonnes": projected_shortfall,
         "live_downtime_hours": downtime_hours,
+        "provenance": header(
+            "Nakshatra-X drag model", "derived", model_version=MODEL_VERSION,
+            method=(
+                "Scores are the drag terms rescaled to 0-100. live_downtime_hours "
+                "is the synthetic input itself: provenance['risk.live_downtime_hours']."
+            ),
+        ),
     }
 
     attribution = {
@@ -259,6 +277,10 @@ async def build_mine_telemetry(mine) -> dict:
             "Rainfall" if w_drag >= d_drag and w_drag >= b_drag
             else ("Equipment downtime" if d_drag >= b_drag else "Blasting readiness")
         ),
+        "provenance": header(
+            "Nakshatra-X drag model", "derived", model_version=MODEL_VERSION,
+            method=f"{ATTRIBUTION_VERSION}: exact additive decomposition of the drag terms.",
+        ),
     }
 
     actions = _build_actions(mine_key, w_drag, d_drag, b_drag, projected_shortfall)
@@ -285,16 +307,16 @@ async def build_mine_telemetry(mine) -> dict:
         "weather.humidity_pct": wrap(humidity, "%", wx_source, vintage=wx.get("window_end")),
         "risk.live_downtime_hours": synthetic(
             downtime_hours, "hours/week", SYNTHETIC_CALIBRATION["note"],
-            model_version="synthetic-ops-v1",
+            model_version=SYNTHETIC_OPS_VERSION,
             method=f'Seeded draw, stream "{mine_key}|operations|{day}". Reproducible for a given mine and day.',
         ),
         "operations.equipment_availability_pct": synthetic(
             equipment_availability, "%", SYNTHETIC_CALIBRATION["note"],
-            model_version="synthetic-ops-v1",
+            model_version=SYNTHETIC_OPS_VERSION,
         ),
         "operations.blasts_this_week": synthetic(
             blasts_this_week, "count", SYNTHETIC_CALIBRATION["note"],
-            model_version="synthetic-ops-v1",
+            model_version=SYNTHETIC_OPS_VERSION,
         ),
         "forecast.shortfall_percentage": derived(
             shortfall_pct, "%", "Nakshatra-X drag model",
@@ -342,6 +364,7 @@ async def build_mine_telemetry(mine) -> dict:
             "zone": mine.zone,
             "targetTonnes": mine.target_tonnes,
             "currentProduction": None,
+            "provenance": header(MINE_SOURCE, "reference"),
         },
         "weather": weather,
         "reserve": reserve,

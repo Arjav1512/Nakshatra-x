@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
 # Run one group of browser suites against servers started by start-servers.sh,
-# timing each. Groups run as parallel CI jobs; together they are ~21 minutes.
+# timing each. Groups run as parallel CI jobs (each job's runtime: docs/CI.md).
 #
-#   scripts/ci/browser-suites.sh console|routes-provenance|cls
+#   scripts/ci/browser-suites.sh console|routes-provenance|cls|a11y-routes|a11y-map
 set -uo pipefail
 
-GROUP="${1:?usage: browser-suites.sh console|routes-provenance|cls}"
+GROUP="${1:?usage: browser-suites.sh console|routes-provenance|cls|a11y-routes|a11y-map}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 LOGS="${RUNNER_TEMP:-/tmp}/servers"
 cd "$ROOT/frontend"
@@ -40,6 +40,12 @@ case "$GROUP" in
     run test:provenance -- --offline ;;
   cls)
     run test:cls ;;
+  # axe (WCAG 2.2 AA, serious/critical) plus every status label measured
+  # (tools/status-labels.js), at 1280 and 375: every route, and every map layer.
+  a11y-routes)
+    run test:a11y -- --out "$LOGS/a11y-routes.json" ;;
+  a11y-map)
+    run test:a11y-map ;;
   *) echo "unknown group $GROUP"; exit 2 ;;
 esac
 

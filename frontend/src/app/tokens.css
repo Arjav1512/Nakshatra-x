@@ -38,7 +38,10 @@
      Exactly one. Links, selection, focus ring, and the single primary action
      per view. Never an ordinary container border. */
   --color-accent: #6aa5f0;         /*  6.73:1 worst case */
-  --color-accent-muted: #1e3149;   /* accent-tinted fill for selected rows */
+  /* Accent-tinted fill for a selected row or control. On it: text-primary
+     10.83:1, accent 5.19:1, status-caution 5.96:1, status-nominal 5.37:1.
+     Not status-critical (4.27:1) or text-tertiary / status-unknown (3.93:1). */
+  --color-accent-muted: #1e3149;
 
   /* --- Status -------------------------------------------------------------
      Data semantics only — never emphasis, branding or decoration. Colour is

@@ -10,6 +10,8 @@ artifact and reports how old it is.
     python -m app.api.batch all --force           # recompute even what matches
     python -m app.api.batch tiles                 # map tiles for offline demo
     python -m app.api.batch check                 # agree, and built by this code?
+    python -m app.api.batch pitch                 # write docs/PITCH_FIGURES.md
+    python -m app.api.batch pitch-check           # does it match what is served?
     python -m app.api.batch backtest              # all mines
     python -m app.api.batch backtest MOIL-BAL-01  # one mine
     python -m app.api.batch forecast              # all forecast artifacts
@@ -462,9 +464,9 @@ def run_tiles(argv: list[str]) -> int:
 
 
 def main(argv: list[str]) -> int:
-    if len(argv) < 2 or argv[1] not in ("backtest", "forecast", "all", "check", "tiles"):
+    if len(argv) < 2 or argv[1] not in ("backtest", "forecast", "all", "check", "tiles", "pitch", "pitch-check"):
         print(__doc__)
-        print("\nusage: python -m app.api.batch {all|check|tiles|backtest|forecast} [--force] [MINE_CODE ...]")
+        print("\nusage: python -m app.api.batch {all|check|tiles|pitch|pitch-check|backtest|forecast} [--force] [MINE_CODE ...]")
         return 2
 
     # The same rule the server follows: no NAKSHATRA_DATA_END_DATE means the
@@ -479,6 +481,29 @@ def main(argv: list[str]) -> int:
     # before the mine-code parsing the others share.
     if argv[1] == "tiles":
         return run_tiles(argv[2:])
+
+    # The pitch figures read what is served; they compute nothing
+    # (app/api/pitch_figures.py, docs/DEMO.md "Freeze the pitch dataset").
+    if argv[1] in ("pitch", "pitch-check"):
+        from app.api import pitch_figures
+
+        if argv[1] == "pitch":
+            path = pitch_figures.write()
+            print(f"wrote {path}")
+        problems = pitch_figures.check()
+        for p in problems:
+            print(f"  MISMATCH {p}")
+        print(f"pitch figures: {'match what is served' if not problems else f'{len(problems)} mismatch(es)'}")
+        # Matching is not the same as usable: a dataset whose window has ended
+        # still matches, and must not go into slides.
+        try:
+            bt, cal, ta = pitch_figures.served()
+            passed = pitch_figures.window_passed(pitch_figures.identities_from(bt, cal, ta))
+        except Exception:  # noqa: BLE001 — already reported above as a mismatch
+            passed = None
+        if passed:
+            print(f"  NOT DEMO-READY: the forecast window ({passed}) has passed — re-freeze (docs/DEMO.md)")
+        return 1 if problems else 0
 
     force = "--force" in argv[2:]
     codes = [a for a in argv[2:] if a != "--force"] or None

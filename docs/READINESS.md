@@ -334,6 +334,8 @@ rehearsals found and fixed a bug that would have broken the demo (D-042), a tile
 fetch that died on one slow tile, and a stale on-screen verdict. +1. Still
 deducted: two manually started processes, no component tests, and the axe audits
 are not yet in CI because they fail offline on a real contrast defect (§5).
+*(Since fixed, and the audits now gate CI — §5, "Since 80/100". The score is
+not re-derived here.)*
 
 ### Total
 
@@ -424,12 +426,30 @@ the three model map layers, Mine twin and its constraint engine, the fonts.
 - **Mine twin kept a stale verdict** after a control changed — now cleared in the
   same render (`ea015e0`).
 
+### Since 80/100 — the final hardening PR
+
+- **The switcher's contrast is fixed** with the selected-row token ("ON" 3.86 →
+  5.19:1, "unavailable" 4.43 → 5.96:1), and **both axe audits gate CI**, with
+  every status label measured beside axe (`docs/CI.md`).
+- **The workflow is hardened and checked**: actions pinned to commit SHAs,
+  checkout credentials dropped, read-only token, timeouts, and a check that
+  fails if any of it regresses.
+- **An API provenance guard** calls every GET route and fails on a number with
+  no provenance, or a model version the code does not define — the class
+  `/health` belonged to. Nine routes that carried no provenance header now say where their
+  numbers come from.
+- **The pitch figures are written from what is served** (`docs/PITCH_FIGURES.md`)
+  and checked against it, and the docs that quote them are checked too.
+
 ### Still open
 
-- **Contrast in the map's degraded layer switcher** — the active layer's "ON"
-  measures 3.85:1 (4.5:1 required) and "unavailable" also fails, visible when
-  Planetary Computer is unreachable; online audits never evaluated those labels.
-  Why the axe audits are not yet in CI (`docs/CI.md`).
+- **Balaghat's 14-day distribution on a later dataset.** Freezing the pitch
+  dataset on 2026-10-06 showed it *narrower* than independent days for all four
+  grades — one standardised residual at −26.5σ shrinks the rest (Beldongri: one
+  grade of three). P(shortfall) for the pilot would be overconfident on that
+  dataset, and `test_track_b.py` fails on it. The committed dataset (20 Sep) and
+  every figure in this document are unaffected. No demo dataset is frozen until
+  it is fixed (§6).
 - **The basemap has no offline fallback** (above).
 - **A cold backend saturates**: while it refits, telemetry requests can time out
   and the console shows "DEGRADED — FastAPI service layer unreachable" beside
@@ -447,15 +467,19 @@ the three model map layers, Mine twin and its constraint engine, the fonts.
 
 ## 6. The three most important next actions
 
-**1. Implement N-7, the recommendation audit log.** The only *Required*
+**1. Fix the residual standardisation, then freeze the demo window.** Root cause
+first (a generated event or a numerical fault), an acceptance rule registered in
+`DECISIONS.md` before any result, a fix chosen by the cause, and a Track B check
+across several end dates — one dataset passing and another failing means the
+suite only ever tested one. Then freeze the demo window and write the pitch
+figures from it.
+
+**2. Implement N-7, the recommendation audit log.** The only *Required*
 non-functional still missing, and it unblocks C-7: persist every issued
 recommendation with its constraint verdict, then capture accept/reject with a
 reason.
 
-**2. Make the intervals honest at 14 days.** The cumulative calibration (0.738 and
+**3. Make the intervals honest at 14 days.** The cumulative calibration (0.738 and
 0.683 on two windows, tails 0.165) is what a planner acts on through
 P(shortfall). The per-mine loading that came closest is in the backlog as a fresh
 pre-registered replication on an independent seed (D-040).
-
-**3. Fix the degraded switcher's contrast, then put the axe audits in CI.** The
-last known accessibility defect, and the only browser check still run by hand.

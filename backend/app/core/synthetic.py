@@ -71,6 +71,11 @@ def rnd(value: float, dp: int = 1) -> float:
     return round(value * f) / f
 
 
+# The version of the operational stream below, stamped on every value drawn
+# from it. A named constant, so the API guard (test_api_provenance.py) can tell
+# a version the code defines from one typed into a response.
+SYNTHETIC_OPS_VERSION = "synthetic-ops-v1"
+
 # Calibration anchors. Order-of-magnitude figures consistent with MOIL's
 # publicly reported scale (~1.1-1.3 Mt of manganese ore a year across ~10
 # mines). NOT MOIL's actual operating figures and not presented as such.

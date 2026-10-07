@@ -1606,9 +1606,13 @@ export default function IndiaSatelliteMap({
                         key={l.key}
                         data-layer-button={l.key}
                         onClick={() => onChangeLayer(l.key)}
+                        // Selected is the selected-row token, not a white
+                        // overlay: on bg-white/20 the "ON" measured 3.85:1 and
+                        // "unavailable" 4.43:1 (4.5:1 required). tokens.css
+                        // lists what may sit on accent-muted.
                         className={`px-3 py-1 rounded-md text-left text-xs font-mono transition-colors flex items-center justify-between gap-3 cursor-pointer ${
                           activeLayer === l.key
-                            ? 'bg-white/20 text-text-primary font-bold border border-border-interactive shadow-md'
+                            ? 'bg-accent-muted text-text-primary font-bold border border-border-interactive shadow-md'
                             : 'text-text-tertiary hover:text-text-primary hover:bg-surface-2'
                         }`}
                       >

@@ -10,13 +10,15 @@ in the non-blocking network job, which reports and never fails.
 
 | Job | What it runs | Gates the PR | Runtime on the runner |
 |---|---|---|---|
-| **Frontend** | `tsc --noEmit`, `lint:literals`, Biome no worse than the base commit, `npm run build` | yes | 0:35 (0:27–0:40) |
-| **Backend — fast suites** | every backend suite except Track B, network-marked tests deselected; then confirms the artifact guard and network block were active, and that no committed artifact changed | yes | 1:24 (1:16–1:39) |
+| **Frontend** | `tsc --noEmit`, `lint:literals`, Biome no worse than the base commit, `npm run build`, workflow hardening (`scripts/ci/check-workflow.js`) | yes | 0:35 (0:27–0:40) |
+| **Backend — fast suites** | every backend suite except Track B, network-marked tests deselected — the API provenance guard (`test_api_provenance.py`) among them; then confirms the artifact guard, the network block and the API guard ran, and that no committed artifact changed | yes | 1:24 (1:16–1:39) |
 | **Backend — Track B** | `test_track_b.py` | yes | 12:30 (8:52–12:35) |
-| **Artifacts** | `python -m app.api.batch check` | yes | 0:39 (0:33–0:45) |
+| **Artifacts** | `python -m app.api.batch check`, then `batch pitch-check`: `docs/PITCH_FIGURES.md`, and the figures DEMO.md and JURY_QA.md quote from it, against what the artifacts serve | yes | 0:39 (0:33–0:45), measured before `pitch-check` was added |
 | **Browser — console** | `test:e2e`, `test:dates`, `test:pilot`, `test:scenario`, `test:surface`, `test:nav`, `test:auth`, `test:motion`, `test:fonts` | yes | 5:18 (5:18–5:34) |
 | **Browser — routes-provenance** | `test:routes -- --external-offline`, `test:provenance`, then `test:provenance -- --offline` with the backend stopped | yes | 9:49 (9:49–9:51) |
 | **Browser — cls** | `test:cls` | yes | 9:22 (9:18–9:22) |
+| **Browser — a11y-routes** | `test:a11y`: axe on all 17 routes at 1280 and 375, plus every status label measured | yes | not yet measured on the runner (locally 2:02 for the suite) |
+| **Browser — a11y-map** | `test:a11y-map`: axe on every map layer at 1280 and 375, plus every status label measured | yes | not yet measured on the runner (locally 1:04 for the suite) |
 | **Network — live services** | `pytest -m network`; `test:map`, `test:map -- --evicted` and `test:routes` (basemap check included) against the live services | **no** — writes its outcome to the job summary and a warning annotation | 4:26 (4:04–4:26) |
 
 Runtimes are job wall-clock times on `ubuntu-latest`, setup included, measured
@@ -31,8 +33,37 @@ Node 22 and `npm ci` (`.github/actions/frontend-env`).
 
 **Required checks are a repository setting**, not something this file can set.
 To make the gating jobs required, add them under *Settings → Branches → Branch
-protection → Require status checks*: the seven "gates the PR" rows above. Leave
-"Network — live services" out.
+protection → Require status checks*: the nine "gates the PR" rows above. Leave
+"Network — live services" out. (As of this writing `main` has no branch
+protection, so "gates the PR" means a red check, not a blocked merge.)
+
+## Workflow hardening
+
+What the workflow does about its own attack surface, and the check that keeps
+it so (`scripts/ci/check-workflow.js`, last step of the Frontend job):
+
+- **Third-party actions are pinned to full commit SHAs**, with the release
+  they correspond to in a comment (`actions/checkout@11d5960… # v4.4.0`). A
+  tag such as `v4` can be moved to different code by whoever controls the
+  action's repository; a SHA cannot. The pins are the commits `v4`/`v5`
+  pointed to when they were set, so the change altered no behaviour. Updating
+  an action means looking up the new release's SHA, by hand or with a bot
+  such as Dependabot (not set up here).
+- **`actions/checkout` runs with `persist-credentials: false`**, so the job's
+  token is not left in `.git/config` for later steps to read. No job pushes.
+- **The token is read-only** (`permissions: contents: read`, top level): the
+  jobs check out and test; step summaries and annotations need no scope.
+- **`concurrency`**: a new push to a PR cancels that PR's run in progress; on
+  `main` nothing is cancelled, so every merge commit gets a complete run.
+- **Every job has `timeout-minutes`**, so a hung server or browser costs at
+  most that long, not GitHub's six-hour default.
+
+The check fails on an unpinned action, a checkout without
+`persist-credentials: false`, a missing or write-granting `permissions:`
+block, a missing `concurrency:` block with `cancel-in-progress`, or a job
+without `timeout-minutes`. Against `main`'s workflow files before this change
+it found 15 problems: nine unpinned actions, and six checkouts that kept
+their credentials.
 
 ## Biome: no worse than the base, and how the baseline is pinned
 
@@ -61,6 +92,22 @@ the whole session, the app's background threads included, and is checked by
 non-loopback connection refused, all 75 backend tests outside Track B passed,
 and only two steps of `test_api` reached out. Track B passes under the same
 block.
+
+**The API provenance guard** (`test_api_provenance.py`) reads the API rather
+than the page. It enumerates the live FastAPI route table, calls every GET route
+with valid inputs (a route with no call fails the test), and fails on any number
+in a JSON response that is neither inside a provenance envelope or header nor on
+a short allowlist, each entry with a category (id, count, extent, request echo,
+or /readyz's own service state) and a reason. It also fails on any
+`<name>-v<N>` version string that is not a version constant the code defines.
+It exists because `/health` named a model that does not exist, and two
+endpoints scored invented inputs, and no rendered-page check could see any of
+it: nothing on screen called them. Against commit `2096fbc`, which still had
+all three, it names `random-forest-prospectivity-v1` and
+`scipy-linprog-blend-v1` on `/health`, `heuristic-surface-indicator-score-v1`
+on `/reserve-prediction`, and every figure of both endpoints among 143
+numbers with no provenance. It runs with the network blocked, so the live
+upstreams answer with their labelled fallbacks.
 
 | Test | Needs | Where it runs |
 |---|---|---|
@@ -99,6 +146,26 @@ hostname, which a resolver block cannot see; the app makes none.
 and are applied with Chrome unable to resolve anything but this machine, so the
 fonts are proven to come from the app, not from Google.
 
+### Accessibility: axe, and every status label measured
+
+`test:a11y` (`tools/a11y.js`) audits all 17 routes, and `test:a11y-map`
+(`tools/a11y-map-layers.js`) selects every map layer in turn, each at 1280 and
+375 px. Both run axe-core's WCAG 2.2 AA rules and fail on any serious or
+critical violation. On the same page state, both also run
+`tools/status-labels.js`, which finds every element whose text is in a status
+or accent colour and measures its contrast against what is actually under it
+(4.5:1, or 3:1 for large text). It exists because axe reports a node as a
+violation, a pass or "incomplete", and in one online run it reported the
+layer switcher's labels as none of the three. A label the script cannot
+measure (over an image, or with no opaque background) fails too.
+
+They run with external services unreachable, like every required browser job.
+The map is then degraded, which is when the switcher's "unavailable" labels
+exist at all. Before the fix these audits failed on `main` exactly there: the
+active layer's "ON" at 3.86:1 and "unavailable" at 4.43:1 on the raw
+`bg-white/20` fill. The fix gave the selected layer the `accent-muted` token;
+those labels are now 5.19:1 and 5.96:1.
+
 One check in those suites needs an external service by nature: `test:routes`'
 "at least 8 tiles loaded", which counts ESRI basemap tiles. Measured offline it
 was the only failure (107 of 108 passed). The required job runs the suite with
@@ -118,7 +185,6 @@ without the flag, so the basemap is still checked against the live service.
 | Tool | Why it is not in CI |
 |---|---|
 | `npm run test:map -- --pc-blocked` | Proves the map falls back to the local tile cache. That cache is 39.3 MB fetched from Planetary Computer by `python -m app.api.batch tiles` (560 s) and is gitignored; a CI copy would have to be downloaded from the service the test is about. It is in the DEMO.md pre-flight instead. |
-| `tools/a11y.js`, `tools/a11y-map-layers.js` | **Not yet — they fail offline, on a real defect.** Both gate (exit 1 on any serious violation), and both were run under the same unreachable-services setup as the browser jobs: every route passed except the map, `/console?track=a`, where axe flags two labels in the layer switcher's degraded state — the active layer's "ON" (`#6aa5f0` on `#414447`, 3.85:1 against the 4.5:1 required for 12 px text) and each unreachable tile layer's "unavailable". In an online run made to compare, axe did not evaluate those labels at all — they appear in none of its violations, incomplete or passes — so earlier clean online audits do not show they pass. Fixing them is a change to the app, outside this CI change; once fixed, both audits belong in the browser jobs. |
 | `tools/capture*.js`, `tools/demo-walk.js`, Lighthouse (`npx lighthouse`) | Screenshot and score generators for evidence, not checks. |
 | `python -m app.api.batch all` / `tiles` | Regenerate artifacts and download tiles; CI checks the committed set with `batch check` instead. |
 

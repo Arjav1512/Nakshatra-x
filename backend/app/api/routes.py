@@ -18,7 +18,8 @@ from app.ml.prospectivity import (
     rank_drill_targets,
     scored_grid,
 )
-from app.api.telemetry import build_mine_telemetry
+from app.api.response_provenance import header
+from app.api.telemetry import MINE_SOURCE, build_mine_telemetry
 import csv
 import io
 
@@ -62,6 +63,15 @@ def _warming_response(exc: Warming) -> JSONResponse:
                 f"{exc.eta_seconds:.0f}s, or poll /api/v1/readyz."
             ),
         },
+    )
+
+
+def _track_a_header(result: dict) -> dict:
+    """The provenance of a Track A score: the same model the grid serves."""
+    return header(
+        "Ordinary kriging over a gradient-boosting model of measured Sentinel-2 "
+        "L2A band ratios and SRTM terrain",
+        "derived", model_version=result.get("model_version"),
     )
 
 
@@ -173,6 +183,7 @@ def list_mines(db: Session = Depends(get_db)):
             "longitude": mine.longitude,
             "zone": mine.zone,
             "target_tonnes": mine.target_tonnes,
+            "provenance": header(MINE_SOURCE, "reference"),
         }
         for mine in mines
     ]
@@ -183,7 +194,17 @@ async def mine_environment(mine_id: int, db: Session = Depends(get_db)):
     mine = db.get(MineSite, mine_id)
     if not mine:
         raise HTTPException(status_code=404, detail="Mine not found")
-    return await fetch_weather_signal(mine.latitude, mine.longitude)
+    signal = await fetch_weather_signal(mine.latitude, mine.longitude)
+    # Measured when NASA POWER answered, the labelled synthetic fallback when
+    # it did not — the same split telemetry uses for these three numbers.
+    live = bool(signal.get("is_live"))
+    return {
+        **signal,
+        "provenance": header(
+            signal.get("source") or "weather signal (source not reported)", "measured" if live else "synthetic",
+            vintage=signal.get("window_end"),
+        ),
+    }
 
 @router.get("/mines/{mine_id}/telemetry")
 async def mine_telemetry(mine_id: int, db: Session = Depends(get_db)):
@@ -234,8 +255,19 @@ def track_b_backtest(mine_id: int, span_days: int = Query(150, ge=60, le=400),
     """
     mine_code, _ = _mine_code_or_404(mine_id)
     try:
-        return backtest_mine(mine_code, span_days=span_days,
-                             step_days=step_days, allow_compute=compute)
+        result = backtest_mine(mine_code, span_days=span_days,
+                               step_days=step_days, allow_compute=compute)
+        return {
+            **result,
+            "provenance": header(
+                "Rolling-origin backtest on the seeded synthetic dataset: the model "
+                "is refit before every origin and scored only on days it did not "
+                "see. Metrics describe the model on this dataset, not MOIL's "
+                "operations (PRD 8.2).",
+                "synthetic", model_version=result.get("model_version"),
+                vintage=result.get("computed_at"),
+            ),
+        }
     except NoBacktest as exc:
         # Not an error: only the pilot mine's backtest is committed, because a
         # full run is 216 s and belongs in the batch. The response names the
@@ -277,7 +309,18 @@ def track_b_recommendations(mine_id: int, horizon_days: int = Query(14, ge=1, le
     """Constraint-gated corrective actions. PRD C-1..C-5."""
     mine_code, _ = _mine_code_or_404(mine_id)
     try:
-        return recommend_actions(mine_code, horizon_days=horizon_days)
+        result = recommend_actions(mine_code, horizon_days=horizon_days)
+        from app.ml.forecaster import MODEL_VERSION as FORECASTER
+
+        return {
+            **result,
+            "provenance": header(
+                "Corrective actions generated from the Track B forecast of synthetic "
+                "operational data and checked by the constraint engine; each "
+                "expected effect is computed from that forecast.",
+                "synthetic", model_version=FORECASTER,
+            ),
+        }
     except Warming as exc:
         return _warming_response(exc)
     except ValueError as exc:
@@ -290,7 +333,8 @@ def prospectivity_predict(lat: float = Query(..., ge=-90, le=90),
                           live: bool = Query(True)):
     """Track A point prediction with uncertainty and evidence. PRD A-3, A-4, A-7."""
     try:
-        return predict_point(lat, lng, fetch_live=live)
+        result = predict_point(lat, lng, fetch_live=live)
+        return {**result, "provenance": _track_a_header(result)}
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
 
@@ -299,7 +343,8 @@ def prospectivity_predict(lat: float = Query(..., ge=-90, le=90),
 def prospectivity_targets(top_n: int = Query(10, ge=1, le=50)):
     """Ranked drill targets with the evidence behind each. PRD A-5."""
     try:
-        return rank_drill_targets(top_n=top_n)
+        result = rank_drill_targets(top_n=top_n)
+        return {**result, "provenance": _track_a_header(result)}
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
 
@@ -534,9 +579,21 @@ def calibration_cumulative(mine_code: str | None = None):
             None if mine or not mine_code
             else f"No per-mine calibration recorded for {mine_code}."
         ),
+        # Daily coverage and MAPE, portfolio-wide and for the requested mine.
+        # Absent from artifacts measured before the harness wrote them.
+        "daily": (
+            {
+                "quantity": data["daily"]["quantity"],
+                "horizons_days": data["daily"]["horizons_days"],
+                "portfolio": data["daily"]["portfolio"],
+                "mine": data["daily"]["per_mine"].get(mine_code) if mine_code else None,
+            }
+            if data.get("daily") else None
+        ),
         "window": data["window"],
         "method": data["method"],
         "generated_at": data["generated_at"],
+        "artifact_identity": data.get("artifact_identity"),
         "records_sha256": data["records_sha256"],
         "doc": data["doc"],
         "provenance": data["provenance"],
@@ -547,7 +604,17 @@ def calibration_cumulative(mine_code: str | None = None):
 def prospectivity_metrics():
     """Leave-one-mine-out validation metrics. PRD A-8, D-7."""
     try:
-        return model_metrics()
+        result = model_metrics()
+        return {
+            **result,
+            "provenance": header(
+                "Leave-one-mine-out validation of the Track A model on measured "
+                "Sentinel-2 L2A band ratios and SRTM terrain at the labelled sites: "
+                "each deposit is held out in turn and scored by a model that never "
+                "saw it.",
+                "derived", model_version=result.get("model_version"),
+            ),
+        }
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
 
@@ -558,7 +625,13 @@ async def mine_satellite_imagery(mine_id: int, db: Session = Depends(get_db)):
     mine = db.get(MineSite, mine_id)
     if not mine:
         raise HTTPException(status_code=404, detail="Mine not found")
-    return await query_sentinel_stac(mine.latitude, mine.longitude)
+    stac = await query_sentinel_stac(mine.latitude, mine.longitude)
+    # Scene metadata exists only when STAC answered; then it is measured. When
+    # it did not, the response has no scenes to attribute, and says so.
+    if stac.get("is_live"):
+        stac = {**stac, "provenance": header(stac.get("provider") or "Earth Search STAC", "measured",
+                                              vintage=stac.get("queried_at"))}
+    return stac
 
 @router.post("/upload-operational-csv")
 async def upload_operational_csv(file: UploadFile = File(...)):

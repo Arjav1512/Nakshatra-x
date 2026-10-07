@@ -12,6 +12,7 @@ const fs = require('node:fs')
 const path = require('node:path')
 const puppeteer = require('puppeteer-core')
 const AXE_SOURCE = require('axe-core').source
+const { auditStatusLabels } = require('./status-labels')
 
 const CHROME =
   process.env.CHROME_PATH ||
@@ -48,6 +49,7 @@ function arg(name, fallback) {
 
   const report = []
   let totalSerious = 0
+  let totalStatus = 0
 
   /**
    * Both widths, every route.
@@ -101,6 +103,10 @@ function arg(name, fallback) {
     for (const v of serious) {
       console.log(`    ${v.impact.toUpperCase().padEnd(8)} ${v.id} (${v.nodes}) — ${v.help}`)
     }
+    // After axe, because measuring scrolls each label into view.
+    const status = await auditStatusLabels(page, `${vp} ${route}`)
+    totalStatus += status.fails.length
+    report[report.length - 1].statusLabels = status.rows
     await page.close()
   }
   }
@@ -113,8 +119,9 @@ function arg(name, fallback) {
     fs.writeFileSync(out, JSON.stringify(report, null, 2))
   }
 
+  const ok = totalSerious === 0 && totalStatus === 0
   console.log(
-    `\n${totalSerious === 0 ? 'PASS' : 'FAIL'} — ${totalSerious} serious/critical violations across ${routes.length} route(s) x 2 viewports (1280, 375)`
+    `\n${ok ? 'PASS' : 'FAIL'} — ${totalSerious} serious/critical violations and ${totalStatus} status label(s) below threshold or unverifiable across ${routes.length} route(s) x 2 viewports (1280, 375)`
   )
-  process.exit(totalSerious === 0 ? 0 : 1)
+  process.exit(ok ? 0 : 1)
 })()
