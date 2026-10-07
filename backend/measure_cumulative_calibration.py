@@ -45,7 +45,7 @@ from datetime import date, timedelta
 import numpy as np
 
 from app.ingestion.generator import MINES, generate_all
-from app.ml.forecaster import ProductionForecaster, build_covariates, build_series
+from app.ml.forecaster import ProductionForecaster, build_covariates, build_series, make_features
 
 MAX_H = 14
 DAILY_HORIZONS = (1, 3, 7, 14)
@@ -95,11 +95,18 @@ def run(args: argparse.Namespace) -> int:
         flush=True,
     )
 
+    # D-043 ablation arms: which parts of the crossing fix the forecaster runs
+    # with. "both" is the product; the others exist to measure the parts.
+    arm = getattr(args, "arm", "both")
+    fc_kwargs = {"rearrange": arm in ("both", "crossing"), "day_blocks": arm in ("both", "blocks")}
+    print(f"forecaster arm: {arm} {fc_kwargs}", flush=True)
+
     t_start = time.time()
     n_cum = n_daily = 0
     with open(args.out, "w") as fh:
         fh.write(json.dumps({
             "type": "meta",
+            "forecaster_arm": arm,
             "loading_available": HAVE_LOADING,
             "n_origins": len(origins),
             "first_origin": origins[0].isoformat(),
@@ -110,7 +117,7 @@ def run(args: argparse.Namespace) -> int:
 
         for i, origin in enumerate(origins, 1):
             t0 = time.time()
-            fc = ProductionForecaster().fit(
+            fc = ProductionForecaster(**fc_kwargs).fit(
                 series, cov, train_end=origin - timedelta(days=1),
                 horizons=tuple(full), opencast=opencast,
             )
@@ -119,13 +126,33 @@ def run(args: argparse.Namespace) -> int:
             for code in codes:
                 if code not in fc.models:
                     continue
-                res = fc.residuals.get(code)
-                if res is None:
-                    continue
                 rho_mine = float(getattr(fc, "rho_for", lambda _c: 0.0)(code))
 
                 for g in sorted({k[1] for k in series if k[0] == code}):
                     s = series[(code, g)]
+                    # This grade's residuals: its column of the day table, or
+                    # the mine's interleaved series in the arms without blocks.
+                    res = fc.residual_block(code, g)
+                    if res is None:
+                        continue
+                    # The raw model outputs at the daily horizons, to say which
+                    # daily rows crossed before anything sorted them (D-043 A4).
+                    Xd = np.array([
+                        make_features(origin, h, s, cov, code, g, opencast.get(code, False), fc.epoch)
+                        for h in DAILY_HORIZONS
+                    ], dtype=float)
+                    rq = np.vstack([fc.models[code][q].predict(Xd) for q in fc.quantiles])
+                    raw_crossed = {
+                        int(h): bool(rq[0][i] > rq[1][i] or rq[1][i] > rq[2][i] or rq[0][i] > rq[2][i])
+                        for i, h in enumerate(DAILY_HORIZONS)
+                    }
+                    # And whether this forecaster's interval crossed after its
+                    # conformal step, before any second sort (D-043 A4, amended).
+                    conformal_crossed = {}
+                    for i, h in enumerate(DAILY_HORIZONS):
+                        w = fc.conformal_width.get((code, int(h)), fc.conformal_width_default.get(code, 0.0))
+                        a_, b_, c_ = sorted((rq[0][i], rq[1][i], rq[2][i]))
+                        conformal_crossed[int(h)] = bool(a_ - w > b_ or b_ > c_ + w)
 
                     # Daily rows, for the "unchanged by the loading" identity and
                     # for the split's effect on MAPE and daily coverage.
@@ -140,6 +167,8 @@ def run(args: argparse.Namespace) -> int:
                             "mine": code, "grade": g, "h": int(h),
                             "actual": float(a), "q50": p["q50"],
                             "q10": p["q10"], "q90": p["q90"],
+                            "raw_crossed": raw_crossed[int(h)],
+                            "conformal_crossed": conformal_crossed[int(h)],
                         }) + "\n")
                         n_daily += 1
 
@@ -399,6 +428,68 @@ def _daily_stats(daily: list[dict]) -> dict:
     }
 
 
+def _paired_daily(main_daily: list[dict], branch_daily: list[dict], n_boot: int) -> dict | None:
+    """
+    D-043 A1 and A4, on the daily rows: paired with main on
+    (origin, mine, grade, horizon).
+
+    - every branch row must satisfy q10 <= q50 <= q90;
+    - q50 may differ from main's only where a crossing entered: the raw model
+      outputs crossed (`raw_crossed`, recorded by the branch's run; the quantile
+      models are the same on both sides) or main's own returned interval was
+      crossed after its conformal step;
+    - |coverage - 0.80| compared with a cluster bootstrap over origin dates,
+      positive = branch closer.
+    """
+    def key(r):
+        return (r["origin"], r["mine"], r["grade"], r["h"])
+
+    m_by = {key(r): r for r in main_daily}
+    pairs = [(m_by[key(b)], b) for b in branch_daily if key(b) in m_by]
+    if not pairs:
+        return None
+    crossed_branch = sum(1 for _, b in pairs if not (b["q10"] <= b["q50"] <= b["q90"]))
+    changed = [(m, b) for m, b in pairs if abs(m["q50"] - b["q50"]) > 1e-9]
+    main_after = lambda m: m["q10"] > m["q50"] or m["q50"] > m["q90"]  # noqa: E731
+    changed_raw = sum(1 for _, b in changed if b.get("raw_crossed"))
+    changed_after = sum(1 for m, b in changed if not b.get("raw_crossed") and main_after(m))
+    changed_branch = sum(1 for m, b in changed
+                         if not b.get("raw_crossed") and not main_after(m) and b.get("conformal_crossed"))
+    changed_neither = len(changed) - changed_raw - changed_after - changed_branch
+    n_raw = sum(1 for _, b in pairs if b.get("raw_crossed"))
+    n_after = sum(1 for m, b in pairs if main_after(m))
+
+    inside = lambda r: r["q10"] <= r["actual"] <= r["q90"]  # noqa: E731
+    im = np.array([inside(m) for m, _ in pairs], dtype=bool)
+    ib = np.array([inside(b) for _, b in pairs], dtype=bool)
+    keys = sorted({m["origin"] for m, _ in pairs})
+    by = defaultdict(list)
+    for i, (m, _) in enumerate(pairs):
+        by[m["origin"]].append(i)
+
+    def stat(sel):
+        return abs(np.mean(im[sel]) - 0.80) - abs(np.mean(ib[sel]) - 0.80)
+
+    boot = np.array([stat(idx) for idx in _boot_indices(keys, by, n_boot)])
+    ms = _daily_stats([m for m, _ in pairs])
+    bs = _daily_stats([b for _, b in pairs])
+    return {
+        "n_rows": len(pairs),
+        "branch_rows_crossed": crossed_branch,
+        "q50_changed": len(changed),
+        "q50_changed_where_raw_crossed": changed_raw,
+        "q50_changed_where_main_crossed_after_conformal": changed_after,
+        "q50_changed_where_branch_crossed_after_conformal": changed_branch,
+        "q50_changed_where_nothing_crossed": changed_neither,
+        "rows_raw_crossed": n_raw,
+        "rows_main_crossed_after_conformal": n_after,
+        "main": ms,
+        "branch": bs,
+        "delta_coverage_toward_nominal": round(float(stat(np.arange(len(pairs)))), 4),
+        "delta_coverage_ci": _ci(boot),
+    }
+
+
 def analyse(args: argparse.Namespace) -> int:
     bmeta, bcum, bdaily = _load(args.branch)
     keys, by = _clusters(bcum)
@@ -426,6 +517,7 @@ def analyse(args: argparse.Namespace) -> int:
         if st:
             report["arms"]["main"] = st
         report["daily"] = {"main": _daily_stats(mdaily), "branch": _daily_stats(bdaily)}
+        report["daily_paired"] = _paired_daily(mdaily, bdaily, args.n_boot)
         # Same origin dates on both sides?
         report["origin_dates_identical"] = sorted(mkeys) == sorted(keys)
 
@@ -740,6 +832,8 @@ def main(argv: list[str]) -> int:
     r.add_argument("--span", type=int, default=340)
     r.add_argument("--step", type=int, default=14)
     r.add_argument("--out", required=True)
+    r.add_argument("--arm", choices=("both", "crossing", "blocks", "none"), default="both",
+                   help="D-043 ablation: which parts of the crossing fix the forecaster runs")
     r.set_defaults(fn=run)
 
     a = sub.add_parser("analyse")
