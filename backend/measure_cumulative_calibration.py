@@ -591,6 +591,12 @@ def artifact(args: argparse.Namespace) -> int:
 
     Only the shipped configuration is reported — the `rho0` arm, which is the
     model as it runs. The declined loading's arms are in docs/CALIBRATION.md.
+
+    The daily figures are written too: coverage of the daily 80% band and the
+    median's MAPE, portfolio-wide and per mine, at horizons 1, 3, 7 and 14 days,
+    with the same cluster bootstrap over origin dates. They were quoted in the
+    docs and the pitch (0.761, 10.00%) from a one-off analysis and stored in no
+    artifact, so nothing could check them against what is served.
     """
     import hashlib
     import time as _time
@@ -599,7 +605,7 @@ def artifact(args: argparse.Namespace) -> int:
     from app.ml.forecaster import MODEL_VERSION
 
     raw = open(args.records, "rb").read()
-    meta, cum, _daily = _load(args.records)
+    meta, cum, daily = _load(args.records)
     if not cum:
         print("no cumulative records")
         return 1
@@ -621,6 +627,23 @@ def artifact(args: argparse.Namespace) -> int:
             "design_effect": st.get("design_effect"),
         }
 
+    def daily_for(recs: list[dict]) -> dict | None:
+        if not recs:
+            return None
+        st = _daily_stats(recs)
+        keys, by = _clusters(recs)
+        a = np.array([r["actual"] for r in recs], dtype=float)
+        inside = (a >= np.array([r["q10"] for r in recs], dtype=float)) & (
+            a <= np.array([r["q90"] for r in recs], dtype=float))
+        cov_b = np.array([float(np.mean(inside[idx])) for idx in _boot_indices(keys, by, args.n_boot)])
+        return {
+            "coverage_80": round(st["coverage_80"], 3),
+            "coverage_80_ci95": _ci(cov_b),
+            "mape_pct": round(st["mape_pct"], 2),
+            "n_predictions": st["n"],
+            "n_origin_dates": len(keys),
+        }
+
     portfolio = stats_for(cum)
     per_mine = {}
     for mine in sorted({r["mine"] for r in cum}):
@@ -637,6 +660,18 @@ def artifact(args: argparse.Namespace) -> int:
         "model_version": MODEL_VERSION,
         "portfolio": portfolio,
         "per_mine": per_mine,
+        "daily": {
+            "quantity": (
+                "share of realised daily production inside the forecast's 80% band, "
+                "and the MAPE of its median, at horizons of 1, 3, 7 and 14 days"
+            ),
+            "horizons_days": list(DAILY_HORIZONS),
+            "portfolio": daily_for(daily),
+            "per_mine": {
+                m: daily_for([r for r in daily if r["mine"] == m])
+                for m in sorted({r["mine"] for r in daily})
+            },
+        },
         "window": {
             "first_origin": meta.get("first_origin"),
             "last_origin": meta.get("last_origin"),
@@ -686,6 +721,10 @@ def artifact(args: argparse.Namespace) -> int:
           f"ESS {p['effective_sample_size']}")
     for m, st in per_mine.items():
         print(f"  {m:14} coverage {st['coverage_80']} {st['coverage_80_ci95']}  n={st['n_windows']}")
+    dp = out["daily"]["portfolio"]
+    if dp:
+        print(f"  daily      coverage {dp['coverage_80']} {dp['coverage_80_ci95']}  "
+              f"MAPE {dp['mape_pct']}%  n={dp['n_predictions']} at {dp['n_origin_dates']} dates")
     return 0
 
 

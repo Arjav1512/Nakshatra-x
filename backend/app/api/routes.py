@@ -579,9 +579,21 @@ def calibration_cumulative(mine_code: str | None = None):
             None if mine or not mine_code
             else f"No per-mine calibration recorded for {mine_code}."
         ),
+        # Daily coverage and MAPE, portfolio-wide and for the requested mine.
+        # Absent from artifacts measured before the harness wrote them.
+        "daily": (
+            {
+                "quantity": data["daily"]["quantity"],
+                "horizons_days": data["daily"]["horizons_days"],
+                "portfolio": data["daily"]["portfolio"],
+                "mine": data["daily"]["per_mine"].get(mine_code) if mine_code else None,
+            }
+            if data.get("daily") else None
+        ),
         "window": data["window"],
         "method": data["method"],
         "generated_at": data["generated_at"],
+        "artifact_identity": data.get("artifact_identity"),
         "records_sha256": data["records_sha256"],
         "doc": data["doc"],
         "provenance": data["provenance"],
