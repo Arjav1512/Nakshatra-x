@@ -196,7 +196,7 @@ def rolling_origin_backtest(
             if any(a is None for a in actuals):
                 continue
             dense = fc.predict(mine_code, grade, origin, full, series, cov)
-            sims = _cumulative_paths(dense, fc.residuals.get(mine_code))
+            sims = _cumulative_paths(dense, fc.residual_block(mine_code, grade))
             if sims is None:
                 continue
             realised = float(sum(float(a) for a in actuals))

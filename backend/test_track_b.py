@@ -315,21 +315,26 @@ def test_cumulative_aggregation_beats_independent_days():
     origin = st["end"]
     fc = _forecaster(code, origin)
     assert code in fc.models
-    residuals = fc.residuals.get(code)
-    assert residuals is not None and len(residuals) >= 100, "no residual series was kept"
-
-    # The residuals must actually carry persistence; if they did not, the block
-    # bootstrap would be an expensive way to reproduce independence.
-    lag1 = float(np.corrcoef(residuals[:-1], residuals[1:])[0, 1])
-    assert lag1 > 0.2, f"residual lag-1 autocorrelation {lag1:.3f} — nothing to preserve"
-
     grades = sorted({k[1] for k in st["series"] if k[0] == code})
+    blocks_by_grade = {g: fc.residual_block(code, g) for g in grades}
+    for g, res in blocks_by_grade.items():
+        assert res is not None and len(res) >= 100, f"no residual series was kept for {g}"
+
+    # The residuals must actually carry persistence across days; if they did
+    # not, the block bootstrap would be an expensive way to reproduce
+    # independence. Pearson lag-1 of each grade's daily series — its column of
+    # the day table — averaged over the grades (DECISIONS.md D-043, A2). It was
+    # computed on a series that interleaved three or four grades per day, so its
+    # lag-1 measured same-day correlation between grades as much as persistence.
+    lag1 = float(np.mean([np.corrcoef(r[:-1], r[1:])[0, 1] for r in blocks_by_grade.values()]))
+    assert lag1 > 0.2, f"mean residual lag-1 autocorrelation {lag1:.3f} — nothing to preserve"
+
     horizons = list(range(1, 15))
     wider = 0
     for g in grades:
         series = st["series"][(code, g)]
         preds = fc.predict(code, g, origin, horizons, series, st["cov"])
-        blocks = _cumulative_paths(preds, residuals)
+        blocks = _cumulative_paths(preds, blocks_by_grade[g])
         indep = _cumulative_paths(preds, None)
         assert blocks is not None and indep is not None
         # Correlated days must give a wider cumulative distribution.

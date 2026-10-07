@@ -179,6 +179,13 @@ def seasonal_naive(series: dict[date, float], target: date) -> float:
     return _mean_lag(series, target, 28)
 
 
+#: The residual sigma floor, as a fraction of the mine's median one-step
+#: sigma (DECISIONS.md D-043, F2). Pre-registered at 0.25 before any outcome was
+#: measured, as a guard against degenerate bands rather than a calibration
+#: lever. Not to be tuned.
+SIGMA_FLOOR_FRACTION = 0.25
+
+
 class ProductionForecaster:
     """
     Per-mine quantile GBT over all grades of that mine.
@@ -193,15 +200,27 @@ class ProductionForecaster:
         quantiles: Sequence[float] = DEFAULT_QUANTILES,
         random_state: int = 20260921,
         calibration_fraction: float = 0.25,
+        rearrange: bool = True,
+        day_blocks: bool = True,
     ):
         self.quantiles = tuple(quantiles)
         self.random_state = random_state
         self.calibration_fraction = calibration_fraction
+        #: D-043 F1 + F2: sort every row's predicted quantiles before they are
+        #: used, again after the conformal step, and floor the residual sigma.
+        #: Off only to measure the ablation; the product runs with it on.
+        self.rearrange = rearrange
+        #: D-043 F3: simulate cumulative paths from blocks of days, every grade
+        #: of the mine on the same days. Off only to measure the ablation.
+        self.day_blocks = day_blocks
         self.models: dict[str, dict[float, HistGradientBoostingRegressor]] = {}
-        #: Standardised one-step residuals per mine, in time order. Used to
-        #: aggregate daily distributions into a cumulative one without assuming
-        #: the days are independent — see the note in `fit`.
+        #: Standardised one-step residuals per mine, rows of all its grades in
+        #: calibration order (several per day). What the aggregation used before
+        #: D-043; kept for the ablation and for diagnostics.
         self.residuals: dict[str, np.ndarray] = {}
+        #: The same residuals as a table per mine: one row per target day, one
+        #: column per grade, complete days only — see `residual_block`.
+        self.residual_days: dict[str, dict] = {}
         # Conformal width correction, in tonnes, per (mine, horizon).
         # A single global width cannot serve both ends of the horizon range:
         # measured at 0.475 coverage for h=1 against 0.75 for h=14, because
@@ -242,7 +261,7 @@ class ProductionForecaster:
                         origin, h, series, cov, mine, grade,
                         self.opencast.get(mine, False), self.epoch,
                     )
-                    by_mine[mine].append((x, float(series[target]), origin))
+                    by_mine[mine].append((x, float(series[target]), origin, grade))
 
         for mine, samples in by_mine.items():
             if len(samples) < 200:
@@ -301,9 +320,17 @@ class ProductionForecaster:
                 fits[q] = m
             self.models[mine] = fits
 
+            # All quantiles for the calibration rows, one row of `cal_q` per
+            # quantile. The models are fitted independently, so a row can come
+            # out crossed — on one Balaghat day q90 fell below q50 and onto q10
+            # (DECISIONS.md D-043). Sorting each column is the monotone
+            # rearrangement (Chernozhukov, Fernandez-Val & Galichon, 2010): it
+            # changes nothing on a row that did not cross.
             q_lo, q_hi = self.quantiles[0], self.quantiles[-1]
-            lo_cal = fits[q_lo].predict(X[cal_idx])
-            hi_cal = fits[q_hi].predict(X[cal_idx])
+            cal_q = np.vstack([fits[q].predict(X[cal_idx]) for q in self.quantiles])
+            if self.rearrange:
+                cal_q = np.sort(cal_q, axis=0)
+            lo_cal, hi_cal = cal_q[0], cal_q[-1]
             # Conformity score: signed distance outside the band.
             scores = np.maximum(lo_cal - y[cal_idx], y[cal_idx] - hi_cal)
             alpha = 1.0 - (q_hi - q_lo)
@@ -346,15 +373,22 @@ class ProductionForecaster:
             # correlation structure is assumed: whatever persistence is in the
             # residuals is reproduced by sampling them in runs.
             #
-            # One-step (h=1) calibration rows only, which is one observation per
-            # origin and therefore a genuine daily series.
+            # One-step (h=1) calibration rows only: one per grade per day. This
+            # comment used to say "one observation per origin and therefore a
+            # genuine daily series"; a mine has several grades, so the rows of
+            # a day were interleaved, and a block of residuals spanned a
+            # quarter as many days as it had entries (D-043). The day table
+            # below keeps the days as days.
             h_col = X[cal_idx][:, 0].astype(int)
-            one_step = cal_idx[h_col == 1]
+            step1 = h_col == 1
+            one_step = cal_idx[step1]
             if len(one_step) >= 30:
-                mid = fits[0.5].predict(X[one_step]) if 0.5 in fits else None
-                lo = fits[q_lo].predict(X[one_step])
-                hi = fits[q_hi].predict(X[one_step])
-                centre = mid if mid is not None else (lo + hi) / 2.0
+                lo = cal_q[0][step1]
+                hi = cal_q[-1][step1]
+                centre = (
+                    cal_q[self.quantiles.index(0.5)][step1]
+                    if 0.5 in self.quantiles else (lo + hi) / 2.0
+                )
 
                 # Standardise in LOG space, because that is where they are
                 # applied.
@@ -372,12 +406,48 @@ class ProductionForecaster:
                 if int(np.sum(ok)) >= 30:
                     sd_day = (np.log(hi[ok]) - np.log(lo[ok])) / (2 * z90)
                     sd_day = np.maximum(sd_day, 1e-6)
+                    if self.rearrange:
+                        # D-043 F2. A band far narrower than the mine's typical
+                        # one is a near-crossing, not information: on the failing
+                        # day the sigma was 0.4% of the median, and dividing by
+                        # it gave a residual of -626 that inflated the mine's
+                        # residual scale sevenfold.
+                        sd_day = np.maximum(
+                            sd_day, SIGMA_FLOOR_FRACTION * float(np.median(sd_day))
+                        )
                     r = (np.log(y[one_step][ok]) - np.log(centre[ok])) / sd_day
-                    r = r[np.isfinite(r)]
+                    finite = np.isfinite(r)
+                    r = r[finite]
                     if len(r) >= 30:
                         sd = float(np.std(r))
-                        self.residuals[mine] = (r / sd if sd > 1e-9 else r).astype(float)
+                        z = (r / sd if sd > 1e-9 else r).astype(float)
+                        self.residuals[mine] = z
+                        rows = one_step[ok][finite]
+                        self.residual_days[mine] = _day_table(
+                            [samples[i][2] + timedelta(days=1) for i in rows],
+                            [samples[i][3] for i in rows],
+                            z,
+                        )
         return self
+
+    def residual_block(self, mine_code: str, grade: str) -> np.ndarray | None:
+        """
+        The residuals a grade's cumulative distribution is simulated from.
+
+        With day blocks (D-043 F3): that grade's column of the mine's day table
+        — one value per day, days in order, and the same days for every grade.
+        Paths drawn with one seed therefore use the same days for every grade
+        of the mine, so the correlation between grades on a day is carried
+        along with the persistence across days.
+
+        Without: the mine's interleaved series, as it was before D-043.
+        """
+        if not self.day_blocks:
+            return self.residuals.get(mine_code)
+        t = self.residual_days.get(mine_code)
+        if t is None or grade not in t["grades"]:
+            return None
+        return t["table"][:, t["grades"].index(grade)]
 
     def predict(
         self,
@@ -415,6 +485,10 @@ class ProductionForecaster:
             # Conformal widening — calibrated on held-out data at fit time.
             lo -= width
             hi += width
+            if self.rearrange:
+                # A negative conformal width moves the endpoints towards each
+                # other and can cross them, or the median (D-043 F1).
+                lo, mid, hi = sorted((lo, mid, hi))
             out[h] = {
                 "q10": max(0.0, lo),
                 "q50": max(0.0, mid),
@@ -422,6 +496,28 @@ class ProductionForecaster:
                 "conformal_width_tonnes": round(width, 2),
             }
         return out
+
+
+def _day_table(days: list[date], grades: list[str], z: np.ndarray) -> dict:
+    """
+    Standardised one-step residuals as a table: one row per target day, one
+    column per grade (D-043 F3).
+
+    Only days on which every grade has a residual are kept, so a block of rows
+    is a block of days for every grade at once; how many were dropped is
+    recorded. The scale was fixed before this, across all of the mine's rows.
+    """
+    grade_order = tuple(sorted(set(grades)))
+    cells = {(d, g): float(v) for d, g, v in zip(days, grades, z)}
+    all_days = sorted(set(days))
+    complete = [d for d in all_days if all((d, g) in cells for g in grade_order)]
+    table = np.array([[cells[(d, g)] for g in grade_order] for d in complete], dtype=float)
+    return {
+        "grades": grade_order,
+        "days": complete,
+        "table": table.reshape(len(complete), len(grade_order)),
+        "dropped_days": len(all_days) - len(complete),
+    }
 
 
 def shortfall_probability(
