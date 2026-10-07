@@ -1209,3 +1209,157 @@ These are recorded as strict xfails (`test_track_b.py`,
 **No pitch dataset is frozen.** The follow-up — dependence across horizons
 1–14 within a forecast path, per grade and for mine totals, and whether it
 explains #20's 2.5–3.4× gap — is its own change, with its own pre-registration.
+
+## D-044 — P(shortfall) is withdrawn from the stage, and the freeze rule is amended
+
+**Written 2026-10-07T20:24Z (2026-10-08 01:54 IST), before the freeze dataset
+was generated and before any check was run on it.** This entry is committed and
+pushed before `batch all` runs for the new date. D-043 found the 14-day
+aggregation behind P(shortfall) unsound on every dataset measured, and no fix
+has passed. Until one does (D-045, next), the console stops presenting it, and
+a figure that is not presented no longer holds up the freeze.
+
+**Seen before writing this, and disclosed:**
+- the committed forecasts (dataset ending 2026-09-20): every mine's worst-grade
+  P(shortfall) is between 0.88 and 1.00, and the per-grade and mine-level
+  expected shortfalls quoted below;
+- everything in D-043 and `docs/QUANTILE_CROSSING.md`.
+
+Nothing has been generated or measured on the dataset this entry freezes.
+
+### 1. Hidden, not labelled
+
+The other option was to keep the figure on screen, marked "under validation —
+not calibrated". It is hidden instead, because:
+
+1. **The defect has no direction a reader could allow for.** It is not a known
+   bias of known size. On the eight datasets D-043 measured, the 14-day
+   distribution was:
+   - narrower than independent days on five, which makes P overconfident;
+   - saturated on two;
+   - moved by 10% or more by a single residual on all eight.
+
+   Next to a label, 0.97 still reads as 0.97, and nobody can say whether the
+   truth is higher or lower.
+2. **A number on a projected screen travels without its label:** in a photo, in
+   a judge's notes, in the CSV export.
+3. **It ranks almost nothing.** Worst-grade P is between 0.88 and 1.00 on all
+   ten mines in the committed forecasts. The tonnes already order them.
+4. **Hiding costs the follow-up nothing.** The API still computes and serves
+   `p_shortfall` and `delta_shortfall_probability`, unchanged. D-045 compares
+   against exactly the construction main serves, and putting P back is a
+   console change made after a pass.
+
+**What leaves the screen:**
+- every P(shortfall), on the portfolio cards, the mobile summary, the mine's
+  answer row and the per-grade chips;
+- the risk band (colour, and high / elevated / low), which was a set of
+  thresholds on P;
+- ΔP(shortfall) on corrective actions, which is derived from P;
+- the 14-day calibration panel, which described P's distribution.
+
+Where P was, the console says it is withdrawn while under validation, shows no
+number, and links to `docs/QUANTILE_CROSSING.md`. No other figure derived from
+the 14-day distribution is displayed: the cumulative p10 and p90 never were.
+
+### 2. What the console presents instead
+
+**The focal number is expected shortfall in tonnes, summed over grades:**
+Σ over grades of max(0, plan − expected production).
+
+It is not the mine-level figure in the API's `portfolio` block, which is
+max(0, Σ plan − Σ expected). That one lets a surplus in one grade cancel a
+deficit in another, and PRD §3 says grades are not fungible. The console's own
+grade panel says the same. On the committed forecasts the two differ at four
+mines:
+
+| Mine | Netted (served today) | Summed over grades |
+|---|---|---|
+| Beldongri | 0 t | 0.5 t |
+| Gumgaon | 0 t | 10.2 t |
+| Mansar | 128.0 t | 150.5 t |
+| Chikla | 164.4 t | 169.9 t |
+
+The sum is computed in the console from the per-grade figures the API serves.
+No fingerprinted module changes, so no artifact moves because of it.
+
+**It sits with the daily 80% intervals, as now, and their measured
+calibration.** That calibration replaces the 14-day panel:
+- daily coverage across all ten mines, and for the open mine, each with its 95%
+  cluster-bootstrap interval;
+- read from the calibration artifact's `daily` block, which is already served.
+
+**Why expected shortfall can be shown when P cannot.** It is a mean. By
+linearity it does not depend on how the days are correlated, which is the
+premise D-043 falsified; it depends only on each day's marginal distribution. A
+check is added for this, below, so it is tested rather than argued.
+
+### 3. The freeze rule, amended
+
+This replaces `docs/DEMO.md`'s "a dataset a test fails on is not frozen":
+
+- **A dataset is frozen when every check covering a presented figure passes on
+  it.**
+- **Figures that are not presented don't block a freeze.** If a check covering
+  only withdrawn figures fails on the frozen dataset, that failure is recorded,
+  not loosened:
+  - it is marked strict xfail, conditioned on that dataset's end date only;
+  - its assertion and threshold are unchanged;
+  - its failure message is quoted in the PR.
+- **P(shortfall) and the 14-day cumulative figures** — coverage, interval,
+  tails, and each mine's 14-day coverage — **are excluded from
+  `docs/PITCH_FIGURES.md` until a fix passes its pre-registered test** (D-045).
+  A test enforces the exclusion, so a figure cannot drift back in unnoticed.
+- **The strict xfails already in place stay as they are.** If one of them passes
+  on the frozen dataset (it is strict, so CI fails), that is reported, and the
+  freeze is not committed in this change.
+
+**Presented figures, and the checks that cover them** — all must pass on the
+frozen dataset:
+
+| Presented | Checks |
+|---|---|
+| Expected shortfall (tonnes), plan target, expected production | `test_track_b.py`: grade-aware, no future information, and the new check below; `test_served_intervals.py`; `batch check`; `test:e2e`, `test:dates`, `demo-walk` |
+| Daily 80% intervals | `test_served_intervals.py`; `test:band` |
+| Daily calibration (portfolio, each mine) | `test_calibration_harness.py`; `batch check`; `pitch-check` |
+| Pilot backtest: MAPE vs baseline, daily coverage | `test_track_b.py::test_backtest_gbt_beats_baseline_and_is_calibrated`; `pitch-check` |
+| Corrective actions | `test_track_b.py` constraint tests; `test_api*.py` |
+| Track A AUC, CI, ablation | `test_track_a.py`; `pitch-check` |
+| Anything rendered | `provenance-guard`, `test_api_provenance.py`, `lint:literals` |
+
+The rest of the backend suite and the browser console group run too, as on any
+change.
+
+**Withdrawn figures, and their checks** — these don't block the freeze:
+- `test_track_b.py::test_shortfall_probability_is_a_probability`;
+- `test_track_b.py::test_cumulative_aggregation_beats_independent_days`;
+- `test_track_b.py::test_backtest_reports_cumulative_calibration`;
+- `test_track_b.py::test_residuals_persist_across_days`, already a strict xfail;
+- `test_track_b_dates.py`, strict xfails on fixed dates, so unaffected by the
+  freeze.
+
+**The new check.** On the frozen dataset, for each of the pilot's grades:
+- compute the exact expectation of the 14-day total, Σ over days of the mean
+  over residuals r of exp(μ_d + σ_d r);
+- the served `expected_cumulative_tonnes` must lie within four Monte Carlo
+  standard errors of it, plus 0.05 t of rounding. The standard error is the
+  sd of the same 4,000 paths divided by √4000.
+
+Four standard errors, and not a tolerance tuned to the data: a correct
+implementation fails it about once in 16,000 grades.
+
+### 4. The freeze
+
+- **End date: 2026-10-07**, the latest DEMO.md permits (yesterday, IST). The
+  forecast window is 8–21 October 2026.
+- **One date.** It was chosen before anything was generated, and no other date
+  will be tried. If a check covering a presented figure fails, nothing is
+  frozen and the failure is reported.
+- **`docs/PITCH_FIGURES.md` will hold:**
+  - the pilot backtest: MAPE against the baseline, daily coverage, predictions,
+    origins;
+  - across all ten mines: daily coverage with its 95% interval, and daily MAPE;
+  - Balaghat's daily coverage with its 95% interval, from the calibration
+    artifact;
+  - Track A: leave-one-mine-out AUC with its 95% interval, the ablation, and the
+    random split for contrast.
