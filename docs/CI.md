@@ -14,7 +14,7 @@ in the non-blocking network job, which reports and never fails.
 | **Backend — fast suites** | every backend suite except Track B, network-marked tests deselected — the API provenance guard (`test_api_provenance.py`) among them; then confirms the artifact guard, the network block and the API guard ran, and that no committed artifact changed | yes | 1:24 (1:16–1:39) |
 | **Backend — Track B** | `test_track_b.py` | yes | 12:30 (8:52–12:35) |
 | **Artifacts** | `python -m app.api.batch check`, then `batch pitch-check`: `docs/PITCH_FIGURES.md`, and the figures DEMO.md and JURY_QA.md quote from it, against what the artifacts serve | yes | 0:39 (0:33–0:45), measured before `pitch-check` was added |
-| **Browser — console** | `test:e2e`, `test:dates`, `test:pilot`, `test:scenario`, `test:surface`, `test:nav`, `test:auth`, `test:motion`, `test:fonts` | yes | 5:18 (5:18–5:34) |
+| **Browser — console** | `test:e2e`, `test:dates`, `test:pilot`, `test:scenario`, `test:surface`, `test:nav`, `test:auth`, `test:motion`, `test:fonts`, `test:band` (the median never leaves its band, every mine and grade), `test:blending` (the tonnage entered reaches the solver) | yes | 5:18 (5:18–5:34) |
 | **Browser — routes-provenance** | `test:routes -- --external-offline`, `test:provenance`, then `test:provenance -- --offline` with the backend stopped | yes | 9:49 (9:49–9:51) |
 | **Browser — cls** | `test:cls` | yes | 9:22 (9:18–9:22) |
 | **Browser — a11y-routes** | `test:a11y`: axe on all 17 routes at 1280 and 375, plus every status label measured | yes | not yet measured on the runner (locally 2:02 for the suite) |
