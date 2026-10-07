@@ -886,3 +886,204 @@ command; an explicit value still wins. The record travels with the artifacts, so
 `git checkout -- backend/artifacts data/synthetic` restores the committed default
 with them. The module sits outside the forecast's import chain, so no
 artifact's code fingerprint moved.
+
+## D-043 — Quantile crossing: what is measured, what is changed, and the rule it must pass
+
+**Written 2026-10-07T11:21Z, before any measurement in this change.** Nothing
+below has been run on the fixed code. This entry is committed and pushed before
+the crossing count, the fix, or any calibration figure exists, so that the
+numbers cannot choose the rule.
+
+### What was already known when this was written
+
+Disclosed, because a pre-registration that hides prior looks is worth nothing.
+All of it comes from the read-only diagnosis of 2026-10-07 on main's forecaster
+(the code this entry changes), with a script that reproduced the served residual
+series exactly:
+
+- **The defect.** On the dataset ending 2026-10-06, Balaghat's 14-day
+  block-bootstrap distribution was *narrower* than independent days for all four
+  grades (ferro manganese sd 45 vs 106 t); Beldongri for one grade of three; the
+  other eight mines not. `test_track_b.py::test_cumulative_aggregation_beats_independent_days`
+  failed there and passes on the dataset ending 2026-09-20.
+- **The row behind it.** Balaghat dioxide, origin 2026-07-10, target 2026-07-11:
+  actual 26.0 t, q10 30.6, q50 33.4, q90 30.6. The three quantile models are
+  fitted independently and **crossed**: q90 fell below q50 and onto q10, an "80%
+  band" 0.03 t wide with the median outside it. Its log-space sigma 0.000398 gave
+  a raw residual of −626.6 and, after dividing by the mine's residual sd, −26.47.
+  That sd was 23.67 with the row and 3.24 without it, so every other residual was
+  shrunk about 7×. Other crossed rows were visible in the same listing
+  (2026-07-09 dioxide q50 40.1 > q90 35.5; 2026-09-29 blast furnace q50 181.0 <
+  q10 190.0). The actual is 78% of q50: an ordinary day, not a generated event.
+- **Sigma statistics seen.** Balaghat one-step log-sigma, 6 Oct: median 0.0967,
+  5th percentile 0.0381, minimum 0.000398. 20 Sep: median 0.1041, 5th percentile
+  0.0558, minimum 0.0118. The floor below was chosen with these in view; no
+  calibration or coverage outcome of any fixed variant has been seen.
+- **Pearson lag-1** of Balaghat's residual series: 0.002 on 6 Oct (rank 0.594),
+  0.501 on 20 Sep.
+- **The residual series interleaves grades.** It is built from the one-step
+  calibration rows of all of a mine's grades, sorted by origin: three or four
+  rows per day, not "one observation per origin" as the code comment says.
+- **Main's figures** (the comparison point). Dataset ending 20 Sep: 14-day
+  coverage 0.738 [0.700, 0.777], tails 0.165, Balaghat 0.667; daily coverage
+  0.761 [0.733, 0.786], MAPE 10.00%; pilot backtest MAPE 11.67% vs 14.81%,
+  coverage 0.812. Dataset ending 6 Oct: 14-day coverage 0.683 [0.636, 0.728],
+  tails 0.208, Balaghat 0.677; pilot backtest 11.00% vs 13.22%, 0.819.
+
+### 1. Measure crossing first, on main's code
+
+`backend/measure_quantile_crossing.py`, on both datasets (ending 2026-09-20 and
+2026-10-06), before any fix. For each row (q10, q50, q90) it counts three kinds
+of crossing: q10 > q50, q50 > q90, q10 > q90. Reported as counts and shares, in
+three places:
+
+- **fit-time calibration rows** — the one-step rows of the served forecaster's
+  calibration slice, where the residuals come from;
+- **served forecasts** — every mine, grade and horizon 1–14 at the dataset's end
+  date;
+- **backtest predictions** — the calibration harness's design: 24 origins,
+  step 14 days, every mine, grade and horizon 1–14.
+
+For served and backtest rows, both **before** the conformal adjustment (the raw
+model outputs) and **after** it (as `predict` returns them: sorted, widened by
+the conformal width, clipped at zero). The conformal width can be negative, which
+moves the endpoints towards each other and can cross them again.
+
+Reported, not a gate.
+
+### 2. The change — three parts
+
+**F1. Monotone rearrangement** (Chernozhukov, Fernández-Val & Galichon, 2010).
+Every row's three predicted quantiles are sorted before they are used for
+anything — the conformity scores and the residuals in `fit`, and the interval in
+`predict` (which already sorts there). After the conformal adjustment they are
+sorted again. Sorting is the monotone rearrangement for three quantiles; it never
+moves a quantile further from the truth on average, and it changes nothing on a
+row that did not cross.
+
+**F2. A sigma floor, relative to the mine.** In the residual standardisation a
+row's log-space sigma is `max(sigma, 0.25 × m)`, where `m` is the median sigma of
+that mine's one-step calibration rows after rearrangement.
+
+- **Why 0.25.** It is a guard, not a calibration lever. A band a quarter of a
+  mine's typical width is still a confident forecast. One narrower than that,
+  from independently fitted quantile models, is far more likely a near-crossing
+  than information. The failing row sat at 0.4% of its mine's median.
+- **Chosen as a round fraction, before any outcome.** With the sigma statistics
+  above in view (Balaghat's only — no other mine's were looked at): 0.25 is below
+  the ratio of the 5th percentile to the median on both datasets (20 Sep
+  0.0558 / 0.1041 = 0.54; 6 Oct 0.0381 / 0.0967 = 0.39). So for Balaghat it
+  touches fewer than 5% of rows on either: a tail, not the body.
+- **Never tuned.** If the rule below fails, 0.25 is not adjusted to make it pass.
+
+**F3. Residual blocks by day, not by row.** Each mine's residuals become a table:
+one row per target day, one column per grade. A day enters only if every grade
+has a residual that day (complete cases); the days dropped are counted and
+reported. One standardisation scale per mine, as before.
+
+A simulated 14-day path draws one block of 14 consecutive days (circular), the
+same block for every grade of the mine (common draws, one seed). Grade *g* uses
+its column. So persistence across days and correlation between grades on the
+same day are both what gets resampled.
+
+No served figure today sums grades jointly; the between-grade correlation is
+carried for when one does. The code comment that called the old series "one
+observation per origin" is corrected.
+
+**Ablation arms**, each measured on both datasets:
+
+| Arm | F1 + F2 (crossing fix) | F3 (day blocks) |
+|---|---|---|
+| main | — | — |
+| crossing fix only | yes | — |
+| day blocks only | — | yes |
+| both (ships) | yes | yes |
+
+### 3. Acceptance rule — all must hold for "both" to ship
+
+**A1. No crossed interval is served.**
+- A test asserts `0 ≤ q10 ≤ q50 ≤ q90` for every mine, grade and horizon of
+  every committed forecast artifact, and in every backtest prediction row the
+  harness records for "both".
+- A browser assertion checks that the forecast chart's median line never
+  renders outside its band.
+
+**A2. `test_track_b.py` passes in full on both datasets.**
+- In `test_cumulative_aggregation_beats_independent_days` the precondition stays
+  **Pearson** lag-1 autocorrelation.
+- The series it is computed on changes, because F3 changes what the residuals
+  are. It becomes each grade's daily residual series (a column of the day
+  table), and the precondition is that the mean over the mine's grades exceeds
+  0.2.
+- Justification, independent of any result: the old series interleaved three or
+  four grades per day. Its lag-1 therefore measured same-day correlation between
+  grades as much as persistence across days, and the assertion is about
+  persistence across days.
+- The statistic is not changed to rank correlation: the outlier is removed by
+  F1/F2, not by choosing a statistic it cannot move.
+- "Correlated aggregation is wider than independent days, for every grade" stays
+  a separate assertion, unchanged.
+
+**A3. The 14-day calibration is no worse than main's on either dataset.**
+- **Measured with** the existing harness, unchanged in design: span 340 days,
+  step 14, 24 origins, all mines, the shipped arm.
+- **Compared** paired on identical (origin, mine, grade) windows, with the
+  distances of D-040:
+  ```
+  Δ_cov  = |cov_main − 0.80| − |cov_branch − 0.80|      positive = branch closer
+  Δ_tail = |tail_main − 0.10| − |tail_branch − 0.10|
+  ```
+- **Intervals** are 95% cluster-bootstrap intervals over origin dates (2,000
+  resamples, fixed seed).
+- **The rule:** "both" fails if, on either dataset, either interval lies
+  entirely below zero — the branch shown worse.
+
+**A4. Daily marginals.**
+- q50 is unchanged from main on every daily row where main's raw quantiles did
+  not cross. The number of rows whose q50 changed must not exceed the number of
+  crossed rows.
+- The intervals' endpoints may move everywhere, because the conformity scores
+  are computed from rearranged quantiles. Daily coverage is therefore compared
+  paired on identical (origin, mine, grade, horizon) rows, with the same
+  cluster-bootstrap rule as A3 on `|coverage − 0.80|`.
+- Daily MAPE is reported.
+
+**A5. No single residual dominates.** On both datasets, for every mine, removing
+the day with the largest absolute standardised residual from the table changes
+each grade's simulated 14-day sd (seeded, at the end-date origin) by less than
+5%.
+
+**A6. Sanity across end dates.** Eight datasets:
+- **The end dates:** 2025-12-15, 2026-01-31, 2026-03-15, 2026-04-30,
+  2026-06-15, 2026-07-31 — spread over a year, monsoon included — plus
+  2026-09-20 and 2026-10-06.
+- **Per date,** with the forecaster fitted at the end date:
+  - (i) every mine and grade: correlated 14-day sd ≥ 0.9 × the independent-days
+    sd ("never pathologically narrower");
+  - (ii) at least 80% of (mine, grade) pairs have P(shortfall) in
+    [0.001, 0.999] ("no saturation" — the original bug put nine of ten at
+    1.000);
+  - (iii) every mine: the residual scale changes by less than 10% when its single
+    largest absolute raw residual is removed ("no single-residual domination").
+- **Where it runs** — decided by measurement, by this rule: if the check takes
+  at most 6 minutes on this 8-core machine (about 15 on a CI runner, at the 2.5×
+  ratio measured for Track B), it is a CI job on every pull request. Otherwise it
+  runs nightly on a schedule.
+
+**A7. The ablation is reported** for both datasets: every arm's 14-day coverage
+and tails with intervals, daily coverage and MAPE. Not a gate.
+
+### If the rule fails
+
+"Both" does not ship as it is. The failure is reported with its numbers; neither
+0.25 nor any threshold above is adjusted. A different fix is a new entry, written
+before it is measured.
+
+### After it passes
+
+- Regenerate every artifact: the forecaster changes, so the code fingerprint
+  moves.
+- Re-measure the calibration figures. They were computed with crossed quantiles
+  in the data, so they are expected to move; the new numbers are stated.
+- Freeze the pitch dataset on 2026-10-06 — yesterday, the latest end date
+  docs/DEMO.md permits — and write docs/PITCH_FIGURES.md from it.
