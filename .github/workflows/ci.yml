@@ -98,7 +98,7 @@ jobs:
         run: .venv/bin/python -m pytest test_track_b.py -p no:cacheprovider -rfE --durations=5
 
   artifacts:
-    name: Artifacts — produced by this code (batch check)
+    name: Artifacts — produced by this code, and the pitch figures match
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -109,6 +109,12 @@ jobs:
       - name: python -m app.api.batch check
         working-directory: backend
         run: .venv/bin/python -m app.api.batch check
+      # The figures the pitch quotes (docs/PITCH_FIGURES.md, and DEMO.md and
+      # JURY_QA.md where they quote it) against what the artifacts serve.
+      - name: python -m app.api.batch pitch-check
+        if: ${{ !cancelled() }}
+        working-directory: backend
+        run: .venv/bin/python -m app.api.batch pitch-check
 
   browser:
     name: Browser — ${{ matrix.group }} (external services unreachable)

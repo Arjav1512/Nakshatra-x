@@ -32,28 +32,89 @@ Measured in two fresh clones on 2026-10-06 (8-core laptop): the clone took
 machine's package caches already warm. A machine that has never downloaded these
 packages takes several minutes longer. Clone the day before, not the morning of.
 
-### The day before — regenerate every artifact, together
+### Freeze the pitch dataset — once, before the slides are made
 
-**Do this once, the day before the demo.** One command, about seventeen minutes,
-and it is the difference between a forecast that covers next fortnight and one
-that covers a fortnight that has already been and gone.
+The slides, `docs/JURY_QA.md` and this script quote figures: MAPE against the
+baseline, interval coverage, the Track A AUC. Every Track B figure depends on the
+synthetic dataset, and the dataset depends on its end date. The readiness pass
+found this page quoting the 20 September dataset (pilot MAPE 11.67%) beside a
+rehearsal serving the 6 October one (11.00%). Both were real, and a judge
+comparing a slide with the screen would have seen two claims about one model.
+So the dataset is chosen once and frozen, and every quoted figure is read from it.
+
+1. **Choose one end date** — the last day of synthetic actuals. The forecast
+   covers the 14 days after it, so choose a date no more than 13 days before the
+   demo (the window must still be open on the day; `npm run test:dates` checks
+   that) and no later than yesterday.
+2. **Regenerate once** with that date, on a quiet machine — about 18 minutes;
+   the next section says what it does and why it is safe:
+
+   ```bash
+   (cd backend && NAKSHATRA_DATA_END_DATE=YYYY-MM-DD .venv/bin/python -m app.api.batch all)
+   ```
+
+   Then run the backend suites on it, Track B included — about five minutes:
+
+   ```bash
+   (cd backend && .venv/bin/python -m pytest -m "not network" -p no:cacheprovider)
+   ```
+
+   A dataset a test fails on is not frozen: roll back and fix the cause. Do not
+   look for a date that passes.
+
+3. **Write the figures it produced:**
+
+   ```bash
+   (cd backend && .venv/bin/python -m app.api.batch pitch)
+   ```
+
+   This writes `docs/PITCH_FIGURES.md` from what the API serves — each figure
+   with the endpoint and field it is served at, the artifact it comes from, and
+   that artifact's identity (dataset, seed, end date, code fingerprint).
+4. **Quote only those.** Make the slides from `docs/PITCH_FIGURES.md`. Here and
+   in `JURY_QA.md` a quoted figure is in bold and followed by an HTML comment
+   naming its key, `pitch:<key>`; the comment does not render, and the backend
+   test fails if the bold value is not the one the file holds.
+5. **Commit** `backend/artifacts`, `data/synthetic` and `docs/PITCH_FIGURES.md`
+   together.
+
+**Not yet frozen for a demo.** `docs/PITCH_FIGURES.md` holds the committed
+dataset (actuals to 2026-09-20) so the tooling and its checks run on something
+real. Its window, 21 Sep – 4 Oct 2026, has passed; the file says so at the top,
+and nothing from it goes into slides. Freezing on 2026-10-06 was tried and
+stopped: on that dataset Balaghat's 14-day distribution comes out *narrower* than
+independent days for all four grades — one standardised residual at −26.5σ
+shrinks the rest — so the pilot's P(shortfall) would be overconfident on stage,
+and `test_track_b.py` fails. The demo-window freeze follows the forecaster fix,
+and whoever does it re-freezes for a date that fits the demo.
+
+**After freezing, do not regenerate with another date** — not the day before,
+not on the day. It would change every figure under the slides. Check instead:
 
 ```bash
-(cd backend && NAKSHATRA_DATA_END_DATE=$(date +%F) .venv/bin/python -m app.api.batch all)
+(cd backend && .venv/bin/python -m app.api.batch check && .venv/bin/python -m app.api.batch pitch-check)
 ```
+
+`check` confirms every artifact is on one dataset and was built by this code;
+`pitch-check` confirms `docs/PITCH_FIGURES.md` still matches what is served. CI
+runs the same comparison on every pull request (`backend/test_pitch_figures.py`),
+so a change that would move a quoted figure cannot merge without the figures
+moving with it.
+
+### What `batch all` does — for freezing and re-freezing
 
 `all` regenerates the sample CSVs, all ten forecasts, the committed backtest(s)
 **and the calibration shown beside P(shortfall)** from **one** dataset, then
 verifies they agree and prints the identity it used. Check the dates it prints
 before you trust it.
 
-**You do not set the date again tomorrow.** `batch all` records it with the
-artifacts (`data/synthetic/_dataset_identity.json`), and the backend serves the
-recorded dataset whenever `NAKSHATRA_DATA_END_DATE` is unset (`DECISIONS.md`
-D-042); its first log line says which date it is serving. It did not use to:
-the first cold-start rehearsal regenerated for 6 October, started the backend as
-this document said, and watched it refit all ten forecasts for the old window
-over the new ones while `/readyz` stayed 503 — the step undone by the next one.
+**You do not set the date again.** `batch all` records it with the artifacts
+(`data/synthetic/_dataset_identity.json`), and the backend serves the recorded
+dataset whenever `NAKSHATRA_DATA_END_DATE` is unset (`DECISIONS.md` D-042); its
+first log line says which date it is serving. It did not use to: the first
+cold-start rehearsal regenerated for 6 October, started the backend as this
+document said, and watched it refit all ten forecasts for the old window over the
+new ones while `/readyz` stayed 503 — the step undone by the next one.
 
 The calibration is in `all` because it describes the dataset too. A new end date
 changes the dataset, and the console refuses a calibration measured on a
@@ -80,7 +141,7 @@ macOS `mediaanalysisd` had been sitting at 211% CPU for seventeen hours. The
 output was byte-identical — same MAPE, same coverage — it just took ninety-seven
 times as long. Check `ps -Ao pid,%cpu,comm -r | head -5` before you start.
 
-#### Regenerating the day before is safe — and why
+#### Regenerating is safe — and why
 
 The backend decides an artifact is stale by **identity alone**: its dataset
 identity (generator, contract, seed, end date) or its code fingerprint (model
@@ -105,17 +166,19 @@ anyway — a determinism check — and still leaves identical output untouched.
 
 Age is still shown, never acted on. While the window is current, the forecast
 panel says "generated N h ago", read from the artifact's own `vintage` (a
-checkout resets file times, so the file cannot say). `/readyz` carries an `age_warning` once the oldest forecast is more
-than 48 hours old, which means it was not regenerated the day before; pre-flight
-step 2 prints it. It does not affect readiness. What matters on the day is
-whether the forecast window has ended, and `npm run test:dates` checks exactly
+checkout resets file times, so the file cannot say). `/readyz` carries an
+`age_warning` once the oldest forecast is more than 48 hours old; pre-flight step
+2 prints it. With a frozen dataset that warning is expected — the artifacts are
+as old as the freeze — and it does not affect readiness. What matters on the day
+is whether the forecast window has ended, and `npm run test:dates` checks exactly
 that.
 
-#### Map tiles — so the imagery survives the network
+#### The day before — map tiles, so the imagery survives the network
 
-The three imagery layers (Sentinel-2 true colour, the iron-oxide ratio and the
-Copernicus DEM) come from Microsoft Planetary Computer. Fetch a local copy the
-day before, so a hall with bad wifi does not take them off the map:
+The one thing to fetch the day before. The three imagery layers (Sentinel-2 true
+colour, the iron-oxide ratio and the Copernicus DEM) come from Microsoft
+Planetary Computer. Fetch a local copy, so a hall with bad wifi does not take
+them off the map:
 
 ```bash
 (cd backend && .venv/bin/python -m app.api.batch tiles)
@@ -143,7 +206,7 @@ the map's attribution line either way. If Planetary Computer forgets a mosaic
 
 #### If regeneration fails, roll back
 
-The previous artifact set is committed in git, so it is always the fallback:
+The frozen artifact set is committed in git, so it is always the fallback:
 
 ```bash
 git checkout -- backend/artifacts data/synthetic     # back to the committed set
@@ -157,45 +220,48 @@ place rather than a half-written one. Demo with the committed set if you have to
 the console will say the window has already ended, which is honest and
 survivable. An inconsistent set is not.
 
-**Why this step exists.** A forecast's origin is the last day of actuals, and the
-synthetic generator's end date is a committed constant — it has to be, or the
-dataset would change overnight and no artifact would be reproducible. The
-consequence is that the committed artifacts cover a window fixed at the date in
-`DEFAULT_DATA_END_DATE` (currently 2026-09-20, so 21 Sep – 4 Oct 2026). On any
-later day that window is in the past.
+**Why there is an end date at all.** A forecast's origin is the last day of
+actuals, and the dataset has to be fixed — or it would change overnight and no
+artifact would be reproducible. So the window is fixed too: the committed
+artifacts are the frozen set (actuals to the date in `docs/PITCH_FIGURES.md`),
+and the generator's built-in default (`DEFAULT_DATA_END_DATE`, 2026-09-20) applies
+only where no dataset has been recorded. On any day after the window ends it is
+in the past.
 
-Nothing shifts the displayed dates without regenerating the forecast. If you skip
-this step the console says so in plain words — *"This forecast's window has
-already ended"* — rather than presenting a stale fortnight as a plan. That is
-survivable; it is not what you want on stage. `docs/DECISIONS.md` D-030 records
-why it works this way.
+Nothing shifts the displayed dates without regenerating the forecast. If the
+window has ended, the console says so in plain words — *"This forecast's window
+has already ended"* — rather than presenting a stale fortnight as a plan. That
+is survivable; it is not what you want on stage, and the remedy is a re-freeze.
+`docs/DECISIONS.md` D-030 records why it works this way.
 
 Regenerating with a new date changes the artifact identity, so `git status` will
 show the forecasts, the backtest, the calibration and the samples as modified.
-Running it again with the same date changes nothing further. Commit them or
-don't, as you prefer — but do not edit them.
+Running it again with the same date changes nothing further. Commit them with
+the rewritten `docs/PITCH_FIGURES.md`, and do not edit any of them by hand.
 
 ### Pre-flight — run this before every demo
 
 In order, in three terminals. Do not start talking until every one is green.
 
 ```bash
-# Terminal 1 — 0. ports: nothing left over from an earlier session; then
+# Terminal 1 — 0. ports: nothing left over from an earlier session;
+#              the slides' figures are still the served ones (pitch-check); then
 #              1. the backend. One worker, and do not set NAKSHATRA_SKIP_WARM.
 scripts/check_port.sh 8000 "FastAPI" && scripts/check_port.sh 3000 "Next.js"
-cd backend && .venv/bin/python -m uvicorn app.main:app --port 8000
+cd backend && .venv/bin/python -m app.api.batch pitch-check
+.venv/bin/python -m uvicorn app.main:app --port 8000
 ```
 
 Its first line names the dataset it serves —
-`[dataset] end date … — recorded by batch all …`. It should be the date you
-regenerated for.
+`[dataset] end date … — recorded by batch all …`. It should be the frozen date in
+`docs/PITCH_FIGURES.md`.
 
 ```bash
 # Terminal 2 — 2. readiness: every mine "ready", every artifact on one dataset.
 until curl -sf http://localhost:8000/api/v1/readyz >/dev/null; do sleep 1; done
 curl -s http://localhost:8000/api/v1/readyz | python3 -m json.tool | head -20
-#    Informational: warns if the oldest forecast is over 48 h, i.e. it was not
-#    regenerated the day before. Not a failure — but run test:dates below.
+#    Informational: warns if the oldest forecast is over 48 h — expected with a
+#    frozen dataset. Not a failure; test:dates below checks the window is open.
 curl -s http://localhost:8000/api/v1/readyz | python3 -c 'import json,sys; print(json.load(sys.stdin)["age_warning"] or "artifact age: ok")'
 #            3. the frontend.
 cd frontend && BACKEND_URL=http://127.0.0.1:8000 \
@@ -362,22 +428,25 @@ Result:
 
 | | MAPE | Coverage |
 |---|---|---|
-| GBT + conformal, pilot mine | 11.67% | **0.812** |
-| Seasonal-naive, pilot mine | 14.81% | — |
-| GBT + conformal, all ten mines | 10.00% | **0.761** [0.733, 0.786] |
+| GBT + conformal, pilot mine | **11.67%**<!-- pitch:pilot.mape_model --> | **0.812**<!-- pitch:pilot.daily_coverage --> |
+| Seasonal-naive, pilot mine | **14.81%**<!-- pitch:pilot.mape_baseline --> | — |
+| GBT + conformal, all ten mines | **10.00%**<!-- pitch:portfolio.daily_mape --> | **0.761**<!-- pitch:portfolio.daily_coverage --> **[0.733, 0.786]**<!-- pitch:portfolio.daily_coverage_ci --> |
 
-**The figures depend on the dataset.** The table quotes the committed artifacts
-(data to 20 September). After the day-before regeneration the screen shows that
-dataset's figures instead — in the rehearsal, regenerated for 6 October: pilot
-MAPE 11.00% vs 13.22%, coverage 0.819; 14-day calibration 0.683. **Read the
-numbers off the screen**, not off this page; the points below hold for both.
+**These are `docs/PITCH_FIGURES.md`'s figures**, and a test fails if this page
+quotes anything else. Today that file holds the committed dataset (actuals to
+20 September), whose window has passed — not demo-ready. Once the demo window is
+frozen, this table, `JURY_QA.md` and the screen show the frozen figures, and the
+test is what keeps them the same.
 
 **Say two things, and scope the second one.** First, the model beats the
 baseline — the comparison is like-for-like, same origins and targets. Second, and
-rarer: the 80% interval covers **81%** of actuals (0.812) *on the pilot mine*. Do not
-generalise that figure. Across all ten mines daily coverage is **0.761**
-[0.733, 0.786] and the 14-day cumulative total is too narrow at **0.738**
-[0.700, 0.777] — if a judge asks, that is the honest answer and it is written up
+rarer: the 80% interval holds **0.812**<!-- pitch:pilot.daily_coverage --> of
+actuals *on the pilot mine*. Do not generalise that figure. Across all ten mines
+daily coverage is **0.761**<!-- pitch:portfolio.daily_coverage -->
+**[0.733, 0.786]**<!-- pitch:portfolio.daily_coverage_ci --> and the 14-day
+cumulative total is too narrow at **0.738**<!-- pitch:portfolio.cumulative_coverage -->
+**[0.700, 0.777]**<!-- pitch:portfolio.cumulative_coverage_ci --> — if a judge
+asks, that is the honest answer and it is written up
 in `docs/CALIBRATION.md`. PRD §11 calls calibration out specifically —
 *"do 70%-confidence predictions come true 70% of the time? Almost no team will
 measure this."* Getting there took four attempts; `docs/BACKTEST.md` reports all
@@ -448,17 +517,19 @@ coefficient.
 **Click "prospectivity" in the breadcrumb** (Portfolio / production risk ·
 prospectivity). The track is part of where you are now, not a separate toggle.
 
-Three tiles: **LOMO AUC 0.85**, spectral-only 0.60, slope-only 0.51.
+Three tiles: LOMO AUC **0.85**<!-- pitch:track_a.auc -->, spectral-only
+**0.60**<!-- pitch:track_a.spectral_only -->, slope-only **0.51**<!-- pitch:track_a.slope_only -->.
 
 **Say the honest version:**
 
-> 0.85, and the confidence interval is 0.72–0.95 — ten positives cannot support
+> **0.85**<!-- pitch:track_a.auc -->, and the confidence interval is
+> **[0.72, 0.95]**<!-- pitch:track_a.auc_ci --> — ten positives cannot support
 > a tighter claim. The earlier pipeline reported 0.98, but its features were
 > computed from distance to the known mines, which are the labels. That number
 > measured leakage. This one comes from real Sentinel-2 band ratios and SRTM
 > terrain, validated by holding out an entire deposit at a time.
 
-**Point at the amber panel** — spectral-only is 0.60, so the geological signal
+**Point at the amber panel** — spectral-only is **0.60**<!-- pitch:track_a.spectral_only -->, so the geological signal
 is thinner than the headline suggests, and GSI lithology (the feature most
 likely to carry real geology) was unreachable and is therefore *omitted, not
 substituted*.
@@ -548,8 +619,9 @@ satellite data are real.
 **"Can you see ore from space?"** No. Nobody can at 383 m. We use satellite data
 for surface geology and weather, which is what the PS actually names.
 
-**"Is 0.85 good?"** It is honest. The CI is 0.72–0.95 on ten deposits, the
-spectral-only ablation is 0.60, and we publish both.
+**"Is 0.85 good?"** It is honest. The CI is **[0.72, 0.95]**<!-- pitch:track_a.auc_ci -->
+on ten deposits, the spectral-only ablation is **0.60**<!-- pitch:track_a.spectral_only -->,
+and we publish both.
 
 **"What happens when MOIL gives you real data?"** Rows land in the same schema
 with `is_synthetic: false`, and the amber badges turn green. Nothing else

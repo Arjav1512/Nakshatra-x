@@ -2,8 +2,14 @@
 
 The fifteen questions a MOIL or ISRO jury is most likely to ask, and the ones we
 would least like to be asked. Each answer is the honest one, with the evidence
-behind it. If an answer here and a number on screen disagree, the screen is
-reading the artifact and this file is out of date — say so and trust the screen.
+behind it.
+
+**The figures come from `docs/PITCH_FIGURES.md`.** Each one quoted here carries
+a hidden `pitch:` key, and `backend/test_pitch_figures.py` fails if it differs
+from that file, which fails if *it* differs from what the API serves. Today the
+file holds the committed dataset (actuals to 20 September), whose forecast
+window has passed: these answers are right about that dataset, and the
+demo-window freeze will update them — the test will not pass until it does.
 
 ---
 
@@ -55,14 +61,24 @@ sound, not how it would perform on MOIL's operations.
 ### 4. Are your prediction intervals calibrated?
 
 **On the pilot mine, roughly; across the portfolio, no — they are too narrow, and
-we measured by how much.** The 80% daily interval holds **0.812** on Balaghat's
-backtest, but **0.761 [0.733, 0.786]** across all ten mines — the confidence
-interval excludes 0.80. For the 14-day total, which P(shortfall) is computed
-from, coverage is **0.738 [0.700, 0.777]**, with 16.5% of real totals in the outer
-tails against a nominal 10%. Per mine it ranges from 0.542 to 0.903; Balaghat's
-own 14-day figure is **0.667**. On the dataset regenerated for 6 October the same
-measurement gives 0.683 — below nominal on both windows. So P(shortfall) is more
-confident than it has earned.
+we measured by how much.** The 80% daily interval holds
+**0.812**<!-- pitch:pilot.daily_coverage --> on Balaghat's backtest, but
+**0.761**<!-- pitch:portfolio.daily_coverage -->
+**[0.733, 0.786]**<!-- pitch:portfolio.daily_coverage_ci --> across all ten mines —
+the confidence interval excludes 0.80. For the 14-day total, which P(shortfall)
+is computed from, coverage is **0.738**<!-- pitch:portfolio.cumulative_coverage -->
+**[0.700, 0.777]**<!-- pitch:portfolio.cumulative_coverage_ci -->, with a share of
+**0.165**<!-- pitch:portfolio.cumulative_tails --> of real totals in the outer
+tails against a nominal 0.10. Per mine it ranges from 0.542 to 0.903; Balaghat's
+own 14-day figure is **0.667**<!-- pitch:balaghat.cumulative_coverage -->. On the
+dataset regenerated for 6 October the same measurement gives 0.683 — below
+nominal on both windows. So P(shortfall) is more confident than it has earned.
+
+**And one more, found while freezing the pitch dataset:** on the 6 October
+dataset Balaghat's 14-day distribution came out *narrower* than treating the days
+as independent — one extreme standardised residual shrinks the rest. That is
+being fixed before any demo dataset is frozen; it is why the committed figures
+are still the 20 September ones.
 
 We tried a fix (a common-factor loading), pre-registered the rule it had to pass
 before reading the result, and declined it when it did not beat the model as
@@ -82,8 +98,9 @@ training script also turned a failed AUC computation into a reported 1.0.
 The rebuilt model uses real Sentinel-2 band ratios and SRTM terrain only; a test
 enforces that no feature is a function of distance to a mine. It is validated
 leave-one-mine-out — an entire deposit held out at a time, the question a
-geologist asks: *would this have found the next deposit?* That gives 0.85. (Under
-a random 5-fold split the same model scores 0.82, lower, so the reported figure
+geologist asks: *would this have found the next deposit?* That gives
+**0.85**<!-- pitch:track_a.auc -->. (Under a random 5-fold split the same model
+scores **0.82**<!-- pitch:track_a.random_split -->, lower, so the reported figure
 is not the flattering one.) The leaked metrics files were deleted, including one
 served publicly.
 
@@ -92,9 +109,12 @@ served publicly.
 
 ### 6. Is 0.85 good?
 
-**It is honest, and it is softer than it looks.** The 95% CI is **[0.723, 0.95]**
-on ten deposits — ten positives cannot support a tighter claim. Spectral
-features alone reach **0.60**, terrain alone 0.665, slope alone 0.511 (chance),
+**It is honest, and it is softer than it looks.** The 95% CI is
+**[0.72, 0.95]**<!-- pitch:track_a.auc_ci --> on ten deposits — ten positives
+cannot support a tighter claim. Spectral features alone reach
+**0.60**<!-- pitch:track_a.spectral_only -->, terrain alone
+**0.67**<!-- pitch:track_a.terrain_only -->, slope alone
+**0.51**<!-- pitch:track_a.slope_only --> (chance),
 and the top feature is elevation: mines sit on flat ground, so part of what the
 model learns is where mines are built. Four of ten deposits score below 0.35 and
 Tirodi (0.018) is essentially missed. GSI lithology, the feature most likely to
@@ -129,7 +149,9 @@ imagery draws from the cache labelled CACHED; the basemap goes blank.
 
 **Rolling-origin backtest, refitting at every origin, scoring only held-out
 days, against a seasonal-naive baseline on the same origins and targets.** Pilot:
-MAPE **11.67% vs 14.81%**; across ten mines, 10.00%. A test corrupts every
+MAPE **11.67%**<!-- pitch:pilot.mape_model --> vs
+**14.81%**<!-- pitch:pilot.mape_baseline -->; across ten mines,
+**10.00%**<!-- pitch:portfolio.daily_mape -->. A test corrupts every
 post-origin actual tenfold and asserts the forecast is bit-identical — so the
 model provably cannot see the future. Getting there took four attempts, and the
 two that failed are published.

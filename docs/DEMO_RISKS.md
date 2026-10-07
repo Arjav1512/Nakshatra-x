@@ -23,13 +23,15 @@ honest sentence is always available.
 | No network for the first build | the build fails fetching fonts from Google | Build once on a network; after that the cached build needs none (`docs/CI.md`). |
 | Slow clone | the clone took 31 s and 252 s on two runs, same day, same machine (371 MB) | Clone the day before, not the morning of. |
 
-### The day before — `batch all` and `batch tiles`
+### Freezing (`batch all`, `batch pitch`) and the day before (`batch tiles`)
 
 | What can fail | How it shows | Fallback |
 |---|---|---|
 | Machine busy | `batch all` far slower than ~17 min (once: 5.8 hours) | Check `ps -Ao pid,%cpu,comm -r \| head -5` first; run it on a quiet machine. |
 | A step fails partway | `batch all` prints `FAIL` / `MISMATCH` and exits 1 | `git checkout -- backend/artifacts data/synthetic`, then `(cd backend && .venv/bin/python -m app.api.batch check)`. The committed set is consistent; its forecast window will be in the past (test:dates says so). |
-| The date not carried to demo day | *(fixed, D-042)* — before the fix: `/readyz` 503 forever, forecasts silently refitted for the old window | Check the backend's first line: `[dataset] end date <the date you regenerated for>`. |
+| The date not carried to demo day | *(fixed, D-042)* — before the fix: `/readyz` 503 forever, forecasts silently refitted for the old window | Check the backend's first line: `[dataset] end date <the frozen date in docs/PITCH_FIGURES.md>`. |
+| Regenerated after the freeze | every figure moves under the slides; `batch pitch-check` reports MISMATCH (and CI fails) | Roll back to the committed frozen set (`git checkout -- backend/artifacts data/synthetic`). Regenerate only to re-freeze: all five steps in DEMO.md, and new slides. |
+| The frozen dataset fails a test | `batch all` succeeds but a suite fails on the new dataset — as on 2026-10-06, where Balaghat's 14-day distribution came out narrower than independent days | Do not freeze it. Roll back and fix the cause; a dataset is not chosen because it passes. |
 | A slow network while fetching tiles | `batch tiles` reports *N tile(s) failed* and exits 1 (it used to die with a traceback and no manifest — fixed) | Run it again: it reuses every tile on disk and fetches only the failed ones (rehearsal: 368 tiles, 60 s). |
 | Planetary Computer down while fetching tiles | layers reported skipped | Re-run later. Without a cache the imagery layers are live-only — see network loss below. |
 
@@ -42,7 +44,7 @@ honest sentence is always available.
 | Artifacts disagree on the dataset | `/readyz` 503 with `dataset_consistency` naming the odd kind out | Regenerate everything together (`batch all`) or roll back; never one kind alone. |
 | No `SESSION_SECRET` | auth routes return 500 | Start the frontend with the line in DEMO.md; the console does not need auth. |
 | `test:e2e` fails | names the failed checks (cards, drill-down, backtest, actions) | Do not present a red screen. Read the check; DEF-1-class failures mean the console cannot render data. |
-| `test:dates` fails | the forecast window has ended | Regenerate (the day-before step) or present with the console's own sentence: *"This forecast's window has already ended."* |
+| `test:dates` fails | the forecast window has ended | Re-freeze (DEMO.md, all five steps, new slides) or present with the console's own sentence: *"This forecast's window has already ended."* |
 | `test:map` fails, `--pc-blocked` passes | Planetary Computer unreachable from here | The demo runs from the tile cache, labelled CACHED; say so. |
 | Both map checks fail | no live imagery and no cache | `batch tiles` again; or present Track A on the model layers only (they do not need Planetary Computer). |
 
@@ -57,7 +59,7 @@ honest sentence is always available.
 | 0:20 portfolio | Backend down | every panel reads **unavailable** with the reason; no number invented | Restart the backend; meanwhile this *is* the N-6 demonstration. |
 | 0:45 conditions | NASA POWER / Open-Meteo unreachable | rainfall and temperature switch from LIVE to **SYNTHETIC** fallback values, under a red *"DEGRADED — live upstream unavailable. Displayed values are synthetic and must not be read as observations."*; `+ evidence` says the same | Say: weather degrades honestly; the operational tiles were always synthetic and say so. |
 | 1:05 P(shortfall) | Calibration artifact stale (regenerated without the calibration) | "Calibration unavailable: measured on a different model" | Regenerate with `batch all` — calibration is part of it. |
-| 1:05–1:35 figures | The script's numbers are not the screen's | after the day-before regeneration every figure is that dataset's (rehearsal, 6 Oct: MAPE 11.00% vs 13.22%, coverage 0.819, calibration 0.683 — not 11.67%, 0.812, 0.738) | Read figures off the screen; DEMO.md says so. |
+| 1:05–1:35 figures | The script's numbers are not the screen's | Prevented by the freeze: DEMO.md, JURY_QA.md and the slides quote `docs/PITCH_FIGURES.md`, and `batch pitch-check` (and CI) fail if it and what is served differ. It happened before the freeze — the rehearsal served 6 Oct (MAPE 11.00%) while the script said 11.67% | Run `batch pitch-check` in the pre-flight; if it fails, the slides are wrong, not the screen. |
 | 1:35 backtest | Opened a non-pilot mine | "Validated on the pilot mine (Balaghat)" with a link | Designed state; click through to Balaghat. |
 | 2:05 actions | Expecting a rejected action | The panel reads *"No candidate violated a constraint this run."* | Do not promise a rejection here; the next beat shows one. |
 | 2:20 Mine twin | Forgetting to run again | *(fixed)* changing a control now clears the old verdict at once and says *"Inputs changed — run again"*; before the fix the old "passed" stayed on screen | Click **Run what-if simulation** after every change. |
