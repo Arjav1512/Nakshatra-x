@@ -441,15 +441,55 @@ the three model map layers, Mine twin and its constraint engine, the fonts.
 - **The pitch figures are written from what is served** (`docs/PITCH_FIGURES.md`)
   and checked against it, and the docs that quote them are checked too.
 
+### Found in the residual-fix PR (#29)
+
+- **The blending tool never used the planner's tonnage.** The Next proxy sent
+  `required_tonnes`; the backend's field was `target_tonnes`, which defaulted to
+  5,000 t and silently ignored the unknown key. Whatever the slider said, every
+  plan was for 5,000 t.
+  - **The earlier verification of this tool was incomplete.** `test_api.py`
+    posted straight to FastAPI with the right field name, and `test:routes`
+    only checked that `/blending` rendered. Nothing sent a tonnage through the
+    proxy and looked at what came back.
+  - **Fixed** (`bc1febb`): every field is required, unknown fields are
+    rejected, and the proxy sends `target_tonnes`. `npm run test:blending` now
+    sets the slider to 7,500 t in the browser and asserts the request carries
+    it, the response echoes it, and the plan's allocations sum to it.
+  - **The same endpoint also defaulted its whole request** — four stockpiles
+    named after real mines — so `{}` returned an "optimal" plan for inventory
+    nobody holds. The API guard now rejects an empty body and any numeric
+    default on every POST route.
+- **The 14-day P(shortfall) rests on a premise that does not hold** (D-043,
+  `docs/QUANTILE_CROSSING.md`). Its block bootstrap assumes one-step residuals
+  persist across days.
+  - **They barely do:** each grade's daily lag-1 is 0.02–0.30.
+  - **Where the apparent persistence came from:** the series it resampled
+    interleaved three or four grades per day, so a "14-day" block replayed
+    about three and a half days of shocks shared between grades.
+  - **No pre-registered fix passed**, so served P(shortfall) is unchanged, and
+    the regenerated artifacts match main's figure for figure.
+  - **Measured on eight datasets, what is served fails a basic sanity check on
+    every one:**
+    - narrower than independent days on five;
+    - one residual moving a mine's scale by 10% or more on all eight;
+    - saturated on two.
+  - **The calibration figures** (0.738 on the committed dataset) are measured
+    honestly, but the mechanism behind them is this accident.
+- **The quantile models cross** on about one row in ten. Served intervals are
+  now guaranteed ordered: `predict` sorts after the conformal step, which on
+  main had re-crossed 2 and 16 of 11,424 backtest intervals. The chart's median
+  is checked against its band for every mine and grade.
+
 ### Still open
 
-- **Balaghat's 14-day distribution on a later dataset.** Freezing the pitch
-  dataset on 2026-10-06 showed it *narrower* than independent days for all four
-  grades — one standardised residual at −26.5σ shrinks the rest (Beldongri: one
-  grade of three). P(shortfall) for the pilot would be overconfident on that
-  dataset, and `test_track_b.py` fails on it. The committed dataset (20 Sep) and
-  every figure in this document are unaffected. No demo dataset is frozen until
-  it is fixed (§6).
+- **P(shortfall)'s 14-day distribution is unsound,** not only Balaghat's on
+  6 October:
+  - D-043 measured main's construction failing on all eight datasets tried;
+  - no pre-registered fix passed;
+  - the checks are strict xfails in `test_track_b.py` and
+    `test_track_b_dates.py`, so they cannot quietly change.
+
+  No demo dataset is frozen until this is fixed (§6).
 - **The basemap has no offline fallback** (above).
 - **A cold backend saturates**: while it refits, telemetry requests can time out
   and the console shows "DEGRADED — FastAPI service layer unreachable" beside
@@ -467,12 +507,15 @@ the three model map layers, Mine twin and its constraint engine, the fonts.
 
 ## 6. The three most important next actions
 
-**1. Fix the residual standardisation, then freeze the demo window.** Root cause
-first (a generated event or a numerical fault), an acceptance rule registered in
-`DECISIONS.md` before any result, a fix chosen by the cause, and a Track B check
-across several end dates — one dataset passing and another failing means the
-suite only ever tested one. Then freeze the demo window and write the pitch
-figures from it.
+**1. Rebuild the 14-day aggregation on a premise that holds, then freeze the
+demo window.** D-043 found the root cause of the first failure (quantile
+crossing) and that the block bootstrap's premise is false. The follow-up, with
+its own pre-registration:
+- estimate the dependence a 14-day total needs from the backtest's
+  multi-horizon errors — across horizons 1–14 within a forecast path, per grade
+  and for mine totals;
+- test whether that explains #20's 2.5–3.4× gap;
+- ship only what passes, then freeze and write the pitch figures.
 
 **2. Implement N-7, the recommendation audit log.** The only *Required*
 non-functional still missing, and it unblocks C-7: persist every issued

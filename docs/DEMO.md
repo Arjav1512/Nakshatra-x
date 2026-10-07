@@ -83,10 +83,15 @@ dataset (actuals to 2026-09-20) so the tooling and its checks run on something
 real. Its window, 21 Sep – 4 Oct 2026, has passed; the file says so at the top,
 and nothing from it goes into slides. Freezing on 2026-10-06 was tried and
 stopped: on that dataset Balaghat's 14-day distribution comes out *narrower* than
-independent days for all four grades — one standardised residual at −26.5σ
-shrinks the rest — so the pilot's P(shortfall) would be overconfident on stage,
-and `test_track_b.py` fails. The demo-window freeze follows the forecaster fix,
-and whoever does it re-freezes for a date that fits the demo.
+independent days for all four grades, so the pilot's P(shortfall) would be
+overconfident on stage, and `test_track_b.py` fails.
+
+The fix that followed (D-043, `docs/QUANTILE_CROSSING.md`) found more: the 14-day
+aggregation fails sanity checks on every one of eight datasets, and no
+pre-registered fix passed. **So no dataset is frozen yet**, and the freeze waits
+for the aggregation to be rebuilt. Whoever does it re-freezes for a date that
+fits the demo — and runs the suites first (step 2), which is what would have
+caught this.
 
 **After freezing, do not regenerate with another date** — not the day before,
 not on the day. It would change every figure under the slides. Check instead:

@@ -74,11 +74,18 @@ own 14-day figure is **0.667**<!-- pitch:balaghat.cumulative_coverage -->. On th
 dataset regenerated for 6 October the same measurement gives 0.683 — below
 nominal on both windows. So P(shortfall) is more confident than it has earned.
 
-**And one more, found while freezing the pitch dataset:** on the 6 October
-dataset Balaghat's 14-day distribution came out *narrower* than treating the days
-as independent — one extreme standardised residual shrinks the rest. That is
-being fixed before any demo dataset is frozen; it is why the committed figures
-are still the 20 September ones.
+**And the deeper problem, found while freezing the pitch dataset.** P(shortfall)
+treats days as correlated by resampling blocks of the model's one-step
+residuals, and that premise turned out not to hold.
+- **What we measured:** each grade's residuals barely persist from day to day
+  (lag-1 0.02–0.30).
+- **Where the apparent correlation came from:** a series that interleaved the
+  grades, so same-day correlation between grades stood in for persistence.
+- **What we tried:** a pre-registered fix, measured against the shipped model
+  on two datasets; it did not pass. We changed nothing that serves.
+- **What it means:** what is served fails a sanity check on all eight datasets
+  we tried (`docs/QUANTILE_CROSSING.md`). That is also why no demo dataset is
+  frozen.
 
 We tried a fix (a common-factor loading), pre-registered the rule it had to pass
 before reading the result, and declined it when it did not beat the model as

@@ -12,7 +12,8 @@ in the non-blocking network job, which reports and never fails.
 |---|---|---|---|
 | **Frontend** | `tsc --noEmit`, `lint:literals`, Biome no worse than the base commit, `npm run build`, workflow hardening (`scripts/ci/check-workflow.js`) | yes | 0:35 (0:27–0:40) |
 | **Backend — fast suites** | every backend suite except Track B, network-marked tests deselected — the API provenance guard (`test_api_provenance.py`) among them; then confirms the artifact guard, the network block and the API guard ran, and that no committed artifact changed | yes | 1:24 (1:16–1:39) |
-| **Backend — Track B** | `test_track_b.py` | yes | 12:30 (8:52–12:35) |
+| **Backend — Track B** | `test_track_b.py` (the block bootstrap's persistence premise is a strict xfail: D-043 measured it false) | yes | 12:30 (8:52–12:35) |
+| **Backend — Track B across eight end dates** | `test_track_b_dates.py`: the 14-day distribution's sanity on eight datasets spread over a year (D-043 A5, A6). Every check is currently a strict xfail — what is served fails them all — so a fix, or a crash, turns the job red until the markers go | yes | not yet measured on the runner (locally 3:28–4:00) |
 | **Artifacts** | `python -m app.api.batch check`, then `batch pitch-check`: `docs/PITCH_FIGURES.md`, and the figures DEMO.md and JURY_QA.md quote from it, against what the artifacts serve | yes | 0:39 (0:33–0:45), measured before `pitch-check` was added |
 | **Browser — console** | `test:e2e`, `test:dates`, `test:pilot`, `test:scenario`, `test:surface`, `test:nav`, `test:auth`, `test:motion`, `test:fonts`, `test:band` (the median never leaves its band, every mine and grade), `test:blending` (the tonnage entered reaches the solver) | yes | 5:18 (5:18–5:34) |
 | **Browser — routes-provenance** | `test:routes -- --external-offline`, `test:provenance`, then `test:provenance -- --offline` with the backend stopped | yes | 9:49 (9:49–9:51) |
