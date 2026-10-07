@@ -16,8 +16,8 @@ are now, and its evidence is what exists today.
 | | |
 |---|---|
 | **Weighted score (target)** | **80 / 100** (was 74) — §4 |
-| Requirements fully met | **26 / 44 (59%)** (was 25) |
-| Partial | **13 / 44 (30%)** |
+| Requirements fully met | **24 / 44 (55%)** (was 26: B-6 and D-3 partial since D-044) |
+| Partial | **15 / 44 (34%)** |
 | Missing | **5 / 44 (11%)** — 4 deferred past Phase 1 by PRD §10; N-7 is the one Required gap |
 | Broken | **0** |
 | Checked on every pull request | **8 CI jobs**, 7 of them gating; none can be failed by an external service (`docs/CI.md`) |
@@ -71,13 +71,13 @@ file, a test or a measured number. *CI* means asserted on every pull request by
 | B-3 blast records | P0 | **fully** | `BlastRecord`: schedule, delay, fragmentation, outcome. |
 | B-4 weather observed + forecast | P0 | **fully** | NASA POWER (live: `test_api.py::test_live_upstreams`, CI network job) and Open-Meteo; degraded path asserted offline (`test_upstreams_degrade_honestly_when_unreachable`, CI). NDVI/LST **not** ingested (§5). |
 | B-5 forecast per mine **per grade** | P0 | **fully** | Grade is a model feature; four distinct grade forecasts; `test_track_b.py::test_forecaster_is_grade_aware` (CI, Track B job). Rendered per grade (browser, `demo-walk.js` 1:05). |
-| B-6 shortfall probability + band | P0 | **fully** | Monte Carlo over conformalised per-day predictives; `test_shortfall_probability_is_a_probability`. **Now shown with its own calibration beside it** (#23): portfolio 14-day coverage 0.738 [0.700, 0.777] against a nominal 0.80 — read from `backend/artifacts/calibration/cumulative_coverage.json`, refused when stale. The figure is honest about being too confident (§5). |
+| B-6 shortfall probability + band | P0 | **partial** *(was fully)* | Computed and served by the API (`p_shortfall`, Monte Carlo over conformalised per-day predictives; `test_shortfall_probability_is_a_probability`), but **withdrawn from the screen** (D-044): the 14-day aggregation behind it fails its sanity checks on all eight datasets measured (D-043, §5), and no fix has passed. Kept out of `PITCH_FIGURES.md` by a test until the follow-up (D-045) passes its pre-registered rule. |
 | B-7 attribution to constraints | P0 | **fully** | Exact additive decomposition, `additive-driver-attribution-v1`, named as what it is — not SHAP. |
 | B-8 threshold alerts | P1 | **partial** | `POST /dispatch-operational-alert`, `GET /alerts`; **not driven by B-6 crossing a threshold**. Alert precision/recall (PRD §11) is therefore **not measured**. Unchanged. |
 | B-9 grade-aware (non-fungible) | P1 | **fully** | Grade is a first-class key in the contract and the forecaster. |
 | B-10 backtest + display error | P0 | **fully** | Rolling-origin, refit at every origin. Pilot (Balaghat): **MAPE 11.67% vs baseline 14.81%, coverage 0.812** over 160 predictions. Portfolio over 24 origins: daily coverage **0.761 [0.733, 0.786]**, MAPE 10.00%; 14-day cumulative **0.738 [0.700, 0.777]** (`docs/CALIBRATION.md`). On screen without a click (browser, `npm run test:pilot`, CI). |
 
-**Track B: 8 fully · 2 partial · 0 missing** (unchanged)
+**Track B: 7 fully · 3 partial · 0 missing** (B-6 partial since D-044)
 
 ### 2.3 Corrective actions (PRD §6.3)
 
@@ -99,7 +99,7 @@ file, a test or a measured number. *CI* means asserted on every pull request by
 |---|---|---|---|
 | D-1 show predicted reserves | P0 | **partial** | Prospectivity with uncertainty, never called "reserve"; **no resource/grade estimate over a zone** (blocked on A-6). |
 | D-2 production trends | P0 | **fully** | Per-grade trajectory with 80% interval and seasonal-naive overlay; browser (`test:e2e`, CI). |
-| D-3 shortfall risk | P0 | **fully** | Ten portfolio cards with P(shortfall), four grades for Balaghat; browser (`test:e2e`, CI). |
+| D-3 shortfall risk | P0 | **partial** *(was fully)* | Ten portfolio cards ranked by expected shortfall in tonnes, summed over grades, and each grade's own figure; the daily bands with their measured calibration. **No probability of shortfall on screen** — withdrawn (D-044, B-6). Browser (`test:e2e`, CI), which also asserts no probability is rendered. |
 | D-4 corrective steps | P0 | **fully** | Approved actions with effect, assumptions and checks passed; browser (`test:e2e`, CI). The console's rejection panel renders its stated empty result; a rejection with real data is seen on Mine twin (C-5). |
 | D-5 map with prospectivity + targets | P0 | **partial** | Six layers, each with a legend that states its provenance and licence (#23); Planetary Computer imagery with a local tile cache fallback, labelled when cached; `npm run test:map` (live, CI network job). **Ranked targets are listed beside the map, not plotted on it** — the markers are the mines and the cell being scored. |
 | D-6 portfolio → mine → face | P1 | **partial** | Portfolio → mine → grade, one navigation model (the breadcrumb carries the track, #23); `npm run test:nav` (CI). **Face level is grade level** — the contract has no face key (D-021). |
@@ -107,7 +107,7 @@ file, a test or a measured number. *CI* means asserted on every pull request by
 | D-8 export PDF/Excel | P1 | **fully** | CSV with provenance columns + print-to-PDF (`console-export.ts`). |
 | D-9 role-based views | P2 | **missing** | Deferred by PRD §10. |
 
-**Dashboard: 5 fully · 3 partial · 1 missing** (unchanged)
+**Dashboard: 4 fully · 4 partial · 1 missing** (D-3 partial since D-044)
 
 ### 2.5 Non-functional (PRD §7)
 
@@ -129,13 +129,15 @@ file, a test or a measured number. *CI* means asserted on every pull request by
 | Group | Fully | Partial | Missing | Total |
 |---|---|---|---|---|
 | Track A | 5 | 4 | 1 | 10 |
-| Track B | 8 | 2 | 0 | 10 |
+| Track B | 7 | 3 | 0 | 10 |
 | Corrective | 2 | 3 | 2 | 7 |
-| Dashboard | 5 | 3 | 1 | 9 |
+| Dashboard | 4 | 4 | 1 | 9 |
 | Non-functional | 6 | 1 | 1 | 8 |
-| **Total** | **26** | **13** | **5** | **44** |
+| **Total** | **24** | **15** | **5** | **44** |
 
-The one status change since 74/100 is N-3. Most of what changed in between is
+Since then, B-6 and D-3 have gone from fully to partial: P(shortfall) is
+withdrawn from the screen (D-044). Before that, the one status change since
+74/100 was N-3. Most of what changed in between is
 not a status change: it is the evidence. Eight rows that were asserted by hand
 are asserted on every PR; the network can no longer change a check's result;
 and the demo was walked from a fresh clone.
@@ -288,6 +290,8 @@ non-functional, is. +1 for N-3, which is now met for everything that renders.
 Still deducted for the partials that matter most: A-1 has no persistence, A-6/D-1
 no zone resource estimate, C-1–C-3 templated rather than optimised actions, D-5
 targets not on the map.
+*(Since: B-6 and D-3 are partial, P(shortfall) being withdrawn from the screen,
+D-044. The score is not re-derived here.)*
 
 ### Functional correctness — **19 / 25** *(was 18)*
 
@@ -370,8 +374,10 @@ cold-start rehearsal, the same measurement gave **0.683 [0.636, 0.728]**
 (Balaghat 0.677) — below nominal on both windows. P(shortfall) is therefore more
 confident than the model has earned, most of all near 0 and 1. A fix (a
 common-factor loading) was measured on a pre-registered rule and declined because
-it did not beat the model as shipped (D-040); the console shows the calibration
-beside every P(shortfall) rather than hiding it. Source: `docs/CALIBRATION.md`,
+it did not beat the model as shipped (D-040). D-043 then found the aggregation
+itself unsound, and **P(shortfall) is withdrawn from the screen and the pitch**
+(D-044). The console shows the daily bands' calibration beside them — portfolio
+and mine, each with its interval. Source: `docs/CALIBRATION.md`,
 `backend/artifacts/calibration/cumulative_coverage.json`.
 
 ### Track A — 0.85 is softer than it looks
@@ -440,6 +446,34 @@ the three model map layers, Mine twin and its constraint engine, the fonts.
   numbers come from.
 - **The pitch figures are written from what is served** (`docs/PITCH_FIGURES.md`)
   and checked against it, and the docs that quote them are checked too.
+
+### Found in the pitch-safe interim PR (#30)
+
+- **The console's "expected shortfall" netted grades against each other.** The
+  API's mine-level figure is max(0, Σ plan − Σ expected), so a surplus in one
+  grade cancelled a deficit in another. PRD §3 says grades are not fungible, and
+  the console's own grade panel said so.
+  - On the committed forecasts it read 0 t for Beldongri and Gumgaon, which are
+    short in one grade (0.5 t and 10.2 t). Mansar read 128.0 t against 150.5 t,
+    and Chikla 164.4 t against 169.9 t.
+  - The console now sums each grade's own shortfall. That figure ranks the
+    mines and is the focal number. `test:e2e` checks the tile against the grade
+    chips.
+  - **Still netted:** the recommendation engine sizes its candidate actions from
+    the API's netted figure (`track_b.recommend_actions`). A mine short in one
+    grade but netting to 0 t therefore shows a shortfall and no corrective
+    action. Changing that touches the fingerprinted engine, so it is left for its
+    own change.
+- **Expected shortfall barely depends on how the 14-day total is built.** On the
+  pilot, the served expected production per grade is within 2.9 t of its exact,
+  dependence-free expectation, inside Monte Carlo error. Independent lognormal
+  days move it by 2–15 t, about 0.3%, and the sum of daily medians by 4–13 t.
+  So the focal figure does not lean on the premise D-043 falsified, and a test
+  (`test_track_b.py::test_expected_shortfall_does_not_depend_on_how_days_correlate`)
+  ties the served figure to that expectation. Its tolerance, four Monte Carlo
+  standard errors, is about 0.3% of each grade's total. So it catches a larger
+  error, and the 0.3% shift from independent lognormal days sits just inside
+  it.
 
 ### Found in the residual-fix PR (#29)
 
