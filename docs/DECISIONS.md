@@ -1179,3 +1179,33 @@ before it is measured.
   in the data, so they are expected to move; the new numbers are stated.
 - Freeze the pitch dataset on 2026-10-06 — yesterday, the latest end date
   docs/DEMO.md permits — and write docs/PITCH_FIGURES.md from it.
+
+### Result — no arm passed; served P(shortfall) unchanged
+
+Measured 2026-10-07 by the rule above and both amendments. All the figures are
+in `docs/QUANTILE_CROSSING.md` §2.
+
+- **crossing fix only:**
+  - **passes** A1 and A3: 14-day coverage 0.738 → 0.812 and 0.683 → 0.770;
+    tails 0.165 → 0.105 and 0.208 → 0.110;
+  - **fails** A2 (per-grade daily persistence 0.126 / −0.035), A4 on 20 Sep
+    (daily coverage 0.761 → 0.756, CI [−0.0077, −0.0031]), A5 and A6.
+- **day blocks only:** fails A1, A2, A3, A5 and A6.
+- **both:** fails A2, A3, A4 (20 Sep), A5 and A6.
+
+**What shipped,** as amendment 2 says:
+- nothing that changes served P(shortfall): `rearrange` and `day_blocks`
+  default off, and the regenerated artifacts match main's figure for figure;
+- the interval guarantee: `predict` sorts after the conformal step, plus the
+  artifact test and the browser assertion.
+
+**What the measurement established.** The block bootstrap's premise does not
+hold: one-step residuals carry little persistence across days. The apparent
+persistence of the interleaved series was same-day correlation between grades.
+Main's construction fails the sanity checks on all eight datasets measured.
+These are recorded as strict xfails (`test_track_b.py`,
+`test_track_b_dates.py`).
+
+**No pitch dataset is frozen.** The follow-up — dependence across horizons
+1–14 within a forecast path, per grade and for mine totals, and whether it
+explains #20's 2.5–3.4× gap — is its own change, with its own pre-registration.
