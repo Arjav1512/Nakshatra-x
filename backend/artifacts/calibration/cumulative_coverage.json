@@ -183,6 +183,127 @@
       "design_effect": 1.05
     }
   },
+  "daily": {
+    "quantity": "share of realised daily production inside the forecast's 80% band, and the MAPE of its median, at horizons of 1, 3, 7 and 14 days",
+    "horizons_days": [
+      1,
+      3,
+      7,
+      14
+    ],
+    "portfolio": {
+      "coverage_80": 0.761,
+      "coverage_80_ci95": [
+        0.7334,
+        0.7862
+      ],
+      "mape_pct": 10.0,
+      "n_predictions": 3264,
+      "n_origin_dates": 24
+    },
+    "per_mine": {
+      "MOIL-BAL-01": {
+        "coverage_80": 0.792,
+        "coverage_80_ci95": [
+          0.7135,
+          0.8568
+        ],
+        "mape_pct": 9.99,
+        "n_predictions": 384,
+        "n_origin_dates": 24
+      },
+      "MOIL-BEL-10": {
+        "coverage_80": 0.75,
+        "coverage_80_ci95": [
+          0.6771,
+          0.8194
+        ],
+        "mape_pct": 12.15,
+        "n_predictions": 288,
+        "n_origin_dates": 24
+      },
+      "MOIL-BHR-02": {
+        "coverage_80": 0.776,
+        "coverage_80_ci95": [
+          0.7188,
+          0.8281
+        ],
+        "mape_pct": 10.17,
+        "n_predictions": 384,
+        "n_origin_dates": 24
+      },
+      "MOIL-CHK-06": {
+        "coverage_80": 0.714,
+        "coverage_80_ci95": [
+          0.6432,
+          0.7839
+        ],
+        "mape_pct": 11.43,
+        "n_predictions": 384,
+        "n_origin_dates": 24
+      },
+      "MOIL-DON-05": {
+        "coverage_80": 0.724,
+        "coverage_80_ci95": [
+          0.6484,
+          0.7995
+        ],
+        "mape_pct": 11.22,
+        "n_predictions": 384,
+        "n_origin_dates": 24
+      },
+      "MOIL-GUM-09": {
+        "coverage_80": 0.809,
+        "coverage_80_ci95": [
+          0.7604,
+          0.8543
+        ],
+        "mape_pct": 7.8,
+        "n_predictions": 288,
+        "n_origin_dates": 24
+      },
+      "MOIL-KAN-08": {
+        "coverage_80": 0.799,
+        "coverage_80_ci95": [
+          0.7361,
+          0.8611
+        ],
+        "mape_pct": 7.85,
+        "n_predictions": 288,
+        "n_origin_dates": 24
+      },
+      "MOIL-MAN-07": {
+        "coverage_80": 0.733,
+        "coverage_80_ci95": [
+          0.6458,
+          0.809
+        ],
+        "mape_pct": 9.71,
+        "n_predictions": 288,
+        "n_origin_dates": 24
+      },
+      "MOIL-TIR-04": {
+        "coverage_80": 0.792,
+        "coverage_80_ci95": [
+          0.7396,
+          0.8403
+        ],
+        "mape_pct": 8.63,
+        "n_predictions": 288,
+        "n_origin_dates": 24
+      },
+      "MOIL-UKW-03": {
+        "coverage_80": 0.733,
+        "coverage_80_ci95": [
+          0.6632,
+          0.7951
+        ],
+        "mape_pct": 10.11,
+        "n_predictions": 288,
+        "n_origin_dates": 24
+      }
+    }
+  },
   "window": {
     "first_origin": "2025-10-15",
     "last_origin": "2026-09-02",
@@ -191,7 +312,7 @@
   },
   "method": "Rolling-origin: refit before every origin, score the next 14 days. 95% intervals from a cluster bootstrap resampling whole origin dates (2000 resamples, seed 20260921), because a date's windows share weather and equipment state and are not independent.",
   "records_sha256": "b72eb220251f16ea69e2a456b92b67a8b2a0a57ecc077eb56c442f23a8336e72",
-  "generated_at": "2026-10-03T08:06:02Z",
+  "generated_at": "2026-10-07T06:06:25Z",
   "generated_by": "python measure_cumulative_calibration.py artifact --records <run output>",
   "artifact_identity": {
     "generator": "nakshatra-synthetic-v1",
@@ -206,7 +327,7 @@
       "sklearn": "1.6.0"
     }
   },
-  "harness_fingerprint": "b4bf576cd4fd9291",
+  "harness_fingerprint": "f5dbc1a6e8dd3418",
   "doc": "docs/CALIBRATION.md",
   "provenance": {
     "source_kind": "derived",
