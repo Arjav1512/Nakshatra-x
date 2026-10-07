@@ -182,7 +182,8 @@ def seasonal_naive(series: dict[date, float], target: date) -> float:
 #: The residual sigma floor, as a fraction of the mine's median one-step
 #: sigma (DECISIONS.md D-043, F2). Pre-registered at 0.25 before any outcome was
 #: measured, as a guard against degenerate bands rather than a calibration
-#: lever. Not to be tuned.
+#: lever. Not to be tuned. Measured and not shipped: it applies only with
+#: `rearrange=True` (docs/QUANTILE_CROSSING.md).
 SIGMA_FLOOR_FRACTION = 0.25
 
 
@@ -200,18 +201,20 @@ class ProductionForecaster:
         quantiles: Sequence[float] = DEFAULT_QUANTILES,
         random_state: int = 20260921,
         calibration_fraction: float = 0.25,
-        rearrange: bool = True,
-        day_blocks: bool = True,
+        rearrange: bool = False,
+        day_blocks: bool = False,
     ):
         self.quantiles = tuple(quantiles)
         self.random_state = random_state
         self.calibration_fraction = calibration_fraction
-        #: D-043 F1 + F2: sort every row's predicted quantiles before they are
-        #: used, again after the conformal step, and floor the residual sigma.
-        #: Off only to measure the ablation; the product runs with it on.
+        #: D-043 F1 + F2, in `fit`: sort the calibration rows' quantiles before
+        #: the conformity scores and residuals use them, and floor the residual
+        #: sigma. OFF: measured under D-043 and not shipped — no arm passed its
+        #: pre-registered rule (docs/QUANTILE_CROSSING.md). Kept so the
+        #: measurement reproduces and the follow-up can compare against it.
         self.rearrange = rearrange
         #: D-043 F3: simulate cumulative paths from blocks of days, every grade
-        #: of the mine on the same days. Off only to measure the ablation.
+        #: of the mine on the same days. OFF, for the same reason.
         self.day_blocks = day_blocks
         self.models: dict[str, dict[float, HistGradientBoostingRegressor]] = {}
         #: Standardised one-step residuals per mine, rows of all its grades in
@@ -221,6 +224,10 @@ class ProductionForecaster:
         #: The same residuals as a table per mine: one row per target day, one
         #: column per grade, complete days only — see `residual_block`.
         self.residual_days: dict[str, dict] = {}
+        #: The target day of each entry of `residuals`, in the same order. The
+        #: interleaved series carried no day labels, so nothing could say which
+        #: entries belonged to one day (D-043).
+        self.residual_row_days: dict[str, list[date]] = {}
         # Conformal width correction, in tonnes, per (mine, horizon).
         # A single global width cannot serve both ends of the horizon range:
         # measured at 0.475 coverage for h=1 against 0.75 for h=14, because
@@ -423,10 +430,10 @@ class ProductionForecaster:
                         z = (r / sd if sd > 1e-9 else r).astype(float)
                         self.residuals[mine] = z
                         rows = one_step[ok][finite]
+                        row_days = [samples[i][2] + timedelta(days=1) for i in rows]
+                        self.residual_row_days[mine] = row_days
                         self.residual_days[mine] = _day_table(
-                            [samples[i][2] + timedelta(days=1) for i in rows],
-                            [samples[i][3] for i in rows],
-                            z,
+                            row_days, [samples[i][3] for i in rows], z,
                         )
         return self
 
@@ -485,10 +492,12 @@ class ProductionForecaster:
             # Conformal widening — calibrated on held-out data at fit time.
             lo -= width
             hi += width
-            if self.rearrange:
-                # A negative conformal width moves the endpoints towards each
-                # other and can cross them, or the median (D-043 F1).
-                lo, mid, hi = sorted((lo, mid, hi))
+            # A negative conformal width moves the endpoints towards each other
+            # and can cross them, or the median: on main it did, for 2 and 16
+            # of 11,424 backtest intervals (docs/QUANTILE_CROSSING.md). Sorting
+            # again is the served-interval guarantee D-043 ships on its own; it
+            # touches no fitted quantity.
+            lo, mid, hi = sorted((lo, mid, hi))
             out[h] = {
                 "q10": max(0.0, lo),
                 "q50": max(0.0, mid),

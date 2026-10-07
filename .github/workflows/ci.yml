@@ -2,7 +2,7 @@
 # why, and every job's measured runtime: docs/CI.md.
 #
 # Required (their result cannot depend on an external service):
-#   frontend · backend · track-b · artifacts · browser (5 groups)
+#   frontend · backend · track-b · track-b-dates · artifacts · browser (5 groups)
 # Non-blocking (reports, never fails the PR):
 #   network — the tests that need NASA POWER, STAC or Planetary Computer.
 
@@ -71,7 +71,7 @@ jobs:
         working-directory: backend
         run: |
           set -o pipefail
-          .venv/bin/python -m pytest -m "not network" --ignore=test_track_b.py \
+          .venv/bin/python -m pytest -m "not network" --ignore=test_track_b.py --ignore=test_track_b_dates.py \
             -p no:cacheprovider -rfE --durations=10 | tee "$RUNNER_TEMP/pytest.txt"
       - name: Confirm the artifact guard, the network block and the API provenance guard ran
         if: ${{ !cancelled() }}
@@ -96,6 +96,22 @@ jobs:
       - name: pytest test_track_b.py
         working-directory: backend
         run: .venv/bin/python -m pytest test_track_b.py -p no:cacheprovider -rfE --durations=5
+
+  track-b-dates:
+    # D-043 A6: the 14-day distribution checked on eight datasets spread over
+    # a year. 241 s on an 8-core laptop, so it runs on every PR (D-043's rule:
+    # at most 6 minutes locally, about 15 on a runner) rather than nightly.
+    name: Backend — Track B across eight end dates
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/backend-env
+      - name: pytest test_track_b_dates.py
+        working-directory: backend
+        run: .venv/bin/python -m pytest test_track_b_dates.py -p no:cacheprovider -rfExX --durations=10
 
   artifacts:
     name: Artifacts — produced by this code, and the pitch figures match
