@@ -37,6 +37,18 @@ protection → Require status checks*: the nine "gates the PR" rows above. Leave
 "Network — live services" out. (As of this writing `main` has no branch
 protection, so "gates the PR" means a red check, not a blocked merge.)
 
+## When a test hangs
+
+`backend/pytest.ini` sets `faulthandler_timeout = 900`: a test still running
+after 15 minutes gets every thread's stack written to the log, and keeps
+running. The dump comes before the backend (20 min) and Track B (30 min) jobs
+time out, so a hang in CI leaves a stack trace instead of a cancelled job. One
+full local run in PR #28 produced no output and had to be stopped, with nothing
+to say where it was; it did not recur. If it happens again, treat it as a flaky
+test to root-cause. For a server that hangs rather than a test
+(`start-servers.sh`), `py-spy dump --pid <pid>` gives the same before it is
+killed.
+
 ## Workflow hardening
 
 What the workflow does about its own attack surface, and the check that keeps
