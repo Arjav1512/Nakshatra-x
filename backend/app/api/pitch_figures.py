@@ -266,15 +266,20 @@ def compare(text: str, figs: list[Figure], ident: dict) -> list[str]:
     return problems
 
 
-def quoted_problems(figs: dict[str, str], docs=QUOTING_DOCS) -> list[str]:
-    """Every `**value**<!-- pitch:key -->` in the quoting docs holds that key's value."""
+def quoted_problems(figs: dict[str, str], docs=QUOTING_DOCS, against: str = PITCH_DOC.name) -> list[str]:
+    """
+    Every `**value**<!-- pitch:key -->` in the quoting docs holds that key's value.
+
+    `against` names where `figs` came from — the file, or what is served — so
+    a message never attributes a value to the wrong one.
+    """
     problems = []
     for doc in docs:
         for value, key in QUOTE.findall(doc.read_text()):
             if key not in figs:
-                problems.append(f"{doc.name}: quotes pitch:{key}, which {PITCH_DOC.name} does not hold")
+                problems.append(f"{doc.name}: quotes pitch:{key}, which {against} does not have")
             elif value.strip() != figs[key]:
-                problems.append(f"{doc.name}: pitch:{key} quoted as {value.strip()}, {PITCH_DOC.name} holds {figs[key]}")
+                problems.append(f"{doc.name}: pitch:{key} quoted as {value.strip()}, {against}: {figs[key]}")
     return problems
 
 
@@ -285,9 +290,21 @@ def write() -> Path:
 
 
 def check() -> list[str]:
-    bt, cal, ta = served()
-    figs = figures_from(bt, cal, ta)
+    """
+    What differs between PITCH_FIGURES.md, the quoting docs and what is served.
+
+    A source that cannot be served as a pitch figure (a stale calibration, one
+    measured before the daily figures existed, a missing backtest) is reported
+    the same way as a differing value, not raised: either way the figures are
+    not the served ones.
+    """
+    try:
+        bt, cal, ta = served()
+        figs = figures_from(bt, cal, ta)
+        ident = identities_from(bt, cal, ta)
+    except Exception as exc:  # noqa: BLE001 — reported, and the check fails
+        return [f"cannot read the figures from what is served: {type(exc).__name__}: {exc}"]
     if not PITCH_DOC.exists():
         return [f"{PITCH_DOC} does not exist; write it with `python -m app.api.batch pitch`"]
-    problems = compare(PITCH_DOC.read_text(), figs, identities_from(bt, cal, ta))
-    return problems + quoted_problems({f.key: f.value for f in figs})
+    problems = compare(PITCH_DOC.read_text(), figs, ident)
+    return problems + quoted_problems({f.key: f.value for f in figs}, against="served")

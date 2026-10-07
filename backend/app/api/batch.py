@@ -496,8 +496,11 @@ def main(argv: list[str]) -> int:
         print(f"pitch figures: {'match what is served' if not problems else f'{len(problems)} mismatch(es)'}")
         # Matching is not the same as usable: a dataset whose window has ended
         # still matches, and must not go into slides.
-        bt, cal, ta = pitch_figures.served()
-        passed = pitch_figures.window_passed(pitch_figures.identities_from(bt, cal, ta))
+        try:
+            bt, cal, ta = pitch_figures.served()
+            passed = pitch_figures.window_passed(pitch_figures.identities_from(bt, cal, ta))
+        except Exception:  # noqa: BLE001 — already reported above as a mismatch
+            passed = None
         if passed:
             print(f"  NOT DEMO-READY: the forecast window ({passed}) has passed — re-freeze (docs/DEMO.md)")
         return 1 if problems else 0
