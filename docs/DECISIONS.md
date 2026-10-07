@@ -1073,6 +1073,29 @@ each grade's simulated 14-day sd (seeded, at the end-date origin) by less than
 **A7. The ablation is reported** for both datasets: every arm's 14-day coverage
 and tails with intervals, daily coverage and MAPE. Not a gate.
 
+### Amendment to A4 — written after part 1's counts, before any measurement of the fix
+
+**Written 2026-10-07T11:49Z.** Part 1 had run (`docs/QUANTILE_CROSSING.md`); no
+fixed variant had.
+
+A4's first clause said q50 may change only where *main's raw quantiles* crossed.
+But part 1, in this same entry, defines crossing in two places: in the raw
+outputs, and after the conformal step. On main the conformal step produced
+crossed intervals of its own — 2 backtest rows of 11,424 on 20 Sep and 16 on
+6 Oct. Read literally, A4 would count reordering one of those, which is
+precisely the fix, as a violation.
+
+A4 now reads: q50 may differ from main's only on a daily row where a crossing
+entered it. That means one of:
+- its raw quantiles crossed;
+- main's returned interval was crossed after its conformal step;
+- the branch's interval crossed after its conformal step, before the second
+  sort.
+
+The harness records the first and the last for every daily row, and main's
+records show the second. The count of rows whose q50 changed for any other
+reason must be zero. Nothing else in A4, or anywhere in D-043, changes.
+
 ### If the rule fails
 
 "Both" does not ship as it is. The failure is reported with its numbers; neither
