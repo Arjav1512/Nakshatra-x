@@ -81,6 +81,7 @@ export const fetchMines = () => get<MineRow[]>('/api/v1/mines')
 // ---- Track B ---------------------------------------------------------------
 
 export interface ShortfallBlock {
+  /** Served, not rendered: withdrawn from the screen (DECISIONS.md D-044). */
   p_shortfall: number
   expected_cumulative_tonnes: number
   p10_cumulative_tonnes: number
@@ -169,6 +170,7 @@ export interface ActionRow {
   }
   expected_effect?: {
     recovery_tonnes: number
+    /** Served, not rendered: derived from P(shortfall), withdrawn (D-044). */
     delta_shortfall_probability: number
     assumptions: string[]
   }
@@ -178,6 +180,7 @@ export interface RecommendationsResponse {
   mine_code: string
   forecast_origin: string
   expected_shortfall_tonnes: number
+  /** Served, not rendered: withdrawn from the screen (D-044). */
   max_grade_shortfall_probability: number
   approved_actions: ActionRow[]
   rejected_actions: ActionRow[]
@@ -188,6 +191,20 @@ export interface RecommendationsResponse {
     excluded: string[]
   }
   guardrail: string
+}
+
+/**
+ * Expected shortfall in tonnes, summed over grades — the console's focal
+ * number (docs/DECISIONS.md D-044).
+ *
+ * The API's `portfolio.expected_shortfall_tonnes` is max(0, Σ plan − Σ
+ * expected): a surplus in one grade cancels a deficit in another, so a mine
+ * short in one grade can read 0 t. PRD §3 says grades are not fungible, and the
+ * console's own grade panel says so, so each grade's shortfall is added on its
+ * own. Every term is a figure the API serves; nothing is re-modelled here.
+ */
+export function gradeShortfallTonnes(f: ForecastResponse): number {
+  return f.grades.reduce((sum, g) => sum + g.shortfall.expected_shortfall_tonnes, 0)
 }
 
 export const fetchForecast = (mineId: number, horizon = 14) =>

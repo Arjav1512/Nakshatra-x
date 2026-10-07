@@ -3,6 +3,7 @@ import { Card, CardBody } from '@/components/ui/primitives'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { loadLandingEvidence } from '@/lib/landing-evidence'
+import { coverageVerdict } from '@/lib/calibration'
 import { ProspectivityStack, type StackData } from '@/components/landing/ProspectivityStack'
 import { BeltImagery, loadImagery } from '@/components/landing/BeltImagery'
 
@@ -184,7 +185,7 @@ export default async function HomePage() {
                     </span>
                   </div>
                   <p className="measure mt-3 text-sm text-text-secondary">
-                    Interval coverage{' '}
+                    Daily interval coverage on the pilot{' '}
                     <span className="font-mono tabular-nums">{evidence.backtest.coverage80}</span>{' '}
                     against a nominal{' '}
                     <span className="font-mono tabular-nums">
@@ -192,6 +193,53 @@ export default async function HomePage() {
                     </span>
                     .
                   </p>
+                </div>
+              ) : (
+                <p className="mt-4 text-sm text-text-tertiary">
+                  {evidence.backtest.reason} No figure is shown in its place.
+                </p>
+              )}
+              {/*
+                The pilot's coverage is the best-looking one, so it is never
+                shown alone: the portfolio's comes from the calibration
+                artifact the console reads, with its interval and a verdict
+                computed from that interval (D-044).
+              */}
+              {evidence.dailyCalibration.ok ? (
+                <p
+                  className="measure mt-3 text-sm text-text-secondary"
+                  data-provenance="derived"
+                  data-provenance-model={evidence.dailyCalibration.modelVersion}
+                  data-provenance-vintage={evidence.dailyCalibration.generatedAt ?? undefined}
+                  data-landing-daily-calibration
+                >
+                  Across all ten mines:{' '}
+                  <span className="font-mono tabular-nums">
+                    {evidence.dailyCalibration.coverage80.toFixed(3)}
+                  </span>
+                  , 95% CI{' '}
+                  <span className="font-mono tabular-nums">
+                    {evidence.dailyCalibration.ci95[0].toFixed(3)}&ndash;
+                    {evidence.dailyCalibration.ci95[1].toFixed(3)}
+                  </span>{' '}
+                  over{' '}
+                  <span className="font-mono tabular-nums">
+                    {evidence.dailyCalibration.nPredictions.toLocaleString()}
+                  </span>{' '}
+                  held-out predictions at {evidence.dailyCalibration.nOriginDates} origin dates —{' '}
+                  {coverageVerdict(evidence.dailyCalibration.ci95, evidence.dailyCalibration.nominal).short}.
+                </p>
+              ) : (
+                <p className="mt-3 text-sm text-text-tertiary">
+                  {evidence.dailyCalibration.reason} No figure is shown in its place.
+                </p>
+              )}
+              {evidence.backtest.ok ? (
+                <div
+                  data-provenance="derived"
+                  data-provenance-model={evidence.backtest.modelVersion}
+                  data-provenance-vintage={evidence.backtest.computedAt ?? undefined}
+                >
                   <p className="measure mt-3 text-xs text-text-tertiary">
                     Rolling-origin backtest on the pilot mine,{' '}
                     <strong className="font-medium text-text-secondary">
@@ -210,11 +258,7 @@ export default async function HomePage() {
                     See {evidence.backtest.mineName}&rsquo;s backtest in the console &rarr;
                   </Link>
                 </div>
-              ) : (
-                <p className="mt-4 text-sm text-text-tertiary">
-                  {evidence.backtest.reason} No figure is shown in its place.
-                </p>
-              )}
+              ) : null}
             </CardBody>
           </Card>
 

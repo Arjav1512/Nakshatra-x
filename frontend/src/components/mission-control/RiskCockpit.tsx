@@ -103,7 +103,7 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
           data={measuredOrNull(typeof score === 'number'
               ? derived(score, 'score 0-100', 'Constraint-weighted composite over weather and operational drivers', {
                   method:
-                    'A weighted index, not a probability. The calibrated probability of shortfall is on the console, from the Track B forecaster.',
+                    'A weighted index, not a probability. The console gives expected shortfall in tonnes from the Track B forecaster, with its daily intervals and their measured calibration.',
                 })
               : undefined, () => String(typeof score === 'number' ? score.toFixed(1) : null))}
             unavailable="The risk service returned no composite score."
@@ -140,7 +140,9 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
       <p className="measure mt-4 text-xs text-text-tertiary">
         Rain and temperature are measured. The composite score is an index over those measurements
         and the mine's synthetic operational record — useful for ordering mines, not for stating
-        how likely a shortfall is. That number is on the console, with its interval.
+        how likely a shortfall is. The console gives expected shortfall in tonnes, with daily
+        intervals and how well they are calibrated; its probability of shortfall is withdrawn while
+        it is under validation.
       </p>
     </div>
   )

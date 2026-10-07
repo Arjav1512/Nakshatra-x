@@ -1,16 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { DOCS_BASE, coverageVerdict } from '@/lib/calibration'
 
 /**
- * How far to trust P(shortfall), shown beside it.
+ * How far to trust the daily bands, shown beside them.
  *
- * P(shortfall) comes from the forecast's 14-day cumulative distribution, and
- * that distribution is measurably too narrow: across all ten mines its 80% band
- * held fewer than 80% of real outcomes. A probability read off a band that is
- * too narrow is more confident than the data supports. Saying so next to the
- * number is the point — a calibration finding in a doc nobody opens does not
- * change how anyone reads the figure on screen.
+ * This panel used to say how far to trust P(shortfall), from the 14-day total's
+ * calibration. P(shortfall) is withdrawn from the screen (docs/DECISIONS.md
+ * D-044), and with it the figure describing its distribution. What the console
+ * presents now is expected shortfall with the daily 80% intervals in the chart,
+ * so this measures those intervals: the share of real daily production that
+ * fell inside them, across all ten mines and for the mine on screen.
  *
  * Every number here is read from the calibration artifact through the API,
  * which carries the identity of the model it measured. Nothing is typed into
@@ -23,11 +24,11 @@ import { useEffect, useState } from 'react'
  * still contains 0.80 is described as consistent at that sample size rather
  * than as miscalibrated.
  */
-type Stat = {
+type DailyStat = {
   coverage_80: number
   coverage_80_ci95: [number, number]
-  pit_at_extremes: number
-  n_windows: number
+  mape_pct: number
+  n_predictions: number
   n_origin_dates: number
 }
 
@@ -39,36 +40,23 @@ type CalibrationResponse = {
   /** Confidence level of the intervals, from the artifact. */
   ci_level?: number | null
   model_version?: string
-  portfolio?: Stat
-  mine?: Stat | null
-  mine_note?: string | null
+  /** Absent from artifacts measured before the harness recorded daily figures. */
+  daily?: {
+    quantity: string
+    horizons_days: number[]
+    portfolio: DailyStat
+    mine: DailyStat | null
+  } | null
   doc?: string
   generated_at?: string
-}
-
-/** The repo is public, so the write-up resolves for anyone reading the console. */
-const DOCS_BASE = 'https://github.com/Arjav1512/Nakshatra-x/blob/main/'
-
-function verdict(s: Stat, nominal: number): { text: string; tone: string } {
-  const [lo, hi] = s.coverage_80_ci95
-  if (hi < nominal) {
-    return {
-      text: 'too narrow — outcomes fall outside the band more often than it claims, so P(shortfall) is more confident than the data supports',
-      tone: 'text-status-caution',
-    }
-  }
-  if (lo > nominal) {
-    return { text: 'too wide — P(shortfall) is more cautious than it needs to be', tone: 'text-text-secondary' }
-  }
-  return { text: 'consistent with nominal at this sample size', tone: 'text-text-secondary' }
 }
 
 function fmt(x: number) {
   return x.toFixed(3)
 }
 
-function Line({ label, s, nominal }: { label: string; s: Stat; nominal: number }) {
-  const v = verdict(s, nominal)
+function Line({ label, s, nominal }: { label: string; s: DailyStat; nominal: number }) {
+  const v = coverageVerdict(s.coverage_80_ci95, nominal)
   return (
     <p className="leading-snug">
       <span className="text-text-secondary">{label}: </span>
@@ -77,14 +65,14 @@ function Line({ label, s, nominal }: { label: string; s: Stat; nominal: number }
         [{fmt(s.coverage_80_ci95[0])}, {fmt(s.coverage_80_ci95[1])}]
       </span>{' '}
       <span className="text-text-tertiary">
-        ({s.n_windows} windows at {s.n_origin_dates} dates)
+        ({s.n_predictions.toLocaleString()} predictions at {s.n_origin_dates} dates)
       </span>{' '}
-      — <span className={v.tone}>{v.text}</span>
+      — <span className={v.tone === 'caution' ? 'text-status-caution' : 'text-text-secondary'}>{v.text}</span>
     </p>
   )
 }
 
-export function ShortfallCalibration({ mineCode, mineName }: { mineCode: string; mineName: string }) {
+export function IntervalCalibration({ mineCode, mineName }: { mineCode: string; mineName: string }) {
   const [data, setData] = useState<CalibrationResponse | null>(null)
 
   useEffect(() => {
@@ -103,39 +91,43 @@ export function ShortfallCalibration({ mineCode, mineName }: { mineCode: string;
   }, [mineCode])
 
   if (!data) {
-    return <p className="text-xs text-text-tertiary">Loading how far to trust this…</p>
+    return <p className="text-xs text-text-tertiary">Loading how far to trust the daily bands…</p>
   }
 
-  if (data.status !== 'ok' || !data.portfolio || data.nominal_coverage == null) {
+  if (data.status !== 'ok' || !data.daily?.portfolio || data.nominal_coverage == null) {
     return (
       <p role="status" className="text-xs text-text-tertiary" data-provenance="derived">
-        Calibration unavailable: {data.reason ?? data.error ?? 'no calibration returned'}. No figure is
-        shown in its place.
+        Calibration unavailable:{' '}
+        {data.status === 'ok' && !data.daily
+          ? 'the calibration artifact predates the daily figures; re-measure it with batch all'
+          : (data.reason ?? data.error ?? 'no calibration returned')}
+        . No figure is shown in its place.
       </p>
     )
   }
 
   const nominal = data.nominal_coverage
+  const { daily } = data
   return (
     <div
       className="space-y-1 rounded-md border border-border-default bg-surface-1 p-3 text-xs"
       data-provenance="derived"
       data-provenance-model={data.model_version}
       data-provenance-vintage={data.generated_at}
-      data-calibration
+      data-calibration="daily"
     >
       <p className="font-medium text-text-primary">
-        How far to trust P(shortfall): share of real 14-day totals inside the 80% band (a calibrated
-        band holds <span className="font-mono tabular-nums">{nominal.toFixed(2)}</span>)
+        How far to trust the daily bands: share of real days inside the 80% band (a calibrated band
+        holds <span className="font-mono tabular-nums">{nominal.toFixed(2)}</span>)
       </p>
-      <Line label="All ten mines" s={data.portfolio} nominal={nominal} />
-      {data.mine ? (
-        <Line label={mineName} s={data.mine} nominal={nominal} />
+      <Line label="All ten mines" s={daily.portfolio} nominal={nominal} />
+      {daily.mine ? (
+        <Line label={mineName} s={daily.mine} nominal={nominal} />
       ) : (
-        <p className="text-text-tertiary">{data.mine_note ?? `No per-mine figure for ${mineName}.`}</p>
+        <p className="text-text-tertiary">No daily figure for {mineName}.</p>
       )}
       <p className="text-text-tertiary">
-        Held-out rolling-origin backtest;{' '}
+        Held-out rolling-origin backtest at horizons of {daily.horizons_days.join(', ')} days;{' '}
         {data.ci_level != null ? `${Math.round(data.ci_level * 100)}% intervals` : 'intervals'} from a
         bootstrap over whole origin dates. Synthetic data.{' '}
         {data.doc ? (

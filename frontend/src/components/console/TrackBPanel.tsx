@@ -8,10 +8,11 @@ import { PLAN_TARGET_NOTE, derived, measuredValue, reference, synthetic } from '
 import {
   type BacktestResponse, type ForecastResponse, type NoBacktestInfo,
   type RecommendationsResponse, type WarmingInfo,
-  fetchBacktest, fetchForecast, fetchRecommendations,
+  fetchBacktest, fetchForecast, fetchRecommendations, gradeShortfallTonnes,
 } from '@/lib/console-api'
 import { Metric } from './Evidence'
-import { ShortfallCalibration } from './ShortfallCalibration'
+import { IntervalCalibration } from './IntervalCalibration'
+import { ProbabilityWithdrawn } from './ProbabilityWithdrawn'
 
 /**
  * Track B — production shortfall (PRD B-5, B-6, B-7, B-10, C-1..C-5, D-2, D-3,
@@ -23,10 +24,6 @@ import { ShortfallCalibration } from './ShortfallCalibration'
 
 const SYNTH_SOURCE =
   'Synthetic operational model, generated to the published ingestion contract. MOIL operational data is proprietary (PRD §8.2).'
-
-function pct(x: number) {
-  return `${(x * 100).toFixed(1)}%`
-}
 
 function Spinner({ label }: { label: string }) {
   return (
@@ -234,10 +231,6 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
    */
   const forecastSettled = !!forecast || !!fErr || !!fWarm
   const grades = forecast?.grades ?? []
-  /** The worst grade's shortfall probability — what the portfolio card shows. */
-  const worstGradeP = grades.length
-    ? Math.max(...grades.map((g) => g.shortfall.p_shortfall))
-    : null
   const selected = grades.find((g) => g.grade === grade) ?? grades[0] ?? null
 
   return (
@@ -370,43 +363,28 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 }
               ))}
           />
+            {/*
+              The focal number (D-044). Summed over grades, not the API's
+              mine-level figure, which nets a surplus in one grade against a
+              deficit in another — PRD §3 says they are not fungible.
+            */}
             <Metric
               label="Expected shortfall"
               emphasis
               unit="t"
               data={measuredValue(derived(
-                Math.round(forecast.portfolio.expected_shortfall_tonnes),
+                Math.round(gradeShortfallTonnes(forecast)),
                 'tonnes',
-                'max(0, plan target − expected production)',
-                { model_version: forecast.model_version }
-              ))}
-          />
-            <Metric
-              label="Worst-grade P(shortfall)"
-              emphasis
-              data={measuredValue(derived(
-                grades.length ? Math.max(...grades.map((g) => g.shortfall.p_shortfall)) : 0,
-                'probability',
-                'Monte Carlo over per-day predictive distributions',
+                'Sum over grades of max(0, plan target − expected production)',
                 {
                   model_version: forecast.model_version,
-                  method: 'P(cumulative production < plan target) — PRD B-6.',
-                  uncertainty: {
-                    plus_minus: 0,
-                    confidence: forecast.interval.nominal_coverage,
-                    // Read from the forecast, not written here. This said
-                    // "days treated as independent given covariates", which
-                    // stopped being true when the days were aggregated by block
-                    // bootstrap of the model's residuals — the forecast's own
-                    // `aggregation` field has said "days correlated" since, and
-                    // the copy went on contradicting it.
-                    basis: grades[0]?.shortfall.aggregation ?? 'aggregation not reported by the forecast',
-                  },
+                  method:
+                    'Each grade is short or not on its own: a surplus in one grade does not cover a deficit in another (PRD §3). A mean, so it does not depend on how the days are correlated.',
                 }
-              ), () => String(grades.length
-                  ? pct(Math.max(...grades.map((g) => g.shortfall.p_shortfall)))
-                  : null))}
+              ))}
           />
+            {/* Where the worst-grade P(shortfall) was: withdrawn, no number (D-044). */}
+            <ProbabilityWithdrawn variant="tile" />
           </div>
 
           {/*
@@ -419,7 +397,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
           <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
           <div className="space-y-3 lg:order-last lg:col-span-5">
           <div className={sectionCls('answer')}>
-            <ShortfallCalibration mineCode={forecast.mine_code} mineName={mineName} />
+            <IntervalCalibration mineCode={forecast.mine_code} mineName={mineName} />
           </div>
 
           <p className={`measure text-xs text-text-tertiary ${sectionCls('answer')}`}>
@@ -436,7 +414,9 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             <div className="flex flex-wrap gap-2">
               {grades.map((g) => {
                 const on = (grade ?? grades[0]?.grade) === g.grade
-                const risk = g.shortfall.p_shortfall
+                // The grade's own expected shortfall. This chip showed its
+                // P(shortfall), coloured by band; both are withdrawn (D-044).
+                const short = Math.round(g.shortfall.expected_shortfall_tonnes)
                 return (
                   <button type="button"
                     key={g.grade}
@@ -452,12 +432,8 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                     <span className="block font-medium text-text-primary">
                       {g.grade.replace(/_/g, ' ')}
                     </span>
-                    <span
-                      className={`mt-0.5 block font-mono ${
-                        risk > 0.8 ? 'text-status-critical' : risk > 0.5 ? 'text-status-caution' : 'text-status-nominal'
-                      }`}
-                    >
-                      P(short) {pct(risk)}
+                    <span className="mt-0.5 block font-mono tabular-nums text-text-secondary">
+                      {short > 0 ? `−${short.toLocaleString()} t expected` : 'no shortfall expected'}
                     </span>
                   </button>
                 )
@@ -744,10 +720,11 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                     approved
                   </span>
                 </div>
+                {/* The served ΔP(shortfall) is not shown: it is derived from
+                    P(shortfall), which is withdrawn (D-044). */}
                 {a.expected_effect ? (
                   <p className="mt-1 font-mono text-xs text-text-secondary">
-                    +{Math.round(a.expected_effect.recovery_tonnes)} t · ΔP(shortfall){' '}
-                    {a.expected_effect.delta_shortfall_probability}
+                    +{Math.round(a.expected_effect.recovery_tonnes)} t expected recovery
                   </p>
                 ) : null}
                 <p className="mt-1 text-xs text-text-tertiary">

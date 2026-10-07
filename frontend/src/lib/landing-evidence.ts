@@ -35,6 +35,23 @@ export interface LandingEvidence {
         dataWindowEnd: string | null
       }
     | { ok: false; reason: string }
+  /**
+   * Daily interval coverage across all ten mines, from the calibration
+   * artifact the console reads. The pilot's coverage alone reads better than
+   * the portfolio's, and must not be generalised from (DECISIONS.md D-044).
+   */
+  dailyCalibration:
+    | {
+        ok: true
+        coverage80: number
+        ci95: [number, number]
+        nominal: number
+        nPredictions: number
+        nOriginDates: number
+        modelVersion: string
+        generatedAt: string | null
+      }
+    | { ok: false; reason: string }
   trackA:
     | {
         ok: true
@@ -64,10 +81,12 @@ async function get(path: string): Promise<any | null> {
 }
 
 export async function loadLandingEvidence(): Promise<LandingEvidence> {
-  const [bt, metrics] = await Promise.all([
+  const [bt, metrics, cal] = await Promise.all([
     get(`/api/v1/mines/${PILOT_MINE.id}/backtest`),
     get('/api/v1/prospectivity/metrics'),
+    get(`/api/v1/calibration/cumulative?mine_code=${PILOT_MINE.code}`),
   ])
+  const daily = cal?.status === 'ok' ? cal.daily?.portfolio : null
 
   return {
     backtest:
@@ -87,6 +106,25 @@ export async function loadLandingEvidence(): Promise<LandingEvidence> {
             dataWindowEnd: bt.data_window_end ?? null,
           }
         : { ok: false, reason: 'The backtest artifact could not be read from the service layer.' },
+    dailyCalibration:
+      daily && cal.nominal_coverage != null
+        ? {
+            ok: true,
+            coverage80: daily.coverage_80,
+            ci95: daily.coverage_80_ci95,
+            nominal: cal.nominal_coverage,
+            nPredictions: daily.n_predictions,
+            nOriginDates: daily.n_origin_dates,
+            modelVersion: cal.model_version,
+            generatedAt: cal.generated_at ?? null,
+          }
+        : {
+            ok: false,
+            reason:
+              cal?.status === 'stale'
+                ? 'The calibration was measured on a different model, so its figure is not shown.'
+                : 'The calibration artifact could not be read from the service layer.',
+          },
     trackA:
       metrics && metrics.lomo
         ? {
