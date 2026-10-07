@@ -15,7 +15,7 @@ how to re-make them.
 
 **Dataset:** `nakshatra-synthetic-v1`, seed 20260921, contract 1.0.0, actuals to **2026-09-20** — the forecast window is 21 Sep – 4 Oct 2026. Operational data is synthetic (MOIL's is proprietary, PRD 8.2); Track A's inputs are real.
 
-**Code:** `nakshatra-gbt-cqr-v1`, code fingerprint `e7d44df53c54e72e`.
+**Code:** `nakshatra-gbt-cqr-v1`, code fingerprint `b69dccc782e56f1f`.
 
 ## Track B — the pilot backtest (Balaghat)
 
@@ -64,7 +64,7 @@ is served, so a regenerated artifact cannot pass under an old table.
     "sha256": "a66e7ced8bb401dc"
   },
   "backend/artifacts/backtests/MOIL-BAL-01_150d_14step.json": {
-    "code_fingerprint": "e7d44df53c54e72e",
+    "code_fingerprint": "b69dccc782e56f1f",
     "contract_version": "1.0.0",
     "data_end_date": "2026-09-20",
     "generator": "nakshatra-synthetic-v1",
@@ -77,7 +77,7 @@ is served, so a regenerated artifact cannot pass under an old table.
     "model_version": "nakshatra-gbt-cqr-v1"
   },
   "backend/artifacts/calibration/cumulative_coverage.json": {
-    "code_fingerprint": "e7d44df53c54e72e",
+    "code_fingerprint": "b69dccc782e56f1f",
     "contract_version": "1.0.0",
     "data_end_date": "2026-09-20",
     "generator": "nakshatra-synthetic-v1",

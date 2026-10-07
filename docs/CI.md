@@ -12,9 +12,10 @@ in the non-blocking network job, which reports and never fails.
 |---|---|---|---|
 | **Frontend** | `tsc --noEmit`, `lint:literals`, Biome no worse than the base commit, `npm run build`, workflow hardening (`scripts/ci/check-workflow.js`) | yes | 0:35 (0:27–0:40) |
 | **Backend — fast suites** | every backend suite except Track B, network-marked tests deselected — the API provenance guard (`test_api_provenance.py`) among them; then confirms the artifact guard, the network block and the API guard ran, and that no committed artifact changed | yes | 1:24 (1:16–1:39) |
-| **Backend — Track B** | `test_track_b.py` | yes | 12:30 (8:52–12:35) |
+| **Backend — Track B** | `test_track_b.py` (the block bootstrap's persistence premise is a strict xfail: D-043 measured it false) | yes | 12:30 (8:52–12:35) |
+| **Backend — Track B across eight end dates** | `test_track_b_dates.py`: the 14-day distribution's sanity on eight datasets spread over a year (D-043 A5, A6). Every check is currently a strict xfail — what is served fails them all — so a fix, or a crash, turns the job red until the markers go | yes | not yet measured on the runner (locally 3:28–4:00) |
 | **Artifacts** | `python -m app.api.batch check`, then `batch pitch-check`: `docs/PITCH_FIGURES.md`, and the figures DEMO.md and JURY_QA.md quote from it, against what the artifacts serve | yes | 0:39 (0:33–0:45), measured before `pitch-check` was added |
-| **Browser — console** | `test:e2e`, `test:dates`, `test:pilot`, `test:scenario`, `test:surface`, `test:nav`, `test:auth`, `test:motion`, `test:fonts` | yes | 5:18 (5:18–5:34) |
+| **Browser — console** | `test:e2e`, `test:dates`, `test:pilot`, `test:scenario`, `test:surface`, `test:nav`, `test:auth`, `test:motion`, `test:fonts`, `test:band` (the median never leaves its band, every mine and grade), `test:blending` (the tonnage entered reaches the solver) | yes | 5:18 (5:18–5:34) |
 | **Browser — routes-provenance** | `test:routes -- --external-offline`, `test:provenance`, then `test:provenance -- --offline` with the backend stopped | yes | 9:49 (9:49–9:51) |
 | **Browser — cls** | `test:cls` | yes | 9:22 (9:18–9:22) |
 | **Browser — a11y-routes** | `test:a11y`: axe on all 17 routes at 1280 and 375, plus every status label measured | yes | not yet measured on the runner (locally 2:02 for the suite) |
@@ -36,6 +37,18 @@ To make the gating jobs required, add them under *Settings → Branches → Bran
 protection → Require status checks*: the nine "gates the PR" rows above. Leave
 "Network — live services" out. (As of this writing `main` has no branch
 protection, so "gates the PR" means a red check, not a blocked merge.)
+
+## When a test hangs
+
+`backend/pytest.ini` sets `faulthandler_timeout = 900`: a test still running
+after 15 minutes gets every thread's stack written to the log, and keeps
+running. The dump comes before the backend (20 min) and Track B (30 min) jobs
+time out, so a hang in CI leaves a stack trace instead of a cancelled job. One
+full local run in PR #28 produced no output and had to be stopped, with nothing
+to say where it was; it did not recur. If it happens again, treat it as a flaky
+test to root-cause. For a server that hangs rather than a test
+(`start-servers.sh`), `py-spy dump --pid <pid>` gives the same before it is
+killed.
 
 ## Workflow hardening
 

@@ -27,7 +27,7 @@ run() {
 
 case "$GROUP" in
   console)
-    for s in test:e2e test:dates test:pilot test:scenario test:surface test:nav test:auth test:motion test:fonts; do run "$s"; done ;;
+    for s in test:e2e test:dates test:pilot test:scenario test:surface test:nav test:auth test:motion test:fonts test:band test:blending; do run "$s"; done ;;
   routes-provenance)
     run test:routes -- --external-offline
     run test:provenance

@@ -375,7 +375,7 @@ def scenario_constraint_check(req: ScenarioCheckRequest):
     """
     from datetime import datetime, timedelta
 
-    from app.ml.constraints import ActionType, ConstraintEngine, MineContext, ProposedAction
+    from app.ml.constraints import ENGINE_VERSION, ActionType, ConstraintEngine, MineContext, ProposedAction
 
     mine_code, mine_name = _mine_code_or_404(req.mine_id)
     meta = next((m for m in DEFAULT_MINES if m["mine_code"] == mine_code), None)
@@ -438,6 +438,10 @@ def scenario_constraint_check(req: ScenarioCheckRequest):
         "note": (
             "Constraints are enforced, never learned. A scenario that fails here "
             "cannot be run as configured, whatever the arithmetic says it would yield."
+        ),
+        "provenance": header(
+            "The constraint engine's rules applied to the controls in this request",
+            "derived", model_version=ENGINE_VERSION,
         ),
     }
 
@@ -673,19 +677,47 @@ async def upload_operational_csv(file: UploadFile = File(...)):
 from app.ml.blending_optimizer import optimize_ore_blend
 from app.ml.geostat_kriging import compute_borehole_spatial_model
 from app.services.alert_dispatch import dispatch_operational_alert, get_active_dispatched_alerts
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class StockpileItem(BaseModel):
+    """One stockpile the caller wants blended. Every field is required."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(..., max_length=128)
+    available_tonnes: float = Field(..., ge=0)
+    mn_grade_pct: float = Field(..., ge=0, le=100)
+    p_pct: float = Field(..., ge=0, le=100)
+    sio2_pct: float = Field(..., ge=0, le=100)
+    cost_per_tonne_inr: float = Field(..., ge=0)
+
 
 class BlendingRequest(BaseModel):
-    target_tonnes: float = 5000.0
-    target_mn_min: float = 40.5
-    target_p_max: float = 0.15
-    target_sio2_max: float = 6.5
-    stockpiles: list = [
-        {"name": "Balaghat High-Grade SP-1", "available_tonnes": 3200.0, "mn_grade_pct": 46.2, "p_pct": 0.11, "sio2_pct": 4.8, "cost_per_tonne_inr": 8200.0},
-        {"name": "Dongri Buzurg Med-Grade SP-2", "available_tonnes": 4500.0, "mn_grade_pct": 37.5, "p_pct": 0.16, "sio2_pct": 7.2, "cost_per_tonne_inr": 5400.0},
-        {"name": "Ukwa Silico-Mn Grade SP-3", "available_tonnes": 2800.0, "mn_grade_pct": 34.0, "p_pct": 0.14, "sio2_pct": 8.1, "cost_per_tonne_inr": 4100.0},
-        {"name": "Tirodi Low-Grade Blend SP-4", "available_tonnes": 2100.0, "mn_grade_pct": 28.5, "p_pct": 0.18, "sio2_pct": 9.5, "cost_per_tonne_inr": 2900.0},
-    ]
+    """
+    What to blend, and to what specification. Every field is required.
+
+    The same fault the borehole request had. This defaulted every field — a
+    5,000 t target, 40.5% Mn, and four stockpiles named after real MOIL mines
+    ("Balaghat High-Grade SP-1", 46.2% Mn, 3,200 t at Rs 8,200/t …) — so a
+    caller who posted `{}` received an optimised blend plan for inventory and
+    assays that do not exist. There is no stockpile register in this system;
+    the stockpiles are the caller's to state.
+
+    The defaults also hid a mismatch: the Next.js proxy sent `required_tonnes`,
+    which this model silently ignored, so whatever tonnage the planner typed,
+    the solver planned 5,000 t. Unknown fields are now a 422 rather than
+    ignored, so a renamed field cannot fall back to an invented value again.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    target_tonnes: float = Field(..., gt=0)
+    target_mn_min: float = Field(..., ge=0, le=100)
+    target_p_max: float = Field(..., ge=0, le=100)
+    target_sio2_max: float = Field(..., ge=0, le=100)
+    stockpiles: list[StockpileItem] = Field(..., min_length=1)
+
 
 @router.post("/optimize-blending")
 async def optimize_blending_endpoint(req: BlendingRequest):
@@ -694,9 +726,17 @@ async def optimize_blending_endpoint(req: BlendingRequest):
         target_mn_min=req.target_mn_min,
         target_p_max=req.target_p_max,
         target_sio2_max=req.target_sio2_max,
-        stockpiles=req.stockpiles,
+        stockpiles=[s.model_dump() for s in req.stockpiles],
     )
-    return result
+    return {
+        **result,
+        "provenance": header(
+            "SciPy linprog (HiGHS) over the stockpiles in this request. The grades, "
+            "tonnages and costs are the caller's inputs; this system holds no "
+            "stockpile register.",
+            "derived",
+        ),
+    }
 
 # ============================================================
 # REAL CASE 2: CORE DRILL BOREHOLE 3D GEOSTATISTICAL ESTIMATION
@@ -746,6 +786,11 @@ async def analyze_borehole_drill_endpoint(req: BoreholeAnalysisRequest):
     boreholes_dicts = [b.model_dump() for b in req.boreholes]
     result = compute_borehole_spatial_model(boreholes_dicts)
     result["mine_id"] = req.mine_id
+    result["provenance"] = header(
+        "Geostatistical estimate from the borehole assays in this request (the "
+        "caller's inputs; no assay is supplied by this system).",
+        "derived",
+    )
     return result
 
 # ============================================================

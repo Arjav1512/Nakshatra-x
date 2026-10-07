@@ -32,6 +32,17 @@ nothing defined, fails here.
 A header may not call anything but a measurement live: `is_live: true` with any
 `source_kind` other than measured fails.
 
+POST AND PUT ROUTES get the same checks on their responses, called with valid
+bodies (`WRITE_CALLS`), and two more, because their fabrication is a different
+shape. POST /optimize-blending defaulted every field — a 5,000 t target and four
+stockpiles named after real mines, with grades, tonnages and costs — so `{}`
+returned an optimised plan for inventory nobody holds. A valid-body call cannot
+see that, so:
+
+- every POST/PUT route must reject an empty body with a 4xx;
+- no field of a request-body model that is a number, or a list or model of
+  numbers, may have a default ("defaults that are also measurements").
+
 Hermetic: the session's network block (conftest.py) is on, so live upstreams
 answer with their labelled fallbacks, which are what CI serves too.
 """
@@ -79,6 +90,38 @@ CALLS: dict[str, tuple[dict, dict]] = {
 }
 STATUS = {"/api/v1/map/cached-tiles/{layer_id}/{z}/{x}/{y}": {200, 404}}
 
+_ALERT = {"mine_id": 1, "mine_name": "Balaghat", "alert_type": "provenance-guard",
+          "trigger_metric": "test", "action_directive": "none"}
+
+#: Every POST/PUT route, called with a valid body. `files` for a multipart
+#: upload, `json` otherwise. A route missing here fails test_every_write_route_is_called.
+WRITE_CALLS: dict[str, dict] = {
+    "/api/v1/scenario/constraint-check": {"json": {
+        "mine_id": 1, "shift_window": "06-14", "blasting_delay_hours": 0,
+        "redeploy": "none", "dry_blast_tolerance_mm": 5}},
+    "/api/v1/upload-operational-csv": {"files": {
+        "file": ("ops.csv", b"date,tonnes\n2026-10-01,120\n", "text/csv")}},
+    # Illustrative inputs: there is no stockpile register; the caller states them.
+    "/api/v1/optimize-blending": {"json": {
+        "target_tonnes": 5000.0, "target_mn_min": 41.0, "target_p_max": 0.15, "target_sio2_max": 6.5,
+        "stockpiles": [
+            {"name": "Illustrative SP-1", "available_tonnes": 3200.0, "mn_grade_pct": 46.2,
+             "p_pct": 0.11, "sio2_pct": 4.8, "cost_per_tonne_inr": 8200.0},
+            {"name": "Illustrative SP-2", "available_tonnes": 4500.0, "mn_grade_pct": 37.5,
+             "p_pct": 0.16, "sio2_pct": 7.2, "cost_per_tonne_inr": 5400.0},
+        ]}},
+    "/api/v1/analyze-borehole-drill": {"json": {"mine_id": 1, "boreholes": [
+        {"hole_id": "BH-T-1", "x": 100.0, "y": 150.0, "depth_from_m": 45.0, "depth_to_m": 82.0,
+         "mn_pct": 44.5, "fe_pct": 7.2, "sio2_pct": 5.1, "recovery_pct": 92.0, "density_t_m3": 3.9},
+        {"hole_id": "BH-T-2", "x": 150.0, "y": 200.0, "depth_from_m": 50.0, "depth_to_m": 94.0,
+         "mn_pct": 41.8, "fe_pct": 8.0, "sio2_pct": 5.8, "recovery_pct": 89.0, "density_t_m3": 3.8}]}},
+    "/api/v1/dispatch-operational-alert": {"json": _ALERT},
+}
+WRITE_METHODS = {"POST", "PUT", "PATCH"}
+
+#: Request-body fields that may carry a numeric default, and why. Empty: none may.
+DEFAULT_ALLOWED: dict[tuple[str, str], str] = {}
+
 
 @dataclass(frozen=True)
 class Allow:
@@ -110,6 +153,10 @@ ALLOW: tuple[Allow, ...] = (
     # and carries no figures, only the mine it is for.
     Allow("/api/v1/mines/{mine_id}/telemetry", r"^\$\.reserve\.mine_id$", "id", "the mine's database id"),
     Allow("/api/v1/alerts", r"^\$\[\]\.mine_id$", "id", "the mine the alert was dispatched for"),
+    Allow("/api/v1/dispatch-operational-alert", r"^\$\.dispatched_alert\.mine_id$", "id",
+          "the mine the alert was dispatched for"),
+    Allow("/api/v1/dispatch-operational-alert", r"^\$\.active_alert_count$", "count", "alerts held"),
+    Allow("/api/v1/upload-operational-csv", r"^\$\.rows_processed$", "count", "rows read from the upload"),
 )
 
 VERSION = re.compile(r"\b[a-z][a-z0-9]*(?:-[a-z0-9]+)*-v\d+\b")
@@ -187,10 +234,7 @@ def test_every_get_route_is_called():
 @pytest.fixture(scope="module")
 def responses(client):
     # One alert, so /alerts returns a record rather than an empty list.
-    res = client.post("/api/v1/dispatch-operational-alert", json={
-        "mine_id": 1, "mine_name": "Balaghat", "alert_type": "provenance-guard",
-        "trigger_metric": "test", "action_directive": "none",
-    })
+    res = client.post("/api/v1/dispatch-operational-alert", json=_ALERT)
     assert res.status_code == 200, res.text
     out = {}
     for route in _get_routes():
@@ -225,7 +269,7 @@ def test_every_number_has_a_provenance_or_a_stated_reason(responses):
         f"{len(unexplained)} number(s) with no provenance and no allowlist entry:\n  "
         + "\n  ".join(unexplained)
     )
-    unused = [a for a in ALLOW if a not in used]
+    unused = [a for a in ALLOW if a not in used and a.route in CALLS]
     assert not unused, "allowlist entries that matched nothing (remove them): " + "; ".join(
         f"{a.route} {a.path}" for a in unused)
 
@@ -246,6 +290,102 @@ def test_every_version_named_is_one_the_code_defines(responses):
 def test_no_header_calls_anything_but_a_measurement_live(responses):
     problems = [f"{route}  {p}" for route, found in _scan(responses).items() for p in found["headers"]]
     assert not problems, "\n".join(problems)
+
+
+def _write_routes() -> list[APIRoute]:
+    return sorted((r for r in app.routes if isinstance(r, APIRoute) and r.methods & WRITE_METHODS),
+                  key=lambda r: r.path)
+
+
+def test_every_write_route_is_called():
+    paths = {r.path for r in _write_routes()}
+    assert paths - WRITE_CALLS.keys() == set(), f"POST/PUT routes with no call here: {sorted(paths - WRITE_CALLS.keys())}"
+    assert WRITE_CALLS.keys() - paths == set(), f"calls for routes that no longer exist: {sorted(WRITE_CALLS.keys() - paths)}"
+
+
+@pytest.fixture(scope="module")
+def write_responses(client):
+    out = {}
+    for route in _write_routes():
+        call = WRITE_CALLS[route.path]
+        method = sorted(route.methods & WRITE_METHODS)[0].lower()
+        res = getattr(client, method)(route.path, **call)
+        assert res.status_code == 200, f"{method.upper()} {route.path} -> {res.status_code}: {res.text[:300]}"
+        out[route.path] = res.json()
+    return out
+
+
+def test_write_routes_numbers_versions_and_live(write_responses):
+    unexplained, unknown, live, used = [], [], [], set()
+    defined = defined_versions()
+    for route, body in write_responses.items():
+        found = {"numbers": {}, "versions": set(), "headers": []}
+        walk(body, "$", False, (), found)
+        for path, value in found["numbers"].items():
+            hit = next((a for a in ALLOW if a.route == route and re.search(a.path, path)), None)
+            if hit:
+                used.add(hit)
+            else:
+                unexplained.append(f"{route}  {path} = {value!r}")
+        unknown += [f"{route}: {v}" for v in sorted(found["versions"] - defined)]
+        live += [f"{route}  {p}" for p in found["headers"]]
+    assert not unexplained, "numbers with no provenance and no allowlist entry:\n  " + "\n  ".join(unexplained)
+    assert not unknown, "versions no constant defines:\n  " + "\n  ".join(unknown)
+    assert not live, "\n".join(live)
+    unused = [a for a in ALLOW if a not in used and a.route in WRITE_CALLS]
+    assert not unused, "allowlist entries that matched nothing (remove them): " + "; ".join(
+        f"{a.route} {a.path}" for a in unused)
+
+
+def test_every_write_route_rejects_an_empty_body(client):
+    """A request that states nothing cannot produce data."""
+    accepted = []
+    for route in _write_routes():
+        method = sorted(route.methods & WRITE_METHODS)[0].lower()
+        res = getattr(client, method)(route.path, json={})
+        if res.status_code < 400:
+            accepted.append(f"{method.upper()} {route.path} -> {res.status_code}: {res.text[:160]}")
+    assert not accepted, "accepted an empty body:\n  " + "\n  ".join(accepted)
+
+
+def _numeric_defaults(model, prefix: str = "") -> list[str]:
+    """Fields of a pydantic model (recursively) that are numeric and have a default."""
+    import typing
+
+    from pydantic import BaseModel
+
+    out = []
+    for name, field in model.model_fields.items():
+        ann = field.annotation
+        args = typing.get_args(ann)
+        inner = [a for a in (args or (ann,)) if a is not type(None)]
+        numeric = any(a in (int, float) for a in inner) or any(
+            typing.get_origin(a) in (list, tuple) and any(x in (int, float) for x in typing.get_args(a))
+            for a in inner
+        )
+        if numeric and not field.is_required():
+            out.append(f"{prefix}{name} = {field.default!r}")
+        for a in inner + [x for a in inner for x in typing.get_args(a)]:
+            if isinstance(a, type) and issubclass(a, BaseModel):
+                out += _numeric_defaults(a, f"{prefix}{name}.")
+        # An untyped `list` (the old BlendingRequest.stockpiles) with a default is
+        # a list of anything — invented records included.
+        if ann in (list, dict) and not field.is_required():
+            out.append(f"{prefix}{name} = <{ann.__name__} default>")
+    return out
+
+
+def test_no_request_model_defaults_a_number():
+    """Defaults that are also measurements are fabrications with a schema around them."""
+    found = []
+    for route in _write_routes():
+        for param in route.dependant.body_params:
+            model = getattr(param.field_info, "annotation", None) or getattr(param, "type_", None)
+            if isinstance(model, type) and hasattr(model, "model_fields"):
+                for f in _numeric_defaults(model):
+                    if (route.path, f.split(" = ")[0]) not in DEFAULT_ALLOWED:
+                        found.append(f"{route.path}: {model.__name__}.{f}")
+    assert not found, "numeric defaults in request models:\n  " + "\n  ".join(found)
 
 
 def test_the_walker_sees_what_it_should():

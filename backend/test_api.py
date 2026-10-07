@@ -50,9 +50,9 @@ def test_full_pipeline():
         "target_p_max": 0.15,
         "target_sio2_max": 6.5,
         "stockpiles": [
-            {"name": "Balaghat High-Grade SP-1", "available_tonnes": 3200.0, "mn_grade_pct": 46.2, "p_pct": 0.11, "sio2_pct": 4.8, "cost_per_tonne_inr": 8200.0},
-            {"name": "Dongri Buzurg Med-Grade SP-2", "available_tonnes": 4500.0, "mn_grade_pct": 37.5, "p_pct": 0.16, "sio2_pct": 7.2, "cost_per_tonne_inr": 5400.0},
-            {"name": "Ukwa Silico-Mn Grade SP-3", "available_tonnes": 2800.0, "mn_grade_pct": 34.0, "p_pct": 0.14, "sio2_pct": 8.1, "cost_per_tonne_inr": 4100.0},
+            {"name": "Illustrative SP-1", "available_tonnes": 3200.0, "mn_grade_pct": 46.2, "p_pct": 0.11, "sio2_pct": 4.8, "cost_per_tonne_inr": 8200.0},
+            {"name": "Illustrative SP-2", "available_tonnes": 4500.0, "mn_grade_pct": 37.5, "p_pct": 0.16, "sio2_pct": 7.2, "cost_per_tonne_inr": 5400.0},
+            {"name": "Illustrative SP-3", "available_tonnes": 2800.0, "mn_grade_pct": 34.0, "p_pct": 0.14, "sio2_pct": 8.1, "cost_per_tonne_inr": 4100.0},
         ]
     }
     res = client.post("/api/v1/optimize-blending", json=blend_payload)
@@ -68,7 +68,7 @@ def test_full_pipeline():
     # "success" here would be inventing a plan that cannot be executed, which
     # is precisely the failure mode this test exists to catch.
     infeasible_payload = {
-        "required_tonnes": 5000.0,
+        "target_tonnes": 5000.0,
         "target_mn_min": 50.0,          # unreachable
         "target_p_max": 0.15,
         "target_sio2_max": 6.5,

@@ -440,6 +440,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 return (
                   <button type="button"
                     key={g.grade}
+                    data-grade={g.grade}
                     onClick={() => setGrade(g.grade)}
                     aria-pressed={on}
                     data-provenance="derived"
@@ -476,7 +477,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                   dashed = {forecast.baseline_version}
                 </p>
               </div>
-              <div className="h-56 w-full">
+              <div className="h-56 w-full" data-forecast-chart={selected.grade}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={selected.trajectory} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
                     {/* Recharts theme — docs/design/DESIGN_SYSTEM.md section 8.
@@ -516,17 +517,22 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                       }}
                       labelFormatter={(v) => `Day +${v}`}
                     />
+                    {/* The class names let tools/forecast-band.js read each
+                        series from the rendered SVG and check the median never
+                        leaves its band (DECISIONS.md D-043, A1). */}
                     <Area
                       type="monotone" dataKey="p90_tonnes" stroke="none" fill="url(#pi)"
-                      name="p90" isAnimationActive={false}
+                      name="p90" isAnimationActive={false} className="forecast-p90"
                     />
                     <Area
                       type="monotone" dataKey="p10_tonnes" stroke="none"
                       fill="var(--color-surface-2)" name="p10" isAnimationActive={false}
+                      className="forecast-p10"
                     />
                     <Line
                       type="monotone" dataKey="median_tonnes" stroke="var(--color-accent)"
                       strokeWidth={2} dot={false} name="median" isAnimationActive={false}
+                      className="forecast-median"
                     />
                     <Line
                       type="monotone" dataKey="baseline_tonnes"

@@ -10,6 +10,8 @@ import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from app.ingestion.generator import MINES, generate_all
@@ -287,10 +289,41 @@ if __name__ == "__main__":
 # Cumulative-probability calibration
 # ---------------------------------------------------------------------------
 
+@pytest.mark.xfail(strict=True, reason=(
+    "DECISIONS.md D-043, measured: one-step residuals carry little persistence "
+    "across days (Balaghat, mean over grades of each grade's daily Pearson lag-1: "
+    "0.145 on the 20 Sep dataset, -0.011 on 6 Oct, main's construction). The lag-1 "
+    "of about 0.5 this test used to read came from interleaving three or four "
+    "grades per day: same-day correlation between grades, 0.68-0.81. Strict: when "
+    "the follow-up makes the premise hold, this fails until the marker goes."
+))
+def test_residuals_persist_across_days():
+    """
+    The block bootstrap's premise: residuals carry persistence across days.
+
+    If they do not, resampling them in blocks is an expensive way to reproduce
+    independence, and any widening it produces comes from somewhere else. Pearson
+    lag-1 of each grade's daily series (its column of the day table), averaged
+    over the grades, must exceed 0.2 (D-043 A2, amendment 2: the same statistic
+    whatever series the aggregation resamples).
+    """
+    import numpy as np
+
+    from app.api.track_b import _forecaster, _state
+
+    st = _state()
+    code = "MOIL-BAL-01"
+    fc = _forecaster(code, st["end"])
+    t = fc.residual_days[code]
+    assert len(t["table"]) >= 100, "no residual day table was kept"
+    lag1 = float(np.mean([np.corrcoef(t["table"][:-1, j], t["table"][1:, j])[0, 1]
+                          for j in range(len(t["grades"]))]))
+    assert lag1 > 0.2, f"mean per-grade daily lag-1 {lag1:.3f} — nothing to preserve"
+
+
 def test_cumulative_aggregation_beats_independent_days():
     """
-    Correlated aggregation must be measurably better calibrated than summing
-    independent days — the bug this replaced.
+    The served aggregation gives a wider 14-day distribution than independent days.
 
     P(cumulative < target) read 1.000 on nine of ten mines. Days were summed as
     independent lognormals, which gave a 14-day cumulative coefficient of
@@ -299,11 +332,11 @@ def test_cumulative_aggregation_beats_independent_days():
     nominal 0.8), so the backtest passed: the error was in how days combine and
     nothing measured that.
 
-    This compares the two aggregations on the same predictive distributions and
-    the same realised totals, and asserts the correlated one is closer to
-    nominal. It does not assert perfection: measured cumulative coverage is
-    0.725 against a nominal 0.80, which is honest residual miscalibration and is
-    reported in the backtest artifact rather than tuned away.
+    This compares the served aggregation with independent days on the same
+    predictive distributions. What it does not show is *why* the served one is
+    wider: D-043 measured that its residual series' apparent persistence is
+    mostly same-day correlation between grades, interleaved — see
+    test_residuals_persist_across_days and docs/QUANTILE_CROSSING.md.
     """
     import numpy as np
 
@@ -315,29 +348,24 @@ def test_cumulative_aggregation_beats_independent_days():
     origin = st["end"]
     fc = _forecaster(code, origin)
     assert code in fc.models
-    residuals = fc.residuals.get(code)
-    assert residuals is not None and len(residuals) >= 100, "no residual series was kept"
-
-    # The residuals must actually carry persistence; if they did not, the block
-    # bootstrap would be an expensive way to reproduce independence.
-    lag1 = float(np.corrcoef(residuals[:-1], residuals[1:])[0, 1])
-    assert lag1 > 0.2, f"residual lag-1 autocorrelation {lag1:.3f} — nothing to preserve"
-
     grades = sorted({k[1] for k in st["series"] if k[0] == code})
+    served = {g: fc.residual_block(code, g) for g in grades}
+    for g, res in served.items():
+        assert res is not None and len(res) >= 100, f"no residual series was kept for {g}"
+
     horizons = list(range(1, 15))
     wider = 0
     for g in grades:
         series = st["series"][(code, g)]
         preds = fc.predict(code, g, origin, horizons, series, st["cov"])
-        blocks = _cumulative_paths(preds, residuals)
+        blocks = _cumulative_paths(preds, served[g])
         indep = _cumulative_paths(preds, None)
         assert blocks is not None and indep is not None
-        # Correlated days must give a wider cumulative distribution.
         if float(np.std(blocks)) > float(np.std(indep)):
             wider += 1
     assert wider == len(grades), (
         f"correlated aggregation was not wider for {len(grades) - wider} of "
-        f"{len(grades)} grades — the blocks are not preserving persistence"
+        f"{len(grades)} grades"
     )
 
 

@@ -22,21 +22,28 @@ import { z } from 'zod'
  * physically impossible. That solver was unreachable from the UI until now.
  */
 
+/*
+ * Every field is required, here and in the backend. Missing assays used to be
+ * filled in — P 0.12%, SiO2 5.0%, Rs 6,000/t for a stockpile, 5,000 t and
+ * 41% Mn for the request — and a missing stockpile list became an empty one, so
+ * a plan could be built on figures nobody supplied. A value the caller did not
+ * state is now a 400, not an invented assay.
+ */
 const StockpileSchema = z.object({
   name: z.string().max(128),
   available_tonnes: z.number().min(0).max(10000000),
   mn_grade_pct: z.number().min(0).max(100),
-  p_pct: z.number().min(0).max(10).optional(),
-  sio2_pct: z.number().min(0).max(100).optional(),
-  cost_per_tonne_inr: z.number().min(0).max(1000000).optional(),
+  p_pct: z.number().min(0).max(10),
+  sio2_pct: z.number().min(0).max(100),
+  cost_per_tonne_inr: z.number().min(0).max(1000000),
 })
 
 const BlendRequestSchema = z.object({
-  target_tonnes: z.number().min(1).max(5000000).optional(),
-  target_mn_min: z.number().min(5).max(70).optional(),
-  target_p_max: z.number().min(0).max(10).optional(),
-  target_sio2_max: z.number().min(0).max(100).optional(),
-  stockpiles: z.array(StockpileSchema).max(50).optional(),
+  target_tonnes: z.number().min(1).max(5000000),
+  target_mn_min: z.number().min(5).max(70),
+  target_p_max: z.number().min(0).max(10),
+  target_sio2_max: z.number().min(0).max(100),
+  stockpiles: z.array(StockpileSchema).min(1).max(50),
 })
 
 export async function POST(request: NextRequest) {
@@ -60,19 +67,15 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  // `target_tonnes`, the backend's name. This sent `required_tonnes`, which
+  // the backend ignored and replaced with its own default of 5,000 t, so the
+  // tonnage a planner typed never reached the solver.
   const payload = {
-    required_tonnes: parsed.data.target_tonnes ?? 5000,
-    target_mn_min: parsed.data.target_mn_min ?? 41.0,
-    target_p_max: parsed.data.target_p_max ?? 0.15,
-    target_sio2_max: parsed.data.target_sio2_max ?? 6.5,
-    stockpiles: (parsed.data.stockpiles ?? []).map((s) => ({
-      name: s.name,
-      available_tonnes: s.available_tonnes,
-      mn_grade_pct: s.mn_grade_pct,
-      p_pct: s.p_pct ?? 0.12,
-      sio2_pct: s.sio2_pct ?? 5.0,
-      cost_per_tonne_inr: s.cost_per_tonne_inr ?? 6000,
-    })),
+    target_tonnes: parsed.data.target_tonnes,
+    target_mn_min: parsed.data.target_mn_min,
+    target_p_max: parsed.data.target_p_max,
+    target_sio2_max: parsed.data.target_sio2_max,
+    stockpiles: parsed.data.stockpiles,
   }
 
   const result = await fetchFromBackend('/api/v1/optimize-blending', {

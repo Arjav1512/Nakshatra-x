@@ -23,7 +23,9 @@
     "test:cls": "node tools/cls-guard.js",
     "test:fonts": "node tools/fonts-guard.js",
     "test:a11y": "node tools/a11y.js",
-    "test:a11y-map": "node tools/a11y-map-layers.js"
+    "test:a11y-map": "node tools/a11y-map-layers.js",
+    "test:band": "node tools/forecast-band.js",
+    "test:blending": "node tools/e2e-blending.js"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
