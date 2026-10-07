@@ -1,6 +1,6 @@
 # Jury questions — the hard ones, answered honestly
 
-The fifteen questions a MOIL or ISRO jury is most likely to ask, and the ones we
+The sixteen questions a MOIL or ISRO jury is most likely to ask, and the ones we
 would least like to be asked. Each answer is the honest one, with the evidence
 behind it.
 
@@ -60,39 +60,25 @@ sound, not how it would perform on MOIL's operations.
 
 ### 4. Are your prediction intervals calibrated?
 
-**On the pilot mine, roughly; across the portfolio, no — they are too narrow, and
-we measured by how much.** The 80% daily interval holds
-**0.812**<!-- pitch:pilot.daily_coverage --> on Balaghat's backtest, but
-**0.761**<!-- pitch:portfolio.daily_coverage -->
-**[0.733, 0.786]**<!-- pitch:portfolio.daily_coverage_ci --> across all ten mines —
-the confidence interval excludes 0.80. For the 14-day total, which P(shortfall)
-is computed from, coverage is **0.738**<!-- pitch:portfolio.cumulative_coverage -->
-**[0.700, 0.777]**<!-- pitch:portfolio.cumulative_coverage_ci -->, with a share of
-**0.165**<!-- pitch:portfolio.cumulative_tails --> of real totals in the outer
-tails against a nominal 0.10. Per mine it ranges from 0.542 to 0.903; Balaghat's
-own 14-day figure is **0.667**<!-- pitch:balaghat.cumulative_coverage -->. On the
-dataset regenerated for 6 October the same measurement gives 0.683 — below
-nominal on both windows. So P(shortfall) is more confident than it has earned.
+**On the pilot, roughly; across the portfolio, no — the daily bands are too
+narrow, and we measured by how much.** The 80% daily interval holds
+**0.812**<!-- pitch:pilot.daily_coverage --> on Balaghat's backtest, and
+**0.792**<!-- pitch:balaghat.daily_coverage -->
+**[0.714, 0.857]**<!-- pitch:balaghat.daily_coverage_ci --> on the larger
+calibration backtest (24 origin dates), which is consistent with nominal. Across
+all ten mines it holds **0.761**<!-- pitch:portfolio.daily_coverage -->
+**[0.733, 0.786]**<!-- pitch:portfolio.daily_coverage_ci -->. That interval
+excludes 0.80, so the bands claim more confidence than they have earned.
+The console shows both figures beside the bands, with a verdict computed from the
+interval, not written by hand.
 
-**And the deeper problem, found while freezing the pitch dataset.** P(shortfall)
-treats days as correlated by resampling blocks of the model's one-step
-residuals, and that premise turned out not to hold.
-- **What we measured:** each grade's residuals barely persist from day to day
-  (lag-1 0.02–0.30).
-- **Where the apparent correlation came from:** a series that interleaved the
-  grades, so same-day correlation between grades stood in for persistence.
-- **What we tried:** a pre-registered fix, measured against the shipped model
-  on two datasets; it did not pass. We changed nothing that serves.
-- **What it means:** what is served fails a sanity check on all eight datasets
-  we tried (`docs/QUANTILE_CROSSING.md`). That is also why no demo dataset is
-  frozen.
+**The 14-day total is a different matter, and it is why the probability of
+shortfall is off the screen** (Q16). Its figures are measured and published in
+`docs/QUANTILE_CROSSING.md`, but we do not quote them in the pitch: they describe
+an aggregation we have found to be unsound.
 
-We tried a fix (a common-factor loading), pre-registered the rule it had to pass
-before reading the result, and declined it when it did not beat the model as
-shipped. The console now shows the calibration figure beside every P(shortfall).
-
-*Evidence:* `docs/CALIBRATION.md`; `docs/DECISIONS.md` D-040;
-`backend/artifacts/calibration/cumulative_coverage.json`.
+*Evidence:* `docs/CALIBRATION.md`; `docs/DECISIONS.md` D-040, D-044;
+`backend/artifacts/calibration/cumulative_coverage.json` (`daily`).
 
 ### 5. Your earlier version reported an AUC of 0.98. Why is it 0.85 now?
 
@@ -257,6 +243,54 @@ product no longer does what the script says.
 
 *Evidence:* `docs/DEMO.md`; `frontend/tools/demo-walk.js`; `docs/DECISIONS.md`
 D-041, D-042.
+
+---
+
+### 16. Where is the probability of shortfall? The PRD asks for one.
+
+**We withdrew it ourselves, because we found it unsound and could not say in
+which direction it was wrong.**
+
+- **What it was:** P(14-day production < plan), per grade. It was built by
+  resampling blocks of the model's one-day errors, on the premise that those
+  errors carry over from day to day.
+- **What we found** (`docs/QUANTILE_CROSSING.md`, D-043):
+  - **The premise does not hold.** Each grade's errors barely persist from one
+    day to the next: lag-1 correlation 0.02–0.30.
+  - **The apparent persistence came from interleaving the grades.** Same-day
+    correlation between them stood in for persistence across days.
+  - **It fails sanity checks on all eight datasets we tried.** The 14-day spread
+    came out narrower than treating the days as independent on five, it was
+    saturated on two, and a single error could move a mine's scale by up to
+    91%.
+- **What we did:**
+  - We pre-registered a fix and measured it against the shipped model on two
+    datasets. It failed its rule, so nothing that serves changed.
+  - Then we took the figure off the screen rather than label it. A label cannot
+    tell a planner which way to correct 0.97.
+- **What is on screen instead:**
+  - **Expected shortfall in tonnes, summed over grades.** It is a mean, so it
+    does not depend on how the days correlate, and a test checks that it equals
+    that dependence-free expectation.
+  - **The daily 80% bands and their measured calibration** (Q4).
+- **What is being tested next** (its own pre-registration, written before it
+  measures anything). Two candidates, against the shipped construction on the
+  same held-out origins:
+  - (a) the correlation of errors across horizons 1–14 within each forecast;
+  - (b) calibrating the 14-day total directly, by split conformal on held-out
+    totals, which needs no assumption about how days depend on each other.
+
+  To pass, a candidate must:
+  - get closer to nominal on 14-day coverage and tails, with cluster-bootstrap
+    intervals;
+  - pass the eight-date sanity checks, so that today's expected failures turn
+    into passes;
+  - not saturate.
+
+  If neither passes, the probability stays off the screen and we say so.
+
+*Evidence:* `docs/QUANTILE_CROSSING.md`; `docs/DECISIONS.md` D-043, D-044;
+`backend/test_track_b_dates.py` (the expected failures).
 
 ---
 

@@ -59,8 +59,13 @@ So the dataset is chosen once and frozen, and every quoted figure is read from i
    (cd backend && .venv/bin/python -m pytest -m "not network" -p no:cacheprovider)
    ```
 
-   A dataset a test fails on is not frozen: roll back and fix the cause. Do not
-   look for a date that passes.
+   A dataset is frozen only when every check covering a **presented** figure
+   passes on it; if one fails, roll back and fix the cause. Do not look for a
+   date that passes. A check that covers only a figure the console no longer
+   presents — today, P(shortfall) and the 14-day cumulative figures — does not
+   block the freeze. Its failure is recorded, not loosened: it becomes a strict
+   xfail for that end date alone, and the failure goes in the PR
+   (`docs/DECISIONS.md` D-044).
 
 3. **Write the figures it produced:**
 
@@ -109,7 +114,7 @@ moving with it.
 ### What `batch all` does — for freezing and re-freezing
 
 `all` regenerates the sample CSVs, all ten forecasts, the committed backtest(s)
-**and the calibration shown beside P(shortfall)** from **one** dataset, then
+**and the calibration the console shows beside the daily bands** from **one** dataset, then
 verifies they agree and prints the identity it used. Check the dates it prints
 before you trust it.
 
@@ -337,7 +342,8 @@ cd frontend && npm run test:e2e
 ```
 
 This drives `/console` in headless Chrome and asserts what this script is about
-to show: ten portfolio cards each with a probability and a provenance badge, the
+to show: ten portfolio cards, each with an expected shortfall in tonnes and a
+provenance badge and none with a probability; the
 drill-down chain through forecast, per-grade breakdown, backtest and
 constraint-checked actions, and zero 5xx responses. Expect `PASS — 18/18`.
 
@@ -374,12 +380,19 @@ roughly 383 m. We do not claim to see through rock, and PRD §2.2 is why.
 
 ## 0:20 — Portfolio (25 s)
 
-Ten mines, each showing **P(shortfall)** and expected tonnes short. Balaghat is
-marked as the Track B pilot (PRD §13 Q4).
+Ten mines, ranked by **expected shortfall in tonnes**, each against its plan.
+The figure is summed over grades: a surplus in one grade does not cover a
+deficit in another (PRD §3). Balaghat is marked as the Track B pilot (PRD §13
+Q4).
 
-**Point out:** the risk strip is computed per mine by the forecaster — not a
+**Point out:** every figure comes from the forecaster, per mine — none is a
 status colour someone typed in. Cards read `computing…` until their forecast
-returns, then show a real probability.
+returns, then show a real figure.
+
+**There is no probability on screen, on purpose.** Under the list, the console
+says the probability of shortfall is withdrawn while under validation and links
+to what was found. Do not apologise for it. If a judge asks, it is the strongest
+answer in the deck: `JURY_QA.md` Q16.
 
 **Click Balaghat.**
 
@@ -405,18 +418,23 @@ vintage, model version, method, and how old the reading is.
 
 ## 1:05 — Track B: the shortfall (30 s)
 
-Four headline tiles: plan target, expected production, expected shortfall,
-worst-grade P(shortfall).
+Three headline figures: plan target, expected production and **expected
+shortfall** — the focal number, summed over grades. The fourth tile, where the
+probability of shortfall used to be, says it is withdrawn while under validation
+and shows no number.
 
 **Grade matters.** The per-grade breakdown lists ferro manganese, silico
-manganese, blast furnace and dioxide, each with its own probability.
+manganese, blast furnace and dioxide, each with its own expected shortfall.
 
 **Say:** PRD §3 — a shortfall in one grade is not fungible with a surplus in
 another, so B-5 makes per-grade forecasting P0. These are four different
 forecasts, not one number relabelled.
 
-The chart shows the median with its **80% prediction interval**, and the
-**dashed amber line is the seasonal-naive baseline** the model has to beat.
+The chart shows the median with its **80% prediction interval** for each day,
+and the **dashed amber line is the seasonal-naive baseline** the model has to
+beat. Beside it is how far to trust those daily bands: the share of real days
+that fell inside them, across all ten mines and for Balaghat, each with its 95%
+interval.
 
 ---
 
@@ -448,11 +466,14 @@ baseline — the comparison is like-for-like, same origins and targets. Second, 
 rarer: the 80% interval holds **0.812**<!-- pitch:pilot.daily_coverage --> of
 actuals *on the pilot mine*. Do not generalise that figure. Across all ten mines
 daily coverage is **0.761**<!-- pitch:portfolio.daily_coverage -->
-**[0.733, 0.786]**<!-- pitch:portfolio.daily_coverage_ci --> and the 14-day
-cumulative total is too narrow at **0.738**<!-- pitch:portfolio.cumulative_coverage -->
-**[0.700, 0.777]**<!-- pitch:portfolio.cumulative_coverage_ci --> — if a judge
-asks, that is the honest answer and it is written up
-in `docs/CALIBRATION.md`. PRD §11 calls calibration out specifically —
+**[0.733, 0.786]**<!-- pitch:portfolio.daily_coverage_ci -->, an interval that
+excludes 0.80, so the bands are too narrow across the portfolio. On the
+calibration backtest — 24 origin dates, not the pilot backtest's 10 — Balaghat's
+daily band holds **0.792**<!-- pitch:balaghat.daily_coverage -->
+**[0.714, 0.857]**<!-- pitch:balaghat.daily_coverage_ci -->, consistent with
+nominal at that sample size. The console shows both, and if a judge asks, that
+is the honest answer, written up in `docs/CALIBRATION.md`. The 14-day figures
+are not quoted: they belong to the withdrawn probability (Q16). PRD §11 calls calibration out specifically —
 *"do 70%-confidence predictions come true 70% of the time? Almost no team will
 measure this."* Getting there took four attempts; `docs/BACKTEST.md` reports all
 of them including the two that failed.
@@ -461,8 +482,10 @@ of them including the two that failed.
 
 ## 2:05 — Constraint-gated actions (25 s)
 
-Approved actions in green, each with its expected effect, its ΔP(shortfall), its
-**stated assumptions**, and the list of **checks it passed**.
+Approved actions in green, each with its expected recovery in tonnes, its
+**stated assumptions**, and the list of **checks it passed**. (The change in
+probability of shortfall each action used to carry is withdrawn with the
+probability.)
 
 **On the rejection panel — read what is actually on screen.** With the current
 synthetic operational data, no candidate action violates a constraint at any of

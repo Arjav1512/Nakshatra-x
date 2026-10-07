@@ -27,19 +27,16 @@ how to re-make them.
 | `pilot.n_predictions` | Balaghat backtest: held-out predictions scored | **160** | GET /api/v1/mines/1/backtest → `model.n` | `backend/artifacts/backtests/MOIL-BAL-01_150d_14step.json` |
 | `pilot.n_origins` | Balaghat backtest: forecast origins | **10** | GET /api/v1/mines/1/backtest → `n_origins` | `backend/artifacts/backtests/MOIL-BAL-01_150d_14step.json` |
 
-## Track B — calibration, all ten mines and Balaghat
+## Track B — daily calibration, all ten mines and Balaghat
 
 | Key | Figure | Value | Served at → field | Artifact |
 |---|---|---|---|---|
 | `portfolio.daily_coverage` | All ten mines: daily 80% interval coverage | **0.761** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.portfolio.coverage_80` | `backend/artifacts/calibration/cumulative_coverage.json` |
 | `portfolio.daily_coverage_ci` | All ten mines: daily coverage, 95% interval | **[0.733, 0.786]** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.portfolio.coverage_80_ci95` | `backend/artifacts/calibration/cumulative_coverage.json` |
 | `portfolio.daily_mape` | All ten mines: daily MAPE | **10.00%** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.portfolio.mape_pct` | `backend/artifacts/calibration/cumulative_coverage.json` |
-| `portfolio.cumulative_coverage` | All ten mines: 14-day total inside its 80% band | **0.738** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `portfolio.coverage_80` | `backend/artifacts/calibration/cumulative_coverage.json` |
-| `portfolio.cumulative_coverage_ci` | All ten mines: 14-day coverage, 95% interval | **[0.700, 0.777]** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `portfolio.coverage_80_ci95` | `backend/artifacts/calibration/cumulative_coverage.json` |
-| `portfolio.cumulative_tails` | All ten mines: 14-day totals in the outer tails (nominal 0.10) | **0.165** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `portfolio.pit_at_extremes` | `backend/artifacts/calibration/cumulative_coverage.json` |
-| `portfolio.n_origin_dates` | Calibration: origin dates measured | **24** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `portfolio.n_origin_dates` | `backend/artifacts/calibration/cumulative_coverage.json` |
-| `balaghat.cumulative_coverage` | Balaghat: 14-day total inside its 80% band | **0.667** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `mine.coverage_80` | `backend/artifacts/calibration/cumulative_coverage.json` |
-| `balaghat.cumulative_coverage_ci` | Balaghat: 14-day coverage, 95% interval | **[0.521, 0.802]** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `mine.coverage_80_ci95` | `backend/artifacts/calibration/cumulative_coverage.json` |
+| `portfolio.n_origin_dates` | Calibration: origin dates measured | **24** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.portfolio.n_origin_dates` | `backend/artifacts/calibration/cumulative_coverage.json` |
+| `balaghat.daily_coverage` | Balaghat: daily 80% interval coverage (calibration backtest) | **0.792** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.mine.coverage_80` | `backend/artifacts/calibration/cumulative_coverage.json` |
+| `balaghat.daily_coverage_ci` | Balaghat: daily coverage, 95% interval | **[0.714, 0.857]** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.mine.coverage_80_ci95` | `backend/artifacts/calibration/cumulative_coverage.json` |
 
 ## Track A — prospectivity, leave-one-mine-out
 
@@ -51,6 +48,17 @@ how to re-make them.
 | `track_a.terrain_only` | Track A ablation: terrain features only | **0.67** | GET /api/v1/prospectivity/metrics → `ablation_lomo_auc.terrain_only` | `AI/outputs/model_metrics_honest.json` |
 | `track_a.slope_only` | Track A ablation: slope only | **0.51** | GET /api/v1/prospectivity/metrics → `ablation_lomo_auc.slope_only` | `AI/outputs/model_metrics_honest.json` |
 | `track_a.random_split` | Track A: random 5-fold AUC, for contrast | **0.82** | GET /api/v1/prospectivity/metrics → `random_split_auc_for_contrast` | `AI/outputs/model_metrics_honest.json` |
+
+## Withheld
+
+Withheld until a fix passes its pre-registered test (`docs/DECISIONS.md` D-044, D-045). They come from the 14-day aggregation that D-043 found unsound on every dataset it measured (`docs/QUANTILE_CROSSING.md`), and the console no longer shows them.
+
+- P(shortfall), any mine or grade (`p_shortfall`)
+- All ten mines: 14-day total inside its 80% band (`portfolio.cumulative_coverage`)
+- All ten mines: 14-day coverage, 95% interval (`portfolio.cumulative_coverage_ci`)
+- All ten mines: 14-day totals in the outer tails (`portfolio.cumulative_tails`)
+- Balaghat: 14-day total inside its 80% band (`balaghat.cumulative_coverage`)
+- Balaghat: 14-day coverage, 95% interval (`balaghat.cumulative_coverage_ci`)
 
 ## Identity of each source
 
