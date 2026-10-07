@@ -96,9 +96,15 @@ def run(args: argparse.Namespace) -> int:
     )
 
     # D-043 ablation arms: which parts of the crossing fix the forecaster runs
-    # with. "both" is the product; the others exist to measure the parts.
-    arm = getattr(args, "arm", "both")
-    fc_kwargs = {"rearrange": arm in ("both", "crossing"), "day_blocks": arm in ("both", "blocks")}
+    # with. None of them is served — no arm passed D-043's rule.
+    # Without --arm, the forecaster as it is served: its own defaults. That is
+    # what `batch all` measures, and the artifact must describe what is served.
+    # (It defaulted to "both" once, and `batch all` measured an arm nobody
+    # serves; caught by comparing the regenerated artifact with main's.)
+    arm = getattr(args, "arm", None)
+    fc_kwargs = {} if arm is None else {
+        "rearrange": arm in ("both", "crossing"), "day_blocks": arm in ("both", "blocks"),
+    }
     print(f"forecaster arm: {arm} {fc_kwargs}", flush=True)
 
     t_start = time.time()
@@ -106,7 +112,7 @@ def run(args: argparse.Namespace) -> int:
     with open(args.out, "w") as fh:
         fh.write(json.dumps({
             "type": "meta",
-            "forecaster_arm": arm,
+            "forecaster_arm": arm or "served (forecaster defaults)",
             "loading_available": HAVE_LOADING,
             "n_origins": len(origins),
             "first_origin": origins[0].isoformat(),
@@ -832,7 +838,7 @@ def main(argv: list[str]) -> int:
     r.add_argument("--span", type=int, default=340)
     r.add_argument("--step", type=int, default=14)
     r.add_argument("--out", required=True)
-    r.add_argument("--arm", choices=("both", "crossing", "blocks", "none"), default="both",
+    r.add_argument("--arm", choices=("both", "crossing", "blocks", "none"), default=None,
                    help="D-043 ablation: which parts of the crossing fix the forecaster runs")
     r.set_defaults(fn=run)
 
