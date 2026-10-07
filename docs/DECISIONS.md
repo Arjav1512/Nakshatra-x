@@ -1096,6 +1096,75 @@ The harness records the first and the last for every daily row, and main's
 records show the second. The count of rows whose q50 changed for any other
 reason must be zero. Nothing else in A4, or anywhere in D-043, changes.
 
+### Amendment 2 — which arm ships, and what the checks measure
+
+**Written 2026-10-07T12:16Z, while the formal measurement was running and before
+any of its output was read.** The runs started at 11:57Z
+(`scratchpad/d043/runs/run_all.sh`: harness × four arms × two datasets, then
+`test_track_b.py` on both datasets, the multi-date and artifact tests). No
+output file or log of it had been opened; only the start line of its progress
+file, for the time above.
+
+**Seen before writing this, and disclosed:** the Balaghat smoke result recorded
+in `12f9c4d`.
+- With both switches on, 6 Oct: max |z| 6.03, but three grades' 14-day spread
+  is still narrower than independent days, and per-grade day lag-1 is −0.14
+  to 0.05.
+- On main's construction, the interleaved series' lag-1 of about 0.5 is mostly
+  same-day correlation between grades (0.68–0.81); per-grade persistence across
+  days is 0.02–0.30.
+- Both suggest "both" may fail A2 and A6.
+
+**What P(shortfall) is computed on.**
+- **Per grade.** Each grade's 14-day total is simulated against that grade's
+  plan target. The mine card shows the worst grade's figure.
+- **The mine total** carries expectations only — summed means, no
+  distribution — so no served figure today depends on the correlation between
+  grades.
+- **Every acceptance check is per grade** (A2–A6), on (origin, mine, grade)
+  windows or each mine's grades, never mine totals.
+- **If a mine-total distribution is ever served,** the same-day correlation
+  between grades is real for it and must be kept. F3's common draws keep it,
+  and any arm without them must not be used for that.
+
+**Which arm ships.**
+1. **The arm that passes every acceptance criterion against main on both
+   datasets ships.**
+2. **If several pass, the simplest:** crossing fix only, then day blocks only,
+   then both.
+3. **If none passes, served P(shortfall) is not changed,** and the result is
+   reported as negative. The user-visible guarantee and its tests still ship:
+   - `predict`'s sort after the conformal step;
+   - the artifact test and the browser assertion (A1).
+
+   That sort touches no fitted quantity (conformity scores, widths, residuals),
+   and at the served end dates on both datasets no interval was crossed after
+   the conformal step (part 1). So served P(shortfall) is unchanged by it.
+
+**How each criterion reads for an arm other than "both"** — the same
+statistics, applied to what that arm actually does:
+- **A1:** the arm's backtest rows in its harness run must be uncrossed.
+- **A2:** `test_track_b.py` in full with the arm's switches, set by a pytest
+  plugin that changes the forecaster's defaults, not the code.
+  - The precondition is the same statistic for every arm: the mean over grades
+    of the Pearson lag-1 of each grade's column of `residual_days` (every arm
+    builds it), above 0.2. It asserts persistence across days, whatever series
+    the arm resamples, and the interleaved series' own lag-1 is now known to
+    measure something else.
+  - "Wider than independent for every grade" uses the residuals the arm's
+    aggregation uses (`residual_block`).
+- **A3, A4:** the arm's harness run paired with main's.
+- **A5:** for an arm without day blocks, the largest day's rows are removed
+  from the interleaved series it resamples.
+- **A6:** `test_track_b_dates.py` with the arm's switches, by the same plugin.
+
+**If A2 or A6 fails on the persistence premise,** it is reported as negative and
+nothing above is adjusted. The question it raises gets its own change, with its
+own pre-registration: whether the dependence that matters for a 14-day total is
+the correlation across horizons 1–14 within one origin's forecast path, rather
+than one-step residual persistence — and whether that explains the 2.5–3.4×
+understatement of cumulative spread measured in #20.
+
 ### If the rule fails
 
 "Both" does not ship as it is. The failure is reported with its numbers; neither
