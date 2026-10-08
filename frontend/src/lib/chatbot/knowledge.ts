@@ -52,7 +52,7 @@ export const knowledgeBase: KnowledgeChunk[] = [
     keywords: ['monsoon', 'flooding', 'shortfall', 'prevent', 'weather', 'dewatering', 'haul road', 'rain', 'pumps', 'scada'],
     question: 'How do we prevent monsoon pit flooding and operational shortfall?',
     answer:
-      "Rainfall is measured, not controlled. The system reads 14-day precipitation from NASA POWER and Open-Meteo for each mine's coordinates, and rainfall is a covariate in the Track B shortfall forecaster — so heavy monsoon rain shows up as a higher P(shortfall) and as a driver in the attribution breakdown. From there it can raise an operational alert for a person to act on. There is no connection to MOSDAC radar, no MQTT or Modbus, and no SCADA control of pumps: actuating plant equipment is PRD §4 non-goal 2, and this codebase does not do it. No rupee saving is claimed — nothing here has been measured against real MOIL operations.",
+      "Rainfall is measured, not controlled. The system reads 14-day precipitation from NASA POWER and Open-Meteo for each mine's coordinates, and rainfall is a covariate in the Track B shortfall forecaster — so heavy monsoon rain shows up as a larger expected shortfall and as a driver in the attribution breakdown. From there it can raise an operational alert for a person to act on. There is no connection to MOSDAC radar, no MQTT or Modbus, and no SCADA control of pumps: actuating plant equipment is PRD §4 non-goal 2, and this codebase does not do it. No rupee saving is claimed — nothing here has been measured against real MOIL operations.",
     actionButton: {
       label: 'Broadcast Emergency Dewatering Dispatch',
       type: 'dewatering',

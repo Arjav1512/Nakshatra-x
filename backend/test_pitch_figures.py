@@ -57,3 +57,28 @@ def test_the_check_notices_a_changed_figure_or_identity(client):
 
     other = {**ident, pf.BACKTEST_FILE: {**ident[pf.BACKTEST_FILE], "data_end_date": "1999-01-01"}}
     assert any(p.startswith("identity") for p in pf.compare(pf.render(figs, other), figs, ident))
+
+
+def test_withdrawn_figures_stay_out_of_the_pitch(client):
+    """
+    P(shortfall) and the 14-day cumulative figures are withheld (DECISIONS.md
+    D-044): not computed as pitch figures, not written to PITCH_FIGURES.md, and
+    not quoted by DEMO.md or JURY_QA.md. Putting one back fails here until
+    D-045's fix passes its pre-registered test and this list is changed with it.
+    """
+    bt, cal, ta = _served(client)
+    figs, ident = pf.figures_from(bt, cal, ta), pf.identities_from(bt, cal, ta)
+    assert not {f.key for f in figs} & pf.WITHHELD.keys()
+    written, _ = pf.parse(pf.PITCH_DOC.read_text())
+    assert not written.keys() & pf.WITHHELD.keys(), sorted(written.keys() & pf.WITHHELD.keys())
+    for doc in pf.QUOTING_DOCS:
+        quoted = {k for _, k in pf.QUOTE.findall(doc.read_text())}
+        assert not quoted & pf.WITHHELD.keys(), f"{doc.name} quotes {sorted(quoted & pf.WITHHELD.keys())}"
+
+    # The check itself refuses one, so this cannot pass by never looking.
+    text = pf.render(figs, ident)
+    row = "| `portfolio.cumulative_coverage` | 14-day coverage | **0.738** | x | `y` |"
+    first = next(line for line in text.splitlines() if line.startswith("| `"))
+    smuggled = text.replace(first, f"{first}\n{row}", 1)
+    assert any("withheld" in p for p in pf.compare(smuggled, figs, ident))
+    assert pf.withheld_problems(["portfolio.daily_coverage"]) == []

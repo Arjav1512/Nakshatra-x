@@ -69,7 +69,10 @@ async function main() {
     return {
       count: cards.length,
       withNumber: cards.filter((c) => /\d/.test(c.innerText)).length,
-      withProbability: cards.filter((c) => /P\s*\d+%/.test(c.innerText)).length,
+      // P(shortfall) is withdrawn from the screen (DECISIONS.md D-044): every
+      // card leads with tonnes, and none may show a percentage at all.
+      withTonnes: cards.filter((c) => /−[\d,]+\s*t expected/.test(c.innerText)).length,
+      withPercent: cards.filter((c) => /\d\s*%/.test(c.innerText)).length,
       withBadge: cards.filter((c) => badges.some((b) => c.innerText.includes(b))).length,
       unavailable: cards.filter((c) => /unavailable/i.test(c.innerText)).length,
       // The mine name, not the first line: cards now open with a rank ("02"),
@@ -88,9 +91,23 @@ async function main() {
     `got ${portfolio.count}`
   )
   check(
-    'every card shows a shortfall probability',
-    portfolio.withProbability === EXPECTED_MINES,
-    `${portfolio.withProbability}/${EXPECTED_MINES} — ${portfolio.unavailable} unavailable`
+    'every card shows an expected shortfall in tonnes',
+    portfolio.withTonnes === EXPECTED_MINES,
+    `${portfolio.withTonnes}/${EXPECTED_MINES} — ${portfolio.unavailable} unavailable`
+  )
+  check(
+    'no card shows a probability (P(shortfall) withdrawn, D-044)',
+    portfolio.withPercent === 0,
+    `${portfolio.withPercent} card(s) show a percentage`
+  )
+  const portfolioWithdrawn = await page.evaluate(() => {
+    const n = document.querySelector('[data-testid="p-withdrawn"]')
+    return n ? { text: n.innerText, href: n.querySelector('a')?.href ?? '' } : null
+  })
+  check(
+    'the portfolio says P(shortfall) is withdrawn, and links to the finding',
+    !!portfolioWithdrawn && /withdrawn/i.test(portfolioWithdrawn.text) && /QUANTILE_CROSSING\.md$/.test(portfolioWithdrawn.href),
+    portfolioWithdrawn ? portfolioWithdrawn.href : 'no withdrawal notice'
   )
   check(
     'every card carries a provenance badge',
@@ -139,8 +156,50 @@ async function main() {
   check('forecast: plan target rendered', /PLAN TARGET[\s\S]{0,80}?[\d,]+\s*t/i.test(mine))
   check('forecast: expected production rendered', /EXPECTED PRODUCTION[\s\S]{0,80}?[\d,]+\s*t/i.test(mine))
   check('forecast: expected shortfall rendered', /EXPECTED SHORTFALL[\s\S]{0,80}?[\d,]+\s*t/i.test(mine))
-  check('P(shortfall) rendered as a percentage', /P\(SHORTFALL\)[\s\S]{0,80}?\d+(\.\d+)?%/i.test(mine))
-  check('per-grade shortfall breakdown rendered', (mine.match(/P\(short\)\s*\d+(\.\d+)?%/gi) || []).length >= 2)
+
+  // The focal number is summed over grades (D-044): the tile must equal the
+  // grade chips added up, give or take each chip's rounding.
+  const focal = await page.evaluate(() => {
+    const tile = [...document.querySelectorAll('[data-provenance]')].find((n) =>
+      /^\s*Expected shortfall/i.test(n.querySelector('.label')?.textContent ?? '')
+    )
+    const value = Number((tile?.querySelector('[data-metric]')?.textContent ?? '').replace(/[^\d.]/g, ''))
+    const chips = [...document.querySelectorAll('[data-grade]')].map((b) => {
+      const m = b.innerText.match(/−([\d,]+)\s*t expected/)
+      return m ? Number(m[1].replace(/,/g, '')) : /no shortfall expected/.test(b.innerText) ? 0 : null
+    })
+    return { value, chips }
+  })
+  const chipSum = focal.chips.reduce((a, b) => a + (b ?? Number.NaN), 0)
+  check(
+    'per-grade breakdown shows each grade\'s expected shortfall in tonnes',
+    focal.chips.length >= 2 && focal.chips.every((c) => c !== null),
+    `${focal.chips.length} grade(s): ${focal.chips.join(', ')}`
+  )
+  check(
+    'expected shortfall is the grades\' shortfalls summed (D-044, PRD §3)',
+    Math.abs(focal.value - chipSum) <= focal.chips.length,
+    `tile ${focal.value} t, grades sum to ${chipSum} t`
+  )
+  check(
+    'no probability of shortfall rendered as a number (D-044)',
+    !/P\s*\(\s*short(fall)?\s*\)\s*[\d.]/i.test(mine) && !/\bP\s+\d+\s*%/.test(mine) && !/ΔP/.test(mine),
+    (mine.match(/P\s*\(\s*short(fall)?\s*\)\s*[\d.]+%?|\bP\s+\d+\s*%|ΔP[^\n]{0,30}/i) || ['—'])[0]
+  )
+  const mineWithdrawn = await page.evaluate(() =>
+    [...document.querySelectorAll('[data-testid="p-withdrawn"]')].map((n) => n.querySelector('a')?.href ?? '')
+  )
+  check(
+    'where P(shortfall) was, the mine says it is withdrawn and links to the finding',
+    mineWithdrawn.some((h) => /QUANTILE_CROSSING\.md$/.test(h)),
+    mineWithdrawn.join(', ') || 'no withdrawal tile'
+  )
+  const daily = await page.evaluate(() => document.querySelector('[data-calibration="daily"]')?.innerText ?? '')
+  check(
+    'the daily bands\' measured calibration is shown, portfolio and mine',
+    /All ten mines:\s*0\.\d{3}\s*\[0\.\d{3}, 0\.\d{3}\]/.test(daily) && /Balaghat:\s*0\.\d{3}\s*\[0\.\d{3}, 0\.\d{3}\]/.test(daily),
+    daily.split('\n').slice(1, 3).join(' | ') || 'no daily calibration panel'
+  )
 
   // ---- backtest: computed on demand, so run it ----------------------------
   const clicked = await page.evaluate(() => {

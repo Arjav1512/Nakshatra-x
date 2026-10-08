@@ -41,6 +41,28 @@ BACKTEST_FILE = f"backend/artifacts/backtests/{PILOT_CODE}_{BACKTEST_SPAN}d_{BAC
 CALIBRATION_FILE = "backend/artifacts/calibration/cumulative_coverage.json"
 TRACK_A_FILE = "AI/outputs/model_metrics_honest.json"
 
+#: Figures withheld from the pitch (docs/DECISIONS.md D-044), and why.
+#:
+#: P(shortfall) and every 14-day cumulative figure come from the aggregation
+#: D-043 found unsound on every dataset it measured. They stay out of
+#: PITCH_FIGURES.md, and out of anything that quotes it, until a fix passes its
+#: pre-registered test (D-045). Listed by key so the check can refuse them by
+#: name: a figure cannot drift back in under the key it used to have.
+WITHHELD = {
+    "p_shortfall": "P(shortfall), any mine or grade",
+    "portfolio.cumulative_coverage": "All ten mines: 14-day total inside its 80% band",
+    "portfolio.cumulative_coverage_ci": "All ten mines: 14-day coverage, 95% interval",
+    "portfolio.cumulative_tails": "All ten mines: 14-day totals in the outer tails",
+    "balaghat.cumulative_coverage": "Balaghat: 14-day total inside its 80% band",
+    "balaghat.cumulative_coverage_ci": "Balaghat: 14-day coverage, 95% interval",
+}
+WITHHELD_WHY = (
+    "Withheld until a fix passes its pre-registered test (`docs/DECISIONS.md` "
+    "D-044, D-045). They come from the 14-day aggregation that D-043 found "
+    "unsound on every dataset it measured (`docs/QUANTILE_CROSSING.md`), and "
+    "the console no longer shows them."
+)
+
 #: Where each source is served, for the reader of the table.
 SERVED = {
     BACKTEST_FILE: f"GET /api/v1/mines/{PILOT_ID}/backtest",
@@ -82,9 +104,9 @@ def figures_from(backtest: dict, calibration: dict, track_a: dict) -> list[Figur
     if calibration.get("status") != "ok":
         raise ValueError(f"calibration is not being served: {calibration.get('reason') or calibration.get('status')}")
     daily = calibration.get("daily") or {}
-    if not daily.get("portfolio"):
+    if not daily.get("portfolio") or not daily.get("mine"):
         raise ValueError("the calibration artifact has no daily figures; re-measure it (batch all)")
-    dp, cp, cm = daily["portfolio"], calibration["portfolio"], calibration["mine"]
+    dp, dm = daily["portfolio"], daily["mine"]
     lomo, abl = track_a["lomo"], track_a["ablation_lomo_auc"]
     return [
         # ---- Track B: the pilot backtest, on screen at 1:35 ------------------
@@ -96,24 +118,20 @@ def figures_from(backtest: dict, calibration: dict, track_a: dict) -> list[Figur
         Figure("pilot.n_predictions", "Balaghat backtest: held-out predictions scored",
                str(backtest["model"]["n"]), B, "model.n"),
         Figure("pilot.n_origins", "Balaghat backtest: forecast origins", str(backtest["n_origins"]), B, "n_origins"),
-        # ---- Track B: calibration, portfolio-wide and Balaghat ---------------
+        # ---- Track B: daily calibration, portfolio-wide and Balaghat ---------
+        # The daily bands the console draws, and how often real days fell in
+        # them. The 14-day figures that were here are withheld (WITHHELD).
         Figure("portfolio.daily_coverage", "All ten mines: daily 80% interval coverage",
                f"{dp['coverage_80']:.3f}", C, "daily.portfolio.coverage_80"),
         Figure("portfolio.daily_coverage_ci", "All ten mines: daily coverage, 95% interval",
                _ci(dp["coverage_80_ci95"]), C, "daily.portfolio.coverage_80_ci95"),
         Figure("portfolio.daily_mape", "All ten mines: daily MAPE", _pct(dp["mape_pct"]), C, "daily.portfolio.mape_pct"),
-        Figure("portfolio.cumulative_coverage", "All ten mines: 14-day total inside its 80% band",
-               f"{cp['coverage_80']:.3f}", C, "portfolio.coverage_80"),
-        Figure("portfolio.cumulative_coverage_ci", "All ten mines: 14-day coverage, 95% interval",
-               _ci(cp["coverage_80_ci95"]), C, "portfolio.coverage_80_ci95"),
-        Figure("portfolio.cumulative_tails", "All ten mines: 14-day totals in the outer tails (nominal 0.10)",
-               f"{cp['pit_at_extremes']:.3f}", C, "portfolio.pit_at_extremes"),
-        Figure("portfolio.n_origin_dates", "Calibration: origin dates measured", str(cp["n_origin_dates"]), C,
-               "portfolio.n_origin_dates"),
-        Figure("balaghat.cumulative_coverage", "Balaghat: 14-day total inside its 80% band",
-               f"{cm['coverage_80']:.3f}", C, "mine.coverage_80"),
-        Figure("balaghat.cumulative_coverage_ci", "Balaghat: 14-day coverage, 95% interval",
-               _ci(cm["coverage_80_ci95"]), C, "mine.coverage_80_ci95"),
+        Figure("portfolio.n_origin_dates", "Calibration: origin dates measured", str(dp["n_origin_dates"]), C,
+               "daily.portfolio.n_origin_dates"),
+        Figure("balaghat.daily_coverage", "Balaghat: daily 80% interval coverage (calibration backtest)",
+               f"{dm['coverage_80']:.3f}", C, "daily.mine.coverage_80"),
+        Figure("balaghat.daily_coverage_ci", "Balaghat: daily coverage, 95% interval",
+               _ci(dm["coverage_80_ci95"]), C, "daily.mine.coverage_80_ci95"),
         # ---- Track A: leave-one-mine-out, real Sentinel-2 + SRTM -------------
         Figure("track_a.auc", "Track A: leave-one-mine-out AUC", _auc(lomo["auc"]), A, "lomo.auc"),
         Figure("track_a.auc_ci", "Track A: AUC, 95% interval", _ci(lomo["auc_ci95"], 2), A, "lomo.auc_ci95"),
@@ -212,7 +230,7 @@ def render(figs: list[Figure], ident: dict) -> str:
     ]
     sections = [
         ("Track B — the pilot backtest (Balaghat)", "pilot."),
-        ("Track B — calibration, all ten mines and Balaghat", ("portfolio.", "balaghat.")),
+        ("Track B — daily calibration, all ten mines and Balaghat", ("portfolio.", "balaghat.")),
         ("Track A — prospectivity, leave-one-mine-out", "track_a."),
     ]
     for title, prefix in sections:
@@ -224,6 +242,12 @@ def render(figs: list[Figure], ident: dict) -> str:
                 )
         lines.append("")
     lines += [
+        "## Withheld",
+        "",
+        WITHHELD_WHY,
+        "",
+        *[f"- {label} (`{key}`)" for key, label in WITHHELD.items()],
+        "",
         "## Identity of each source",
         "",
         "What the figures above were read from. The check compares these with what",
@@ -258,12 +282,21 @@ def compare(text: str, figs: list[Figure], ident: dict) -> list[str]:
             problems.append(f"{f.key}: {PITCH_DOC.name} says {written[f.key]}, served {f.value}")
     for k in written.keys() - {f.key for f in figs}:
         problems.append(f"{k}: in {PITCH_DOC.name} but not a pitch figure")
+    problems += withheld_problems({f.key for f in figs} | written.keys())
     if written_ident != ident:
         problems.append(
             f"identity: {PITCH_DOC.name} records {json.dumps(written_ident, sort_keys=True)}, "
             f"served {json.dumps(ident, sort_keys=True)}"
         )
     return problems
+
+
+def withheld_problems(keys) -> list[str]:
+    """A withheld figure among `keys` — computed, written or quoted (D-044)."""
+    return [
+        f"{k}: withheld from the pitch until a fix passes its pre-registered test (DECISIONS.md D-044)"
+        for k in sorted(set(keys) & WITHHELD.keys())
+    ]
 
 
 def quoted_problems(figs: dict[str, str], docs=QUOTING_DOCS, against: str = PITCH_DOC.name) -> list[str]:
@@ -275,7 +308,11 @@ def quoted_problems(figs: dict[str, str], docs=QUOTING_DOCS, against: str = PITC
     """
     problems = []
     for doc in docs:
-        for value, key in QUOTE.findall(doc.read_text()):
+        quoted = QUOTE.findall(doc.read_text())
+        problems += [f"{doc.name}: {p}" for p in withheld_problems(k for _, k in quoted)]
+        for value, key in quoted:
+            if key in WITHHELD:
+                continue
             if key not in figs:
                 problems.append(f"{doc.name}: quotes pitch:{key}, which {against} does not have")
             elif value.strip() != figs[key]:

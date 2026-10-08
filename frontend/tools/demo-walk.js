@@ -90,9 +90,16 @@ async function main() {
 
   // 0:20 — portfolio. Scoped to the mine list: the breadcrumb is a list too.
   const cards = await page.evaluate(() => document.querySelectorAll('[data-testid="mine-list"] > li').length)
-  const probs = (t.match(/P\s*\d+%/g) || []).length
-  record('0:20 portfolio — ten mines with P(shortfall)', cards === 10 && probs >= 10,
-    `${cards} cards, ${probs} probabilities`)
+  // P(shortfall) is withdrawn from the screen (DECISIONS.md D-044): the beat
+  // shows expected shortfall in tonnes, and says the probability is withdrawn.
+  const tonnes = (t.match(/−[\d,]+\s*t expected/g) || []).length
+  const probs = (t.match(/\bP\s*\d+\s*%/g) || []).length
+  record('0:20 portfolio — ten mines with expected shortfall, no probability',
+    cards === 10 && tonnes >= 10 && probs === 0,
+    `${cards} cards, ${tonnes} expected shortfalls, ${probs} probabilities`)
+  record('0:20 P(shortfall) withdrawn, with a link to the finding',
+    await page.evaluate(() => /QUANTILE_CROSSING\.md$/.test(
+      document.querySelector('[data-testid="p-withdrawn"] a')?.href ?? '')))
   record('0:20 Balaghat marked as Track B pilot', /Track B pilot/i.test(t))
   await shot(page, '01-portfolio')
 
@@ -120,16 +127,17 @@ async function main() {
   await shot(page, '02-conditions')
 
   // 1:05 — Track B headline tiles + grades + chart
-  record('1:05 headline tiles',
+  record('1:05 headline tiles, P(shortfall) withdrawn',
     /plan target/i.test(t) && /expected production/i.test(t) &&
-    /expected shortfall/i.test(t) && /P\(shortfall\)/i.test(t))
+    /expected shortfall/i.test(t) && /withdrawn while under validation/i.test(t) &&
+    !/P\s*\(\s*short(fall)?\s*\)\s*[\d.]/i.test(t))
   const grades = ['ferro manganese', 'silico manganese', 'blast furnace', 'dioxide'].filter((g) => t.toLowerCase().includes(g))
   record('1:05 per-grade breakdown (PRD B-5)', grades.length === 4, grades.join(', '))
   record('1:05 chart states its interval and baseline',
     /80%/i.test(t) && /seasonal-naive/i.test(t))
-  facts.calibration_beside_p = await page.evaluate(() =>
-    document.querySelector('[data-calibration]')?.innerText?.slice(0, 160) || null)
-  record('1:05 calibration shown beside P(shortfall)', !!facts.calibration_beside_p, facts.calibration_beside_p)
+  facts.daily_calibration = await page.evaluate(() =>
+    document.querySelector('[data-calibration="daily"]')?.innerText?.slice(0, 160) || null)
+  record('1:05 daily bands shown with their measured calibration', !!facts.daily_calibration, facts.daily_calibration)
   await shot(page, '03-trackB')
 
   // 1:35 — backtest: read from the artifact on load, no click

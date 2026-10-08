@@ -369,6 +369,59 @@ def test_cumulative_aggregation_beats_independent_days():
     )
 
 
+def test_expected_shortfall_does_not_depend_on_how_days_correlate():
+    """
+    The console's focal number is a mean, so it must not rest on the premise
+    D-043 falsified (DECISIONS.md D-044, pre-registered there).
+
+    Expected production over the window is the sum of each day's expectation,
+    however the days depend on each other: the sum over days of the mean, over
+    the residual series the aggregation resamples, of exp(mu_d + sigma_d * r).
+    The served figure is a Monte Carlo over blocks of that series. Grade by
+    grade, it must lie within four Monte Carlo standard errors of the exact
+    expectation, plus 0.05 t of rounding. Four is not a tuned tolerance: a
+    correct implementation fails it about once in 16,000 grades. Expected
+    shortfall is max(0, plan - this), so it is covered with it.
+    """
+    import math
+
+    import numpy as np
+
+    from app.api.track_b import _forecaster, _state, forecast_mine
+    from app.ml.backtest import _cumulative_paths
+
+    st = _state()
+    origin = st["end"]
+    fc = _forecaster(PILOT, origin)
+    served = {g["grade"]: g["shortfall"] for g in forecast_mine(PILOT, horizon_days=14)["grades"]}
+    grades = sorted({k[1] for k in st["series"] if k[0] == PILOT})
+    assert sorted(served) == grades
+
+    z = 1.2815515655446004
+    for g in grades:
+        preds = fc.predict(PILOT, g, origin, list(range(1, 15)), st["series"][(PILOT, g)], st["cov"])
+        r = np.asarray(fc.residual_block(PILOT, g), dtype=float)
+        # Each day's lognormal, matched to its quantiles as the aggregation does.
+        params = []
+        for h in sorted(preds):
+            q10, q50, q90 = preds[h]["q10"], preds[h]["q50"], preds[h]["q90"]
+            if q50 <= 0:
+                continue
+            sd = (math.log(q90) - math.log(q10)) / (2 * z) if q90 > q10 > 0 else 0.15
+            params.append((math.log(max(q50, 1e-9)), min(max(sd, 0.02), 1.5)))
+        assert len(r) >= max(30, len(params)), f"{g}: served from independent draws, not blocks"
+
+        exact = sum(float(np.mean(np.exp(mu + sd * r))) for mu, sd in params)
+        paths = _cumulative_paths(preds, r)
+        se = float(np.std(paths, ddof=1)) / math.sqrt(len(paths))
+        got = served[g]["expected_cumulative_tonnes"]
+        assert abs(got - exact) <= 4 * se + 0.05, (
+            f"{g}: served expected production {got} t, exact expectation {exact:.1f} t, "
+            f"Monte Carlo se {se:.2f} t — the focal number depends on the aggregation"
+        )
+        print(f"    {g}: served {got} t, exact {exact:.1f} t, |diff| {abs(got - exact):.2f} t, 4 se {4 * se:.2f} t")
+
+
 def test_backtest_reports_cumulative_calibration():
     """
     The artifact must carry the cumulative calibration, not only daily coverage.

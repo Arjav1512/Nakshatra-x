@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { type MineRow, fetchForecast, fetchMines, fetchTelemetry } from '@/lib/console-api'
+import { type MineRow, fetchForecast, fetchMines, fetchTelemetry, gradeShortfallTonnes } from '@/lib/console-api'
 import { PLAN_TARGET_NOTE, measuredOrNull, synthetic } from '@/lib/provenance'
 import { type ExportRow, buildCsv, downloadCsv, exportPdf } from '@/lib/console-export'
 import { IntegrityBanner, Metric, SourceBadge } from './Evidence'
-import { Button, Card, EmptyState, Skeleton, StatusDot, type Status } from '@/components/ui/primitives'
+import { Button, Card, EmptyState, Skeleton } from '@/components/ui/primitives'
+import { ProbabilityWithdrawn } from './ProbabilityWithdrawn'
 import { TrackAPanel } from './TrackAPanel'
 import { TrackBPanel } from './TrackBPanel'
 
@@ -32,19 +33,19 @@ type Level = 'portfolio' | 'mine'
  * does not yet send; that is logged in FEATURE_BACKLOG.md B-2, not faked here.
  */
 type Cell =
-  | { shortfall: number; p: number }
+  | { shortfall: number; plan: number }
   | { error: string; status: number; warming?: { eta_seconds: number } }
   | null
 
 const isFailure = (c: Cell): c is { error: string; status: number } =>
   c !== null && 'error' in c
 
-/** Risk band. Paired with a shape and a text label, never colour alone. */
-function band(p: number): { status: Status; label: string } {
-  if (p > 0.8) return { status: 'critical', label: 'high' }
-  if (p > 0.5) return { status: 'caution', label: 'elevated' }
-  return { status: 'nominal', label: 'low' }
-}
+/*
+ * There was a risk band here — critical / caution / nominal at P(shortfall)
+ * above 0.8 and 0.5 — painting every card's dot. Its thresholds were on
+ * P(shortfall), which is withdrawn from the screen (DECISIONS.md D-044), so the
+ * band went with it. The cards are ordered by expected shortfall in tonnes.
+ */
 
 /** Balaghat — PRD §13 Q4 names it the Track B pilot. */
 const PILOT_CODE = 'MOIL-BAL-01'
@@ -56,11 +57,12 @@ const PILOT_CODE = 'MOIL-BAL-01'
  */
 const PORTFOLIO_ENV = synthetic(
   0,
-  'probability',
+  'tonnes',
   'Track B forecaster over synthetic operational data (ingestion contract v1.0.0)',
   {
     model_version: 'nakshatra-gbt-cqr-v1',
-    method: 'P(cumulative production < plan target) per mine; open a mine for the full evidence.',
+    method:
+      'Expected shortfall per mine, summed over grades: max(0, plan target − expected production) for each grade (D-044). Open a mine for the full evidence.',
   }
 )
 
@@ -110,7 +112,7 @@ export function DecisionConsole() {
   const [portfolio, setPortfolio] = useState<Record<number, Cell>>({})
 
   /**
-   * Mines ordered by expected shortfall, largest first.
+   * Mines ordered by expected shortfall, summed over grades, largest first.
    *
    * The register's own order is neither risk order nor alphabetical, so
    * position on screen carried no meaning while the eye read it as importance
@@ -200,8 +202,9 @@ export function DecisionConsole() {
           ...p,
           [m.id]: r.ok
             ? {
-                shortfall: r.data.portfolio.expected_shortfall_tonnes,
-                p: Math.max(0, ...r.data.grades.map((g) => g.shortfall.p_shortfall)),
+                // Summed over grades (D-044), not the API's netted mine total.
+                shortfall: gradeShortfallTonnes(r.data),
+                plan: r.data.portfolio.plan_target_tonnes,
               }
             : { error: r.error, status: r.status, warming: r.warming ? { eta_seconds: r.warming.eta_seconds } : undefined },
         }))
@@ -247,7 +250,7 @@ export function DecisionConsole() {
       const mine = mines?.find((m) => m.id === Number(id))
       if (!mine || !v || isFailure(v)) continue
       rows.push({
-        section: 'portfolio', metric: `${mine.name} expected shortfall`, value: Math.round(v.shortfall),
+        section: 'portfolio', metric: `${mine.name} expected shortfall, summed over grades`, value: Math.round(v.shortfall),
         unit: 'tonnes', source: 'Track B forecaster over synthetic operational data',
         source_kind: 'synthetic', vintage: new Date().toISOString(),
         model_version: 'nakshatra-gbt-cqr-v1', uncertainty: 'see forecast intervals', is_synthetic: true,
@@ -410,11 +413,10 @@ export function DecisionConsole() {
               </span>
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-x-2 text-xs">
-              <StatusDot status={band((portfolio[selected.id] as any).p).status} />
               <span className="font-mono tabular-nums text-text-secondary">
-                P {Math.round((portfolio[selected.id] as any).p * 100)}%
+                of {Math.round((portfolio[selected.id] as any).plan).toLocaleString()} t plan
               </span>
-              <span className="text-text-tertiary">expected shortfall against plan</span>
+              <span className="text-text-tertiary">expected shortfall, summed over grades</span>
             </div>
           </div>
         ) : null}
@@ -454,7 +456,7 @@ export function DecisionConsole() {
         {level === 'portfolio' && track === 'B' ? (
           <section>
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="label">Portfolio · ranked by expected shortfall</h2>
+              <h2 className="label">Portfolio · ranked by expected shortfall, summed over grades</h2>
               <p className="text-xs text-text-tertiary">
                 Largest shortfall first. Mines still computing sort last.
               </p>
@@ -545,8 +547,9 @@ export function DecisionConsole() {
                       itself (D-030). Saying it here would be the rolling-window
                       claim that page exists to avoid.
                     */}
+                    {/* Summed over grades (D-044): the mines are ranked by it. */}
                     <span className="text-sm text-text-secondary">
-                      expected against plan, from the stored forecast
+                      summed over grades, from the stored forecast
                     </span>
                   </span>
                   <span className="mt-2 block text-sm text-accent">
@@ -643,10 +646,16 @@ export function DecisionConsole() {
                               )}
                             </p>
                           ) : (
-                            <div className="mt-3 min-h-6">
-                              {/* Lead with the quantity that separates the mines. */}
+                            <div
+                              className="mt-3 min-h-6"
+                              data-provenance="derived"
+                              data-provenance-model={PORTFOLIO_ENV.model_version ?? undefined}
+                            >
+                              {/* Lead with the quantity that separates the mines.
+                                  The P(shortfall) line and its risk band are
+                                  withdrawn (D-044); the plan the shortfall is
+                                  measured against takes the line instead. */}
                               <div className="flex items-baseline gap-2">
-                                <StatusDot status={band(v.p).status} />
                                 <span className="font-mono text-xl tabular-nums text-text-primary">
                                   −{Math.round(v.shortfall).toLocaleString()}
                                 </span>
@@ -654,10 +663,7 @@ export function DecisionConsole() {
                               </div>
                               <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                                 <span className="font-mono text-xs text-text-secondary tabular-nums">
-                                  P {Math.round(v.p * 100)}%
-                                </span>
-                                <span className="text-xs text-text-tertiary">
-                                  {band(v.p).label}
+                                  of {Math.round(v.plan).toLocaleString()} t plan
                                 </span>
                                 {/* N-3: the strip shows numbers, so it shows their kind too. */}
                                 <SourceBadge env={PORTFOLIO_ENV} />
@@ -685,10 +691,14 @@ export function DecisionConsole() {
             )}
 
             <p className="measure mt-4 text-xs text-text-tertiary">
-              Shortfall probabilities are computed per mine from the Track B forecaster over
-              synthetic operational data. Open a mine for drivers, the backtest and
-              constraint-checked actions.
+              Expected shortfall is computed per mine from the Track B forecaster over synthetic
+              operational data, and summed over grades: a surplus in one grade does not cover a
+              deficit in another (PRD §3). Open a mine for its daily forecast intervals and how well
+              they are calibrated, the backtest, and constraint-checked actions.
             </p>
+            <div className="mt-2">
+              <ProbabilityWithdrawn variant="line" />
+            </div>
             <p className="measure mt-2 text-xs text-text-tertiary">{PLAN_TARGET_NOTE}</p>
           </section>
         ) : null}

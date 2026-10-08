@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server'
 import { backendUrl, fetchFromBackend } from '@/lib/backend'
 
 /**
- * Calibration of the 14-day total, for the console beside P(shortfall).
+ * Calibration figures for the console: the daily intervals' coverage, which
+ * the console shows beside the forecast, and the 14-day total's, which it no
+ * longer shows (P(shortfall) is withdrawn, DECISIONS.md D-044).
  *
  * Read from the service's committed calibration artifact, which carries the
  * identity of the model it measured. Nothing here is a default: with the

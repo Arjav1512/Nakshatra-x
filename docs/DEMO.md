@@ -59,8 +59,13 @@ So the dataset is chosen once and frozen, and every quoted figure is read from i
    (cd backend && .venv/bin/python -m pytest -m "not network" -p no:cacheprovider)
    ```
 
-   A dataset a test fails on is not frozen: roll back and fix the cause. Do not
-   look for a date that passes.
+   A dataset is frozen only when every check covering a **presented** figure
+   passes on it; if one fails, roll back and fix the cause. Do not look for a
+   date that passes. A check that covers only a figure the console no longer
+   presents — today, P(shortfall) and the 14-day cumulative figures — does not
+   block the freeze. Its failure is recorded, not loosened: it becomes a strict
+   xfail for that end date alone, and the failure goes in the PR
+   (`docs/DECISIONS.md` D-044).
 
 3. **Write the figures it produced:**
 
@@ -78,20 +83,27 @@ So the dataset is chosen once and frozen, and every quoted figure is read from i
 5. **Commit** `backend/artifacts`, `data/synthetic` and `docs/PITCH_FIGURES.md`
    together.
 
-**Not yet frozen for a demo.** `docs/PITCH_FIGURES.md` holds the committed
-dataset (actuals to 2026-09-20) so the tooling and its checks run on something
-real. Its window, 21 Sep – 4 Oct 2026, has passed; the file says so at the top,
-and nothing from it goes into slides. Freezing on 2026-10-06 was tried and
-stopped: on that dataset Balaghat's 14-day distribution comes out *narrower* than
-independent days for all four grades, so the pilot's P(shortfall) would be
-overconfident on stage, and `test_track_b.py` fails.
+**Frozen on 2026-10-07** (`docs/DECISIONS.md` D-044). The forecast window is
+8–21 October 2026, so the demo must fall inside it; outside it, re-freeze (all
+five steps, new slides). `docs/PITCH_FIGURES.md` holds its figures.
 
-The fix that followed (D-043, `docs/QUANTILE_CROSSING.md`) found more: the 14-day
-aggregation fails sanity checks on every one of eight datasets, and no
-pre-registered fix passed. **So no dataset is frozen yet**, and the freeze waits
-for the aggregation to be rebuilt. Whoever does it re-freezes for a date that
-fits the demo — and runs the suites first (step 2), which is what would have
-caught this.
+How it got here:
+- **Freezing on 2026-10-06 was tried and stopped.** On that dataset Balaghat's
+  14-day distribution came out *narrower* than independent days for all four
+  grades, so the pilot's P(shortfall) would have been overconfident on stage.
+- **The fix that followed found more** (D-043, `docs/QUANTILE_CROSSING.md`). The
+  14-day aggregation fails sanity checks on every one of eight datasets, and no
+  pre-registered fix passed.
+- **So P(shortfall) and the 14-day figures came off the screen and out of the
+  pitch** (D-044), and the freeze rule changed: only checks on presented figures
+  block a freeze.
+- **The date was fixed before anything was generated, and only it was tried.**
+  Every backend suite passes on it, Track B included. The strict expected
+  failures stayed expected failures, and no new one was needed.
+- **One test was restated, not loosened.** `test_served_dataset.py` had pinned
+  the committed dataset record to the generator's built-in default, which any
+  committed freeze breaks (step 5). It now asserts what D-042 needs: the record
+  and the committed artifacts name one dataset.
 
 **After freezing, do not regenerate with another date** — not the day before,
 not on the day. It would change every figure under the slides. Check instead:
@@ -109,7 +121,7 @@ moving with it.
 ### What `batch all` does — for freezing and re-freezing
 
 `all` regenerates the sample CSVs, all ten forecasts, the committed backtest(s)
-**and the calibration shown beside P(shortfall)** from **one** dataset, then
+**and the calibration the console shows beside the daily bands** from **one** dataset, then
 verifies they agree and prints the identity it used. Check the dates it prints
 before you trust it.
 
@@ -337,9 +349,10 @@ cd frontend && npm run test:e2e
 ```
 
 This drives `/console` in headless Chrome and asserts what this script is about
-to show: ten portfolio cards each with a probability and a provenance badge, the
+to show: ten portfolio cards, each with an expected shortfall in tonnes and a
+provenance badge and none with a probability; the
 drill-down chain through forecast, per-grade breakdown, backtest and
-constraint-checked actions, and zero 5xx responses. Expect `PASS — 18/18`.
+constraint-checked actions, and zero 5xx responses. Expect `PASS — 23/23`.
 
 **The backtest no longer needs a click.** It is read from the artifact on load,
 so the figures are on screen when you arrive at Balaghat. On the other nine mines
@@ -374,12 +387,19 @@ roughly 383 m. We do not claim to see through rock, and PRD §2.2 is why.
 
 ## 0:20 — Portfolio (25 s)
 
-Ten mines, each showing **P(shortfall)** and expected tonnes short. Balaghat is
-marked as the Track B pilot (PRD §13 Q4).
+Ten mines, ranked by **expected shortfall in tonnes**, each against its plan.
+The figure is summed over grades: a surplus in one grade does not cover a
+deficit in another (PRD §3). Balaghat is marked as the Track B pilot (PRD §13
+Q4).
 
-**Point out:** the risk strip is computed per mine by the forecaster — not a
+**Point out:** every figure comes from the forecaster, per mine — none is a
 status colour someone typed in. Cards read `computing…` until their forecast
-returns, then show a real probability.
+returns, then show a real figure.
+
+**There is no probability on screen, on purpose.** Under the list, the console
+says the probability of shortfall is withdrawn while under validation and links
+to what was found. Do not apologise for it. If a judge asks, it is the strongest
+answer in the deck: `JURY_QA.md` Q16.
 
 **Click Balaghat.**
 
@@ -405,18 +425,23 @@ vintage, model version, method, and how old the reading is.
 
 ## 1:05 — Track B: the shortfall (30 s)
 
-Four headline tiles: plan target, expected production, expected shortfall,
-worst-grade P(shortfall).
+Three headline figures: plan target, expected production and **expected
+shortfall** — the focal number, summed over grades. The fourth tile, where the
+probability of shortfall used to be, says it is withdrawn while under validation
+and shows no number.
 
 **Grade matters.** The per-grade breakdown lists ferro manganese, silico
-manganese, blast furnace and dioxide, each with its own probability.
+manganese, blast furnace and dioxide, each with its own expected shortfall.
 
 **Say:** PRD §3 — a shortfall in one grade is not fungible with a surplus in
 another, so B-5 makes per-grade forecasting P0. These are four different
 forecasts, not one number relabelled.
 
-The chart shows the median with its **80% prediction interval**, and the
-**dashed amber line is the seasonal-naive baseline** the model has to beat.
+The chart shows the median with its **80% prediction interval** for each day,
+and the **dashed amber line is the seasonal-naive baseline** the model has to
+beat. Beside it is how far to trust those daily bands: the share of real days
+that fell inside them, across all ten mines and for Balaghat, each with its 95%
+interval.
 
 ---
 
@@ -433,26 +458,32 @@ Result:
 
 | | MAPE | Coverage |
 |---|---|---|
-| GBT + conformal, pilot mine | **11.67%**<!-- pitch:pilot.mape_model --> | **0.812**<!-- pitch:pilot.daily_coverage --> |
-| Seasonal-naive, pilot mine | **14.81%**<!-- pitch:pilot.mape_baseline --> | — |
-| GBT + conformal, all ten mines | **10.00%**<!-- pitch:portfolio.daily_mape --> | **0.761**<!-- pitch:portfolio.daily_coverage --> **[0.733, 0.786]**<!-- pitch:portfolio.daily_coverage_ci --> |
+| GBT + conformal, pilot mine | **11.50%**<!-- pitch:pilot.mape_model --> | **0.806**<!-- pitch:pilot.daily_coverage --> |
+| Seasonal-naive, pilot mine | **12.85%**<!-- pitch:pilot.mape_baseline --> | — |
+| GBT + conformal, all ten mines | **10.22%**<!-- pitch:portfolio.daily_mape --> | **0.785**<!-- pitch:portfolio.daily_coverage --> **[0.761, 0.808]**<!-- pitch:portfolio.daily_coverage_ci --> |
 
-**These are `docs/PITCH_FIGURES.md`'s figures**, and a test fails if this page
-quotes anything else. Today that file holds the committed dataset (actuals to
-20 September), whose window has passed — not demo-ready. Once the demo window is
-frozen, this table, `JURY_QA.md` and the screen show the frozen figures, and the
-test is what keeps them the same.
+**These are `docs/PITCH_FIGURES.md`'s figures**, from the dataset frozen on
+2026-10-07 (forecast window 8–21 October 2026). A test fails if this page quotes
+anything else, so this table, `JURY_QA.md` and the screen show the same figures.
 
 **Say two things, and scope the second one.** First, the model beats the
-baseline — the comparison is like-for-like, same origins and targets. Second, and
-rarer: the 80% interval holds **0.812**<!-- pitch:pilot.daily_coverage --> of
-actuals *on the pilot mine*. Do not generalise that figure. Across all ten mines
-daily coverage is **0.761**<!-- pitch:portfolio.daily_coverage -->
-**[0.733, 0.786]**<!-- pitch:portfolio.daily_coverage_ci --> and the 14-day
-cumulative total is too narrow at **0.738**<!-- pitch:portfolio.cumulative_coverage -->
-**[0.700, 0.777]**<!-- pitch:portfolio.cumulative_coverage_ci --> — if a judge
-asks, that is the honest answer and it is written up
-in `docs/CALIBRATION.md`. PRD §11 calls calibration out specifically —
+baseline — the comparison is like-for-like, same origins and targets. Say it as
+it is: on this dataset the margin is modest. Second, and rarer: the 80% interval
+holds **0.806**<!-- pitch:pilot.daily_coverage --> of actuals *on the pilot
+mine*. Across all ten mines, daily coverage is
+**0.785**<!-- pitch:portfolio.daily_coverage -->
+**[0.761, 0.808]**<!-- pitch:portfolio.daily_coverage_ci -->, an interval that
+includes 0.80. On the calibration backtest — 24 origin dates, not the pilot
+backtest's 10 — Balaghat's daily band holds
+**0.802**<!-- pitch:balaghat.daily_coverage -->
+**[0.742, 0.862]**<!-- pitch:balaghat.daily_coverage_ci -->. The console shows
+both, with a verdict computed from the interval.
+
+**Do not say "calibrated."** On this dataset the daily bands are consistent
+with nominal, but on the dataset before it (actuals to 20 September) the same
+measurement was below nominal. The honest description is *close to calibrated,
+and measured* (`docs/CALIBRATION.md`). The 14-day figures are not quoted: they
+belong to the withdrawn probability (Q16). PRD §11 calls calibration out specifically —
 *"do 70%-confidence predictions come true 70% of the time? Almost no team will
 measure this."* Getting there took four attempts; `docs/BACKTEST.md` reports all
 of them including the two that failed.
@@ -461,8 +492,10 @@ of them including the two that failed.
 
 ## 2:05 — Constraint-gated actions (25 s)
 
-Approved actions in green, each with its expected effect, its ΔP(shortfall), its
-**stated assumptions**, and the list of **checks it passed**.
+Approved actions in green, each with its expected recovery in tonnes, its
+**stated assumptions**, and the list of **checks it passed**. (The change in
+probability of shortfall each action used to carry is withdrawn with the
+probability.)
 
 **On the rejection panel — read what is actually on screen.** With the current
 synthetic operational data, no candidate action violates a constraint at any of

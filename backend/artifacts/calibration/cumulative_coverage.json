@@ -6,181 +6,181 @@
   "ci_level": 0.95,
   "model_version": "nakshatra-gbt-cqr-v1",
   "portfolio": {
-    "coverage_80": 0.738,
+    "coverage_80": 0.717,
     "coverage_80_ci95": [
-      0.6997,
-      0.777
+      0.6801,
+      0.7488
     ],
-    "pit_at_extremes": 0.165,
+    "pit_at_extremes": 0.163,
     "pit_at_extremes_ci95": [
       0.1299,
-      0.2022
+      0.1998
     ],
     "n_windows": 816,
     "n_origin_dates": 24,
-    "effective_sample_size": 493.5,
-    "design_effect": 1.65
+    "effective_sample_size": 654.2,
+    "design_effect": 1.25
   },
   "per_mine": {
     "MOIL-BAL-01": {
-      "coverage_80": 0.667,
-      "coverage_80_ci95": [
-        0.5208,
-        0.8021
-      ],
-      "pit_at_extremes": 0.25,
-      "pit_at_extremes_ci95": [
-        0.125,
-        0.3854
-      ],
-      "n_windows": 96,
-      "n_origin_dates": 24,
-      "effective_sample_size": 41.9,
-      "design_effect": 2.29
-    },
-    "MOIL-BEL-10": {
-      "coverage_80": 0.542,
-      "coverage_80_ci95": [
-        0.3889,
-        0.6944
-      ],
-      "pit_at_extremes": 0.264,
-      "pit_at_extremes_ci95": [
-        0.1389,
-        0.3889
-      ],
-      "n_windows": 72,
-      "n_origin_dates": 24,
-      "effective_sample_size": 44.3,
-      "design_effect": 1.63
-    },
-    "MOIL-BHR-02": {
       "coverage_80": 0.781,
-      "coverage_80_ci95": [
-        0.6458,
-        0.8958
-      ],
-      "pit_at_extremes": 0.146,
-      "pit_at_extremes_ci95": [
-        0.0521,
-        0.2708
-      ],
-      "n_windows": 96,
-      "n_origin_dates": 24,
-      "effective_sample_size": 38.9,
-      "design_effect": 2.47
-    },
-    "MOIL-CHK-06": {
-      "coverage_80": 0.76,
-      "coverage_80_ci95": [
-        0.6664,
-        0.8542
-      ],
-      "pit_at_extremes": 0.156,
-      "pit_at_extremes_ci95": [
-        0.0729,
-        0.2604
-      ],
-      "n_windows": 96,
-      "n_origin_dates": 24,
-      "effective_sample_size": 80.1,
-      "design_effect": 1.2
-    },
-    "MOIL-DON-05": {
-      "coverage_80": 0.625,
-      "coverage_80_ci95": [
-        0.4896,
-        0.7604
-      ],
-      "pit_at_extremes": 0.271,
-      "pit_at_extremes_ci95": [
-        0.1458,
-        0.4167
-      ],
-      "n_windows": 96,
-      "n_origin_dates": 24,
-      "effective_sample_size": 48.0,
-      "design_effect": 2.0
-    },
-    "MOIL-GUM-09": {
-      "coverage_80": 0.778,
       "coverage_80_ci95": [
         0.6667,
         0.875
       ],
-      "pit_at_extremes": 0.111,
+      "pit_at_extremes": 0.083,
       "pit_at_extremes_ci95": [
-        0.0417,
-        0.1809
-      ],
-      "n_windows": 72,
-      "n_origin_dates": 24,
-      "effective_sample_size": 62.3,
-      "design_effect": 1.15
-    },
-    "MOIL-KAN-08": {
-      "coverage_80": 0.847,
-      "coverage_80_ci95": [
-        0.7361,
-        0.9444
-      ],
-      "pit_at_extremes": 0.069,
-      "pit_at_extremes_ci95": [
-        0.0,
+        0.0208,
         0.1667
       ],
-      "n_windows": 72,
+      "n_windows": 96,
       "n_origin_dates": 24,
-      "effective_sample_size": 43.7,
+      "effective_sample_size": 58.1,
       "design_effect": 1.65
     },
-    "MOIL-MAN-07": {
-      "coverage_80": 0.792,
+    "MOIL-BEL-10": {
+      "coverage_80": 0.569,
       "coverage_80_ci95": [
-        0.6667,
-        0.9028
+        0.4306,
+        0.7083
       ],
-      "pit_at_extremes": 0.097,
+      "pit_at_extremes": 0.292,
       "pit_at_extremes_ci95": [
-        0.0139,
-        0.2083
+        0.1806,
+        0.4028
       ],
       "n_windows": 72,
       "n_origin_dates": 24,
-      "effective_sample_size": 44.5,
-      "design_effect": 1.62
+      "effective_sample_size": 51.1,
+      "design_effect": 1.41
     },
-    "MOIL-TIR-04": {
-      "coverage_80": 0.722,
+    "MOIL-BHR-02": {
+      "coverage_80": 0.781,
       "coverage_80_ci95": [
-        0.5694,
-        0.8472
+        0.6562,
+        0.8854
       ],
-      "pit_at_extremes": 0.181,
+      "pit_at_extremes": 0.104,
       "pit_at_extremes_ci95": [
-        0.0833,
+        0.0417,
+        0.1875
+      ],
+      "n_windows": 96,
+      "n_origin_dates": 24,
+      "effective_sample_size": 49.4,
+      "design_effect": 1.95
+    },
+    "MOIL-CHK-06": {
+      "coverage_80": 0.688,
+      "coverage_80_ci95": [
+        0.5938,
+        0.7812
+      ],
+      "pit_at_extremes": 0.135,
+      "pit_at_extremes_ci95": [
+        0.0521,
+        0.2396
+      ],
+      "n_windows": 96,
+      "n_origin_dates": 24,
+      "effective_sample_size": 87.6,
+      "design_effect": 1.1
+    },
+    "MOIL-DON-05": {
+      "coverage_80": 0.49,
+      "coverage_80_ci95": [
+        0.3438,
+        0.625
+      ],
+      "pit_at_extremes": 0.375,
+      "pit_at_extremes_ci95": [
+        0.2289,
+        0.5211
+      ],
+      "n_windows": 96,
+      "n_origin_dates": 24,
+      "effective_sample_size": 46.2,
+      "design_effect": 2.08
+    },
+    "MOIL-GUM-09": {
+      "coverage_80": 0.792,
+      "coverage_80_ci95": [
+        0.6528,
+        0.9167
+      ],
+      "pit_at_extremes": 0.167,
+      "pit_at_extremes_ci95": [
+        0.0552,
         0.2917
       ],
       "n_windows": 72,
       "n_origin_dates": 24,
-      "effective_sample_size": 40.5,
-      "design_effect": 1.78
+      "effective_sample_size": 37.7,
+      "design_effect": 1.91
+    },
+    "MOIL-KAN-08": {
+      "coverage_80": 0.764,
+      "coverage_80_ci95": [
+        0.6389,
+        0.875
+      ],
+      "pit_at_extremes": 0.153,
+      "pit_at_extremes_ci95": [
+        0.0556,
+        0.2639
+      ],
+      "n_windows": 72,
+      "n_origin_dates": 24,
+      "effective_sample_size": 46.4,
+      "design_effect": 1.55
+    },
+    "MOIL-MAN-07": {
+      "coverage_80": 0.764,
+      "coverage_80_ci95": [
+        0.6389,
+        0.875
+      ],
+      "pit_at_extremes": 0.111,
+      "pit_at_extremes_ci95": [
+        0.0413,
+        0.1944
+      ],
+      "n_windows": 72,
+      "n_origin_dates": 24,
+      "effective_sample_size": 48.6,
+      "design_effect": 1.48
+    },
+    "MOIL-TIR-04": {
+      "coverage_80": 0.736,
+      "coverage_80_ci95": [
+        0.6111,
+        0.8472
+      ],
+      "pit_at_extremes": 0.125,
+      "pit_at_extremes_ci95": [
+        0.0417,
+        0.2361
+      ],
+      "n_windows": 72,
+      "n_origin_dates": 24,
+      "effective_sample_size": 53.4,
+      "design_effect": 1.35
     },
     "MOIL-UKW-03": {
-      "coverage_80": 0.903,
+      "coverage_80": 0.847,
       "coverage_80_ci95": [
-        0.8333,
-        0.9583
+        0.7639,
+        0.9167
       ],
-      "pit_at_extremes": 0.056,
+      "pit_at_extremes": 0.069,
       "pit_at_extremes_ci95": [
-        0.0,
+        0.0278,
         0.125
       ],
       "n_windows": 72,
       "n_origin_dates": 24,
-      "effective_sample_size": 68.3,
-      "design_effect": 1.05
+      "effective_sample_size": 85.2,
+      "design_effect": 0.85
     }
   },
   "daily": {
@@ -192,133 +192,133 @@
       14
     ],
     "portfolio": {
-      "coverage_80": 0.761,
+      "coverage_80": 0.785,
       "coverage_80_ci95": [
-        0.7334,
-        0.7862
+        0.7607,
+        0.8085
       ],
-      "mape_pct": 10.0,
+      "mape_pct": 10.22,
       "n_predictions": 3264,
       "n_origin_dates": 24
     },
     "per_mine": {
       "MOIL-BAL-01": {
-        "coverage_80": 0.792,
+        "coverage_80": 0.802,
         "coverage_80_ci95": [
-          0.7135,
-          0.8568
+          0.7422,
+          0.862
         ],
-        "mape_pct": 9.99,
+        "mape_pct": 10.81,
         "n_predictions": 384,
         "n_origin_dates": 24
       },
       "MOIL-BEL-10": {
-        "coverage_80": 0.75,
+        "coverage_80": 0.767,
         "coverage_80_ci95": [
-          0.6771,
-          0.8194
+          0.7014,
+          0.8333
         ],
-        "mape_pct": 12.15,
+        "mape_pct": 11.76,
         "n_predictions": 288,
         "n_origin_dates": 24
       },
       "MOIL-BHR-02": {
-        "coverage_80": 0.776,
+        "coverage_80": 0.797,
         "coverage_80_ci95": [
-          0.7188,
-          0.8281
+          0.7266,
+          0.862
         ],
-        "mape_pct": 10.17,
+        "mape_pct": 10.11,
         "n_predictions": 384,
         "n_origin_dates": 24
       },
       "MOIL-CHK-06": {
-        "coverage_80": 0.714,
+        "coverage_80": 0.76,
         "coverage_80_ci95": [
-          0.6432,
-          0.7839
+          0.6875,
+          0.8333
         ],
-        "mape_pct": 11.43,
+        "mape_pct": 11.31,
         "n_predictions": 384,
         "n_origin_dates": 24
       },
       "MOIL-DON-05": {
-        "coverage_80": 0.724,
+        "coverage_80": 0.763,
         "coverage_80_ci95": [
-          0.6484,
-          0.7995
+          0.7031,
+          0.8255
         ],
-        "mape_pct": 11.22,
+        "mape_pct": 12.79,
         "n_predictions": 384,
         "n_origin_dates": 24
       },
       "MOIL-GUM-09": {
-        "coverage_80": 0.809,
+        "coverage_80": 0.795,
         "coverage_80_ci95": [
-          0.7604,
-          0.8543
+          0.7396,
+          0.8472
         ],
-        "mape_pct": 7.8,
+        "mape_pct": 8.1,
         "n_predictions": 288,
         "n_origin_dates": 24
       },
       "MOIL-KAN-08": {
-        "coverage_80": 0.799,
+        "coverage_80": 0.809,
         "coverage_80_ci95": [
-          0.7361,
-          0.8611
+          0.7431,
+          0.8715
         ],
-        "mape_pct": 7.85,
+        "mape_pct": 8.75,
         "n_predictions": 288,
         "n_origin_dates": 24
       },
       "MOIL-MAN-07": {
-        "coverage_80": 0.733,
+        "coverage_80": 0.781,
         "coverage_80_ci95": [
-          0.6458,
-          0.809
+          0.684,
+          0.8681
         ],
-        "mape_pct": 9.71,
+        "mape_pct": 8.7,
         "n_predictions": 288,
         "n_origin_dates": 24
       },
       "MOIL-TIR-04": {
-        "coverage_80": 0.792,
+        "coverage_80": 0.819,
         "coverage_80_ci95": [
-          0.7396,
-          0.8403
+          0.7604,
+          0.8751
         ],
-        "mape_pct": 8.63,
+        "mape_pct": 9.66,
         "n_predictions": 288,
         "n_origin_dates": 24
       },
       "MOIL-UKW-03": {
-        "coverage_80": 0.733,
+        "coverage_80": 0.76,
         "coverage_80_ci95": [
-          0.6632,
-          0.7951
+          0.6875,
+          0.8229
         ],
-        "mape_pct": 10.11,
+        "mape_pct": 8.88,
         "n_predictions": 288,
         "n_origin_dates": 24
       }
     }
   },
   "window": {
-    "first_origin": "2025-10-15",
-    "last_origin": "2026-09-02",
+    "first_origin": "2025-11-01",
+    "last_origin": "2026-09-19",
     "step_days": 14,
     "n_origins": 24
   },
   "method": "Rolling-origin: refit before every origin, score the next 14 days. 95% intervals from a cluster bootstrap resampling whole origin dates (2000 resamples, seed 20260921), because a date's windows share weather and equipment state and are not independent.",
-  "records_sha256": "da922fac60db1cf13655a0552465f604248f52cd04e7f32619c8a3fdf16646ae",
-  "generated_at": "2026-10-07T14:58:44Z",
+  "records_sha256": "0fe8094edb71d2791183d75ef01ae13b7a199916bc22a061013f53106aad4721",
+  "generated_at": "2026-10-08T09:50:26Z",
   "generated_by": "python measure_cumulative_calibration.py artifact --records <run output>",
   "artifact_identity": {
     "generator": "nakshatra-synthetic-v1",
     "contract_version": "1.0.0",
     "generator_seed": 20260921,
-    "data_end_date": "2026-09-20",
+    "data_end_date": "2026-10-07",
     "model_version": "nakshatra-gbt-cqr-v1",
     "code_fingerprint": "b69dccc782e56f1f",
     "library_versions": {
