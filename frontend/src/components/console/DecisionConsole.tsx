@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { type MineRow, fetchForecast, fetchMines, fetchTelemetry, gradeShortfallTonnes } from '@/lib/console-api'
+import { type MineRow, fetchForecast, fetchMines, fetchTelemetry } from '@/lib/console-api'
 import { PLAN_TARGET_NOTE, measuredOrNull, synthetic } from '@/lib/provenance'
 import { type ExportRow, buildCsv, downloadCsv, exportPdf } from '@/lib/console-export'
 import { IntegrityBanner, Metric, SourceBadge } from './Evidence'
@@ -202,8 +202,8 @@ export function DecisionConsole() {
           ...p,
           [m.id]: r.ok
             ? {
-                // Summed over grades (D-044), not the API's netted mine total.
-                shortfall: gradeShortfallTonnes(r.data),
+                // Summed over grades by the API (D-044, PRD §3).
+                shortfall: r.data.portfolio.expected_shortfall_tonnes,
                 plan: r.data.portfolio.plan_target_tonnes,
               }
             : { error: r.error, status: r.status, warming: r.warming ? { eta_seconds: r.warming.eta_seconds } : undefined },

@@ -8,7 +8,7 @@ import { PLAN_TARGET_NOTE, derived, measuredValue, reference, synthetic } from '
 import {
   type BacktestResponse, type ForecastResponse, type NoBacktestInfo,
   type RecommendationsResponse, type WarmingInfo,
-  fetchBacktest, fetchForecast, fetchRecommendations, gradeShortfallTonnes,
+  fetchBacktest, fetchForecast, fetchRecommendations,
 } from '@/lib/console-api'
 import { Metric } from './Evidence'
 import { IntervalCalibration } from './IntervalCalibration'
@@ -364,16 +364,16 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
               ))}
           />
             {/*
-              The focal number (D-044). Summed over grades, not the API's
-              mine-level figure, which nets a surplus in one grade against a
-              deficit in another — PRD §3 says they are not fungible.
+              The focal number (D-044): the API's mine-level figure, which
+              sums each grade's own shortfall — a surplus in one grade does
+              not cancel a deficit in another (PRD §3).
             */}
             <Metric
               label="Expected shortfall"
               emphasis
               unit="t"
               data={measuredValue(derived(
-                Math.round(gradeShortfallTonnes(forecast)),
+                Math.round(forecast.portfolio.expected_shortfall_tonnes),
                 'tonnes',
                 'Sum over grades of max(0, plan target − expected production)',
                 {

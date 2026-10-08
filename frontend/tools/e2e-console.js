@@ -157,8 +157,10 @@ async function main() {
   check('forecast: expected production rendered', /EXPECTED PRODUCTION[\s\S]{0,80}?[\d,]+\s*t/i.test(mine))
   check('forecast: expected shortfall rendered', /EXPECTED SHORTFALL[\s\S]{0,80}?[\d,]+\s*t/i.test(mine))
 
-  // The focal number is summed over grades (D-044): the tile must equal the
-  // grade chips added up, give or take each chip's rounding.
+  // The focal number is summed over grades (D-044, PRD §3). The API serves it
+  // that way now, and the console reads it rather than adding the grades
+  // itself, so this checks the served figure: the tile must equal the grade
+  // chips added up, give or take each chip's rounding.
   const focal = await page.evaluate(() => {
     const tile = [...document.querySelectorAll('[data-provenance]')].find((n) =>
       /^\s*Expected shortfall/i.test(n.querySelector('.label')?.textContent ?? '')
