@@ -55,9 +55,33 @@ def test_no_record_leaves_the_committed_default(monkeypatch, tmp_path):
     assert gen.resolve_data_end_date() == gen.DEFAULT_DATA_END_DATE
 
 
-def test_the_committed_record_is_the_committed_default():
-    """A plain checkout serves exactly what it served before this rule existed."""
-    assert sd.recorded_end_date() == gen.DEFAULT_DATA_END_DATE.isoformat()
+def test_the_committed_record_is_the_committed_artifacts_dataset():
+    """
+    A plain checkout serves exactly the dataset its committed artifacts were built from.
+
+    This asserted that the record equalled the generator's built-in default,
+    which held until a pitch dataset was frozen and committed (docs/DEMO.md,
+    "Freeze the pitch dataset", step 5): a freeze commits a record for its own
+    date, and the default applies only where nothing is recorded (tested
+    above). What D-042 needs is that the record and the committed artifacts
+    name one dataset — otherwise a plain checkout would refit every forecast at
+    startup, the failure this file exists for. Restated in #30, after the
+    2026-10-07 freeze failed the old form (DECISIONS.md D-044).
+    """
+    import json
+    from pathlib import Path
+
+    recorded = sd.recorded_end_date()
+    assert recorded, "no dataset is recorded in data/synthetic/_dataset_identity.json"
+    artifacts = sorted((Path(__file__).resolve().parent / "artifacts").glob("*/*.json"))
+    assert artifacts, "no committed artifacts"
+    built_for = {
+        p.relative_to(p.parents[1]).as_posix(): json.loads(p.read_text())["artifact_identity"]["data_end_date"]
+        for p in artifacts
+    }
+    assert set(built_for.values()) == {recorded}, (
+        f"recorded {recorded}; artifacts built for {built_for}"
+    )
 
 
 @pytest.mark.parametrize("bad", ["{not json", json.dumps({"artifact_identity": {}}), json.dumps([])])
