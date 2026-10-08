@@ -457,6 +457,46 @@ the three model map layers, Mine twin and its constraint engine, the fonts.
 - **The pitch figures are written from what is served** (`docs/PITCH_FIGURES.md`)
   and checked against it, and the docs that quote them are checked too.
 
+### Fixed in #31 — expected shortfall per grade, at the source
+
+- **The API serves a mine's expected shortfall as its grades' own, summed.**
+  `track_b.mine_shortfall_tonnes` computes Σ max(0, plan − expected) per grade.
+  - **The netted figure is not served** under any name.
+  - **The console reads the API's figure** instead of adding the grades itself,
+    and `test:e2e` still checks the tile against the grade chips.
+- **Corrective actions are sized from it.** Balaghat's candidates on the frozen
+  dataset are now sized from 95.5 t, not 18.3 t.
+  - `test_shortfall_per_grade.py` pins this with constructed cases, every
+    served artifact, and the sizing through the API.
+  - Against main's code it fails, on Balaghat's 18.3 t.
+- **Regenerated on the same frozen date, 2026-10-07.** Compared with main value
+  for value, only the mines' `portfolio.expected_shortfall_tonnes` moved, every
+  one to the figure the console already showed.
+  - The backtest, the calibration and every other forecast field are unchanged.
+  - Track A is untouched.
+  - `PITCH_FIGURES.md` changed only in the code-fingerprint lines of its
+    identity block: every figure is identical.
+- **Pre-flight checks memory now** (`scripts/check_memory.sh`): the OS's
+  pressure level must be normal.
+  - **During a run, the signal is the per-forecast time `batch all` prints:**
+    about 25 s normally, minutes when the machine pages.
+  - **Swap is not used as the signal,** because it misled: it grew by 1.5 GB on
+    the regeneration for #31 while every forecast fitted at full speed.
+- **Found, not fixed: calling a serving function outside the app can overwrite a
+  committed artifact with another dataset's forecast.**
+  - **How it happens:** the recorded end date is adopted only when `app.main`
+    starts. A script or REPL that imports `app.api.track_b` builds the
+    generator's default dataset (2026-09-20) instead. When it asks for a
+    forecast, the identity does not match, so the warmer computes one for the
+    default date and writes it over the committed file.
+  - **What happened:** during #31 that replaced the frozen Balaghat forecast.
+    The value-for-value comparison caught it, and `batch all` for the frozen date
+    restored it before anything was committed.
+  - **What is guarded today:** only the test client, by the artifact guard.
+  - **The fix would touch fingerprinted code,** so it is logged as its own
+    change: adopt the record on import, or refuse to write an artifact for an
+    unrecorded date.
+
 ### Found in the pitch-safe interim PR (#30)
 
 - **The console's "expected shortfall" netted grades against each other.** The
@@ -472,12 +512,11 @@ the three model map layers, Mine twin and its constraint engine, the fonts.
   - The console now sums each grade's own shortfall. That figure ranks the
     mines and is the focal number. `test:e2e` checks the tile against the grade
     chips.
-  - **Still netted:** the recommendation engine sizes its candidate actions from
+  - **Still netted:** the recommendation engine sized its candidate actions from
     the API's netted figure (`track_b.recommend_actions`). A mine short in one
-    grade but netting to 0 t therefore shows a shortfall and no corrective
-    action. On the frozen dataset, Balaghat's candidate actions are sized from
-    18.3 t while the console shows 95.5 t. Changing that touches the
-    fingerprinted engine, so it is left for its own change.
+    grade but netting to 0 t showed a shortfall and no corrective action. On
+    the frozen dataset, Balaghat's actions were sized from 18.3 t while the
+    console showed 95.5 t. *Fixed in #31, below.*
 - **P(shortfall) contradicted its own mean.** On the frozen dataset, Chikla's
   expected production is at or above plan in every grade, so its expected
   shortfall is 0 t, yet its worst-grade P(shortfall) is 0.968. It is not shown.

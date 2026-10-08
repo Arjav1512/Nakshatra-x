@@ -158,6 +158,29 @@ macOS `mediaanalysisd` had been sitting at 211% CPU for seventeen hours. The
 output was byte-identical — same MAPE, same coverage — it just took ninety-seven
 times as long. Check `ps -Ao pid,%cpu,comm -r | head -5` before you start.
 
+**And check memory, which the CPU check cannot see.** Another run here fitted
+its first five forecasts at the usual ~24 s each, then took 15–22 minutes per
+forecast, with swap at 7.5 of 8 GB. It was stopped at its time limit
+(`docs/DECISIONS.md` D-044, result):
+
+```bash
+scripts/check_memory.sh        # exit 1: close apps first
+```
+
+- **What passes:** macOS's own memory-pressure level must be *normal*; *warn*
+  and *critical* fail. Free memory and swap are printed. On Linux, at least 25%
+  of memory must be available.
+- **If it fails:** close browsers, IDEs, and chat and video apps, then run it
+  again.
+- **During the run, watch the per-forecast times `batch all` prints,** not
+  swap. A forecast takes about 25 s on this laptop. When the machine pages they
+  go to minutes: 15–22 minutes each on 2026-10-08. Swap is a poor signal on
+  macOS: it stays allocated long after the pressure that caused it, and on a
+  later run it grew by 1.5 GB while every forecast still fitted in 24–28 s.
+- **When it pages:** stop the run (Ctrl-C), close apps and start it again. It
+  resumes where it stopped: every artifact already written for the same date is
+  skipped.
+
 #### Regenerating is safe — and why
 
 The backend decides an artifact is stale by **identity alone**: its dataset
@@ -261,10 +284,12 @@ the rewritten `docs/PITCH_FIGURES.md`, and do not edit any of them by hand.
 In order, in three terminals. Do not start talking until every one is green.
 
 ```bash
-# Terminal 1 — 0. ports: nothing left over from an earlier session;
-#              the slides' figures are still the served ones (pitch-check); then
+# Terminal 1 — 0. ports: nothing left over from an earlier session; memory:
+#              pressure normal, or close apps first; the slides' figures are
+#              still the served ones (pitch-check); then
 #              1. the backend. One worker, and do not set NAKSHATRA_SKIP_WARM.
 scripts/check_port.sh 8000 "FastAPI" && scripts/check_port.sh 3000 "Next.js"
+scripts/check_memory.sh
 cd backend && .venv/bin/python -m app.api.batch pitch-check
 .venv/bin/python -m uvicorn app.main:app --port 8000
 ```
@@ -389,8 +414,9 @@ roughly 383 m. We do not claim to see through rock, and PRD §2.2 is why.
 
 Ten mines, ranked by **expected shortfall in tonnes**, each against its plan.
 The figure is summed over grades: a surplus in one grade does not cover a
-deficit in another (PRD §3). Balaghat is marked as the Track B pilot (PRD §13
-Q4).
+deficit in another (PRD §3). The API serves it that way, and the corrective
+actions at 2:05 are sized from the same figure. Balaghat is marked as the Track
+B pilot (PRD §13 Q4).
 
 **Point out:** every figure comes from the forecaster, per mine — none is a
 status colour someone typed in. Cards read `computing…` until their forecast
@@ -493,9 +519,12 @@ of them including the two that failed.
 ## 2:05 — Constraint-gated actions (25 s)
 
 Approved actions in green, each with its expected recovery in tonnes, its
-**stated assumptions**, and the list of **checks it passed**. (The change in
-probability of shortfall each action used to carry is withdrawn with the
-probability.)
+**stated assumptions**, and the list of **checks it passed**. Each recovery is a
+stated share of the mine's expected shortfall — the same summed-over-grades
+figure as the tile at 1:05, so the actions are sized for the deficit on screen.
+(Until #31 they were sized from a figure that netted grades, which on Balaghat
+was a fifth of the one shown.) The change in probability of shortfall each
+action used to carry is withdrawn with the probability.
 
 **On the rejection panel — read what is actually on screen.** With the current
 synthetic operational data, no candidate action violates a constraint at any of

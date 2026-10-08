@@ -1430,3 +1430,52 @@ against 746.0 t.
 
 **P(shortfall) contradicts its own mean.** Chikla's worst-grade P(shortfall) is
 0.968 while its expected shortfall is 0 t in every grade.
+
+### At the source (#31)
+
+The summed figure moved from the console into the API.
+
+- **What is served:** `track_b.mine_shortfall_tonnes` sums each grade's own
+  max(0, plan − expected), and the forecast's `portfolio.expected_shortfall_tonnes`
+  is that sum. The netted figure is not served under any name.
+- **The recommendation engine sizes its actions from it.** Balaghat's
+  candidates are now sized from 95.5 t, not 18.3 t.
+
+`track_b.py` is fingerprinted, so every artifact was regenerated on the same
+frozen date, 2026-10-07, in 1,116 s, each forecast fitted at its usual 24–28 s.
+Compared with main value for value, ignoring only identity and timestamp
+fields:
+
+| Mine | Netted (main) | Summed over grades |
+|---|---|---|
+| Balaghat | 18.3 t | 95.5 t |
+| Bharweli | 374.0 t | 746.0 t |
+| Gumgaon | 64.4 t | 68.9 t |
+| Ukwa | 134.9 t | 136.7 t |
+| Beldongri | 109.6 t | 109.5 t |
+| Kandri | 160.8 t | 160.7 t |
+
+- **What moved:** only these six mines' `portfolio.expected_shortfall_tonnes`.
+  The last two differ by 0.1 t: grade figures rounded before they are added. Each
+  is the figure the console already showed.
+- **Nothing else moved:** not the backtest, the calibration, any other forecast
+  field, the sample data or Track A.
+- **`PITCH_FIGURES.md` changed in three lines only,** the code fingerprint
+  (b69dccc782e56f1f → 2728774fd1d66412). `pitch-check` compares identity as well
+  as values, so it would fail otherwise. Every figure row is unchanged. This is
+  not a re-freeze: same date, same figures.
+
+**The memory check was not passing during the run,** and the run went ahead
+anyway, disclosed. `scripts/check_memory.sh` reported pressure "warn" with 43%
+free.
+- **Why it went ahead:** the output is seeded, so memory changes how long it
+  takes, never what it produces, and every value was compared with main.
+- **How it was watched:** a sampler logged the process's memory and swap every
+  20 s. The process held at most 0.53 GB, so it was not accumulating memory
+  itself; the paging on 2026-10-08 came from the rest of the machine.
+- **What it showed about the guidance.** Swap grew from 8.5 to 10.0 GB during
+  this run, while every forecast fitted in 24–28 s. So DEMO.md's mid-run signal
+  is the per-forecast time `batch all` prints, not swap. The first draft of
+  that guidance used swap growth. DEMO.md's draft was corrected before it was
+  committed; the script's comment had already been committed (`2bdc703`) and is
+  corrected in a later commit.
