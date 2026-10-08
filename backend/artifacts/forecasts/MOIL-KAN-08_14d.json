@@ -414,7 +414,7 @@
   "portfolio": {
     "plan_target_tonnes": 2507.4,
     "expected_cumulative_tonnes": 2346.6,
-    "expected_shortfall_tonnes": 160.8
+    "expected_shortfall_tonnes": 160.7
   },
   "provenance": {
     "forecast": {
@@ -422,7 +422,7 @@
       "unit": "tonnes",
       "source": "Trained on synthetic operational data generated to the published ingestion contract (docs/INGESTION_CONTRACT.md). MOIL's real production, equipment and blasting records are proprietary (PRD 8.2). Metrics describe the model's behaviour on this dataset, not MOIL's operations.",
       "source_kind": "synthetic",
-      "vintage": "2026-10-07T21:36:22.688338+00:00",
+      "vintage": "2026-10-08T12:12:49.024506+00:00",
       "model_version": "nakshatra-gbt-cqr-v1",
       "uncertainty": null,
       "is_synthetic": true,
@@ -434,7 +434,7 @@
       "unit": "tonnes",
       "source": "Trained on synthetic operational data generated to the published ingestion contract (docs/INGESTION_CONTRACT.md). MOIL's real production, equipment and blasting records are proprietary (PRD 8.2). Metrics describe the model's behaviour on this dataset, not MOIL's operations.",
       "source_kind": "synthetic",
-      "vintage": "2026-10-07T21:36:22.688369+00:00",
+      "vintage": "2026-10-08T12:12:49.024540+00:00",
       "model_version": "nakshatra-synthetic-v1",
       "uncertainty": null,
       "is_synthetic": true,
@@ -449,14 +449,14 @@
     "notice": "MIXED \u2014 weather is measured live; operational figures are synthetic (MOIL operational data is proprietary) and are labelled per field."
   },
   "guardrail": "Decision support for production planning. Not a statutory reserve statement, and not a commitment.",
-  "vintage": "2026-10-07T21:36:22.688522+00:00",
+  "vintage": "2026-10-08T12:12:49.024671+00:00",
   "artifact_identity": {
     "generator": "nakshatra-synthetic-v1",
     "contract_version": "1.0.0",
     "generator_seed": 20260921,
     "data_end_date": "2026-10-07",
     "model_version": "nakshatra-gbt-cqr-v1",
-    "code_fingerprint": "b69dccc782e56f1f",
+    "code_fingerprint": "2728774fd1d66412",
     "library_versions": {
       "numpy": "2.2.0",
       "pydantic": "2.13.5",
