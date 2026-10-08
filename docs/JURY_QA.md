@@ -181,6 +181,11 @@ demo 2:05 and 2:20.
 effect and stated assumptions.** Schedule adjustment is an hours delta, not a
 re-sequenced schedule; blast rescheduling moves a blast to the next legal window;
 equipment redeployment checks feasibility, but its source unit is a placeholder.
+Each candidate recovers a fixed, stated share of the mine's expected shortfall —
+summed over grades, the figure on screen. It was sized from a figure that netted
+a surplus in one grade against a deficit in another until we found it; on
+Balaghat that was a fifth of the real deficit. A test now ties the sizing to the
+served figure.
 Scenario comparison and accept/reject capture are not built (PRD §10 defers
 them; the audit log behind accept/reject, N-7, is the one Required gap).
 
@@ -277,9 +282,10 @@ which direction it was wrong.**
   - Then we took the figure off the screen rather than label it. A label cannot
     tell a planner which way to correct 0.97.
 - **What is on screen instead:**
-  - **Expected shortfall in tonnes, summed over grades.** It is a mean, so it
-    does not depend on how the days correlate, and a test checks that it equals
-    that dependence-free expectation.
+  - **Expected shortfall in tonnes, summed over grades,** as the API serves it
+    and as the corrective actions are sized. It is a mean, so it does not
+    depend on how the days correlate, and a test checks that it equals that
+    dependence-free expectation.
   - **The daily 80% bands and their measured calibration** (Q4).
 - **What is being tested next** (its own pre-registration, written before it
   measures anything). Two candidates, against the shipped construction on the

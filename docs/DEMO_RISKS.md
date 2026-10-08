@@ -27,6 +27,7 @@ honest sentence is always available.
 
 | What can fail | How it shows | Fallback |
 |---|---|---|
+| Machine short of memory | the first forecasts fit in ~24 s, then each takes minutes (2026-10-08: 15–22 min a forecast, swap 7.5 of 8 GB, stopped at the time limit). Watch the per-forecast times; swap alone misleads (it grew 1.5 GB on a later run that fitted at full speed) | `scripts/check_memory.sh` before starting — macOS pressure must be *normal*. Mid-run: Ctrl-C, close apps, run `batch all` again; it resumes, skipping what is already written for the date. |
 | Machine busy | `batch all` far slower than ~17 min (once: 5.8 hours) | Check `ps -Ao pid,%cpu,comm -r \| head -5` first; run it on a quiet machine. |
 | A step fails partway | `batch all` prints `FAIL` / `MISMATCH` and exits 1 | `git checkout -- backend/artifacts data/synthetic`, then `(cd backend && .venv/bin/python -m app.api.batch check)`. The committed set is consistent; its forecast window will be in the past (test:dates says so). |
 | The date not carried to demo day | *(fixed, D-042)* — before the fix: `/readyz` 503 forever, forecasts silently refitted for the old window | Check the backend's first line: `[dataset] end date <the frozen date in docs/PITCH_FIGURES.md>`. |
