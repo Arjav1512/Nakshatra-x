@@ -75,7 +75,7 @@ file, a test or a measured number. *CI* means asserted on every pull request by
 | B-7 attribution to constraints | P0 | **fully** | Exact additive decomposition, `additive-driver-attribution-v1`, named as what it is — not SHAP. |
 | B-8 threshold alerts | P1 | **partial** | `POST /dispatch-operational-alert`, `GET /alerts`; **not driven by B-6 crossing a threshold**. Alert precision/recall (PRD §11) is therefore **not measured**. Unchanged. |
 | B-9 grade-aware (non-fungible) | P1 | **fully** | Grade is a first-class key in the contract and the forecaster. |
-| B-10 backtest + display error | P0 | **fully** | Rolling-origin, refit at every origin. Pilot (Balaghat): **MAPE 11.67% vs baseline 14.81%, coverage 0.812** over 160 predictions. Portfolio over 24 origins: daily coverage **0.761 [0.733, 0.786]**, MAPE 10.00%; 14-day cumulative **0.738 [0.700, 0.777]** (`docs/CALIBRATION.md`). On screen without a click (browser, `npm run test:pilot`, CI). |
+| B-10 backtest + display error | P0 | **fully** | Rolling-origin, refit at every origin. **On the frozen dataset** (actuals to 2026-10-07, `docs/PITCH_FIGURES.md`): pilot (Balaghat) **MAPE 11.50% vs baseline 12.85%, coverage 0.806** over 160 predictions; portfolio over 24 origins, daily coverage **0.785 [0.761, 0.808]**, MAPE 10.22%. On the 20 September dataset: 11.67% vs 14.81%, 0.812; portfolio 0.761 [0.733, 0.786], MAPE 10.00%. The 14-day figures are measured but withheld from the pitch (D-044). On screen without a click (browser, `npm run test:pilot`, CI). |
 
 **Track B: 7 fully · 3 partial · 0 missing** (B-6 partial since D-044)
 
@@ -297,7 +297,8 @@ D-044. The score is not re-derived here.)*
 
 What works is measured and published, including where it falls short: the
 forecaster beats its baseline on a correct rolling-origin protocol; its daily
-intervals hold 0.812 on the pilot but 0.761 across the portfolio, and the 14-day
+intervals held 0.812 on the pilot but 0.761 across the portfolio on the 20 September
+dataset (0.806 and 0.785 on the dataset frozen on 7 October), and the 14-day
 distribution behind P(shortfall) is too narrow — 0.738 on the committed dataset,
 0.683 on the one regenerated for 6 October — measured, and a fix tried and
 declined on a pre-registered rule (D-040). The constraint engine rejects what the
@@ -361,11 +362,20 @@ are the 5 missing and 13 partial requirements, and the limits below.
 
 ## 5. Limits, stated plainly
 
-### Calibration — the intervals are too narrow
+### Calibration — the daily bands are close; the 14-day distribution is not
 
-The forecast's 80% intervals hold **0.812 on the pilot mine** (Balaghat, its
-backtest window) but **0.761 [0.733, 0.786] across all ten mines**, whose
-interval excludes the nominal 0.80. The 14-day cumulative distribution — the one
+**On the frozen dataset** (actuals to 2026-10-07), the daily 80% intervals hold
+**0.806 on the pilot's backtest** and **0.785 [0.761, 0.808] across all ten
+mines**, an interval that includes the nominal 0.80. Balaghat's own, over 24
+origin dates, is 0.802 [0.742, 0.862]; per mine they run from 0.760 to 0.819.
+The 14-day distribution there is 0.717 [0.680, 0.749], with 0.163 in the outer
+tails; that is measured, but withheld from the pitch (D-044).
+
+**On the 20 September dataset**, the daily intervals held **0.812 on the pilot
+mine** (Balaghat, its backtest window) but **0.761 [0.733, 0.786] across all ten
+mines**, an interval that excludes the nominal 0.80. So across windows the daily
+bands run at or slightly under nominal, and are described as close to
+calibrated, not calibrated. The 14-day cumulative distribution — the one
 P(shortfall) is computed from — is narrower still: **0.738 [0.700, 0.777]**, with
 **0.165** of realised totals in the outer tails against a nominal 0.10. Per mine
 it ranges from **0.542** (Beldongri) to **0.903** (Ukwa); **Balaghat, the pilot,
@@ -453,17 +463,30 @@ the three model map layers, Mine twin and its constraint engine, the fonts.
   API's mine-level figure is max(0, Σ plan − Σ expected), so a surplus in one
   grade cancelled a deficit in another. PRD §3 says grades are not fungible, and
   the console's own grade panel said so.
-  - On the committed forecasts it read 0 t for Beldongri and Gumgaon, which are
-    short in one grade (0.5 t and 10.2 t). Mansar read 128.0 t against 150.5 t,
-    and Chikla 164.4 t against 169.9 t.
+  - On the 20 September forecasts it read 0 t for Beldongri and Gumgaon, which
+    are short in one grade (0.5 t and 10.2 t). Mansar read 128.0 t against
+    150.5 t, and Chikla 164.4 t against 169.9 t.
+  - **On the frozen dataset it matters more.** Balaghat, the pilot, nets to
+    18.3 t while its grades are short by 95.5 t in all; Bharweli nets to 374.0 t
+    against 746.0 t.
   - The console now sums each grade's own shortfall. That figure ranks the
     mines and is the focal number. `test:e2e` checks the tile against the grade
     chips.
   - **Still netted:** the recommendation engine sizes its candidate actions from
     the API's netted figure (`track_b.recommend_actions`). A mine short in one
     grade but netting to 0 t therefore shows a shortfall and no corrective
-    action. Changing that touches the fingerprinted engine, so it is left for its
-    own change.
+    action. On the frozen dataset, Balaghat's candidate actions are sized from
+    18.3 t while the console shows 95.5 t. Changing that touches the
+    fingerprinted engine, so it is left for its own change.
+- **P(shortfall) contradicted its own mean.** On the frozen dataset, Chikla's
+  expected production is at or above plan in every grade, so its expected
+  shortfall is 0 t, yet its worst-grade P(shortfall) is 0.968. It is not shown.
+- **The freeze could not have been committed before.**
+  `test_served_dataset.py` pinned the committed dataset record to the
+  generator's built-in default, and a committed freeze necessarily records its
+  own date (DEMO.md step 5). No freeze had been committed, so nothing had
+  hit it. It is restated as what D-042 needs: the record and the committed
+  artifacts name one dataset. It fails when they disagree, which was checked.
 - **Expected shortfall barely depends on how the 14-day total is built.** On the
   pilot, the served expected production per grade is within 2.9 t of its exact,
   dependence-free expectation, inside Monte Carlo error. Independent lognormal
@@ -523,7 +546,9 @@ the three model map layers, Mine twin and its constraint engine, the fonts.
   - the checks are strict xfails in `test_track_b.py` and
     `test_track_b_dates.py`, so they cannot quietly change.
 
-  No demo dataset is frozen until this is fixed (§6).
+  So P(shortfall) is off the screen and out of the pitch until a fix passes its
+  pre-registered test (D-044). The pitch dataset is frozen without it, on
+  2026-10-07, for the window 8–21 October 2026.
 - **The basemap has no offline fallback** (above).
 - **A cold backend saturates**: while it refits, telemetry requests can time out
   and the console shows "DEGRADED — FastAPI service layer unreachable" beside
@@ -541,15 +566,16 @@ the three model map layers, Mine twin and its constraint engine, the fonts.
 
 ## 6. The three most important next actions
 
-**1. Rebuild the 14-day aggregation on a premise that holds, then freeze the
-demo window.** D-043 found the root cause of the first failure (quantile
-crossing) and that the block bootstrap's premise is false. The follow-up, with
-its own pre-registration:
-- estimate the dependence a 14-day total needs from the backtest's
-  multi-horizon errors — across horizons 1–14 within a forecast path, per grade
-  and for mine totals;
-- test whether that explains #20's 2.5–3.4× gap;
-- ship only what passes, then freeze and write the pitch figures.
+**1. Rebuild the 14-day aggregation on a premise that holds, then put
+P(shortfall) back.** D-043 found the root cause of the first failure (quantile
+crossing) and that the block bootstrap's premise is false. The follow-up (D-045),
+with its own pre-registration, compares two estimators against main's:
+- (a) the dependence across horizons 1–14 within a forecast path, per grade;
+  and whether that explains #20's 2.5–3.4× gap;
+- (b) split-conformal calibration of the 14-day total directly.
+
+Only what passes goes back on the console and into the pitch figures. The demo
+window is frozen already (D-044), without P.
 
 **2. Implement N-7, the recommendation audit log.** The only *Required*
 non-functional still missing, and it unblocks C-7: persist every issued

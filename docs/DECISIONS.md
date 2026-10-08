@@ -1363,3 +1363,70 @@ implementation fails it about once in 16,000 grades.
     artifact;
   - Track A: leave-one-mine-out AUC with its 95% interval, the ablation, and the
     random split for contrast.
+
+### Result — frozen on 2026-10-07
+
+Generated 2026-10-08 with `batch all` for the one pre-registered date.
+
+**The first run was stopped.** It was killed at the one-hour background limit
+after eight forecasts. From the sixth on, each fit took 15–22 minutes instead
+of about 24 s, with swap at 7.5 of 8 GB. The machine was paging, not the code
+looping. The re-run, in a fresh process, skipped the eight forecasts already
+written for this date and fitted each remaining one in 26–28 s. It finished in
+944 s with every artifact verified on one dataset. The run dumped Python stacks
+every ten minutes; the one dump fell inside the calibration subprocess, and
+nothing hung.
+
+**Checks covering presented figures:**
+- `batch check` passes.
+- The fast backend suite fails twice; both are covered below.
+- `test_track_b.py`: 12 passed, 1 xfailed. The xfail is the strict one already
+  in place, still failing as recorded. The new expected-shortfall check passes
+  on every grade, with differences of 1.05–6.60 t against allowances of
+  4.35–13.59 t. The backtest test gives MAPE 10.52% against 13.55%.
+- `test_track_b_dates.py`: 10 xfailed. The dates are fixed, so the freeze cannot
+  change it.
+
+**Checks covering withdrawn figures** — wider-than-independent, and the
+backtest's cumulative calibration — both *pass* on this dataset. No new strict
+xfail was needed.
+
+**The two fast-suite failures:**
+1. **`test_pitch_figures.py`**, as expected before `batch pitch` rewrote
+   `PITCH_FIGURES.md`. It passes after.
+2. **`test_served_dataset.py::test_the_committed_record_is_the_committed_default`.**
+   It pinned the committed dataset record to the generator's built-in default
+   (2026-09-20). Any committed freeze breaks that, because DEMO.md step 5
+   commits the new record. No freeze had been committed before, so nothing had
+   hit it.
+
+   **Restated after seeing the failure, and disclosed as such.** It now asserts
+   what D-042 needs: the record and every committed artifact name one dataset.
+   It fails on a record that disagrees with the artifacts, which was checked by
+   pointing it at a 2026-09-20 record. The other option was to move the default
+   in `generator.py`. That module is fingerprinted, so every freeze would have
+   invalidated every artifact.
+
+**What moved:**
+
+| | 20 Sep dataset | Frozen (7 Oct) |
+|---|---|---|
+| Pilot MAPE | 11.67% | 11.50% |
+| Pilot baseline MAPE | 14.81% | 12.85% |
+| Pilot daily coverage | 0.812 | 0.806 |
+| Portfolio daily coverage | 0.761 [0.733, 0.786] | 0.785 [0.761, 0.808] |
+| Balaghat daily coverage | 0.792 | 0.802 [0.742, 0.862] |
+
+The portfolio interval now includes 0.80, so the console's verdict reads
+"consistent with nominal". The docs say "close to calibrated", not
+"calibrated", because the previous window was below it.
+
+**Withheld, but measured on this dataset:** 14-day coverage 0.717
+[0.680, 0.749], tails 0.163.
+
+**The grade sum matters more here than on the committed forecasts.** Balaghat
+nets to 18.3 t against 95.5 t summed over grades, and Bharweli to 374.0 t
+against 746.0 t.
+
+**P(shortfall) contradicts its own mean.** Chikla's worst-grade P(shortfall) is
+0.968 while its expected shortfall is 0 t in every grade.
