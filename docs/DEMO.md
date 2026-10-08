@@ -352,7 +352,7 @@ This drives `/console` in headless Chrome and asserts what this script is about
 to show: ten portfolio cards, each with an expected shortfall in tonnes and a
 provenance badge and none with a probability; the
 drill-down chain through forecast, per-grade breakdown, backtest and
-constraint-checked actions, and zero 5xx responses. Expect `PASS — 18/18`.
+constraint-checked actions, and zero 5xx responses. Expect `PASS — 23/23`.
 
 **The backtest no longer needs a click.** It is read from the artifact on load,
 so the figures are on screen when you arrive at Balaghat. On the other nine mines
