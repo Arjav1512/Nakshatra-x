@@ -173,13 +173,17 @@ export default async function HomePage() {
                   data-provenance-vintage={evidence.backtest.computedAt ?? undefined}
                 >
                   <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+                    {/* Two places, as PITCH_FIGURES.md and the backtest's own
+                        verdict print it: a raw 11.5 beside a slide's 11.50%
+                        reads as two figures (found when the frozen MAPE
+                        ended in a zero). */}
                     <span className="font-mono text-3xl tabular-nums text-text-primary">
-                      {evidence.backtest.mapePct}%
+                      {evidence.backtest.mapePct.toFixed(2)}%
                     </span>
                     <span className="text-sm text-text-secondary">
                       MAPE, against{' '}
                       <span className="font-mono tabular-nums">
-                        {evidence.backtest.baselineMapePct}%
+                        {evidence.backtest.baselineMapePct.toFixed(2)}%
                       </span>{' '}
                       for the seasonal-naive baseline
                     </span>

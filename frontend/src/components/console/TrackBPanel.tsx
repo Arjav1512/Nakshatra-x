@@ -626,14 +626,14 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
               data={measuredValue(derived(backtest.model.mape_pct, '%', 'Rolling-origin backtest, held-out', {
                   model_version: backtest.model_version,
                   method: `${backtest.n_predictions} predictions from ${backtest.n_origins} origins; model refitted at each origin.`,
-                }), () => String(`${backtest.model.mape_pct}%`))}
+                }), () => `${backtest.model.mape_pct.toFixed(2)}%`)}
           />
               <Metric
                 label="Baseline MAPE"
               data={measuredValue(derived(backtest.baseline.mape_pct, '%', 'Seasonal-naive baseline, same origins', {
                   model_version: backtest.baseline_version,
                   method: 'y_hat[t] = y[t − 365]. The architecture requires a baseline that must be beaten.',
-                }), () => String(`${backtest.baseline.mape_pct}%`))}
+                }), () => `${backtest.baseline.mape_pct.toFixed(2)}%`)}
           />
               <Metric
                 label={`Interval coverage (nominal ${backtest.nominal_coverage})`}
