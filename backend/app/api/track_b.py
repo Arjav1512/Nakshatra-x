@@ -95,6 +95,23 @@ def _plan_target(mine_code: str, grade: str, start: date, end: date) -> float:
     return total
 
 
+def mine_shortfall_tonnes(per_grade: list[dict]) -> float:
+    """
+    A mine's expected shortfall: the sum of each grade's own (PRD §3).
+
+    Each grade is short or not on its own, max(0, plan - expected production),
+    and the mine's figure adds those up. A surplus in one grade does not cancel
+    a deficit in another: the grades are different products, and a planner short
+    of ferro manganese is not helped by spare dioxide.
+
+    This used to be max(0, sum of plans - sum of expected), which nets them. On
+    the frozen dataset (actuals to 2026-10-07) that read 18.3 t for Balaghat
+    while its grades were 95.5 t short, and the recommendation engine sized its
+    actions from it (DECISIONS.md D-044). The netted figure is not served.
+    """
+    return round(sum(g["shortfall"]["expected_shortfall_tonnes"] for g in per_grade), 1)
+
+
 def compute_forecast(mine_code: str, horizon_days: int = 14, grade: str | None = None) -> dict:
     """
     Fit and forecast. EXPENSIVE — about 42 s per mine, and the first call in a
@@ -166,7 +183,8 @@ def compute_forecast(mine_code: str, horizon_days: int = 14, grade: str | None =
         "portfolio": {
             "plan_target_tonnes": round(portfolio_target, 1),
             "expected_cumulative_tonnes": round(portfolio_expected, 1),
-            "expected_shortfall_tonnes": round(max(0.0, portfolio_target - portfolio_expected), 1),
+            # Summed over grades, never netted across them (PRD §3).
+            "expected_shortfall_tonnes": mine_shortfall_tonnes(per_grade),
         },
         "provenance": {
             "forecast": synthetic(
@@ -374,6 +392,9 @@ def recommend_actions(mine_code: str, horizon_days: int = 14) -> dict:
     ctx = st["mines"].get(mine_code)
     origin = st["end"]
 
+    # The mine's expected shortfall, summed over grades (mine_shortfall_tonnes):
+    # every candidate below is sized from it. It was the netted figure, so a
+    # surplus in one grade shrank the actions offered for another's deficit.
     shortfall = fx["portfolio"]["expected_shortfall_tonnes"]
     p_short = max((g["shortfall"]["p_shortfall"] for g in fx["grades"]), default=0.0)
 
