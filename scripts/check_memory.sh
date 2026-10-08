@@ -11,10 +11,11 @@
 #
 # The gate is the operating system's own memory-pressure level, not a number
 # tuned here: macOS reports normal, warn or critical, and only normal passes.
-# Free memory and swap are printed for the record. Swap *in use* is not a
-# signal on its own — macOS keeps it allocated long after the pressure that
-# caused it, so a machine can show 8 GB of swap and fit at full speed. Swap
-# *growing during a run* is the signal: see DEMO.md.
+# Free memory and swap are printed for the record, not gated: macOS keeps swap
+# allocated long after the pressure that caused it, and on a later run swap
+# grew by 1.5 GB while every forecast still fitted at full speed. During a run,
+# the signal is the per-forecast time `batch all` prints (~25 s; minutes when
+# paging) — see DEMO.md.
 #
 # On Linux (CI), MemAvailable must be at least MIN_AVAILABLE_PCT of MemTotal.
 set -uo pipefail
