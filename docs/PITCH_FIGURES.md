@@ -7,13 +7,7 @@ from **one** frozen dataset, read from what the API serves. Quote them from
 here; `docs/DEMO.md` (*Freeze the pitch dataset*) says how they were made and
 how to re-make them.
 
-> **Not demo-ready: forecast window already passed** (21 Sep – 4 Oct 2026). These
-> figures come from the committed dataset so the tooling and its checks
-> run on something real. Nothing here goes into slides until the dataset
-> is re-frozen for the demo window (`docs/DEMO.md`, *Freeze the pitch
-> dataset*).
-
-**Dataset:** `nakshatra-synthetic-v1`, seed 20260921, contract 1.0.0, actuals to **2026-09-20** — the forecast window is 21 Sep – 4 Oct 2026. Operational data is synthetic (MOIL's is proprietary, PRD 8.2); Track A's inputs are real.
+**Dataset:** `nakshatra-synthetic-v1`, seed 20260921, contract 1.0.0, actuals to **2026-10-07** — the forecast window is 8 Oct – 21 Oct 2026. Operational data is synthetic (MOIL's is proprietary, PRD 8.2); Track A's inputs are real.
 
 **Code:** `nakshatra-gbt-cqr-v1`, code fingerprint `b69dccc782e56f1f`.
 
@@ -21,9 +15,9 @@ how to re-make them.
 
 | Key | Figure | Value | Served at → field | Artifact |
 |---|---|---|---|---|
-| `pilot.mape_model` | Balaghat backtest: model MAPE | **11.67%** | GET /api/v1/mines/1/backtest → `model.mape_pct` | `backend/artifacts/backtests/MOIL-BAL-01_150d_14step.json` |
-| `pilot.mape_baseline` | Balaghat backtest: seasonal-naive baseline MAPE | **14.81%** | GET /api/v1/mines/1/backtest → `baseline.mape_pct` | `backend/artifacts/backtests/MOIL-BAL-01_150d_14step.json` |
-| `pilot.daily_coverage` | Balaghat backtest: daily 80% interval coverage | **0.812** | GET /api/v1/mines/1/backtest → `model.coverage_80` | `backend/artifacts/backtests/MOIL-BAL-01_150d_14step.json` |
+| `pilot.mape_model` | Balaghat backtest: model MAPE | **11.50%** | GET /api/v1/mines/1/backtest → `model.mape_pct` | `backend/artifacts/backtests/MOIL-BAL-01_150d_14step.json` |
+| `pilot.mape_baseline` | Balaghat backtest: seasonal-naive baseline MAPE | **12.85%** | GET /api/v1/mines/1/backtest → `baseline.mape_pct` | `backend/artifacts/backtests/MOIL-BAL-01_150d_14step.json` |
+| `pilot.daily_coverage` | Balaghat backtest: daily 80% interval coverage | **0.806** | GET /api/v1/mines/1/backtest → `model.coverage_80` | `backend/artifacts/backtests/MOIL-BAL-01_150d_14step.json` |
 | `pilot.n_predictions` | Balaghat backtest: held-out predictions scored | **160** | GET /api/v1/mines/1/backtest → `model.n` | `backend/artifacts/backtests/MOIL-BAL-01_150d_14step.json` |
 | `pilot.n_origins` | Balaghat backtest: forecast origins | **10** | GET /api/v1/mines/1/backtest → `n_origins` | `backend/artifacts/backtests/MOIL-BAL-01_150d_14step.json` |
 
@@ -31,12 +25,12 @@ how to re-make them.
 
 | Key | Figure | Value | Served at → field | Artifact |
 |---|---|---|---|---|
-| `portfolio.daily_coverage` | All ten mines: daily 80% interval coverage | **0.761** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.portfolio.coverage_80` | `backend/artifacts/calibration/cumulative_coverage.json` |
-| `portfolio.daily_coverage_ci` | All ten mines: daily coverage, 95% interval | **[0.733, 0.786]** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.portfolio.coverage_80_ci95` | `backend/artifacts/calibration/cumulative_coverage.json` |
-| `portfolio.daily_mape` | All ten mines: daily MAPE | **10.00%** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.portfolio.mape_pct` | `backend/artifacts/calibration/cumulative_coverage.json` |
+| `portfolio.daily_coverage` | All ten mines: daily 80% interval coverage | **0.785** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.portfolio.coverage_80` | `backend/artifacts/calibration/cumulative_coverage.json` |
+| `portfolio.daily_coverage_ci` | All ten mines: daily coverage, 95% interval | **[0.761, 0.808]** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.portfolio.coverage_80_ci95` | `backend/artifacts/calibration/cumulative_coverage.json` |
+| `portfolio.daily_mape` | All ten mines: daily MAPE | **10.22%** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.portfolio.mape_pct` | `backend/artifacts/calibration/cumulative_coverage.json` |
 | `portfolio.n_origin_dates` | Calibration: origin dates measured | **24** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.portfolio.n_origin_dates` | `backend/artifacts/calibration/cumulative_coverage.json` |
-| `balaghat.daily_coverage` | Balaghat: daily 80% interval coverage (calibration backtest) | **0.792** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.mine.coverage_80` | `backend/artifacts/calibration/cumulative_coverage.json` |
-| `balaghat.daily_coverage_ci` | Balaghat: daily coverage, 95% interval | **[0.714, 0.857]** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.mine.coverage_80_ci95` | `backend/artifacts/calibration/cumulative_coverage.json` |
+| `balaghat.daily_coverage` | Balaghat: daily 80% interval coverage (calibration backtest) | **0.802** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.mine.coverage_80` | `backend/artifacts/calibration/cumulative_coverage.json` |
+| `balaghat.daily_coverage_ci` | Balaghat: daily coverage, 95% interval | **[0.742, 0.862]** | GET /api/v1/calibration/cumulative?mine_code=MOIL-BAL-01 → `daily.mine.coverage_80_ci95` | `backend/artifacts/calibration/cumulative_coverage.json` |
 
 ## Track A — prospectivity, leave-one-mine-out
 
@@ -74,7 +68,7 @@ is served, so a regenerated artifact cannot pass under an old table.
   "backend/artifacts/backtests/MOIL-BAL-01_150d_14step.json": {
     "code_fingerprint": "b69dccc782e56f1f",
     "contract_version": "1.0.0",
-    "data_end_date": "2026-09-20",
+    "data_end_date": "2026-10-07",
     "generator": "nakshatra-synthetic-v1",
     "generator_seed": 20260921,
     "library_versions": {
@@ -87,7 +81,7 @@ is served, so a regenerated artifact cannot pass under an old table.
   "backend/artifacts/calibration/cumulative_coverage.json": {
     "code_fingerprint": "b69dccc782e56f1f",
     "contract_version": "1.0.0",
-    "data_end_date": "2026-09-20",
+    "data_end_date": "2026-10-07",
     "generator": "nakshatra-synthetic-v1",
     "generator_seed": 20260921,
     "library_versions": {

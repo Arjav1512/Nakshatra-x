@@ -11,84 +11,84 @@
   ],
   "cumulative_calibration": {
     "n_origins": 40,
-    "coverage_80": 0.725,
+    "coverage_80": 0.8,
     "nominal_coverage": 0.8,
-    "coverage_gap": -0.075,
-    "mean_pit": 0.443,
-    "pit_at_extremes": 0.175,
+    "coverage_gap": 0.0,
+    "mean_pit": 0.416,
+    "pit_at_extremes": 0.025,
     "note": "Calibration of the cumulative distribution, not of the daily intervals. Daily coverage was correct while the cumulative spread was understated 2.5-3.4x, so this is the check that would have caught it."
   },
   "model": {
-    "mape_pct": 11.67,
-    "smape_pct": 11.36,
-    "mae_tonnes": 20.68,
-    "rmse_tonnes": 29.29,
+    "mape_pct": 11.5,
+    "smape_pct": 11.32,
+    "mae_tonnes": 19.06,
+    "rmse_tonnes": 26.97,
     "n": 160,
-    "coverage_80": 0.812,
-    "coverage_gap": 0.012,
-    "mean_interval_width_tonnes": 60.61
+    "coverage_80": 0.806,
+    "coverage_gap": 0.006,
+    "mean_interval_width_tonnes": 59.64
   },
   "baseline": {
-    "mape_pct": 14.81,
-    "smape_pct": 15.39,
-    "mae_tonnes": 27.0,
-    "rmse_tonnes": 39.73,
+    "mape_pct": 12.85,
+    "smape_pct": 12.71,
+    "mae_tonnes": 22.84,
+    "rmse_tonnes": 32.96,
     "n": 160
   },
   "by_horizon": [
     {
       "horizon_days": 1,
       "n": 40,
-      "model_mape_pct": 13.37,
-      "baseline_mape_pct": 15.6,
-      "model_mae_tonnes": 24.8,
-      "baseline_mae_tonnes": 29.22,
+      "model_mape_pct": 16.8,
+      "baseline_mape_pct": 12.46,
+      "model_mae_tonnes": 27.31,
+      "baseline_mae_tonnes": 22.31,
       "coverage_80": 0.675
     },
     {
       "horizon_days": 3,
       "n": 40,
-      "model_mape_pct": 12.86,
-      "baseline_mape_pct": 14.71,
-      "model_mae_tonnes": 21.29,
-      "baseline_mae_tonnes": 24.47,
-      "coverage_80": 0.85
+      "model_mape_pct": 9.18,
+      "baseline_mape_pct": 14.53,
+      "model_mae_tonnes": 14.87,
+      "baseline_mae_tonnes": 24.74,
+      "coverage_80": 0.8
     },
     {
       "horizon_days": 7,
       "n": 40,
-      "model_mape_pct": 10.37,
-      "baseline_mape_pct": 11.06,
-      "model_mae_tonnes": 16.48,
-      "baseline_mae_tonnes": 19.54,
-      "coverage_80": 0.95
+      "model_mape_pct": 9.21,
+      "baseline_mape_pct": 10.34,
+      "model_mae_tonnes": 14.89,
+      "baseline_mae_tonnes": 17.35,
+      "coverage_80": 0.9
     },
     {
       "horizon_days": 14,
       "n": 40,
-      "model_mape_pct": 10.07,
-      "baseline_mape_pct": 17.86,
-      "model_mae_tonnes": 20.17,
-      "baseline_mae_tonnes": 34.77,
-      "coverage_80": 0.775
+      "model_mape_pct": 10.8,
+      "baseline_mape_pct": 14.08,
+      "model_mae_tonnes": 19.18,
+      "baseline_mae_tonnes": 26.94,
+      "coverage_80": 0.85
     }
   ],
   "window": {
-    "test_start": "2026-04-23",
-    "test_end": "2026-09-20",
+    "test_start": "2026-05-10",
+    "test_end": "2026-10-07",
     "origin_step_days": 14
   },
-  "verdict": "GBT beats the seasonal-naive baseline: MAPE 11.67% vs 14.81% (+21.2% relative).",
+  "verdict": "GBT beats the seasonal-naive baseline: MAPE 11.50% vs 12.85% (+10.5% relative).",
   "nominal_coverage": 0.8,
   "note": "Trained on synthetic operational data generated to the published ingestion contract (docs/INGESTION_CONTRACT.md). MOIL's real production, equipment and blasting records are proprietary (PRD 8.2). Metrics describe the model's behaviour on this dataset, not MOIL's operations.",
-  "computed_at": "2026-10-07T14:49:21.047984+00:00",
-  "data_window_end": "2026-09-20",
+  "computed_at": "2026-10-08T09:40:16.149360+00:00",
+  "data_window_end": "2026-10-07",
   "served_from": "computed",
   "artifact_identity": {
     "generator": "nakshatra-synthetic-v1",
     "contract_version": "1.0.0",
     "generator_seed": 20260921,
-    "data_end_date": "2026-09-20",
+    "data_end_date": "2026-10-07",
     "model_version": "nakshatra-gbt-cqr-v1",
     "code_fingerprint": "b69dccc782e56f1f",
     "library_versions": {

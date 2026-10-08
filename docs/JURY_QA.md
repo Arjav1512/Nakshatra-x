@@ -6,10 +6,9 @@ behind it.
 
 **The figures come from `docs/PITCH_FIGURES.md`.** Each one quoted here carries
 a hidden `pitch:` key, and `backend/test_pitch_figures.py` fails if it differs
-from that file, which fails if *it* differs from what the API serves. Today the
-file holds the committed dataset (actuals to 20 September), whose forecast
-window has passed: these answers are right about that dataset, and the
-demo-window freeze will update them — the test will not pass until it does.
+from that file, which fails if *it* differs from what the API serves. The file
+holds the dataset frozen for the demo: actuals to 7 October 2026, forecast
+window 8–21 October.
 
 ---
 
@@ -60,17 +59,25 @@ sound, not how it would perform on MOIL's operations.
 
 ### 4. Are your prediction intervals calibrated?
 
-**On the pilot, roughly; across the portfolio, no — the daily bands are too
-narrow, and we measured by how much.** The 80% daily interval holds
-**0.812**<!-- pitch:pilot.daily_coverage --> on Balaghat's backtest, and
-**0.792**<!-- pitch:balaghat.daily_coverage -->
-**[0.714, 0.857]**<!-- pitch:balaghat.daily_coverage_ci --> on the larger
-calibration backtest (24 origin dates), which is consistent with nominal. Across
-all ten mines it holds **0.761**<!-- pitch:portfolio.daily_coverage -->
-**[0.733, 0.786]**<!-- pitch:portfolio.daily_coverage_ci -->. That interval
-excludes 0.80, so the bands claim more confidence than they have earned.
-The console shows both figures beside the bands, with a verdict computed from the
-interval, not written by hand.
+**The daily bands are close to calibrated, and we measured how close.** We do
+not call them calibrated.
+- **On this dataset:**
+  - On Balaghat's backtest the 80% daily interval holds
+    **0.806**<!-- pitch:pilot.daily_coverage -->.
+  - On the larger calibration backtest (24 origin dates) it holds
+    **0.802**<!-- pitch:balaghat.daily_coverage -->
+    **[0.742, 0.862]**<!-- pitch:balaghat.daily_coverage_ci --> for Balaghat.
+  - Across all ten mines it holds
+    **0.785**<!-- pitch:portfolio.daily_coverage -->
+    **[0.761, 0.808]**<!-- pitch:portfolio.daily_coverage_ci -->.
+
+  Both intervals include 0.80.
+- **On the dataset before it** (actuals to 20 September), the portfolio figure
+  was below nominal, an interval that excluded 0.80. So across windows the bands
+  run at or slightly under their nominal coverage.
+
+The console shows the portfolio and the mine beside the bands, with a verdict
+computed from the interval, not written by hand.
 
 **The 14-day total is a different matter, and it is why the probability of
 shortfall is off the screen** (Q16). Its figures are measured and published in
@@ -142,9 +149,10 @@ imagery draws from the cache labelled CACHED; the basemap goes blank.
 
 **Rolling-origin backtest, refitting at every origin, scoring only held-out
 days, against a seasonal-naive baseline on the same origins and targets.** Pilot:
-MAPE **11.67%**<!-- pitch:pilot.mape_model --> vs
-**14.81%**<!-- pitch:pilot.mape_baseline -->; across ten mines,
-**10.00%**<!-- pitch:portfolio.daily_mape -->. A test corrupts every
+MAPE **11.50%**<!-- pitch:pilot.mape_model --> vs
+**12.85%**<!-- pitch:pilot.mape_baseline -->; across ten mines,
+**10.22%**<!-- pitch:portfolio.daily_mape -->. On this dataset the pilot's
+margin is modest, and we say so rather than quote a better window. A test corrupts every
 post-origin actual tenfold and asserts the forecast is bit-identical — so the
 model provably cannot see the future. Getting there took four attempts, and the
 two that failed are published.

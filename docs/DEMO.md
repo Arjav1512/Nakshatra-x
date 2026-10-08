@@ -83,20 +83,27 @@ So the dataset is chosen once and frozen, and every quoted figure is read from i
 5. **Commit** `backend/artifacts`, `data/synthetic` and `docs/PITCH_FIGURES.md`
    together.
 
-**Not yet frozen for a demo.** `docs/PITCH_FIGURES.md` holds the committed
-dataset (actuals to 2026-09-20) so the tooling and its checks run on something
-real. Its window, 21 Sep – 4 Oct 2026, has passed; the file says so at the top,
-and nothing from it goes into slides. Freezing on 2026-10-06 was tried and
-stopped: on that dataset Balaghat's 14-day distribution comes out *narrower* than
-independent days for all four grades, so the pilot's P(shortfall) would be
-overconfident on stage, and `test_track_b.py` fails.
+**Frozen on 2026-10-07** (`docs/DECISIONS.md` D-044). The forecast window is
+8–21 October 2026, so the demo must fall inside it; outside it, re-freeze (all
+five steps, new slides). `docs/PITCH_FIGURES.md` holds its figures.
 
-The fix that followed (D-043, `docs/QUANTILE_CROSSING.md`) found more: the 14-day
-aggregation fails sanity checks on every one of eight datasets, and no
-pre-registered fix passed. **So no dataset is frozen yet**, and the freeze waits
-for the aggregation to be rebuilt. Whoever does it re-freezes for a date that
-fits the demo — and runs the suites first (step 2), which is what would have
-caught this.
+How it got here:
+- **Freezing on 2026-10-06 was tried and stopped.** On that dataset Balaghat's
+  14-day distribution came out *narrower* than independent days for all four
+  grades, so the pilot's P(shortfall) would have been overconfident on stage.
+- **The fix that followed found more** (D-043, `docs/QUANTILE_CROSSING.md`). The
+  14-day aggregation fails sanity checks on every one of eight datasets, and no
+  pre-registered fix passed.
+- **So P(shortfall) and the 14-day figures came off the screen and out of the
+  pitch** (D-044), and the freeze rule changed: only checks on presented figures
+  block a freeze.
+- **The date was fixed before anything was generated, and only it was tried.**
+  Every backend suite passes on it, Track B included. The strict expected
+  failures stayed expected failures, and no new one was needed.
+- **One test was restated, not loosened.** `test_served_dataset.py` had pinned
+  the committed dataset record to the generator's built-in default, which any
+  committed freeze breaks (step 5). It now asserts what D-042 needs: the record
+  and the committed artifacts name one dataset.
 
 **After freezing, do not regenerate with another date** — not the day before,
 not on the day. It would change every figure under the slides. Check instead:
@@ -451,29 +458,32 @@ Result:
 
 | | MAPE | Coverage |
 |---|---|---|
-| GBT + conformal, pilot mine | **11.67%**<!-- pitch:pilot.mape_model --> | **0.812**<!-- pitch:pilot.daily_coverage --> |
-| Seasonal-naive, pilot mine | **14.81%**<!-- pitch:pilot.mape_baseline --> | — |
-| GBT + conformal, all ten mines | **10.00%**<!-- pitch:portfolio.daily_mape --> | **0.761**<!-- pitch:portfolio.daily_coverage --> **[0.733, 0.786]**<!-- pitch:portfolio.daily_coverage_ci --> |
+| GBT + conformal, pilot mine | **11.50%**<!-- pitch:pilot.mape_model --> | **0.806**<!-- pitch:pilot.daily_coverage --> |
+| Seasonal-naive, pilot mine | **12.85%**<!-- pitch:pilot.mape_baseline --> | — |
+| GBT + conformal, all ten mines | **10.22%**<!-- pitch:portfolio.daily_mape --> | **0.785**<!-- pitch:portfolio.daily_coverage --> **[0.761, 0.808]**<!-- pitch:portfolio.daily_coverage_ci --> |
 
-**These are `docs/PITCH_FIGURES.md`'s figures**, and a test fails if this page
-quotes anything else. Today that file holds the committed dataset (actuals to
-20 September), whose window has passed — not demo-ready. Once the demo window is
-frozen, this table, `JURY_QA.md` and the screen show the frozen figures, and the
-test is what keeps them the same.
+**These are `docs/PITCH_FIGURES.md`'s figures**, from the dataset frozen on
+2026-10-07 (forecast window 8–21 October 2026). A test fails if this page quotes
+anything else, so this table, `JURY_QA.md` and the screen show the same figures.
 
 **Say two things, and scope the second one.** First, the model beats the
-baseline — the comparison is like-for-like, same origins and targets. Second, and
-rarer: the 80% interval holds **0.812**<!-- pitch:pilot.daily_coverage --> of
-actuals *on the pilot mine*. Do not generalise that figure. Across all ten mines
-daily coverage is **0.761**<!-- pitch:portfolio.daily_coverage -->
-**[0.733, 0.786]**<!-- pitch:portfolio.daily_coverage_ci -->, an interval that
-excludes 0.80, so the bands are too narrow across the portfolio. On the
-calibration backtest — 24 origin dates, not the pilot backtest's 10 — Balaghat's
-daily band holds **0.792**<!-- pitch:balaghat.daily_coverage -->
-**[0.714, 0.857]**<!-- pitch:balaghat.daily_coverage_ci -->, consistent with
-nominal at that sample size. The console shows both, and if a judge asks, that
-is the honest answer, written up in `docs/CALIBRATION.md`. The 14-day figures
-are not quoted: they belong to the withdrawn probability (Q16). PRD §11 calls calibration out specifically —
+baseline — the comparison is like-for-like, same origins and targets. Say it as
+it is: on this dataset the margin is modest. Second, and rarer: the 80% interval
+holds **0.806**<!-- pitch:pilot.daily_coverage --> of actuals *on the pilot
+mine*. Across all ten mines, daily coverage is
+**0.785**<!-- pitch:portfolio.daily_coverage -->
+**[0.761, 0.808]**<!-- pitch:portfolio.daily_coverage_ci -->, an interval that
+includes 0.80. On the calibration backtest — 24 origin dates, not the pilot
+backtest's 10 — Balaghat's daily band holds
+**0.802**<!-- pitch:balaghat.daily_coverage -->
+**[0.742, 0.862]**<!-- pitch:balaghat.daily_coverage_ci -->. The console shows
+both, with a verdict computed from the interval.
+
+**Do not say "calibrated."** On this dataset the daily bands are consistent
+with nominal, but on the dataset before it (actuals to 20 September) the same
+measurement was below nominal. The honest description is *close to calibrated,
+and measured* (`docs/CALIBRATION.md`). The 14-day figures are not quoted: they
+belong to the withdrawn probability (Q16). PRD §11 calls calibration out specifically —
 *"do 70%-confidence predictions come true 70% of the time? Almost no team will
 measure this."* Getting there took four attempts; `docs/BACKTEST.md` reports all
 of them including the two that failed.
