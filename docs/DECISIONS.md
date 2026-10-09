@@ -1740,3 +1740,49 @@ beside it, to say whether #20's gap was a forecast-error gap at all.
 (8–21 October) to put P back if a candidate passes. If neither has passed its
 rule by then, the work stops: the negative result is recorded with whatever was
 measured, and P(shortfall) stays withdrawn.
+
+### D-045 result — neither candidate passed; P(shortfall) stays withdrawn
+
+Measured 2026-10-09, inside the time-box, by the rule above. The figures are in
+`docs/SHORTFALL_PROBABILITY.md`, and the raw results in `docs/evidence/d045/`.
+
+**The measurement measured what is served.** On the frozen dataset the runner's
+main arm reproduces the committed calibration artifact exactly: coverage 0.717,
+tails 0.163, 816 windows.
+
+| Criterion | (a) horizon dependence | (b) direct calibration |
+|---|---|---|
+| C1 better than main, both datasets | **fail** — worse: 14-day coverage 0.696 / 0.657, tails 0.199 / 0.227 | **fail** — worse: 0.713 / 0.685, tails 0.208 / 0.210 |
+| C2 calibrated, both datasets | **fail** | **fail** |
+| C3 eight-date sanity | **fail** on 6 of 8 dates | **fail** on 8 of 8 |
+| C4 no saturation, frozen | pass (94%) | pass (85%) |
+
+**What it established:**
+- **Both candidates are too narrow.** They supply about 1.2× the
+  independent-days spread, where the real 14-day errors spread about 1.7×.
+- **Their source is why.** Both estimate from the forecaster's held-out
+  calibration slice, whose errors are less dispersed than errors at a real
+  forecast origin.
+- **Main's typical width is close to right only by accident.** It is the
+  interleaving artifact D-043 found, and it blows up absurdly in about 4% of
+  windows.
+- **(a) does not explain #20's gap** (6 and 5 of 10 mines, short of 8). #20's
+  2.5–3.4× reproduces as the spread of the realised totals themselves, not as
+  forecast error: the error spreads 1.3–2.4× by mine.
+
+**A deviation from the request, disclosed:**
+- **What was asked:** (b) was to use "held-out backtest totals", and (a) the
+  backtest's multi-horizon errors.
+- **What was registered:** both, here, on the fit's calibration slice instead.
+- **Why it matters:** the slice understates the errors at a real origin, so the
+  literal version — estimated from rolling-origin backtest errors — is
+  untested.
+- **Why it was not run:** it is a different estimator, chosen after these
+  results, so it needs a new entry, written before it is measured.
+
+**What stays:**
+- P(shortfall) and the 14-day figures stay off the console and out of the pitch.
+- The strict expected failures stay.
+- No threshold above was adjusted.
+- No artifact moved: the candidates are unserved and outside the fingerprinted
+  chain.

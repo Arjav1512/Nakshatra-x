@@ -1,0 +1,313 @@
+{
+  "datasets": {
+    "2026-09-20": {
+      "n_windows": 816,
+      "n_origins": 24,
+      "stats": {
+        "rho0": {
+          "n_windows": 816,
+          "rho_mean": 0.0,
+          "coverage_80": 0.738,
+          "coverage_80_ci": [
+            0.6997,
+            0.777
+          ],
+          "coverage_gap": -0.062,
+          "pit_at_extremes": 0.165,
+          "pit_at_extremes_ci": [
+            0.1299,
+            0.2022
+          ],
+          "pit_sd": 0.3098,
+          "pit_sd_ci": [
+            0.2965,
+            0.3212
+          ],
+          "mean_pit": 0.496,
+          "effective_sample_size": 493.5,
+          "design_effect": 1.65
+        },
+        "horizon": {
+          "n_windows": 816,
+          "rho_mean": 0.0,
+          "coverage_80": 0.696,
+          "coverage_80_ci": [
+            0.6556,
+            0.7377
+          ],
+          "coverage_gap": -0.104,
+          "pit_at_extremes": 0.199,
+          "pit_at_extremes_ci": [
+            0.1654,
+            0.2316
+          ],
+          "pit_sd": 0.3247,
+          "pit_sd_ci": [
+            0.3122,
+            0.3346
+          ],
+          "mean_pit": 0.494,
+          "effective_sample_size": 503.6,
+          "design_effect": 1.62
+        },
+        "conformal": {
+          "n_windows": 816,
+          "rho_mean": 0.0,
+          "coverage_80": 0.713,
+          "coverage_80_ci": [
+            0.674,
+            0.7549
+          ],
+          "coverage_gap": -0.087,
+          "pit_at_extremes": 0.208,
+          "pit_at_extremes_ci": [
+            0.1691,
+            0.2463
+          ],
+          "pit_sd": 0.3236,
+          "pit_sd_ci": [
+            0.3083,
+            0.3362
+          ],
+          "mean_pit": 0.474,
+          "effective_sample_size": 494.9,
+          "design_effect": 1.65
+        }
+      },
+      "paired": {
+        "horizon": {
+          "comparison": "rho0 -> horizon",
+          "n_windows": 816,
+          "delta_coverage_toward_nominal": -0.0417,
+          "delta_coverage_ci": [
+            -0.0784,
+            -0.0061
+          ],
+          "delta_coverage_ci_excludes_zero": true,
+          "delta_tails_toward_nominal": -0.0331,
+          "delta_tails_ci": [
+            -0.0674,
+            0.0012
+          ],
+          "delta_tails_ci_excludes_zero": false,
+          "delta_pit_dispersion_toward_uniform": -0.0149,
+          "delta_pit_dispersion_ci": [
+            -0.0258,
+            -0.0041
+          ],
+          "delta_pit_dispersion_ci_excludes_zero": true
+        },
+        "conformal": {
+          "comparison": "rho0 -> conformal",
+          "n_windows": 816,
+          "delta_coverage_toward_nominal": -0.0245,
+          "delta_coverage_ci": [
+            -0.0625,
+            0.0123
+          ],
+          "delta_coverage_ci_excludes_zero": false,
+          "delta_tails_toward_nominal": -0.0429,
+          "delta_tails_ci": [
+            -0.0699,
+            -0.0135
+          ],
+          "delta_tails_ci_excludes_zero": true,
+          "delta_pit_dispersion_toward_uniform": -0.0137,
+          "delta_pit_dispersion_ci": [
+            -0.0246,
+            -0.0028
+          ],
+          "delta_pit_dispersion_ci_excludes_zero": true
+        }
+      },
+      "b_to_a": {
+        "comparison": "conformal -> horizon",
+        "n_windows": 816,
+        "delta_coverage_toward_nominal": -0.0172,
+        "delta_coverage_ci": [
+          -0.0515,
+          0.0172
+        ],
+        "delta_coverage_ci_excludes_zero": false,
+        "delta_tails_toward_nominal": 0.0098,
+        "delta_tails_ci": [
+          -0.0159,
+          0.0355
+        ],
+        "delta_tails_ci_excludes_zero": false,
+        "delta_pit_dispersion_toward_uniform": -0.0011,
+        "delta_pit_dispersion_ci": [
+          -0.0127,
+          0.0098
+        ],
+        "delta_pit_dispersion_ci_excludes_zero": false
+      }
+    },
+    "2026-10-07": {
+      "n_windows": 816,
+      "n_origins": 24,
+      "stats": {
+        "rho0": {
+          "n_windows": 816,
+          "rho_mean": 0.0,
+          "coverage_80": 0.717,
+          "coverage_80_ci": [
+            0.6801,
+            0.7488
+          ],
+          "coverage_gap": -0.083,
+          "pit_at_extremes": 0.163,
+          "pit_at_extremes_ci": [
+            0.1299,
+            0.1998
+          ],
+          "pit_sd": 0.3127,
+          "pit_sd_ci": [
+            0.2996,
+            0.3241
+          ],
+          "mean_pit": 0.484,
+          "effective_sample_size": 654.2,
+          "design_effect": 1.25
+        },
+        "horizon": {
+          "n_windows": 816,
+          "rho_mean": 0.0,
+          "coverage_80": 0.657,
+          "coverage_80_ci": [
+            0.6201,
+            0.6924
+          ],
+          "coverage_gap": -0.143,
+          "pit_at_extremes": 0.227,
+          "pit_at_extremes_ci": [
+            0.1973,
+            0.2561
+          ],
+          "pit_sd": 0.3309,
+          "pit_sd_ci": [
+            0.3188,
+            0.3418
+          ],
+          "mean_pit": 0.483,
+          "effective_sample_size": 658.8,
+          "design_effect": 1.24
+        },
+        "conformal": {
+          "n_windows": 816,
+          "rho_mean": 0.0,
+          "coverage_80": 0.685,
+          "coverage_80_ci": [
+            0.636,
+            0.7292
+          ],
+          "coverage_gap": -0.115,
+          "pit_at_extremes": 0.21,
+          "pit_at_extremes_ci": [
+            0.1667,
+            0.2574
+          ],
+          "pit_sd": 0.3268,
+          "pit_sd_ci": [
+            0.3083,
+            0.3403
+          ],
+          "mean_pit": 0.471,
+          "effective_sample_size": 383.3,
+          "design_effect": 2.13
+        }
+      },
+      "paired": {
+        "horizon": {
+          "comparison": "rho0 -> horizon",
+          "n_windows": 816,
+          "delta_coverage_toward_nominal": -0.06,
+          "delta_coverage_ci": [
+            -0.098,
+            -0.0245
+          ],
+          "delta_coverage_ci_excludes_zero": true,
+          "delta_tails_toward_nominal": -0.0637,
+          "delta_tails_ci": [
+            -0.1017,
+            -0.0233
+          ],
+          "delta_tails_ci_excludes_zero": true,
+          "delta_pit_dispersion_toward_uniform": -0.0182,
+          "delta_pit_dispersion_ci": [
+            -0.0287,
+            -0.0084
+          ],
+          "delta_pit_dispersion_ci_excludes_zero": true
+        },
+        "conformal": {
+          "comparison": "rho0 -> conformal",
+          "n_windows": 816,
+          "delta_coverage_toward_nominal": -0.0319,
+          "delta_coverage_ci": [
+            -0.0613,
+            -0.0037
+          ],
+          "delta_coverage_ci_excludes_zero": true,
+          "delta_tails_toward_nominal": -0.0466,
+          "delta_tails_ci": [
+            -0.087,
+            -0.0049
+          ],
+          "delta_tails_ci_excludes_zero": true,
+          "delta_pit_dispersion_toward_uniform": -0.0141,
+          "delta_pit_dispersion_ci": [
+            -0.0247,
+            -0.0013
+          ],
+          "delta_pit_dispersion_ci_excludes_zero": true
+        }
+      },
+      "b_to_a": {
+        "comparison": "conformal -> horizon",
+        "n_windows": 816,
+        "delta_coverage_toward_nominal": -0.0282,
+        "delta_coverage_ci": [
+          -0.0687,
+          0.0123
+        ],
+        "delta_coverage_ci_excludes_zero": false,
+        "delta_tails_toward_nominal": -0.0172,
+        "delta_tails_ci": [
+          -0.0515,
+          0.0233
+        ],
+        "delta_tails_ci_excludes_zero": false,
+        "delta_pit_dispersion_toward_uniform": -0.0041,
+        "delta_pit_dispersion_ci": [
+          -0.0178,
+          0.0074
+        ],
+        "delta_pit_dispersion_ci_excludes_zero": false
+      }
+    }
+  },
+  "candidates": {
+    "horizon": {
+      "criteria": {
+        "C1_better_than_main_both_datasets": false,
+        "C2_calibrated_both_datasets": false,
+        "C3_eight_date_sanity": false,
+        "C4_no_saturation_frozen": true,
+        "C5_presented_figures_unchanged": "by construction; verified after regeneration only if it ships"
+      },
+      "passes": false
+    },
+    "conformal": {
+      "criteria": {
+        "C1_better_than_main_both_datasets": false,
+        "C2_calibrated_both_datasets": false,
+        "C3_eight_date_sanity": false,
+        "C4_no_saturation_frozen": true,
+        "C5_presented_figures_unchanged": "by construction; verified after regeneration only if it ships"
+      },
+      "passes": false
+    }
+  },
+  "ships": null
+}

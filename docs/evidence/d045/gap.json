@@ -1,0 +1,214 @@
+{
+  "2026-09-20": {
+    "per_mine": {
+      "MOIL-BAL-01": {
+        "error_spread_in_ind_sds": 1.674,
+        "ci95": [
+          1.2201,
+          2.0607
+        ],
+        "a_sd_ratio": 1.284,
+        "a_inside": true,
+        "realised_cv_over_ind_cv": 2.86
+      },
+      "MOIL-BEL-10": {
+        "error_spread_in_ind_sds": 1.803,
+        "ci95": [
+          1.4089,
+          2.114
+        ],
+        "a_sd_ratio": 1.292,
+        "a_inside": false,
+        "realised_cv_over_ind_cv": 7.16
+      },
+      "MOIL-BHR-02": {
+        "error_spread_in_ind_sds": 1.585,
+        "ci95": [
+          1.1975,
+          1.9351
+        ],
+        "a_sd_ratio": 1.308,
+        "a_inside": true,
+        "realised_cv_over_ind_cv": 2.97
+      },
+      "MOIL-CHK-06": {
+        "error_spread_in_ind_sds": 1.532,
+        "ci95": [
+          1.1908,
+          1.8312
+        ],
+        "a_sd_ratio": 1.196,
+        "a_inside": true,
+        "realised_cv_over_ind_cv": 6.18
+      },
+      "MOIL-DON-05": {
+        "error_spread_in_ind_sds": 2.226,
+        "ci95": [
+          1.7651,
+          2.5841
+        ],
+        "a_sd_ratio": 1.65,
+        "a_inside": false,
+        "realised_cv_over_ind_cv": 6.15
+      },
+      "MOIL-GUM-09": {
+        "error_spread_in_ind_sds": 1.686,
+        "ci95": [
+          1.3069,
+          2.0085
+        ],
+        "a_sd_ratio": 1.27,
+        "a_inside": false,
+        "realised_cv_over_ind_cv": 3.21
+      },
+      "MOIL-KAN-08": {
+        "error_spread_in_ind_sds": 1.701,
+        "ci95": [
+          1.0739,
+          2.2214
+        ],
+        "a_sd_ratio": 1.156,
+        "a_inside": true,
+        "realised_cv_over_ind_cv": 3.14
+      },
+      "MOIL-MAN-07": {
+        "error_spread_in_ind_sds": 1.444,
+        "ci95": [
+          1.0979,
+          1.7343
+        ],
+        "a_sd_ratio": 1.139,
+        "a_inside": true,
+        "realised_cv_over_ind_cv": 3.06
+      },
+      "MOIL-TIR-04": {
+        "error_spread_in_ind_sds": 1.6,
+        "ci95": [
+          1.2969,
+          1.8335
+        ],
+        "a_sd_ratio": 1.18,
+        "a_inside": false,
+        "realised_cv_over_ind_cv": 3.21
+      },
+      "MOIL-UKW-03": {
+        "error_spread_in_ind_sds": 1.341,
+        "ci95": [
+          1.0836,
+          1.5927
+        ],
+        "a_sd_ratio": 1.168,
+        "a_inside": true,
+        "realised_cv_over_ind_cv": 3.16
+      }
+    },
+    "mines_a_inside": 6,
+    "a_explains": false
+  },
+  "2026-10-07": {
+    "per_mine": {
+      "MOIL-BAL-01": {
+        "error_spread_in_ind_sds": 1.363,
+        "ci95": [
+          1.063,
+          1.6592
+        ],
+        "a_sd_ratio": 1.123,
+        "a_inside": true,
+        "realised_cv_over_ind_cv": 2.96
+      },
+      "MOIL-BEL-10": {
+        "error_spread_in_ind_sds": 1.712,
+        "ci95": [
+          1.3372,
+          1.9875
+        ],
+        "a_sd_ratio": 1.3,
+        "a_inside": false,
+        "realised_cv_over_ind_cv": 7.35
+      },
+      "MOIL-BHR-02": {
+        "error_spread_in_ind_sds": 1.612,
+        "ci95": [
+          1.1873,
+          2.0085
+        ],
+        "a_sd_ratio": 1.282,
+        "a_inside": true,
+        "realised_cv_over_ind_cv": 2.91
+      },
+      "MOIL-CHK-06": {
+        "error_spread_in_ind_sds": 1.792,
+        "ci95": [
+          1.3274,
+          2.209
+        ],
+        "a_sd_ratio": 1.29,
+        "a_inside": false,
+        "realised_cv_over_ind_cv": 6.52
+      },
+      "MOIL-DON-05": {
+        "error_spread_in_ind_sds": 2.359,
+        "ci95": [
+          1.917,
+          2.7374
+        ],
+        "a_sd_ratio": 1.527,
+        "a_inside": false,
+        "realised_cv_over_ind_cv": 6.65
+      },
+      "MOIL-GUM-09": {
+        "error_spread_in_ind_sds": 1.369,
+        "ci95": [
+          1.117,
+          1.5809
+        ],
+        "a_sd_ratio": 1.084,
+        "a_inside": false,
+        "realised_cv_over_ind_cv": 3.28
+      },
+      "MOIL-KAN-08": {
+        "error_spread_in_ind_sds": 1.537,
+        "ci95": [
+          1.199,
+          1.8003
+        ],
+        "a_sd_ratio": 1.227,
+        "a_inside": true,
+        "realised_cv_over_ind_cv": 3.25
+      },
+      "MOIL-MAN-07": {
+        "error_spread_in_ind_sds": 1.44,
+        "ci95": [
+          1.1658,
+          1.6408
+        ],
+        "a_sd_ratio": 1.209,
+        "a_inside": true,
+        "realised_cv_over_ind_cv": 3.1
+      },
+      "MOIL-TIR-04": {
+        "error_spread_in_ind_sds": 1.474,
+        "ci95": [
+          1.1984,
+          1.6868
+        ],
+        "a_sd_ratio": 1.224,
+        "a_inside": true,
+        "realised_cv_over_ind_cv": 3.3
+      },
+      "MOIL-UKW-03": {
+        "error_spread_in_ind_sds": 1.368,
+        "ci95": [
+          1.1523,
+          1.562
+        ],
+        "a_sd_ratio": 1.141,
+        "a_inside": false,
+        "realised_cv_over_ind_cv": 3.46
+      }
+    },
+    "mines_a_inside": 5,
+    "a_explains": false
+  }
+}
