@@ -1479,3 +1479,97 @@ free.
   that guidance used swap growth. DEMO.md's draft was corrected before it was
   committed; the script's comment had already been committed (`2bdc703`) and is
   corrected in a later commit.
+
+## D-046 — The committed artifacts are guarded at the write, not at each caller
+
+*(D-045 is the number reserved for the P(shortfall) follow-up, referenced before
+this was written, so this entry precedes it in the file.)*
+
+**The class:** a write into the committed artifacts — `backend/artifacts/`, the
+set the demo serves — that nobody chose. This is the fourth occurrence:
+
+1. **D-033.** A test's still-running warm flight wrote an empty Balaghat stub,
+   with a valid identity, into the committed set.
+2. **`backend/conftest.py`.** The test client's startup warmer overwrote two
+   committed forecasts (TIR-04 and UKW-03), and the guard of the time hashed
+   too early to see it.
+3. **D-042.** The backend, started without the end date, refitted all ten
+   forecasts for the old, ended window over the new ones.
+4. **#31.** A script that imported `app.api.track_b` built the generator's
+   default dataset (2026-09-20), because only `app.main` adopts the record.
+   Asking for Balaghat found no matching artifact, and the warmer wrote a
+   20 September forecast over the frozen 2026-10-07 file. A value-for-value
+   comparison caught it, and `batch all` restored it before anything was
+   committed.
+
+**Each fix guarded the caller that had just failed:**
+- tests got a session copy and a hash that waits for flights;
+- the server and `batch` adopt the record;
+- scripts got nothing, which is how the fourth happened.
+
+A fifth caller would be unguarded again. Every writer passes through one place
+— the write — and one file says which dataset the committed set serves:
+`data/synthetic/_dataset_identity.json`. So the rule lives there, and no longer
+depends on each caller resolving the served dataset correctly.
+
+**The rule** (`app/core/artifact_guard.py`):
+- **Before anything is written under `backend/artifacts/`,** its dataset
+  identity — generator, contract, seed, end date — is compared with the record.
+  That covers a forecast (`forecast_store.write_artifact`), the backtest
+  (`track_b.compute_backtest`) and the calibration
+  (`measure_cumulative_calibration.py`). A mismatch raises
+  `ArtifactWriteRefused` naming both datasets and the one command that moves the
+  committed set. Nothing is written silently: `batch` prints a `REFUSED` line
+  and stops, and the warmer logs it.
+- **The record moves only through `batch all` with an explicit
+  `NAKSHATRA_DATA_END_DATE`.**
+  - `export_samples` checks before it writes any sample or the record, so a
+    refusal leaves both as they were.
+  - `batch.main` reads whether the date was set by the caller *before*
+    adopting the record, because adopting sets the variable.
+  - With an explicit date, `all` writes the record first, so every artifact
+    written after it matches.
+- **Computing for another date is still allowed.** The warmer keeps a refused
+  forecast in memory, and `forecast_mine` serves it when no artifact matches.
+  In a process serving the recorded dataset — every app and `batch all` run —
+  nothing is ever refused, so nothing there changes.
+
+**What it does not catch,** said plainly. It compares *dataset* identity, so a
+write for the recorded dataset passes it whoever makes it. Occurrences 1 and 2
+came from test processes. Those stay covered by the conftest's session copy and
+hash, and by D-033's completeness check: an empty stub with a valid identity
+passes a dataset comparison. Writes outside `backend/artifacts/` — a test's
+temporary copy, a calibration `--out` — are not its business.
+`docs/PITCH_FIGURES.md` is a document, checked by `pitch-check`.
+
+**The guard is in the forecast's import chain, deliberately.** It decides what
+reaches the committed set, so it is part of the code fingerprint
+(`2728774fd1d66412` → `26668cae85f17dfc`). That moved every artifact's identity,
+so `batch all` regenerated the set on the frozen date, 2026-10-07, with an
+explicit date. It is also the sanctioned path, run end to end under the guard:
+1,184 s, no refusal, no failure.
+- **Nothing moved:** compared with main value for value, ignoring identity,
+  timestamps and the calibration's harness fingerprint, nothing moved — the
+  forecasts, the backtest (MAPE 11.50% against 12.85%, coverage 0.806), the
+  calibration, the samples, and Track A.
+- **`PITCH_FIGURES.md` changed in its three code-fingerprint lines only.**
+- **The memory check reported "warn" (41% free)** and the run went ahead,
+  watched by its per-forecast times: 25–31 s each.
+
+**Tests** (`backend/test_artifact_write_guard.py`):
+- **The rule:**
+  - a write for another dataset is refused, naming both;
+  - one for the recorded dataset passes;
+  - other paths are ignored;
+  - the record moves only when allowed;
+  - only an explicit date sets the flag.
+- **End to end,** in a subprocess against a temporary copy of the code, the
+  artifacts and the record:
+  - **the #31 incident step for step.** On main (`a8c5ed1`) it overwrites the
+    committed Balaghat forecast; here it is refused, and the forecast is served
+    from memory for 2026-09-20.
+  - **`batch all` through its own entry point,** narrowed to one mine, with an
+    explicit new date. The record moves, and the forecast is written for that
+    date; `batch forecast` with the same date and no record move is refused.
+  - **the app**, warming a deleted forecast and writing it for the recorded
+    dataset.

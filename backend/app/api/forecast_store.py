@@ -78,6 +78,7 @@ MAX_WARM_WORKERS = int(os.environ.get("NAKSHATRA_WARM_WORKERS", "2"))
 # comment there: setting OMP_NUM_THREADS after numpy has loaded does nothing,
 # and this module is not imported first by every entry point.
 from app import FIT_THREADS  # noqa: E402  (re-exported for /readyz)
+from app.core.artifact_guard import ArtifactWriteRefused, check_write  # noqa: E402
 
 # Rough per-mine fit cost, used only to give a waiting client an ETA.
 EST_FIT_SECONDS = 45.0
@@ -360,6 +361,20 @@ _STARTED_AT: dict[str, float] = {}
 # Failures, per key: {"reason": str, "at": float, "attempts": int}
 _FAILED: dict[str, dict[str, Any]] = {}
 
+# Forecasts computed here that the write guard kept out of the committed set,
+# per key: a process serving a dataset other than the recorded one — a script
+# that imported track_b without adopting the record, say — computes for its own
+# date and serves from here. Empty whenever the process serves the recorded
+# dataset, which is every app and `batch all` run (app.core.artifact_guard).
+_UNWRITTEN: dict[str, dict[str, Any]] = {}
+
+
+def unwritten(mine_code: str, horizon_days: int) -> dict[str, Any] | None:
+    """A forecast computed in this process but refused by the write guard."""
+    with _LOCK:
+        held = _UNWRITTEN.get(_key(mine_code, horizon_days))
+        return dict(held) if held else None
+
 # Bounded exponential backoff. Without it, a mine that fails deterministically
 # is retried by every request that touches it — a retry storm that turns one
 # broken mine into a broken backend.
@@ -441,6 +456,9 @@ def write_artifact(
     payload["vintage"] = datetime.now(timezone.utc).isoformat()
     payload["artifact_identity"] = artifact_identity()
     path = artifact_path(mine_code, horizon_days)
+    # Before anything else touches the file: a forecast for a dataset that is
+    # not the recorded one never reaches the committed set (D-046).
+    check_write(path, payload["artifact_identity"])
     if path.exists() and says_the_same(path, payload):
         return path, False
     # Write-then-rename, so a reader never sees a half-written artifact.
@@ -502,7 +520,16 @@ def warm(
         def _run() -> dict[str, Any]:
             try:
                 payload = compute(mine_code, horizon_days)
-                write_artifact(mine_code, horizon_days, payload)
+                try:
+                    write_artifact(mine_code, horizon_days, payload)
+                except ArtifactWriteRefused as refused:
+                    # Computing for another dataset is allowed; writing it into
+                    # the committed set is not. Said out loud, and kept in memory
+                    # so this process can still serve what it computed.
+                    print(f"[warm] {mine_code}: {refused}", file=sys.stderr, flush=True)
+                    with _LOCK:
+                        _UNWRITTEN[key] = {**payload, "served_from": "memory",
+                                           "not_written": str(refused)}
                 with _LOCK:
                     _FAILED.pop(key, None)
                 return payload

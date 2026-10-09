@@ -221,8 +221,10 @@ from app.api.forecast_store import (
     read_artifact,
     says_the_same,
     status as store_status,
+    unwritten,
     warm,
 )
+from app.core.artifact_guard import check_write
 
 BACKTEST_CACHE_DIR = Path(__file__).resolve().parents[2] / "artifacts" / "backtests"
 
@@ -261,6 +263,9 @@ def compute_backtest(mine_code: str, span_days: int = 150, step_days: int = 14) 
 
     BACKTEST_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     path = _backtest_cache_path(mine_code, span_days, step_days)
+    # A backtest of another dataset never reaches the committed set (D-046);
+    # the refusal names both datasets, and the batch reports it as a failure.
+    check_write(path, res["artifact_identity"])
     if path.exists() and says_the_same(path, res):
         # Same inputs, same backtest. The file and its `computed_at` stay as
         # they were, and the caller gets what is on disk so memory agrees.
@@ -486,7 +491,8 @@ def forecast_mine(mine_code: str, horizon_days: int = 14, grade: str | None = No
     """
     Serve a persisted forecast. Never computes.
 
-    Read order: process memory -> artifact on disk -> raise Warming.
+    Read order: artifact on disk -> a forecast this process computed but the
+    write guard kept out of the committed set (D-046) -> raise Warming.
 
     Raising rather than computing is the point of this change. A request that
     computes is a request that holds a connection for 42 s, cannot be cancelled
@@ -495,6 +501,11 @@ def forecast_mine(mine_code: str, horizon_days: int = 14, grade: str | None = No
     do next.
     """
     cached = read_artifact(mine_code, horizon_days)
+    if cached is None:
+        # Computed in this process for a dataset the write guard kept out of
+        # the committed set (D-046). Never true when the process serves the
+        # recorded dataset; there, the artifact is the only source.
+        cached = unwritten(mine_code, horizon_days)
     if cached is not None:
         if grade:
             cached = dict(cached)

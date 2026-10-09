@@ -482,20 +482,33 @@ the three model map layers, Mine twin and its constraint engine, the fonts.
     about 25 s normally, minutes when the machine pages.
   - **Swap is not used as the signal,** because it misled: it grew by 1.5 GB on
     the regeneration for #31 while every forecast fitted at full speed.
-- **Found, not fixed: calling a serving function outside the app can overwrite a
-  committed artifact with another dataset's forecast.**
-  - **How it happens:** the recorded end date is adopted only when `app.main`
-    starts. A script or REPL that imports `app.api.track_b` builds the
-    generator's default dataset (2026-09-20) instead. When it asks for a
-    forecast, the identity does not match, so the warmer computes one for the
-    default date and writes it over the committed file.
-  - **What happened:** during #31 that replaced the frozen Balaghat forecast.
-    The value-for-value comparison caught it, and `batch all` for the frozen date
-    restored it before anything was committed.
-  - **What is guarded today:** only the test client, by the artifact guard.
-  - **The fix would touch fingerprinted code,** so it is logged as its own
-    change: adopt the record on import, or refuse to write an artifact for an
-    unrecorded date.
+- **Found here, fixed in #32: calling a serving function outside the app could
+  overwrite a committed artifact with another dataset's forecast.**
+  - **How it happened:** the recorded end date is adopted only when `app.main`
+    starts. A script that imported `app.api.track_b` built the generator's
+    default dataset (2026-09-20). Asking for a forecast found no matching
+    artifact, so the warmer computed one and wrote it over the frozen Balaghat
+    file.
+  - **How it was caught:** the value-for-value comparison caught it, and
+    `batch all` restored it before anything was committed.
+  - **The fix is in #32 (D-046):** the write path now refuses it; see below.
+
+### Fixed in #32 — artifact writes guarded at the write path
+
+**Every write into `backend/artifacts/` checks first** — forecasts, the
+backtest, the calibration. The artifact's dataset identity is compared with
+`data/synthetic/_dataset_identity.json`, and a mismatch is refused with both
+datasets named.
+- **The record:** it moves only through `batch all` with an explicit
+  `NAKSHATRA_DATA_END_DATE`, which writes the record first.
+- **Another date:** computing for it is still allowed. The warmer logs the
+  refusal and keeps the forecast in memory.
+- **The app:** it adopts the record, so it is unaffected.
+- **The tests:** `test_artifact_write_guard.py` reproduces the #31 incident on a
+  temporary copy; on main it overwrites. It also runs `batch all` with an
+  explicit date, and the app path.
+- **The rest of the record:** this is the fourth write of its kind into the
+  committed set; the first three are in D-046.
 
 ### Found in the pitch-safe interim PR (#30)
 

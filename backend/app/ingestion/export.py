@@ -107,6 +107,7 @@ def export_samples(
     seed: int = DEFAULT_SEED,
     written: list[str] | None = None,
     dry_run: bool = False,
+    new_dataset_allowed: bool = False,
 ) -> dict[str, int]:
     """
     Write a bounded sample per entity — enough to validate a mapping.
@@ -117,10 +118,20 @@ def export_samples(
     `dry_run` writes nothing and appends the files that WOULD change — that is
     `batch check` asking whether the committed samples are what this code
     generates.
+
+    The samples and `_dataset_identity.json` are the served-dataset record, so
+    they move to another dataset only when `new_dataset_allowed` — which only
+    `batch all` with an explicit `NAKSHATRA_DATA_END_DATE` passes (D-046). The
+    check comes before any file is written, so a refusal leaves the record and
+    the samples as they were.
     """
-    if not dry_run:
-        SAMPLE_DIR.mkdir(parents=True, exist_ok=True)
     data = generate_all(seed=seed)
+    identity = dataset_identity(seed=seed, end=date.fromisoformat(data["window"]["end"]))
+    if not dry_run:
+        from app.core.artifact_guard import check_record_write
+
+        check_record_write(identity, new_dataset_allowed=new_dataset_allowed)
+        SAMPLE_DIR.mkdir(parents=True, exist_ok=True)
     counts: dict[str, int] = {}
     changed = written if written is not None else []
     for entity in ENTITY_ORDER:
@@ -142,7 +153,6 @@ def export_samples(
     # enough: the same seed with a different end date produces a different three
     # years of rows. `/readyz` reads this file to check the samples agree with
     # the forecast and backtest artifacts.
-    identity = dataset_identity(seed=seed, end=date.fromisoformat(data["window"]["end"]))
     identity_path = SAMPLE_DIR / "_dataset_identity.json"
     if _replace_if_changed(
         identity_path,
