@@ -71,7 +71,7 @@ file, a test or a measured number. *CI* means asserted on every pull request by
 | B-3 blast records | P0 | **fully** | `BlastRecord`: schedule, delay, fragmentation, outcome. |
 | B-4 weather observed + forecast | P0 | **fully** | NASA POWER (live: `test_api.py::test_live_upstreams`, CI network job) and Open-Meteo; degraded path asserted offline (`test_upstreams_degrade_honestly_when_unreachable`, CI). NDVI/LST **not** ingested (§5). |
 | B-5 forecast per mine **per grade** | P0 | **fully** | Grade is a model feature; four distinct grade forecasts; `test_track_b.py::test_forecaster_is_grade_aware` (CI, Track B job). Rendered per grade (browser, `demo-walk.js` 1:05). |
-| B-6 shortfall probability + band | P0 | **partial** *(was fully)* | Computed and served by the API (`p_shortfall`, Monte Carlo over conformalised per-day predictives; `test_shortfall_probability_is_a_probability`), but **withdrawn from the screen** (D-044): the 14-day aggregation behind it fails its sanity checks on all eight datasets measured (D-043, §5), and no fix has passed. Kept out of `PITCH_FIGURES.md` by a test until the follow-up (D-045) passes its pre-registered rule. |
+| B-6 shortfall probability + band | P0 | **partial** *(was fully)* | Computed and served by the API (`p_shortfall`, Monte Carlo over conformalised per-day predictives; `test_shortfall_probability_is_a_probability`), but **withdrawn from the screen** (D-044): the 14-day aggregation behind it fails its sanity checks on all eight datasets measured (D-043, §5), and no fix has passed. D-045 measured two replacement estimators — horizon dependence and direct conformal calibration of the 14-day total — and **neither passed**: both came out worse calibrated than what is served (`docs/SHORTFALL_PROBABILITY.md`). Kept out of `PITCH_FIGURES.md` by a test. |
 | B-7 attribution to constraints | P0 | **fully** | Exact additive decomposition, `additive-driver-attribution-v1`, named as what it is — not SHAP. |
 | B-8 threshold alerts | P1 | **partial** | `POST /dispatch-operational-alert`, `GET /alerts`; **not driven by B-6 crossing a threshold**. Alert precision/recall (PRD §11) is therefore **not measured**. Unchanged. |
 | B-9 grade-aware (non-fungible) | P1 | **fully** | Grade is a first-class key in the contract and the forecaster. |
@@ -601,6 +601,10 @@ datasets named.
   So P(shortfall) is off the screen and out of the pitch until a fix passes its
   pre-registered test (D-044). The pitch dataset is frozen without it, on
   2026-10-07, for the window 8–21 October 2026.
+  - **D-045 tried two replacements and neither passed.** Both estimated from
+    the forecaster's held-out calibration slice and came out too narrow: about
+    1.2× the independent-days spread, against the roughly 1.7× the real 14-day
+    errors show (`docs/SHORTFALL_PROBABILITY.md`).
 - **The basemap has no offline fallback** (above).
 - **A cold backend saturates**: while it refits, telemetry requests can time out
   and the console shows "DEGRADED — FastAPI service layer unreachable" beside
@@ -618,16 +622,21 @@ datasets named.
 
 ## 6. The three most important next actions
 
-**1. Rebuild the 14-day aggregation on a premise that holds, then put
-P(shortfall) back.** D-043 found the root cause of the first failure (quantile
-crossing) and that the block bootstrap's premise is false. The follow-up (D-045),
-with its own pre-registration, compares two estimators against main's:
-- (a) the dependence across horizons 1–14 within a forecast path, per grade;
-  and whether that explains #20's 2.5–3.4× gap;
-- (b) split-conformal calibration of the 14-day total directly.
-
-Only what passes goes back on the console and into the pitch figures. The demo
-window is frozen already (D-044), without P.
+**1. Estimate the 14-day spread from errors at real forecast origins, then
+decide whether P(shortfall) comes back.**
+- **What D-045 found** (`docs/SHORTFALL_PROBABILITY.md`):
+  - estimators built on the forecaster's own held-out calibration slice are too
+    narrow, because that slice's errors understate the errors at a forecast
+    origin;
+  - #20's 2.5–3.4× gap was mostly the totals' own variability. The forecast
+    error needs about 1.7×, not 3×.
+- **The untested version is the one originally asked for:** horizon dependence,
+  or conformal calibration of the 14-day total, estimated from rolling-origin
+  backtest errors.
+- **It needs its own pre-registration,** and a committed backtest for every
+  mine to serve it.
+- **Until a fix passes,** P stays withdrawn; the demo window is frozen without
+  it.
 
 **2. Implement N-7, the recommendation audit log.** The only *Required*
 non-functional still missing, and it unblocks C-7: persist every issued

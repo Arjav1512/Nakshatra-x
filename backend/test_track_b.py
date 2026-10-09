@@ -422,6 +422,30 @@ def test_expected_shortfall_does_not_depend_on_how_days_correlate():
         print(f"    {g}: served {got} t, exact {exact:.1f} t, |diff| {abs(got - exact):.2f} t, 4 se {4 * se:.2f} t")
 
 
+def test_d045_rebuilds_the_calibration_slice_exactly_as_fit_does():
+    """
+    DECISIONS.md D-045's candidates read the fit's held-out calibration slice,
+    rebuilt outside `fit`. The rebuilt rows must reproduce every conformal width
+    the fit computed — if `fit` changes how it builds or splits its samples, the
+    candidates would otherwise go on measuring a slice nobody fitted.
+    """
+    import numpy as np
+
+    from app.api.track_b import _forecaster, _state
+    from app.ml import cumulative_candidates as cc
+
+    st = _state()
+    fc = _forecaster(PILOT, st["end"])
+    paths, rows = cc.calibration_paths(fc, st["series"], st["cov"], st["end"])
+    cc.check_reconstruction(fc, rows)
+    assert PILOT in paths and paths[PILOT], "no complete calibration paths for the pilot"
+    for g, gp in paths[PILOT].items():
+        assert len(gp.origins) >= cc.MIN_PATHS, f"{g}: {len(gp.origins)} complete paths"
+        assert gp.z.shape == (len(gp.origins), len(cc.H)) and np.isfinite(gp.z).all()
+        # Every path ends on or before the fit's last day: nothing from the future.
+        assert max(gp.origins) + timedelta(days=len(cc.H)) <= st["end"]
+
+
 def test_backtest_reports_cumulative_calibration():
     """
     The artifact must carry the cumulative calibration, not only daily coverage.

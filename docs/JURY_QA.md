@@ -287,24 +287,26 @@ which direction it was wrong.**
     depend on how the days correlate, and a test checks that it equals that
     dependence-free expectation.
   - **The daily 80% bands and their measured calibration** (Q4).
-- **What is being tested next** (its own pre-registration, written before it
-  measures anything). Two candidates, against the shipped construction on the
-  same held-out origins:
+- **What we tested next, and what happened** (D-045, pre-registered before
+  anything was measured). Two replacements, against the shipped construction on
+  the same 816 held-out windows per dataset:
   - (a) the correlation of errors across horizons 1–14 within each forecast;
-  - (b) calibrating the 14-day total directly, by split conformal on held-out
-    totals, which needs no assumption about how days depend on each other.
+  - (b) calibrating the 14-day total directly, by split conformal.
 
-  To pass, a candidate must:
-  - get closer to nominal on 14-day coverage and tails, with cluster-bootstrap
-    intervals;
-  - pass the eight-date sanity checks, so that today's expected failures turn
-    into passes;
-  - not saturate.
+  **Neither passed.**
+  - **Calibration:** both were worse calibrated than what is served, and failed
+    the eight-date sanity checks.
+  - **Why:** both learned the 14-day spread from the forecaster's own held-out
+    slice, which turned out to understate the errors at a real forecast origin.
+    They supplied about 1.2× the independent-days spread; the real errors need
+    about 1.7×.
+  - **So:** the probability stays off the screen, and we say so.
+  - **Next:** the same estimators, built from rolling-origin backtest errors
+    instead, with their own pre-registration.
 
-  If neither passes, the probability stays off the screen and we say so.
-
-*Evidence:* `docs/QUANTILE_CROSSING.md`; `docs/DECISIONS.md` D-043, D-044;
-`backend/test_track_b_dates.py` (the expected failures).
+*Evidence:* `docs/QUANTILE_CROSSING.md`; `docs/SHORTFALL_PROBABILITY.md`;
+`docs/DECISIONS.md` D-043, D-044, D-045; `backend/test_track_b_dates.py` (the
+expected failures).
 
 ---
 

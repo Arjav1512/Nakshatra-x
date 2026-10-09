@@ -1573,3 +1573,216 @@ explicit date. It is also the sanctioned path, run end to end under the guard:
     date; `batch forecast` with the same date and no record move is refused.
   - **the app**, warming a deleted forecast and writing it for the recorded
     dataset.
+
+## D-045 — P(shortfall): two candidate estimators, and the rule either must pass
+
+**Written 2026-10-09T11:44Z (17:14 IST), before either candidate exists in code
+and before any of its output.** Committed and pushed before implementation
+starts. P(shortfall) stays withdrawn (D-044) unless a candidate passes every
+criterion below. A different fix is a new entry.
+
+**Seen before writing this, and disclosed:**
+- **D-043's measurements** of main's construction, the residual-block bootstrap:
+  - one-step residuals barely persist across days (per-grade lag-1 0.02–0.30);
+  - the interleaved series' lag-1 of about 0.5 is same-day correlation
+    between grades (0.68–0.81);
+  - it fails the eight-date sanity checks.
+- **Main's 14-day figures on the two datasets used here:**
+  - 2026-09-20: coverage 0.738 [0.700, 0.777], tails 0.165;
+  - 2026-10-07 (frozen): coverage 0.717 [0.680, 0.749], tails 0.163.
+- **The forecaster's held-out calibration slice exists** (the most recent 25% of
+  each mine's samples, with predictions at every horizon). No horizon
+  correlation, conformity score or total from it has been computed.
+- **#20's 2.5–3.4× gap** is in commit c167526: "the real 14-day cumulative CV is
+  0.084–0.232 by mine; independent summation produces 0.034–0.069". **How the
+  real CV was computed is not recorded.**
+
+### The candidates
+
+Both are estimated at every fit from the calibration slice: rows the quantile
+models never trained on, with targets on or before the fit's last day. So
+nothing at serving time sees the future. Each grade uses only **complete
+paths**: calibration origins with actuals at all 14 horizons.
+
+For a calibration row, the **served daily distribution** is the lognormal
+`shortfall_probability` already uses:
+- μ = log(median);
+- σ = (log q90 − log q10) / (2 × 1.2816);
+- the quantiles are taken after `predict`'s own sort → conformal widening →
+  sort, with that mine and horizon's conformal width.
+
+The **standardised error** is z = (log actual − μ) / σ. Rows with a
+non-positive actual or quantile are dropped, and so is any path containing one.
+
+- **(a) Horizon dependence.**
+  - **Estimate:** R_g, the 14 × 14 Pearson correlation of z across horizons
+    1–14, over grade g's complete paths. Computed on complete paths, it is
+    positive semi-definite by construction.
+  - **The 14-day distribution:** 4,000 draws Z ~ N(0, R_g), with the forecast's
+    own μ_h and σ_h. Each draw is Σ_h exp(μ_h + σ_h Z_h).
+  - **Simulation:** 4,000 draws, seed 20260921, as the existing construction uses.
+  - **Fewer than 30 complete paths:** pool z across the mine's grades. How
+    often that happens is reported.
+- **(b) Direct calibration of the 14-day total** (split conformal).
+  - **Score:** for each complete path, s = log(T / T̂), where T is the realised
+    14-day total and T̂ the sum of the served daily medians.
+  - **The 14-day distribution for a forecast:** T̂ × exp(s_i) over grade g's n
+    scores.
+  - **P(total < t):** (k + 0.5) / (n + 1), where k = #{s_i < log(t / T̂)}. This
+    is the conformal predictive distribution, midpoint convention. No
+    assumption about how days depend on each other.
+  - **The 80% band:** T̂ × exp(s₍ₗ₎) to T̂ × exp(s₍ᵤ₎), with
+    l = ⌊0.1(n + 1)⌋ and u = ⌈0.9(n + 1)⌉ (1-indexed order statistics, clipped
+    to 1..n).
+  - **Fewer than 30 scores:** pool across the mine's grades. How often is
+    reported.
+
+**What each candidate changes, and what it does not.** A candidate supplies
+only P(shortfall) and the 14-day p10 and p90 that come from its distribution.
+These stay exactly as served now, checked value for value against main after
+regeneration:
+- the daily quantiles, plan targets and expected production;
+- **expected shortfall,** which keeps D-044's definition and test.
+
+### Measurement
+
+- **Main's arm:** the served construction, residual blocks (`rho0` in the
+  harness).
+- **The same windows for all three arms:** at each origin the harness fits once
+  and scores all three, so they are compared on identical windows.
+- **Datasets:** 2026-09-20 (the previous committed one) and **2026-10-07** (the
+  frozen, served one).
+- **Origins:** the harness's 24, 14 days apart, as `batch all` uses.
+- **Statistics, as D-040 and D-043 defined them:**
+  - 14-day coverage: the share of realised totals inside the 80% band, nominal
+    0.80;
+  - tails: PIT below 0.05 or above 0.95, nominal 0.10;
+  - 95% intervals from 2,000 cluster-bootstrap resamples of whole origin dates,
+    seed 20260921;
+  - paired differences in distance to nominal from the same resamples
+    (`_paired`).
+- **Quiet machine:** one process, nothing in parallel, a committed tree,
+  `scripts/check_memory.sh` before each run.
+
+### Acceptance — a candidate passes only if every criterion holds
+
+- **C1 — Better than main, on both datasets.** For coverage and for tails, the
+  paired 95% interval of [main's distance to nominal − the candidate's] lies
+  entirely above zero.
+- **C2 — Calibrated, on both datasets.** The candidate's own 95% interval
+  contains 0.80 for coverage and 0.10 for tails.
+- **C3 — The eight-date sanity checks pass** (`test_track_b_dates.py`'s dates
+  and thresholds, from D-043). Computed for the candidate:
+  - **(i) Not narrower than independent days.** For every mine and grade at
+    each date, the candidate's 14-day sd is at least 0.9 × the sd of the same
+    marginals summed independently.
+  - **(ii) No saturation.** At each date, at least 80% of (mine, grade)
+    P(shortfall) values are unsaturated:
+    - for (a), in [0.001, 0.999];
+    - for (b), strictly between its extreme attainable values 0.5/(n + 1) and
+      (n + 0.5)/(n + 1) — the target lies within the calibrated totals.
+  - **(iii) No single input dominates.** For every mine and grade, removing the
+    single most extreme calibration input changes the 14-day sd by less than
+    10%: for (a) the path with the largest max|z|, for (b) the largest |s|.
+  - **A5 — no single day moves a spread,** on 2026-09-20 and 2026-10-06. Take
+    the calendar day with the mine's largest |one-step standardised error|, as
+    the existing test does. Removing every calibration path or window that
+    contains it must change each grade's 14-day sd by less than 5%.
+- **C4 — No saturation on the frozen dataset.** At least 80% of the served
+  (mine, grade) P(shortfall) values on 2026-10-07 are unsaturated, as in
+  C3 (ii).
+- **C5 — Presented figures do not move.** After regeneration on 2026-10-07,
+  every presented figure is identical to main's: daily quantiles, expected
+  shortfall, plan, expected production, the backtest's daily figures and MAPE,
+  and the daily calibration.
+
+### Selection — fixed now
+
+- **Both pass:** (b) ships, for simplicity, unless (a) is better than (b) by
+  more than the interval. That means the paired 95% interval of [(b)'s distance
+  to nominal − (a)'s] lies entirely above zero for coverage *and* tails, on
+  *both* datasets; then (a) ships.
+- **One passes:** it ships.
+- **Neither passes:** P(shortfall) stays withdrawn, and the result is recorded
+  as negative, with its numbers. No threshold above is adjusted.
+
+### Does (a) explain #20's gap? — reported, not a ship criterion
+
+#20's "real CV" is not recorded, so two quantities are reported, both per mine,
+over the harness windows on both datasets:
+1. **The forecast error #20 should have compared against.** The spread of
+   realised 14-day totals around the forecast, in units of the
+   independent-days sd: sd over windows of (T − E_ind) / sd_ind. Its 95%
+   interval comes from the cluster bootstrap.
+2. **The quantity #20 probably measured:** the coefficient of variation of
+   realised 14-day totals across windows, against the mean independent-days CV.
+   That reproduces a ratio comparable to 2.5–3.4×.
+
+**(a) explains the gap** if, for at least 8 of 10 mines, (a)'s mean sd ratio
+sd_a / sd_ind lies inside the 95% interval of quantity 1. Quantity 2 is reported
+beside it, to say whether #20's gap was a forecast-error gap at all.
+
+### If a candidate passes
+
+- P(shortfall) and the 14-day figures go back on the console and into
+  `PITCH_FIGURES.md`: `WITHHELD` shrinks accordingly.
+- The artifacts are regenerated on 2026-10-07 and `pitch-check` is run.
+- The strict expected failures in `test_track_b_dates.py` are rewritten for the
+  served construction with the thresholds above, and must pass, markers removed.
+- **`test_track_b.py::test_residuals_persist_across_days` is retired, not
+  turned into a pass.** It measures a property of the data — one-step
+  persistence — that no estimator changes, and neither candidate relies on it.
+  The reason is recorded where it was.
+
+### Time-box
+
+**Cut-off: 2026-10-12 23:59 IST.** That leaves nine days of the frozen window
+(8–21 October) to put P back if a candidate passes. If neither has passed its
+rule by then, the work stops: the negative result is recorded with whatever was
+measured, and P(shortfall) stays withdrawn.
+
+### D-045 result — neither candidate passed; P(shortfall) stays withdrawn
+
+Measured 2026-10-09, inside the time-box, by the rule above. The figures are in
+`docs/SHORTFALL_PROBABILITY.md`, and the raw results in `docs/evidence/d045/`.
+
+**The measurement measured what is served.** On the frozen dataset the runner's
+main arm reproduces the committed calibration artifact exactly: coverage 0.717,
+tails 0.163, 816 windows.
+
+| Criterion | (a) horizon dependence | (b) direct calibration |
+|---|---|---|
+| C1 better than main, both datasets | **fail** — worse: 14-day coverage 0.696 / 0.657, tails 0.199 / 0.227 | **fail** — worse: 0.713 / 0.685, tails 0.208 / 0.210 |
+| C2 calibrated, both datasets | **fail** | **fail** |
+| C3 eight-date sanity | **fail** on 6 of 8 dates | **fail** on 8 of 8 |
+| C4 no saturation, frozen | pass (94%) | pass (85%) |
+
+**What it established:**
+- **Both candidates are too narrow.** They supply about 1.2× the
+  independent-days spread, where the real 14-day errors spread about 1.7×.
+- **Their source is why.** Both estimate from the forecaster's held-out
+  calibration slice, whose errors are less dispersed than errors at a real
+  forecast origin.
+- **Main's typical width is close to right only by accident.** It is the
+  interleaving artifact D-043 found, and it blows up absurdly in about 4% of
+  windows.
+- **(a) does not explain #20's gap** (6 and 5 of 10 mines, short of 8). #20's
+  2.5–3.4× reproduces as the spread of the realised totals themselves, not as
+  forecast error: the error spreads 1.3–2.4× by mine.
+
+**A deviation from the request, disclosed:**
+- **What was asked:** (b) was to use "held-out backtest totals", and (a) the
+  backtest's multi-horizon errors.
+- **What was registered:** both, here, on the fit's calibration slice instead.
+- **Why it matters:** the slice understates the errors at a real origin, so the
+  literal version — estimated from rolling-origin backtest errors — is
+  untested.
+- **Why it was not run:** it is a different estimator, chosen after these
+  results, so it needs a new entry, written before it is measured.
+
+**What stays:**
+- P(shortfall) and the 14-day figures stay off the console and out of the pitch.
+- The strict expected failures stay.
+- No threshold above was adjusted.
+- No artifact moved: the candidates are unserved and outside the fingerprinted
+  chain.
