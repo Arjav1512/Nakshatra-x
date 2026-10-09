@@ -33,7 +33,12 @@ The forecast window follows the last day of generated actuals. That date is a
 parameter with a committed default; override it at generation time to move the
 window (docs/DECISIONS.md, docs/DEMO.md):
 
-    NAKSHATRA_DATA_END_DATE=2026-11-30 python -m app.api.batch forecast
+    NAKSHATRA_DATA_END_DATE=2026-11-30 python -m app.api.batch all
+
+`all` with an explicit date is the only command that moves the committed set to
+a new dataset: it writes the record first, then every artifact against it. Any
+other write of an artifact for a dataset that is not the recorded one is refused
+(app.core.artifact_guard, DECISIONS.md D-046).
 
 Suggested cron (nightly, after the data refresh):
 
@@ -120,6 +125,7 @@ def run_forecasts(
     from app.api.routes import DEFAULT_MINES
     from app.api.track_b import compute_forecast
     from app.api.forecast_store import is_fresh, write_artifact
+    from app.core.artifact_guard import ArtifactWriteRefused
 
     from app.ingestion.generator import resolve_data_end_date
     from datetime import timedelta
@@ -138,7 +144,13 @@ def run_forecasts(
             continue
         t0 = time.time()
         payload = compute_forecast(code, horizon_days=horizon_days)
-        path, written = write_artifact(code, horizon_days, payload)
+        try:
+            path, written = write_artifact(code, horizon_days, payload)
+        except ArtifactWriteRefused as refused:
+            # The run is for a dataset that is not the recorded one (D-046), so
+            # every other mine would be refused too: say so once, and stop.
+            print(f"  [{i}/{len(targets)}] {code}: REFUSED — {refused}")
+            return 1
         verb = "written" if written else "identical — not rewritten"
         print(f"  [{i}/{len(targets)}] {code}: {time.time() - t0:.1f}s -> {path.name} ({verb})")
     return 0
@@ -164,7 +176,7 @@ def committed_backtest_specs() -> list[tuple[str, int, int]]:
     return specs
 
 
-def run_all(force: bool = False) -> int:
+def run_all(force: bool = False, new_dataset_allowed: bool = False) -> int:
     """
     Regenerate every synthetic-derived artifact from one dataset.
 
@@ -197,7 +209,10 @@ def run_all(force: bool = False) -> int:
     print("1/4  Sample CSVs (data/synthetic)")
     t0 = time.time()
     written: list[str] = []
-    counts = export_samples(written=written)
+    # The record moves to another dataset only when the date was given
+    # explicitly (D-046); otherwise a run for a different dataset is refused here,
+    # before any sample, record or artifact is written.
+    counts = export_samples(written=written, new_dataset_allowed=new_dataset_allowed)
     print(
         f"  {sum(counts.values()):,} rows across {len(counts)} entities in {time.time() - t0:.1f}s — "
         + (f"written: {', '.join(written)}" if written else "identical — nothing rewritten")
@@ -472,8 +487,13 @@ def main(argv: list[str]) -> int:
     # The same rule the server follows: no NAKSHATRA_DATA_END_DATE means the
     # dataset the last `batch all` generated, so `check` judges the artifacts
     # that are actually there and a re-run reproduces them (served_dataset).
-    from app.core.served_dataset import adopt_recorded_end_date
+    import os
 
+    from app.core.served_dataset import ENV, adopt_recorded_end_date
+
+    # Read before adopting: adoption sets the variable to the recorded date, and
+    # only a date given by the person running this may move the record (D-046).
+    explicit_date = bool(os.environ.get(ENV, "").strip())
     end, source = adopt_recorded_end_date()
     print(f"dataset end date: {end or 'committed default'} — {source}")
 
@@ -523,7 +543,7 @@ def main(argv: list[str]) -> int:
         return 0 if report["consistent"] and ident["ok"] else 1
 
     if argv[1] == "all":
-        failures = run_all(force=force)
+        failures = run_all(force=force, new_dataset_allowed=explicit_date)
         print(f"Done in {time.time() - started:.1f}s · {failures} failure(s)")
         return 1 if failures else 0
 

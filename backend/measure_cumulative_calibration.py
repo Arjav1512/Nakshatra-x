@@ -808,6 +808,10 @@ def artifact(args: argparse.Namespace) -> int:
     dest = __import__("pathlib").Path(args.out) if args.out else CALIBRATION_ARTIFACT
     dest.parent.mkdir(parents=True, exist_ok=True)
     p = portfolio
+    # A calibration of another dataset never reaches the committed set (D-046).
+    from app.core.artifact_guard import check_write
+
+    check_write(dest, out["artifact_identity"])
     if dest.exists() and says_the_same(dest, out):
         # Same records, same figures: the file and its `generated_at` stay.
         print(f"unchanged {dest} — identical apart from generated_at; not rewritten")
