@@ -498,24 +498,39 @@ export function DecisionConsole() {
                 detail={minesErr}
               />
             ) : !mines ? (
-              <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {/* One placeholder per mine in MOIL's register. Six were
-                    rendered here while ten cards were about to arrive, so the
-                    page grew by four rows the moment the register resolved —
-                    which is most of the console's layout shift. If the register
-                    ever returns a different count the cost is one small shift,
-                    not the four-row jump. */}
-                {Array.from({ length: 10 }, (_, i) => i).map((i) => (
-                  <Card key={i}>
-                    <div className="space-y-2 p-4">
-                      <Skeleton className="h-4 w-28" />
-                      <Skeleton className="h-3 w-20" />
-                      <Skeleton className="h-4 w-32" />
-                    </div>
-                  </Card>
-                ))}
+              /*
+                While the register loads, the same boxes the loaded page draws:
+                the focal band's reserved slot, then ten card-height
+                placeholders. This drew ten short skeleton cards (82 px) and no
+                band, so when the register arrived the band appeared above them
+                and every card grew to 170 px — a shift of 0.063 at 1280x800 and
+                0.101 in Lighthouse's 1350x940 desktop run, over its 0.1 target
+                (POLISH_AUDIT.md, result). Six were once drawn for ten mines;
+                ten still are. If the register ever returns a different count
+                the cost is one small shift, not this jump.
+              */
+              <>
+                <div className="mt-4 min-h-[10.625rem] md:min-h-[9.125rem]">
+                  <div className="h-full rounded-md border border-border-subtle bg-surface-1/50 p-5">
+                    <span className="label">Largest expected shortfall</span>
+                    <p className="mt-2 text-sm text-text-secondary">Loading the mine register&hellip;</p>
+                  </div>
+                </div>
+                <ul aria-hidden="true" className="mt-4 grid list-none gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {Array.from({ length: 10 }, (_, i) => i).map((i) => (
+                    <li key={`slot-${i}`}>
+                      <Card className="h-full min-h-[10.625rem]">
+                        <div className="space-y-2 p-4">
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-3 w-20" />
+                          <Skeleton className="h-4 w-32" />
+                        </div>
+                      </Card>
+                    </li>
+                  ))}
+                </ul>
                 <p className="sr-only">Loading mine register</p>
-              </div>
+              </>
             ) : (
               <>
               {/*
@@ -597,10 +612,18 @@ export function DecisionConsole() {
                 className="mt-4 grid list-none gap-3 sm:grid-cols-2 lg:grid-cols-3"
               >
                 {!portfolioSettled
-                  ? (mines ?? []).map((m) => (
+                  ? (mines ?? []).map((_, i) => (
                       // Same box as a real card, so swapping one for the other
                       // moves nothing. No name: its slot is not known yet.
-                      <li key={m.id} aria-hidden="true">
+                      //
+                      // Keyed by slot, not by mine, here and in the ranked list
+                      // below. Keyed by mine, React moved each card's DOM node
+                      // from its register position to its ranked one when the
+                      // ranking landed, and the browser counts a moved node as
+                      // layout shift: 0.063 at 1280x800, 0.101 in Lighthouse's
+                      // desktop run (POLISH_AUDIT.md, result). By slot, the
+                      // nodes stay where they are and only their content changes.
+                      <li key={`slot-${i}`} aria-hidden="true">
                         <Card className="h-full min-h-[10.625rem]">
                           <div className="h-full w-full animate-pulse rounded-md bg-surface-2/40" />
                         </Card>
@@ -610,7 +633,7 @@ export function DecisionConsole() {
                   const v = portfolio[m.id]
                   const isPilot = m.mine_code === PILOT_CODE
                   return (
-                    <li key={m.id}>
+                    <li key={`slot-${rank}`}>
                       <Card
                         interactive
                         // One height for every card. Content gives 146 or 170px, so
