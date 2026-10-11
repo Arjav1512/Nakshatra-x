@@ -525,8 +525,10 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                       tickFormatter={(h) => dayOf(forecast.window.start, h)}
                       tickLine={false}
                       axisLine={false}
-                      // Every other day: fourteen dates do not fit at 13 px.
-                      interval={1}
+                      // Evenly spaced dates that fit at 13 px: every other
+                      // day on a desktop, fewer on a phone.
+                      interval="equidistantPreserveStart"
+                      minTickGap={16}
                     />
                     {/*
                       Fitted to the data, not from zero. From zero, values of

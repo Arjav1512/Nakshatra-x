@@ -415,26 +415,29 @@ export function DecisionConsole() {
           already holds, so it needs nothing the panel has.
         */}
         {selected && track === 'B' && portfolio[selected.id] && !isFailure(portfolio[selected.id]!) ? (
+          /*
+            One line, 48 px. It was two lines and about 90 px, sticky at 56 px,
+            while the section tabs are sticky at 104 px (6.5rem = 56 + 48): once
+            you scrolled, the summary slid over the tabs and hid them
+            (POLISH_AUDIT.md issue 8).
+          */
           <div
-            className="sticky top-14 z-20 -mx-4 border-y border-border-default bg-surface-1/95 px-4 py-3 md:hidden"
+            className="sticky top-14 z-20 -mx-4 flex h-12 items-center justify-between gap-3 border-y border-border-default bg-surface-1 px-4 md:hidden"
             data-testid="mine-sticky-summary"
             data-provenance="derived"
             data-provenance-model={PORTFOLIO_ENV.model_version ?? undefined}
           >
-            <div className="flex items-baseline justify-between gap-3">
-              <span className="min-w-0 truncate text-sm font-medium text-text-primary">
-                {selected.name}
-              </span>
-              <span className="shrink-0 font-mono text-lg tabular-nums text-text-primary">
+            <span className="min-w-0 truncate text-sm font-medium text-text-primary">
+              {selected.name}
+            </span>
+            <span className="flex shrink-0 items-baseline gap-2">
+              <span className="font-mono text-lg tabular-nums text-text-primary">
                 &minus;{Math.round((portfolio[selected.id] as any).shortfall).toLocaleString()} t
               </span>
-            </div>
-            <div className="mt-1 flex flex-wrap items-center gap-x-2 text-xs">
-              <span className="font-mono tabular-nums text-text-secondary">
+              <span className="font-mono text-xs tabular-nums text-text-secondary">
                 of {Math.round((portfolio[selected.id] as any).plan).toLocaleString()} t plan
               </span>
-              <span className="text-text-tertiary">expected shortfall, summed over grades</span>
-            </div>
+            </span>
           </div>
         ) : null}
 
