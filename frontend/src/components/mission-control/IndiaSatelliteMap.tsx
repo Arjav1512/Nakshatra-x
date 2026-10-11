@@ -1338,7 +1338,7 @@ export default function IndiaSatelliteMap({
             */}
             {activePrediction && (
               <div
-                className="absolute top-3 right-3 z-[450] max-h-[calc(100%-1.5rem)] w-[calc(100%-1.5rem)] overflow-y-auto rounded-md border border-border-default bg-surface-1 p-4 shadow-[var(--shadow-overlay)] sm:w-[400px]"
+                className="absolute top-3 right-3 z-[450] max-h-[calc(100%-1.5rem)] w-[calc(100%-1.5rem)] overflow-y-auto rounded-md border border-border-default bg-surface-1 p-4 shadow-[var(--shadow-overlay)] sm:w-[440px]"
                 data-testid="map-point-score"
                 role="dialog"
                 aria-label="Score at this point"
