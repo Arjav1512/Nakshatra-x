@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { fetchForecast } from '@/lib/console-api'
 import { ASSUMPTION_GROUPS, ASSUMPTION_NOTE } from '@/lib/scenario-assumptions'
 import { Metric } from '@/components/console/Evidence'
+import { StatusDot } from '@/components/ui/primitives'
 import { assumption, measuredValue, reference } from '@/lib/provenance'
 import type { MineInfo } from '@/components/mission-control/types'
 import {
@@ -377,7 +378,9 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   const runAgain = 'Inputs changed — run again.'
 
   return (
-    <div className="rounded-md border border-border-default bg-surface-1 p-6 border border-border-interactive rounded-md space-y-6 shadow-2xl relative overflow-hidden">
+    // overflow-x-clip so the sticky controls column can stick to the page; no
+    // shadow — only overlays cast one (DESIGN_SYSTEM §3.8).
+    <div className="relative space-y-6 overflow-x-clip rounded-md border border-border-default bg-surface-1 p-6">
       {/* Background Cyber Ambient Glow */}
 
 
@@ -418,9 +421,15 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
       </div>
 
       {/* Main Grid: Parameter Controls + Real Digital Data Analytics */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* items-start: the controls column stretched to the outcome column's
+          height, leaving a 400 px empty box beside the verdict
+          (POLISH_AUDIT.md issue 6). */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
         {/* Left Column: Interactive Scenario Controls (5 Columns) */}
-        <div className="lg:col-span-5 space-y-5 rounded-md border border-border-subtle bg-surface-2 p-5 rounded-md border border-border-default">
+        {/* Sticky from lg: the controls (about 420 px) stay beside the
+            results as they scroll, so at the demo's beat — "+6H delay", run
+            again — the control and the verdict are on screen together. */}
+        <div className="space-y-5 rounded-md border border-border-default bg-surface-2 p-5 lg:sticky lg:top-20 lg:col-span-5">
           <div className="flex items-center justify-between border-b border-border-default pb-2">
             <div className="flex items-center gap-2">
               <Sliders className="w-4 h-4 text-accent" />
@@ -531,11 +540,15 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
           <button
             onClick={runSimulation}
             disabled={loading}
-            className="w-full py-3.5 rounded-md bg-gradient-to-r from-accent to-accent text-black font-semibold text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-colors hover: hover:scale-[1.02]"
+            // The view's one primary action: accent fill, sentence case. No
+            // scale on hover and no spinning icon (DESIGN_SYSTEM §7.2), and
+            // the label says what runs — arithmetic and a constraint check,
+            // not a "digital twin simulation".
+            className="flex w-full items-center justify-center gap-2 rounded-md bg-accent py-3 text-sm font-medium text-surface-0 transition-colors duration-[120ms] ease-out hover:bg-accent/90 disabled:opacity-45"
             type="button"
           >
-            <Play className={`w-4 h-4 fill-black ${loading ? 'animate-spin' : ''}`} />
-            <span>{loading ? 'RUNNING DIGITAL TWIN SIMULATION...' : 'RUN WHAT-IF SIMULATION'}</span>
+            <Play className="h-4 w-4" aria-hidden="true" />
+            <span>{loading ? 'Running the what-if…' : 'Run what-if simulation'}</span>
           </button>
         </div>
 
@@ -664,8 +677,13 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-default pb-2">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-accent" />
-                <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">
-                  50-Year Historical Mining Baseline &bull; <span className="text-status-caution">1975–2040 AI Forecast</span>
+                {/* It said "50-Year Historical Mining Baseline • 1975–2040 AI
+                    Forecast", in status amber. The series is synthetic and the
+                    forward part illustrative — this panel's own header says
+                    "not a fitted trajectory model" — so the title says that
+                    (POLISH_AUDIT.md issue 6). */}
+                <h3 className="text-sm font-medium text-text-primary">
+                  50-year synthetic series · <span className="text-text-secondary">to 2040 illustrative, not a forecast</span>
                 </h3>
               </div>
 
@@ -955,25 +973,33 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
             <p className="measure mt-2 text-xs text-text-tertiary">{result?.note}</p>
 
             {verdict ? (
-              <div className="mt-3 border-t border-border-subtle pt-3">
+              /*
+                The verdict is the beat (docs/DEMO.md 2:20): "the engine
+                rejects it by name". It was a 12 px line at the foot of this
+                box, the smallest text in the panel. It is 22 px now, with the
+                status shape as well as the colour, and the broken rule in full
+                under it at 15 px in primary text (POLISH_AUDIT.md issue 6).
+              */
+              <div className="mt-3 border-t border-border-default pt-3" data-testid="constraint-verdict">
                 <p
-                  className={`text-xs font-medium ${
+                  className={`flex items-center gap-2 text-xl font-medium ${
                     verdict.feasible ? 'text-status-nominal' : 'text-status-critical'
                   }`}
                 >
+                  <StatusDot status={verdict.feasible ? 'nominal' : 'critical'} className="h-3 w-3" />
                   {verdict.feasible
                     ? 'Constraint check passed — these controls can be run as configured.'
                     : 'Constraint check failed — these controls cannot be run as configured.'}
                 </p>
-                <ul className="mt-1 space-y-1">
+                <ul className="mt-2 space-y-1.5">
                   {verdict.checks.map((c) => (
-                    <li key={c.action_type} className="text-xs text-text-secondary">
-                      <span className="font-mono text-text-tertiary">{c.action_type}</span>{' '}
+                    <li key={c.action_type} className="text-base text-text-secondary">
+                      <span className="font-mono text-sm text-text-secondary">{c.action_type}</span>{' '}
                       {c.feasible ? (
                         <span className="text-status-nominal">ok</span>
                       ) : (
                         c.violations.map((v) => (
-                          <span key={v.rule} className="text-status-critical">
+                          <span key={v.rule} className="text-text-primary">
                             {v.detail}
                           </span>
                         ))

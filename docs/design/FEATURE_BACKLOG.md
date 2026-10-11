@@ -450,3 +450,8 @@ these were found and left:
   cards. Session state, not layout; deduplicating runs is a behaviour change.
 - **Spinners where the design system specifies skeletons** (Track A and Track B
   loading lines). Honest and calm; inconsistent only.
+- **Mine twin's 50-year chart offers "Reserves (T)" and "Grade (% Mn)".** The
+  series is synthetic (the panel says so), and PRD §2.4 rules out reserve
+  figures. The polish pass corrected the chart's title, which called the
+  illustrative trajectory an "AI forecast"; whether a synthetic reserve and
+  grade series belongs on screen at all is a content decision, not polish.
