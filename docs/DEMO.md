@@ -466,8 +466,9 @@ another, so B-5 makes per-grade forecasting P0. These are four different
 forecasts, not one number relabelled.
 
 The chart shows the median with its **80% prediction interval** for each day,
-and the **dashed amber line is the seasonal-naive baseline** the model has to
-beat. Beside it is how far to trust those daily bands: the share of real days
+and the **dashed grey line is the seasonal-naive baseline** the model has to
+beat. It sits beside the shortfall, so there is nothing to scroll to; the grade
+buttons above it switch which grade's band is drawn. Beside it is how far to trust those daily bands: the share of real days
 that fell inside them, across all ten mines and for Balaghat, each with its 95%
 interval.
 

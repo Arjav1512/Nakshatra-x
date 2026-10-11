@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import {
-  Area, AreaChart, CartesianGrid, Line, ResponsiveContainer, Tooltip, XAxis, YAxis,
+  Area, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
 import { PLAN_TARGET_NOTE, derived, measuredValue, reference, synthetic } from '@/lib/provenance'
 import {
@@ -104,6 +104,17 @@ function describeWindow(origin: string, start: string, end: string) {
     ended,
     inProgress: started && !ended,
   }
+}
+
+/**
+ * The calendar day of a horizon. Day 1 is the window's first day; the chart
+ * labels days by date because the window is fixed, not "the next N days"
+ * (D-030).
+ */
+function dayOf(windowStart: string, horizonDays: number) {
+  const d = new Date(`${windowStart}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + horizonDays - 1)
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
 }
 
 export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: string }) {
@@ -333,7 +344,8 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
       ) : (
         <>
           {/*
-            One focal figure, two that frame it (POLISH_AUDIT.md issue 2).
+            One focal figure, two that frame it, and the chart beside them
+            (POLISH_AUDIT.md issues 2 and 3).
 
             These were four equal tiles. The largest numbers on the screen
             were the plan (13,030) and expected production (13,012) — five
@@ -343,10 +355,16 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             withdrawal of P(shortfall) stated under it as an annotation of the
             number it would have qualified, instead of a fourth tile shaped
             like one that failed to load. Plan and expected production sit
-            beside it as the pair the shortfall is the difference of.
+            under it as the pair the shortfall is measured against.
+
+            The grades and their daily band sit beside the answer rather than
+            under it: stacked, the chart started at y = 901-956 on a 1280x800
+            screen and the presenter had to scroll mid-sentence. How far to
+            trust the band follows the chart, in the same column.
           */}
-          <div className={`grid gap-3 lg:grid-cols-12 ${sectionCls('answer')}`}>
-            <div className="lg:col-span-6">
+          <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
+          <div className="space-y-3 lg:col-span-5">
+            <div className={sectionCls('answer')}>
               {/*
                 The focal number (D-044): the API's mine-level figure, which
                 sums each grade's own shortfall — a surplus in one grade does
@@ -381,7 +399,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 }
               />
             </div>
-            <div className="grid content-start gap-3 sm:grid-cols-2 lg:col-span-6">
+            <div className={`grid gap-3 sm:grid-cols-2 ${sectionCls('answer')}`}>
               <Metric
                 label="Plan target (horizon)"
                 emphasis
@@ -407,41 +425,33 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                   }
                 ))}
               />
+            </div>
+            <div className={sectionCls('answer')}>
               {/* Someone will subtract these two and get a different number
                   from the focal one. That is the point of PRD §3; say so here. */}
-              <p className="text-sm text-text-secondary sm:col-span-2">
+              <p className="text-sm text-text-secondary ">
                 The shortfall is not plan minus production: each grade is short or not on its own,
-                and a surplus in one grade does not cover a deficit in another (PRD §3). The grades
-                and their daily bands are below.
+                and a surplus in one grade does not cover a deficit in another (PRD §3). Each
+                grade&rsquo;s own shortfall and daily band are under &ldquo;By grade&rdquo;.
               </p>
             </div>
           </div>
 
+          <div className="space-y-3 lg:col-span-7">
           {/*
-            B-1 confusion 6. Below the four answer cards: the drivers on the
-            left, and how far to trust the answer on the right, side by side
-            from lg up. The trust column comes first in the DOM — it qualifies
-            the number directly above it, so that is where a screen reader and
-            the mobile tabs meet it — and is moved to the right visually.
+            The grades and the chart are one card now (POLISH_AUDIT.md issue 3).
+            The chips are the chart's grade selector, and as a card of their
+            own they cost a border, padding and a gap — part of what put the
+            chart's top at y = 901 on a 1280x800 screen.
           */}
-          <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
-          <div className="space-y-3 lg:order-last lg:col-span-5">
-          <div className={sectionCls('answer')}>
-            <IntervalCalibration mineCode={forecast.mine_code} mineName={mineName} />
-          </div>
-
-          <p className={`measure text-xs text-text-tertiary ${sectionCls('answer')}`}>
-            {PLAN_TARGET_NOTE}
-          </p>
-          </div>
-
-          <div className="space-y-4 lg:col-span-7">
-          {/* --- grade-aware breakdown: PRD B-5 is per-grade at P0 --- */}
-          <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('drivers')}`}>
-            <p className="mb-2 text-xs uppercase tracking-wider text-text-secondary">
-              By grade — a shortfall in one grade is not fungible with a surplus in another (PRD §3)
+          <div className={`rounded-md border border-border-default bg-surface-2 p-3 md:p-4 ${sectionCls('drivers')}`}>
+            {/* --- grade-aware breakdown: PRD B-5 is per-grade at P0 --- */}
+            <p className="label">By grade</p>
+            <p className="mt-1 text-sm text-text-secondary">
+              A shortfall in one grade is not fungible with a surplus in another (PRD §3). Choose a
+              grade to see its daily band.
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               {grades.map((g) => {
                 const on = (grade ?? grades[0]?.grade) === g.grade
                 // The grade's own expected shortfall. This chip showed its
@@ -455,62 +465,86 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                     aria-pressed={on}
                     data-provenance="derived"
                     data-provenance-model={forecast.model_version}
-                    className={`rounded-md border px-3 py-2 text-left text-xs transition-colors ${
-                      on ? 'border-accent/60 bg-accent/10' : 'border-border-default bg-surface-2 hover:border-border-interactive'
+                    className={`rounded-md border px-3 py-2 text-left text-sm transition-colors duration-[120ms] ease-out ${
+                      on ? 'border-accent bg-accent-muted' : 'border-border-interactive bg-surface-2 hover:bg-surface-3'
                     }`}
                   >
                     <span className="block font-medium text-text-primary">
                       {g.grade.replace(/_/g, ' ')}
                     </span>
-                    <span className="mt-0.5 block font-mono tabular-nums text-text-secondary">
+                    <span className="mt-0.5 block font-mono text-xs tabular-nums text-text-secondary">
                       {short > 0 ? `−${short.toLocaleString()} t expected` : 'no shortfall expected'}
                     </span>
                   </button>
                 )
               })}
             </div>
-          </div>
 
           {/* --- trajectory with prediction interval + baseline --- */}
           {selected ? (
-            <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('drivers')}`}>
-              <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-                <p className="text-xs uppercase tracking-wider text-text-secondary">
-                  {selected.grade.replace(/_/g, ' ')} · daily trajectory
+            <div className="mt-4 border-t border-border-default pt-3">
+              <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <p className="text-sm font-medium text-text-primary">
+                  {selected.grade.replace(/_/g, ' ')} · daily production, tonnes
                 </p>
-                <p className="font-mono text-xs text-text-tertiary">
-                  band = {Math.round(forecast.interval.nominal_coverage * 100)}% prediction interval ·
-                  dashed = {forecast.baseline_version}
-                </p>
+                {/*
+                  A key with the marks themselves, in 13 px secondary. It was
+                  one 12 px tertiary mono line ("band = 80% prediction interval ·
+                  dashed = seasonal-naive-365-v1"): 5.1:1, 3.3:1 on a washed-out
+                  projector, and a sentence to decode instead of a mark to match.
+                */}
+                <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-secondary" aria-label="Chart key">
+                  <li className="flex items-center gap-1.5">
+                    <span aria-hidden="true" className="inline-block h-3 w-4 rounded-sm border border-accent/70 bg-accent/30" />
+                    {Math.round(forecast.interval.nominal_coverage * 100)}% prediction interval
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span aria-hidden="true" className="inline-block h-0.5 w-4 rounded-full bg-accent" />
+                    median
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span aria-hidden="true" className="inline-block w-4 border-t-2 border-dashed border-text-secondary" />
+                    seasonal-naive baseline
+                  </li>
+                </ul>
               </div>
-              <div className="h-56 w-full" data-forecast-chart={selected.grade}>
+              <div className="h-56 w-full md:h-60" data-forecast-chart={selected.grade}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={selected.trajectory} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
+                  <ComposedChart data={selected.trajectory} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
                     {/* Recharts theme — docs/design/DESIGN_SYSTEM.md section 8.
                         Colours reference the design tokens through var(); no hex
                         literal appears outside tokens.css. Entrance animation is
                         off: an animating chart is a count-up by another name. */}
-                    <defs>
-                      <linearGradient id="pi" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.16} />
-                        <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0.16} />
-                      </linearGradient>
-                    </defs>
                     <CartesianGrid
                       vertical={false}
-                      stroke="var(--color-border-subtle)"
+                      stroke="var(--color-border-default)"
                     />
                     <XAxis
                       dataKey="horizon_days"
-                      tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }}
+                      tick={{ fontSize: 13, fill: 'var(--color-text-secondary)' }}
+                      tickFormatter={(h) => dayOf(forecast.window.start, h)}
                       tickLine={false}
                       axisLine={false}
+                      // Every other day: fourteen dates do not fit at 13 px.
+                      interval={1}
                     />
+                    {/*
+                      Fitted to the data, not from zero. From zero, values of
+                      about 150-210 t used the top fifth of the plot and the
+                      band was a sliver (POLISH_AUDIT.md issue 3). The ticks
+                      state the range, so nothing implies a zero that is not
+                      drawn.
+                    */}
                     <YAxis
-                      tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }}
+                      tick={{ fontSize: 13, fill: 'var(--color-text-secondary)' }}
                       tickLine={false}
                       axisLine={false}
-                      width={48}
+                      width={44}
+                      domain={[
+                        (lo: number) => Math.max(0, Math.floor((lo * 0.9) / 10) * 10),
+                        (hi: number) => Math.ceil((hi * 1.05) / 10) * 10,
+                      ]}
+                      allowDecimals={false}
                     />
                     <Tooltip
                       contentStyle={{
@@ -521,36 +555,63 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                         fontVariantNumeric: 'tabular-nums',
                         color: 'var(--color-text-primary)',
                       }}
-                      labelFormatter={(v) => `Day +${v}`}
+                      labelFormatter={(v) => dayOf(forecast.window.start, Number(v))}
                     />
-                    {/* The class names let tools/forecast-band.js read each
-                        series from the rendered SVG and check the median never
-                        leaves its band (DECISIONS.md D-043, A1). */}
+                    {/*
+                      The band is one ranged area between p10 and p90, with its
+                      edges drawn as lines. It was a p90 area with a p10 area
+                      painted in the card's own colour over its lower half: a
+                      16% tint against near-black, with a slab of mask under
+                      it, and nothing left of it on a washed-out projector. The
+                      edges carry the interval now; the fill only groups it.
+                      The p10 / p90 / median class names are what
+                      tools/forecast-band.js reads (DECISIONS.md D-043, A1).
+                    */}
                     <Area
-                      type="monotone" dataKey="p90_tonnes" stroke="none" fill="url(#pi)"
+                      type="monotone"
+                      dataKey={(d: any) => [d.p10_tonnes, d.p90_tonnes]}
+                      stroke="none" fill="var(--color-accent)" fillOpacity={0.28}
+                      name="80% interval" isAnimationActive={false} className="forecast-band"
+                      activeDot={false}
+                    />
+                    <Line
+                      type="monotone" dataKey="p90_tonnes" stroke="var(--color-accent)"
+                      strokeOpacity={0.7} strokeWidth={1} dot={false} activeDot={false}
                       name="p90" isAnimationActive={false} className="forecast-p90"
                     />
-                    <Area
-                      type="monotone" dataKey="p10_tonnes" stroke="none"
-                      fill="var(--color-surface-2)" name="p10" isAnimationActive={false}
-                      className="forecast-p10"
+                    <Line
+                      type="monotone" dataKey="p10_tonnes" stroke="var(--color-accent)"
+                      strokeOpacity={0.7} strokeWidth={1} dot={false} activeDot={false}
+                      name="p10" isAnimationActive={false} className="forecast-p10"
                     />
                     <Line
                       type="monotone" dataKey="median_tonnes" stroke="var(--color-accent)"
-                      strokeWidth={2} dot={false} name="median" isAnimationActive={false}
+                      strokeWidth={2.5} dot={false} name="median" isAnimationActive={false}
                       className="forecast-median"
                     />
                     <Line
                       type="monotone" dataKey="baseline_tonnes"
-                      stroke="var(--color-text-tertiary)"
-                      strokeWidth={1} strokeDasharray="4 3" dot={false}
+                      stroke="var(--color-text-secondary)"
+                      strokeWidth={1.5} strokeDasharray="5 4" dot={false}
                       name="seasonal-naive" isAnimationActive={false}
                     />
-                  </AreaChart>
+                  </ComposedChart>
                 </ResponsiveContainer>
               </div>
+              <p className="mt-1 font-mono text-xs text-text-secondary">
+                baseline: {forecast.baseline_version}
+              </p>
             </div>
           ) : null}
+          </div>
+
+          <div className={sectionCls('answer')}>
+            <IntervalCalibration mineCode={forecast.mine_code} mineName={mineName} />
+          </div>
+
+          <p className={`measure text-xs text-text-tertiary ${sectionCls('answer')}`}>
+            {PLAN_TARGET_NOTE}
+          </p>
           </div>
           </div>
         </>
