@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import type { Envelope, Measured } from '@/lib/provenance'
 
 /**
@@ -138,13 +138,20 @@ export type MetricProps = {
   label: string
   unit?: string
   emphasis?: boolean
+  /**
+   * The one figure a screen exists to answer (POLISH_AUDIT.md issue 2). Set in
+   * display size so it reads first from the back of a room; one per screen.
+   */
+  focal?: boolean
+  /** Annotation under the figure, inside the same provenance envelope. */
+  footer?: ReactNode
 } & (
   | { data: Measured<any>; unavailable?: string }
   | { data: Measured<any> | null | undefined; unavailable: string }
 )
 
 export function Metric(props: MetricProps) {
-  const { label, unit, emphasis } = props
+  const { label, unit, emphasis, focal, footer } = props
   const [open, setOpen] = useState(false)
   const data = 'data' in props ? props.data ?? null : null
   const env = data?.envelope ?? null
@@ -154,7 +161,7 @@ export function Metric(props: MetricProps) {
 
   return (
     <div
-      className="rounded-md border border-border-default bg-surface-2 p-3"
+      className={`rounded-md border bg-surface-2 ${focal ? 'h-full border-border-strong p-4 md:p-5' : 'border-border-default p-3'}`}
       // B-6: the rendered-page provenance guard reads this. The attribute goes
       // on the whole card, not just the value node, because the label and the
       // unit are part of the claim — "rainfall 14d mm" beside "104.71" says
@@ -172,10 +179,16 @@ export function Metric(props: MetricProps) {
       {hasValue ? (
         <div
           data-metric
-          className={`mt-1 font-mono ${emphasis ? 'text-2xl' : 'text-lg'} text-text-primary`}
+          className={`font-mono text-text-primary ${
+            focal ? 'mt-2 text-4xl leading-none tracking-tight md:text-5xl' : `mt-1 ${emphasis ? 'text-2xl' : 'text-lg'}`
+          }`}
         >
           {typeof value === 'number' ? value.toLocaleString() : value}
-          {unit ? <span className="ml-1 text-xs text-text-secondary">{unit ?? env?.unit}</span> : null}
+          {unit ? (
+            <span className={`ml-1 text-text-secondary ${focal ? 'text-2xl md:text-3xl' : 'text-xs'}`}>
+              {unit ?? env?.unit}
+            </span>
+          ) : null}
         </div>
       ) : (
         <div className="mt-1 text-sm text-text-tertiary">
@@ -202,6 +215,9 @@ export function Metric(props: MetricProps) {
         // A value with no envelope must not pass silently — N-3 is 100%.
         <p className="mt-2 text-xs text-status-critical">No provenance attached (PRD N-3 violation).</p>
       ) : null}
+
+      {/* After the evidence toggle, which belongs to the figure itself. */}
+      {footer ? <div className="mt-3">{footer}</div> : null}
     </div>
   )
 }

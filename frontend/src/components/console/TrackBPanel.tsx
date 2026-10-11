@@ -237,22 +237,13 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
     // Calm arrival for the whole panel when a different mine is opened. Keyed
     // on the mine so it plays on change, not on every re-render.
     <section key={mineId} className="panel-enter space-y-4">
-      <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-accent">
-          Track B · Production shortfall
-        </h2>
-        {forecast ? (
-          <p className="font-mono text-xs text-text-tertiary">
-            {forecast.model_version} ·{' '}
-            {describeWindow(
-              forecast.forecast_origin,
-              forecast.window.start,
-              forecast.window.end
-            ).text}
-          </p>
-        ) : null}
-      </header>
-
+      {/*
+        No kicker row. "TRACK B · PRODUCTION SHORTFALL" in accent blue sat here
+        and said what the breadcrumb ("production risk") and the subtitle
+        ("Production shortfall, days to months") already say, 40 px above the
+        answer; the model version it carried is in the window line below
+        (POLISH_AUDIT.md issues 2 and 4).
+      */}
       {forecast
         ? (() => {
             const w = describeWindow(
@@ -261,8 +252,15 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
               forecast.window.end
             )
             return (
+              /*
+                One line, not a boxed paragraph (POLISH_AUDIT.md issue 2). It
+                was 105 px of prose between the mine's name and its answer.
+                The facts are the same — origin, the fixed window, a stored
+                artifact and its age, not a live reading — and so are the hooks
+                tools/e2e-forecast-dates.js reads. An ended window keeps its
+                full warning: that one has to stop the presenter.
+              */
               <div
-                className="rounded-md border border-border-default bg-surface-1 p-3"
                 data-testid="forecast-provenance"
                 data-provenance="synthetic"
                 data-provenance-model={forecast.model_version}
@@ -272,29 +270,26 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 data-window-end={forecast.window.end}
                 data-window-ended={String(w.ended)}
               >
-                <p className="measure text-xs text-text-secondary">
-                  {w.ended ? (
-                    <>
-                      <strong className="font-medium text-status-caution">
-                        This forecast&rsquo;s window has already ended.
-                      </strong>{' '}
-                      It covers {w.span}, forecast from {w.from}, which is in the past. The figures
-                      below are what the model predicted for that window, not a plan for today.
-                      Regenerate the artifacts to forecast from today (docs/DEMO.md).
-                    </>
-                  ) : (
-                    <>
-                      Figures below cover one fixed fortnight — {w.text} — set when the artifact was
-                      generated. It is not a window that rolls forward with today&rsquo;s date. It is
-                      served from a stored artifact
-                      {forecast.artifact_age_hours != null
-                        ? `, generated ${forecast.artifact_age_hours.toFixed(1)} h ago`
-                        : ''}
-                      , so it is a computed prediction rather than a live reading. The conditions
-                      panel, after the forecast, is measured live and carries its own vintage.
-                    </>
-                  )}
-                </p>
+                {w.ended ? (
+                  <p className="measure rounded-md border border-status-caution/40 bg-status-caution/10 p-3 text-sm text-text-primary">
+                    <strong className="font-medium text-status-caution">
+                      This forecast&rsquo;s window has already ended.
+                    </strong>{' '}
+                    It covers {w.span}, forecast from {w.from}, which is in the past. The figures
+                    below are what the model predicted for that window, not a plan for today.
+                    Regenerate the artifacts to forecast from today (docs/DEMO.md).
+                  </p>
+                ) : (
+                  <p className="text-sm text-text-secondary">
+                    <span className="text-text-primary">{w.span}</span>, forecast from {w.from} by{' '}
+                    <span className="font-mono text-xs">{forecast.model_version}</span> · a fixed
+                    fortnight from a stored artifact
+                    {forecast.artifact_age_hours != null
+                      ? ` (generated ${forecast.artifact_age_hours.toFixed(1)} h ago)`
+                      : ''}
+                    , not a live reading and not a window that rolls with today&rsquo;s date
+                  </p>
+                )}
               </div>
             )
           })()
@@ -337,54 +332,89 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
         <Spinner label={`Loading ${mineName}…`} />
       ) : (
         <>
-          <div className={`grid gap-3 sm:grid-cols-2 lg:grid-cols-4 ${sectionCls('answer')}`}>
-            <Metric
-              label="Plan target (horizon)"
-              emphasis
-              unit="t"
-              data={measuredValue(reference(
-                Math.round(forecast.portfolio.plan_target_tonnes),
-                'tonnes',
-                'plan_target, ingestion contract v1.0.0',
-                { model_version: 'nakshatra-synthetic-v1', method: 'Monthly plan pro-rated across the forecast window.' }
-              ))}
-          />
-            <Metric
-              label="Expected production"
-              emphasis
-              unit="t"
-              data={measuredValue(synthetic(
-                Math.round(forecast.portfolio.expected_cumulative_tonnes),
-                'tonnes',
-                SYNTH_SOURCE,
-                {
-                  model_version: forecast.model_version,
-                  method: 'Quantile gradient boosting with conformalised intervals; grade is a model feature.',
+          {/*
+            One focal figure, two that frame it (POLISH_AUDIT.md issue 2).
+
+            These were four equal tiles. The largest numbers on the screen
+            were the plan (13,030) and expected production (13,012) — five
+            digits each — and the answer, the expected shortfall, was the
+            third tile at the same size and read as the smallest thing there.
+            The shortfall is now the focal tile, in display size, with the
+            withdrawal of P(shortfall) stated under it as an annotation of the
+            number it would have qualified, instead of a fourth tile shaped
+            like one that failed to load. Plan and expected production sit
+            beside it as the pair the shortfall is the difference of.
+          */}
+          <div className={`grid gap-3 lg:grid-cols-12 ${sectionCls('answer')}`}>
+            <div className="lg:col-span-6">
+              {/*
+                The focal number (D-044): the API's mine-level figure, which
+                sums each grade's own shortfall — a surplus in one grade does
+                not cancel a deficit in another (PRD §3).
+              */}
+              <Metric
+                label="Expected shortfall"
+                focal
+                unit="t"
+                data={measuredValue(derived(
+                  Math.round(forecast.portfolio.expected_shortfall_tonnes),
+                  'tonnes',
+                  'Sum over grades of max(0, plan target − expected production)',
+                  {
+                    model_version: forecast.model_version,
+                    method:
+                      'Each grade is short or not on its own: a surplus in one grade does not cover a deficit in another (PRD §3). A mean, so it does not depend on how the days are correlated.',
+                  }
+                ))}
+                footer={
+                  <>
+                    <p className="mb-3 text-sm text-text-secondary">
+                      Summed over grades, for {describeWindow(
+                        forecast.forecast_origin,
+                        forecast.window.start,
+                        forecast.window.end
+                      ).span}
+                    </p>
+                    {/* Where the worst-grade P(shortfall) was: withdrawn, no number (D-044). */}
+                    <ProbabilityWithdrawn variant="note" />
+                  </>
                 }
-              ))}
-          />
-            {/*
-              The focal number (D-044): the API's mine-level figure, which
-              sums each grade's own shortfall — a surplus in one grade does
-              not cancel a deficit in another (PRD §3).
-            */}
-            <Metric
-              label="Expected shortfall"
-              emphasis
-              unit="t"
-              data={measuredValue(derived(
-                Math.round(forecast.portfolio.expected_shortfall_tonnes),
-                'tonnes',
-                'Sum over grades of max(0, plan target − expected production)',
-                {
-                  model_version: forecast.model_version,
-                  method:
-                    'Each grade is short or not on its own: a surplus in one grade does not cover a deficit in another (PRD §3). A mean, so it does not depend on how the days are correlated.',
-                }
-              ))}
-          />
-            {/* Where the worst-grade P(shortfall) was: withdrawn, no number (D-044). */}
-            <ProbabilityWithdrawn variant="tile" />
+              />
+            </div>
+            <div className="grid content-start gap-3 sm:grid-cols-2 lg:col-span-6">
+              <Metric
+                label="Plan target (horizon)"
+                emphasis
+                unit="t"
+                data={measuredValue(reference(
+                  Math.round(forecast.portfolio.plan_target_tonnes),
+                  'tonnes',
+                  'plan_target, ingestion contract v1.0.0',
+                  { model_version: 'nakshatra-synthetic-v1', method: 'Monthly plan pro-rated across the forecast window.' }
+                ))}
+              />
+              <Metric
+                label="Expected production"
+                emphasis
+                unit="t"
+                data={measuredValue(synthetic(
+                  Math.round(forecast.portfolio.expected_cumulative_tonnes),
+                  'tonnes',
+                  SYNTH_SOURCE,
+                  {
+                    model_version: forecast.model_version,
+                    method: 'Quantile gradient boosting with conformalised intervals; grade is a model feature.',
+                  }
+                ))}
+              />
+              {/* Someone will subtract these two and get a different number
+                  from the focal one. That is the point of PRD §3; say so here. */}
+              <p className="text-sm text-text-secondary sm:col-span-2">
+                The shortfall is not plan minus production: each grade is short or not on its own,
+                and a surplus in one grade does not cover a deficit in another (PRD §3). The grades
+                and their daily bands are below.
+              </p>
+            </div>
           </div>
 
           {/*

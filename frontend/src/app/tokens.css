@@ -93,7 +93,9 @@
   /* Display end of the scale (B-2). The old scale stopped at 36px, so the
      largest thing on any page was barely twice body size and hierarchy had to
      come from weight and colour. These two steps are display-only: a page gets
-     at most one, and it names what you are looking at. */
+     at most one heading at this size, and it names what you are looking at.
+     The one other use is the screen's focal figure (Metric `focal`), which is
+     the answer the page exists to give (POLISH_AUDIT.md issue 2). */
   --text-4xl: 3rem;                   /* 48 */
   --text-4xl--line-height: 3.25rem;   /* 52 */
   --text-5xl: 4rem;                   /* 64 */
