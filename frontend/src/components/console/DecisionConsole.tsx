@@ -623,6 +623,7 @@ export function DecisionConsole() {
                       // layout shift: 0.063 at 1280x800, 0.101 in Lighthouse's
                       // desktop run (POLISH_AUDIT.md, result). By slot, the
                       // nodes stay where they are and only their content changes.
+                      // biome-ignore lint/suspicious/noArrayIndexKey: the slot is the identity on purpose; a key per mine moves the DOM node when the ranking lands, which is the layout shift this fixes.
                       <li key={`slot-${i}`} aria-hidden="true">
                         <Card className="h-full min-h-[10.625rem]">
                           <div className="h-full w-full animate-pulse rounded-md bg-surface-2/40" />
@@ -633,6 +634,7 @@ export function DecisionConsole() {
                   const v = portfolio[m.id]
                   const isPilot = m.mine_code === PILOT_CODE
                   return (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: keyed by slot like the placeholders above, so each card replaces its placeholder in place instead of moving (no layout shift).
                     <li key={`slot-${rank}`}>
                       <Card
                         interactive
