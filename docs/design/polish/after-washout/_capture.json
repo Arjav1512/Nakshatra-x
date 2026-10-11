@@ -1,0 +1,158 @@
+{
+  "base": "http://localhost:3000",
+  "washout": true,
+  "viewports": {
+    "1366": {
+      "width": 1366,
+      "height": 768,
+      "dpr": 1,
+      "landing": {
+        "h1": {
+          "top": 185,
+          "bottom": 229
+        },
+        "fonts": [
+          "Inter",
+          "Inter Fallback",
+          "IBM Plex Mono"
+        ]
+      },
+      "portfolio": {
+        "focal_band": {
+          "top": 374,
+          "bottom": 520
+        },
+        "list": {
+          "top": 536,
+          "bottom": 1252
+        },
+        "withdrawn": {
+          "top": 1340,
+          "bottom": 1388
+        }
+      },
+      "balaghat": {
+        "shortfall_tile": {
+          "top": 2066,
+          "bottom": 2094
+        },
+        "expected_shortfall": {
+          "top": 440,
+          "bottom": 732
+        },
+        "chart": {
+          "top": 666,
+          "bottom": 906
+        },
+        "backtest": {
+          "top": 1284,
+          "bottom": 1300
+        },
+        "actions": {
+          "top": 1191,
+          "bottom": 1227
+        }
+      },
+      "minetwin": {
+        "verdict": {
+          "top": 1921,
+          "bottom": 2146
+        }
+      },
+      "tracka": {
+        "map": {
+          "top": 504,
+          "bottom": 1124
+        },
+        "metrics": {
+          "top": 1245,
+          "bottom": 1360
+        }
+      },
+      "dossier_seconds": 2,
+      "dossier": {
+        "clicked": true,
+        "text": "SCORE AT THIS POINT\n\nGrid cell (21.850, 79.150)\n\n21.850°N, 79.150°E\n\nKRIGED PROSPECTIVITY\nDERIVED\n0.032\n+ evidence\nDIRECT MODEL SCORE (LIVE READ)\nLIVE\n0.017\n+ evidence\n\nInputs are Sentinel-2 surface reflectance and SRTM terrain. They carry no subsurface information; this does not detect ore at depth (PRD 2.2).\n\nOutput is a prospectivity score for a qualified person, not a UNFC or statutory reserve figure (PRD 2.4)."
+      }
+    },
+    "1366z125": {
+      "width": 1093,
+      "height": 614,
+      "dpr": 1.25,
+      "landing": {
+        "h1": {
+          "top": 185,
+          "bottom": 229
+        },
+        "fonts": [
+          "Inter",
+          "Inter Fallback",
+          "IBM Plex Mono"
+        ]
+      },
+      "portfolio": {
+        "focal_band": {
+          "top": 374,
+          "bottom": 520
+        },
+        "list": {
+          "top": 536,
+          "bottom": 1252
+        },
+        "withdrawn": {
+          "top": 1340,
+          "bottom": 1388
+        }
+      },
+      "balaghat": {
+        "shortfall_tile": {
+          "top": 2379,
+          "bottom": 2407
+        },
+        "expected_shortfall": {
+          "top": 460,
+          "bottom": 752
+        },
+        "chart": {
+          "top": 750,
+          "bottom": 990
+        },
+        "backtest": {
+          "top": 1417,
+          "bottom": 1433
+        },
+        "actions": {
+          "top": 1324,
+          "bottom": 1360
+        }
+      },
+      "minetwin": {
+        "verdict": {
+          "top": 1937,
+          "bottom": 2162
+        }
+      },
+      "tracka": {
+        "map": {
+          "top": 504,
+          "bottom": 1124
+        },
+        "metrics": {
+          "top": 1245,
+          "bottom": 1360
+        }
+      },
+      "dossier_seconds": 2,
+      "dossier": {
+        "clicked": true,
+        "text": "SCORE AT THIS POINT\n\nGrid cell (21.850, 79.400)\n\n21.850°N, 79.400°E\n\nKRIGED PROSPECTIVITY\nDERIVED\n0.086\n+ evidence\nDIRECT MODEL SCORE (LIVE READ)\nLIVE\n0.015\n+ evidence\n\nInputs are Sentinel-2 surface reflectance and SRTM terrain. They carry no subsurface information; this does not detect ore at depth (PRD 2.2).\n\nOutput is a prospectivity score for a qualified person, not a UNFC or statutory reserve figure (PRD 2.4)."
+      }
+    }
+  },
+  "console_errors": {
+    "1366": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "1366z125": []
+  }
+}

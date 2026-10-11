@@ -311,3 +311,74 @@ as is** unless the fixes above touch the same lines.
   across every layer. Logged in `docs/design/FEATURE_BACKLOG.md`.
 - Mine twin's scenario history (six identical cards after a rehearsal). It is
   session state, not layout.
+
+---
+
+## Result — after the fixes (2026-10-11)
+
+Same capture, same build process: `polish/after/`, `polish/after-washout/`,
+`polish/after/_capture.json`. Taken on `ecfc090`, with the map-click shots
+re-taken on `8176055` (the panel's width). The two code commits after that,
+`633fd7d` and `0f0c2a8`, change what the console draws while it loads and
+add comments; no settled screen differs.
+
+Lighthouse 13.5.0 on the final build (live upstreams, quiet machine, memory
+pressure normal), median of three runs:
+
+| Page | Form factor | Performance | Accessibility | CLS | LCP |
+|---|---|---|---|---|---|
+| `/` | desktop | 98 | 100 | 0.000 | 1.06 s |
+| `/console` | desktop | 100 | 100 | 0.000 | 0.82 s |
+| `/` | mobile (Lighthouse default throttling) | 90 | 100 | 0.000 | 3.68 s |
+| `/console` | mobile (Lighthouse default throttling) | 91 | 100 | 0.000 | 3.47 s |
+
+| Issue | Fixed in | What changed |
+|---|---|---|
+| 1. Map click: NaN% and invented fields | `dd9b4ce`, `8176055` | The click renders the model's response through `Metric` (`PointScore`, shared with "Score a location"); a failed request says so with no number; the browser-side fallback prediction is deleted; the marker is static. `test:e2e` clicks a cell and checks it. |
+| 2. Balaghat focal hierarchy | `a8028d4` | Expected shortfall is the one focal tile (48/64 px); P(shortfall)'s withdrawal is an annotation under it; plan and expected production frame it, with why the shortfall is not their difference. |
+| 3. Chart below the fold, washes out | `2a1af5a`, `71e3c45` | Chart beside the answer; ranged band with drawn edges; axis fitted to the data; 13 px secondary ticks with dates; a key with the marks. |
+| 4. Key text on a projector | `c2b9b60` | `.label` 12 px secondary, one eyebrow style; no status colour as decoration on the path. |
+| 5. Track A below the fold | `473754a` | Own heading; one-line map header; neutral controls; the no-op "Highlight belt" toggle removed; the mine card off the map on phones. |
+| 6. Mine twin's verdict | `1d148e4` | 22 px verdict with its status shape; controls sticky beside it; one title; the "AI forecast" chart title corrected. |
+| 7. Perpetual motion | `dd9b4ce` | The spinning, glowing crosshair and the slide-in are gone. |
+| 8. Phone | `71e3c45` | The sticky summary is 48 px and no longer hides the section tabs; the chart's dates fit. |
+| 9. Portfolio band | `cf3b3b1`, `ecfc090` | The shortfall at the name's size, without growing the band past its reserved height. |
+| Found while measuring: the portfolio shifted when its ranking landed | `633fd7d` | The mine list is keyed by slot, not by mine, so React no longer moves card nodes from register order to rank order; the register-loading state reserves the loaded layout. `/console` CLS 0.063 → 0 at 1280×800; Lighthouse desktop 0.101 → 0.000. Pre-existing on main. |
+
+**Where the presenter's elements sit now** (CSS px from the top; fold = screen
+height in CSS px):
+
+| Viewport | Fold | Focal tile top | Chart top | Track A map top | Mine-twin verdict top |
+|---|---|---|---|---|---|
+| 1280×800 | 800 | 562 → **440** | 901 → **666** | 586 → **504** | 2049 → 1921 |
+| 1366×768 | 768 | 562 → **440** | 901 → **666** | 586 → **504** | 2049 → 1921 |
+| 1366×768 at 125% | 614 | 562 → **460** | 993 → 750 | 618 → **504** | 2065 → 1937 |
+| 1920×1080 | 1080 | 562 → **440** | 901 → **666** | 586 → **504** | 2049 → 1921 |
+| 1920×1080 at 125% | 864 | 562 → **440** | 901 → **666** | 586 → **504** | 2049 → 1921 |
+| 375 (phone) | 812 | 1238 → **792** | in the Drivers tab | 1054 → **798** | 3387 → 3273 |
+
+- **At 1280×800 and 1366×768 the chart now starts on the first screen**
+  (known open item 1). At 1366×768 at 125% it still starts 136 px below the
+  fold; the focal answer does not.
+- **On a phone the mine card no longer covers the map** (known open item 2);
+  it is not drawn below `sm`, and the dock under the map names the mine.
+- **Mine twin's verdict is still below the fold**, by the page's nature; the
+  presenter scrolls to the controls, and the controls now stay beside the
+  verdict.
+- **Washed out**, the Balaghat answer, its labels and the chart's band edges
+  stay legible (`after-washout/1366-03-balaghat*.png`): key text is
+  `text-primary`, 7.0:1 or better through the filter on surfaces 0–2, where
+  all of it sits.
+
+## What is left, and why it is left
+
+Minor, by the rule this pass stopped on:
+
+- The app has no favicon (`/favicon.ico` 404 in the console on every route,
+  before and after). The browser shows its default tab icon.
+- The map's search presets jump to cities outside the manganese belt (Delhi,
+  Mumbai, Lucknow). They are restyled only where issue 5 needed it; removing
+  or replacing them would change the tool, not its look.
+- On a phone, the map's zoom buttons overlap the bottom of an open point-score
+  panel; the panel scrolls.
+- Spinners where the design system says skeletons (backlogged).
