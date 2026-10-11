@@ -648,9 +648,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
       {/* --- N-8: backtest visible in the UI --- */}
       <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('evidence')}`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-xs uppercase tracking-wider text-text-secondary">
-            Backtest — held-out accuracy (PRD B-10, N-8)
-          </p>
+          <p className="label">Backtest — held-out accuracy (PRD B-10, N-8)</p>
           {!backtest && !btLoading && !noBacktest ? (
             <button type="button"
               onClick={runBacktest}
@@ -710,7 +708,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             data-provenance-model={backtest.model_version}
             data-provenance-vintage={backtest.computed_at}
           >
-            <p className="text-xs text-text-secondary">{backtest.verdict}</p>
+            <p className="text-sm text-text-primary">{backtest.verdict}</p>
             <div className="grid gap-3 sm:grid-cols-3">
               <Metric
                 label="Model MAPE"
@@ -734,8 +732,10 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 }), () => String(String(backtest.model.coverage_80)))}
           />
             </div>
-            <table className="w-full text-xs">
-              <thead className="text-text-tertiary">
+            {/* Model and baseline columns in text colours, not accent blue and
+                status amber: neither is a state (POLISH_AUDIT.md issue 4). */}
+            <table className="w-full text-sm">
+              <thead className="text-text-secondary">
                 <tr className="border-b border-border-default text-left">
                   <th className="py-1 font-normal">Horizon</th>
                   <th className="py-1 font-normal">Model MAPE</th>
@@ -747,8 +747,8 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 {backtest.by_horizon.map((h: any) => (
                   <tr key={h.horizon_days} className="border-b border-border-subtle">
                     <td className="py-1">{h.horizon_days} d</td>
-                    <td className="py-1 text-accent">{h.model_mape_pct}%</td>
-                    <td className="py-1 text-status-caution">{h.baseline_mape_pct}%</td>
+                    <td className="py-1 text-text-primary">{h.model_mape_pct}%</td>
+                    <td className="py-1">{h.baseline_mape_pct}%</td>
                     <td className="py-1">{h.coverage_80}</td>
                   </tr>
                 ))}
@@ -787,9 +787,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
 
       {/* --- D-4 + C-5: recommendations, and what the engine rejected --- */}
       <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('actions')}`}>
-        <p className="mb-2 text-xs uppercase tracking-wider text-text-secondary">
-          Corrective actions (PRD C-1..C-5) — every action constraint-checked
-        </p>
+        <p className="label mb-2">Corrective actions (PRD C-1..C-5)</p>
         {rWarm ? (
           <WarmingState what="Recommendations" warming={rWarm} attempt={attempt} />
         ) : rErr ? (

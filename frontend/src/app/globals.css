@@ -124,15 +124,20 @@
    ============================================================================ */
 
 @layer components {
-  /* The one permitted sub-12px step: short eyebrow labels of one to three
-     words. Never a sentence. */
+  /* Short eyebrow labels of one to three words. Never a sentence.
+
+     12 px secondary, not 11 px tertiary (POLISH_AUDIT.md issue 4). A label is
+     what a presenter points at — "EXPECTED SHORTFALL" over the figure — and
+     at 11 px tertiary it measured 5.09:1 on a card and 3.34:1 on a washed-out
+     projector. Secondary is 7.28:1 or better on surfaces 0-2. Every eyebrow on the
+     demo path uses this one class; the three variants it had are gone. */
   .label {
-    font-size: 0.6875rem; /* 11 */
+    font-size: 0.75rem; /* 12 */
     line-height: 1rem;
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
   }
 
   /* Prose measure. Long-form text is capped so lines stay readable. */
