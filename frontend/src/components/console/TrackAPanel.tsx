@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { derived, measured, measuredOrNull, measuredValue } from '@/lib/provenance'
+import { derived, measuredValue } from '@/lib/provenance'
 import {
   type DrillTargetsResponse, type TrackAMetrics,
   fetchDrillTargets, fetchTrackAMetrics, predictPoint,
 } from '@/lib/console-api'
 import { cividis } from '@/lib/colormap'
 import { Metric } from './Evidence'
+import { PointScore } from './PointScore'
 import { DEFAULT_LAYER, type LayerType } from '@/components/mission-control/IndiaSatelliteMap'
 import type { MineInfo } from '@/components/mission-control/types'
 
@@ -341,55 +342,8 @@ export function TrackAPanel() {
         {pErr ? <div className="mt-3"><Unavailable what="Prediction" reason={pErr} /></div> : null}
 
         {probe ? (
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <Metric
-              label="Kriged prospectivity"
-              emphasis
-              data={measuredValue(derived(probe.kriged_prospectivity_score, 'score 0-1', 'Ordinary kriging over measured observations', {
-                model_version: probe.model_version,
-                method: probe.uncertainty_basis,
-                // `?? 0` here reported an uncertainty of ZERO when the kriging
-                // standard deviation was missing — the single most misleading
-                // value available, since it claims the estimate is exact. An
-                // absent spread is now "not quantified", which is what Metric
-                // renders when `uncertainty` is undefined.
-                uncertainty:
-                  probe.uncertainty_sd != null
-                    ? {
-                        plus_minus: Number(probe.uncertainty_sd.toFixed(3)),
-                        confidence: 0.68,
-                        basis:
-                          probe.variogram?.range_m != null
-                            ? `Kriging standard deviation; variogram range ${Math.round(probe.variogram.range_m / 1000)} km.`
-                            : 'Kriging standard deviation; variogram range not reported.',
-                      }
-                    : undefined,
-              }), () => String(probe.kriged_prospectivity_score?.toFixed(3)))}
-          />
-            {probe.direct_model_score != null ? (
-              <Metric
-                label="Direct model score (live read)"
-                emphasis
-              data={measuredValue(measured(probe.direct_model_score, 'probability', probe.source ?? 'Sentinel-2 L2A + SRTM', {
-                  model_version: probe.model_version,
-                  vintage: probe.scene?.datetime,
-                  method: `Scene ${probe.scene?.scene_id} · cloud ${probe.scene?.cloud_cover_pct}%`,
-                }), () => String(probe.direct_model_score.toFixed(3)))}
-          />
-            ) : (
-              <Metric
-                label="Direct model score (live read)"
-                data={measuredOrNull(null)}
-            unavailable={probe.note ?? 'Live satellite read not requested.'}
-          />
-            )}
-          </div>
-        ) : null}
-
-        {probe?.guardrails ? (
-          <div className="mt-3 space-y-1 rounded-md border border-border-default bg-surface-1 p-3 text-xs leading-snug text-text-secondary">
-            <p>{probe.guardrails.no_subsurface_detection}</p>
-            <p>{probe.guardrails.not_a_reserve}</p>
+          <div className="mt-3">
+            <PointScore probe={probe} />
           </div>
         ) : null}
       </div>

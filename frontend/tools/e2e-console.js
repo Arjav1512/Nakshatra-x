@@ -237,6 +237,63 @@ async function main() {
     `${checksPassed} "checks passed" for ${approved} approved`
   )
 
+  // ---- Track A: a click on the map ----------------------------------------
+  // The map invites a click on any cell. That click used to open a panel of
+  // fields the service does not send — "NaN%", a literal 4.2 km fault, literal
+  // SWIR values — and on a failed request a prediction built in the browser
+  // and marked live (docs/design/POLISH_AUDIT.md issue 1). The page-load guards
+  // could not see it: it exists only after a click on a Leaflet path.
+  console.log('\nTrack A — a click on the map\n')
+  await page.goto(`${BASE}/console?track=a`, { waitUntil: 'networkidle2', timeout: 60000 })
+  for (let i = 0; i < 60; i++) {
+    if (await page.evaluate(() => document.querySelectorAll('path.leaflet-interactive').length > 20)) break
+    await sleep(500)
+  }
+  await page.evaluate(() => document.querySelector('.leaflet-container')?.scrollIntoView({ block: 'start' }))
+  await sleep(500)
+  const cell = await page.evaluate(() => {
+    const map = document.querySelector('.leaflet-container')?.getBoundingClientRect()
+    if (!map) return null
+    const cells = [...document.querySelectorAll('path.leaflet-interactive')]
+      .map((p) => p.getBoundingClientRect())
+      .filter((r) => r.width > 0 && r.left > map.left + 40 && r.right < map.right - 40 &&
+        r.top > map.top + 40 && r.bottom < map.bottom - 40)
+    const r = cells[Math.floor(cells.length / 2)]
+    return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null
+  })
+  check('a surface cell is on the map to click', !!cell)
+  if (cell) {
+    await page.mouse.click(cell.x, cell.y)
+    let panel = null
+    for (let i = 0; i < 180; i++) {
+      panel = await page.evaluate(() => {
+        const el = document.querySelector('[data-testid="map-point-score"]')
+        if (!el || !/Kriged prospectivity|unavailable/i.test(el.innerText)) return null
+        // Every run of digits must sit inside a provenance envelope, except the
+        // clicked point's own coordinates.
+        const bare = []
+        const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
+        while (walk.nextNode()) {
+          const n = walk.currentNode
+          if (!/\d/.test(n.textContent)) continue
+          const host = n.parentElement
+          if (host?.closest('[data-provenance]') || host?.closest('[data-point-coords]')) continue
+          bare.push(n.textContent.trim().slice(0, 60))
+        }
+        return { text: el.innerText, bare }
+      })
+      if (panel) break
+      await sleep(500)
+    }
+    check('the click opens the point\'s score', !!panel, panel ? panel.text.split('\n').slice(0, 3).join(' | ') : 'no panel in 90 s')
+    if (panel) {
+      check('no NaN in it', !/NaN/.test(panel.text))
+      check('no number in it without provenance', panel.bare.length === 0, panel.bare.join(' | '))
+      check('it does not call the score a probability of manganese',
+        !/possibility|dossier/i.test(panel.text))
+    }
+  }
+
   // ---- global ------------------------------------------------------------
   console.log('\nglobal\n')
   check(
