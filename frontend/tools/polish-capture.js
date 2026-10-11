@@ -164,7 +164,17 @@ const screens = {
           b?.click()
         }, tab)
         await sleep(600)
-        await shoot(page, vp, `03-balaghat-tab-${tab.toLowerCase()}`)
+        // The fold is the same for every tab; what changes is below the tab
+        // bar. So each tab is shot with the tab bar at the top of the screen,
+        // as a phone user sees it after tapping, and as a full page.
+        await page.evaluate(() => window.scrollTo(0, 0))
+        await page.evaluate(() => {
+          const nav = document.querySelector('nav[aria-label="Mine sections"]')
+          if (nav) window.scrollTo(0, nav.getBoundingClientRect().top + scrollY - 56)
+        })
+        await sleep(300)
+        await snap(page, vp, `03-balaghat-tab-${tab.toLowerCase()}`)
+        await page.screenshot({ path: file(vp, `03-balaghat-tab-${tab.toLowerCase()}-full`, false), fullPage: true })
       }
     }
   },
@@ -290,7 +300,19 @@ const screens = {
     await page.close()
   }
   await browser.close()
-  fs.writeFileSync(path.join(OUT, '_capture.json'), JSON.stringify(report, null, 2))
+  // A partial re-run (--only, --screens) updates what it measured and keeps
+  // the rest of an existing record.
+  const out = path.join(OUT, '_capture.json')
+  if (fs.existsSync(out)) {
+    const prev = JSON.parse(fs.readFileSync(out, 'utf8'))
+    for (const [id, m] of Object.entries(report.viewports)) {
+      prev.viewports[id] = { ...(prev.viewports[id] ?? {}), ...m }
+      prev.console_errors[id] = report.console_errors[id]
+    }
+    fs.writeFileSync(out, JSON.stringify(prev, null, 2))
+  } else {
+    fs.writeFileSync(out, JSON.stringify(report, null, 2))
+  }
   console.log(`\n${OUT}/_capture.json`)
 })().catch((e) => {
   console.error(e)

@@ -261,11 +261,19 @@ glows. **Fix:** a static marker; no slide.
 
 ![balaghat at 375](polish/before/375-03-balaghat-tab-answer.png)
 
+![balaghat drivers tab at 375](polish/before/375-03-balaghat-tab-drivers.png)
+
 At 375 the sticky summary does put the answer (−96 t) in the fold, which works.
-Around it: the breadcrumb wraps so "/ production risk" starts a line on its
-own; Export CSV / PDF take a full row; the fortnight paragraph is 140 px. The
-Track A card covers the map (issue 5). **Fix:** the one-line disclosure from
-issue 2 removes most of it; the hotspot card moves off the map on phones.
+But **once you scroll, it hides the section tabs**: the summary is sticky at
+56 px and about 90 px tall, and the tab bar is sticky at 104 px, so the tabs
+slide under it. The shot above is the Drivers tab after tapping it — no tab bar
+on screen. Around it: the breadcrumb wraps so "/ production risk" starts a line
+on its own; Export CSV / PDF take a full row; the fortnight paragraph is 140 px.
+The Track A card covers the map (issue 5).
+
+**Fix:** the summary becomes one line (48 px), which is what the tab bar's
+104 px offset assumes; the one-line disclosure from issue 2 removes the
+paragraph; the hotspot card moves off the map on phones.
 
 ### 9. Portfolio — works; small things
 
