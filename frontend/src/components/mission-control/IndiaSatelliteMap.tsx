@@ -23,8 +23,6 @@ import {
   Sparkles,
   Compass,
   Navigation,
-  Globe2,
-  Radio,
   Search,
   X,
   Loader2,
@@ -309,7 +307,6 @@ export default function IndiaSatelliteMap({
   }, [])
 
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [radarSweepActive, setRadarSweepActive] = useState(true)
 
   // Interactive AI Map Selection & Prediction States
   const [searchQuery, setSearchQuery] = useState('')
@@ -1070,78 +1067,64 @@ export default function IndiaSatelliteMap({
 
   return (
     <div
-      className={`rounded-md border border-border-default bg-surface-1 overflow-hidden transition-colors duration-500 relative ${
-        isFullscreen ? 'fixed inset-4 z-50 rounded-md' : 'rounded-[32px]'
+      className={`relative overflow-hidden rounded-md border border-border-default bg-surface-1 ${
+        isFullscreen ? 'fixed inset-4 z-50' : ''
       }`}
     >
-      {/* Top Header Bar */}
-      <div className="p-4 sm:p-5 border-b border-border-default flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[rgba(10,14,20,0.75)] ">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-status-critical/15 border border-status-critical/40">
-            <Globe2 className="h-5 w-5 text-status-critical" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-semibold uppercase tracking-widest text-status-critical">
-                PROSPECTIVITY MAP
-              </span>
-              <span className="text-xs">
-                CLICK A CELL, OR SEARCH A PLACE
-              </span>
-            </div>
-            <h4 className="text-sm font-semibold text-text-primary mt-0.5">
-              Click a cell, or search a place, to score it against the Track A prospectivity model. The score is a ranking signal from surface geology and terrain — not a grade, not a reserve, and not evidence of ore at depth.
-            </h4>
-            {/* What is actually drawn, reported by the service that drew it. */}
-            {activeLayer === 'probability' || activeLayer === 'uncertainty' ? (
-              surfaceMeta.error ? (
-                <p className="mt-1 text-xs text-status-caution">
-                  No surface is drawn: {surfaceMeta.error}. A drawn stand-in would not be the
-                  model&rsquo;s.
-                </p>
-              ) : surfaceMeta.modelVersion ? (
-                <p
-                  className="mt-1 font-mono text-xs text-text-tertiary"
-                  data-provenance="derived"
-                  data-provenance-model={surfaceMeta.modelVersion}
-                >
-                  {surfaceMeta.modelVersion} · {surfaceMeta.nCells?.toLocaleString()} cells scored,
-                  kriged · derived, not a live reading
-                </p>
-              ) : null
-            ) : null}
-          </div>
+      {/*
+        Header: one sentence and the map's controls (POLISH_AUDIT.md issue 5).
+        It was a red "PROSPECTIVITY MAP" eyebrow, an uppercase "CLICK A CELL,
+        OR SEARCH A PLACE", and a bold sentence saying the same — three
+        statements of one instruction, in status red, which means "threshold
+        breached". The panel above the map already labels it. The "Highlight
+        belt on/off" toggle is gone: it switched a class (cyber-radar-sweep-beam)
+        that no stylesheet defines, so it changed nothing on the map.
+      */}
+      <div className="flex flex-col justify-between gap-3 border-b border-border-default bg-surface-1 p-4 md:flex-row md:items-center">
+        <div className="min-w-0">
+          <p className="measure text-sm text-text-secondary">
+            Click a cell, or search a place, to score it against the Track A model. The score ranks
+            places by surface geology and terrain — not a grade, not a reserve, and not evidence of
+            ore at depth.
+          </p>
+          {/* What is actually drawn, reported by the service that drew it. */}
+          {activeLayer === 'probability' || activeLayer === 'uncertainty' ? (
+            surfaceMeta.error ? (
+              <p className="mt-1 text-xs text-status-caution">
+                No surface is drawn: {surfaceMeta.error}. A drawn stand-in would not be the
+                model&rsquo;s.
+              </p>
+            ) : surfaceMeta.modelVersion ? (
+              <p
+                className="mt-1 font-mono text-xs text-text-secondary"
+                data-provenance="derived"
+                data-provenance-model={surfaceMeta.modelVersion}
+              >
+                {surfaceMeta.modelVersion} · {surfaceMeta.nCells?.toLocaleString()} cells scored,
+                kriged · derived, not a live reading
+              </p>
+            ) : null
+          ) : null}
         </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            type="button"
-            onClick={() => setRadarSweepActive(!radarSweepActive)}
-            className={`rounded-md border border-border-interactive bg-surface-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer ${
-              radarSweepActive ? 'border-status-critical text-status-critical' : 'text-text-tertiary'
-            }`}
-          >
-            <Radio className="w-3.5 h-3.5 " />
-            <span>Highlight belt {radarSweepActive ? 'on' : 'off'}</span>
-          </button>
-
+        {/* Map controls: neutral, sentence case (DESIGN_SYSTEM §4.4, §5.2). */}
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={zoomToNational}
-            className="rounded-md border border-border-interactive bg-surface-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-text-primary flex items-center gap-1.5 cursor-pointer"
+            className="flex items-center gap-1.5 rounded-md border border-border-interactive bg-surface-2 px-3 py-1.5 text-sm text-text-primary transition-colors duration-[120ms] ease-out hover:bg-surface-3"
           >
-            <Compass className="w-3.5 h-3.5 text-accent" />
-            <span>National View</span>
+            <Compass className="h-4 w-4 text-text-secondary" aria-hidden="true" />
+            <span>National view</span>
           </button>
 
           <button
             type="button"
             onClick={zoomToIndia}
-            className="rounded-md border border-border-interactive bg-surface-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-text-primary flex items-center gap-1.5 cursor-pointer"
+            className="flex items-center gap-1.5 rounded-md border border-border-interactive bg-surface-2 px-3 py-1.5 text-sm text-text-primary transition-colors duration-[120ms] ease-out hover:bg-surface-3"
           >
-            <Navigation className="w-3.5 h-3.5 text-[var(--color-status-caution)]" />
-            <span>Manganese Belt</span>
+            <Navigation className="h-4 w-4 text-text-secondary" aria-hidden="true" />
+            <span>Manganese belt</span>
           </button>
 
           <button
@@ -1152,9 +1135,9 @@ export default function IndiaSatelliteMap({
             // route (it had never visited /console?track=a).
             aria-label={isFullscreen ? 'Exit full-screen map' : 'Full-screen map'}
             aria-pressed={isFullscreen}
-            className="rounded-md border border-border-interactive bg-surface-2 p-2 rounded-full text-text-primary hover:text-accent transition-colors cursor-pointer"
+            className="rounded-md border border-border-interactive bg-surface-2 p-2 text-text-primary transition-colors duration-[120ms] ease-out hover:bg-surface-3"
           >
-            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </button>
         </div>
       </div>
@@ -1290,8 +1273,6 @@ export default function IndiaSatelliteMap({
             } bg-surface-0 overflow-hidden`}
           >
 
-            {radarSweepActive && <div className="cyber-radar-sweep-beam" />}
-
             <div ref={mapContainerRef} className="w-full h-full" />
 
             {/* DEFAULT TELEMETRY CARD (Top Right - visible when search prediction report is not active) */}
@@ -1305,34 +1286,27 @@ export default function IndiaSatelliteMap({
               </div>
             ) : null}
 
+            {/*
+              The selected mine's card. Not on a phone: there it covered the top
+              of a 380 px map (POLISH_AUDIT.md issues 5 and 8), and the dock
+              under the map already names the mine and its plan target. And not
+              "CRITICAL PLAN TARGET" in status red — a large plan is not a
+              breached threshold; the red is the marker colour (backlogged).
+            */}
             {!activePrediction && currentHotspotMeta && (
-              <div className="absolute top-4 right-4 z-[400] p-4 rounded-md bg-[rgba(8,12,18,0.92)] border border-border-default  max-w-xs shadow-2xl">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full " style={{ backgroundColor: currentHotspotMeta.color }} />
-                    <span className="text-xs font-mono font-semibold uppercase" style={{ color: currentHotspotMeta.color }}>
-                      {selectedMine.name} Hotspot
-                    </span>
-                  </div>
-                  <span
-                    className="text-xs"
-                    style={{
-                      backgroundColor: `${currentHotspotMeta.color}20`,
-                      borderColor: `${currentHotspotMeta.color}60`,
-                      color: currentHotspotMeta.color,
-                    }}
-                  >
-                    {currentHotspotMeta.priority} PLAN TARGET
-                  </span>
+              <div className="absolute top-3 right-3 z-[400] hidden max-w-xs rounded-md border border-border-default bg-surface-1 p-4 shadow-[var(--shadow-overlay)] sm:block">
+                <div className="mb-2 flex items-center gap-2">
+                  <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: currentHotspotMeta.color }} />
+                  <span className="text-sm font-medium text-text-primary">{selectedMine.name}</span>
                 </div>
 
                 <div
-                  className="space-y-2 text-xs font-mono pt-1.5 border-t border-border-default"
+                  className="space-y-1.5 border-t border-border-default pt-2 text-sm"
                   data-provenance="reference"
                 >
-                  <div className="flex justify-between text-text-tertiary">
-                    <span>Plan target (register):</span>
-                    <span className="font-bold text-text-primary">{currentHotspotMeta.rate}</span>
+                  <div className="flex justify-between gap-4 text-text-secondary">
+                    <span>Plan target (register)</span>
+                    <span className="font-mono text-text-primary">{currentHotspotMeta.rate}</span>
                   </div>
                   {/*
                     An "Estimated Ore Grade" row sat here showing a per-mine Mn
@@ -1340,12 +1314,12 @@ export default function IndiaSatelliteMap({
                     Track A outputs a prospectivity score, which PRD §2.4 is
                     explicit is not a grade and not a reserve.
                   */}
-                  <div className="flex justify-between text-text-tertiary">
-                    <span>Coordinates:</span>
-                    <span className="text-accent">{selectedMine.lat}&deg;N, {selectedMine.lng}&deg;E</span>
+                  <div className="flex justify-between gap-4 text-text-secondary">
+                    <span>Coordinates</span>
+                    <span className="font-mono text-text-primary">{selectedMine.lat}&deg;N, {selectedMine.lng}&deg;E</span>
                   </div>
-                  <div className="flex justify-between text-text-tertiary">
-                    <span>Geological Belt:</span>
+                  <div className="flex justify-between gap-4 text-text-secondary">
+                    <span>Geological belt</span>
                     <span className="text-text-primary">{selectedMine.state === 'MP' ? 'Central MP Syncline' : 'Western MH Corridor'}</span>
                   </div>
                 </div>

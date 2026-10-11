@@ -372,6 +372,23 @@ export function DecisionConsole() {
                 </span>
               </p>
             </>
+          ) : track === 'A' ? (
+            /*
+              Track A names itself. It repeated the portfolio's hero — "Decision
+              support for MOIL" and its four-line thesis — above the map, which
+              put the map's top edge at y = 586 on a 768 px screen
+              (POLISH_AUDIT.md issue 5). The thesis stays on the portfolio,
+              where the demo opens on it.
+            */
+            <>
+              <h1 className="font-display text-3xl font-medium tracking-tight md:text-4xl">
+                Where to prospect
+              </h1>
+              <p className="measure mt-2 text-base text-text-secondary">
+                Track A ranks places over years from surface geology and terrain. Nothing here
+                claims to see ore underground.
+              </p>
+            </>
           ) : (
             <>
               <h1 className="font-display text-3xl font-medium tracking-tight md:text-4xl">
