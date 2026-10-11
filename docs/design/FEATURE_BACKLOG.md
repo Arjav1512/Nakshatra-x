@@ -432,3 +432,21 @@ honest ("the same commit produces byte-identical forecasts" —
 resolved end date rather than from the clock, or to drop it from the sample
 export. Until then a regeneration cannot be distinguished from a change by
 `git diff`.
+
+---
+
+## Pitch polish — deferred from `docs/design/POLISH_AUDIT.md` (2026-10-11)
+
+The polish pass before the pitch is frontend-only and adds no features, so
+these were found and left:
+
+- **Map marker colours.** Mines are drawn in status red / amber by plan-target
+  size ("largest plan target" in `status-critical`). A plan target is not a
+  breached threshold, so this spends the alarm channel on a register field
+  (DESIGN_SYSTEM §3.4). The colours live in Leaflet `divIcon` HTML inside
+  `IndiaSatelliteMap.tsx` and in the marker key; recolouring them is a
+  map-styling change across every layer, with its own screenshots.
+- **Mine twin's scenario history.** After a rehearsal it holds six near-identical
+  cards. Session state, not layout; deduplicating runs is a behaviour change.
+- **Spinners where the design system specifies skeletons** (Track A and Track B
+  loading lines). Honest and calm; inconsistent only.
