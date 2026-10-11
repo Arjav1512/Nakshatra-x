@@ -557,7 +557,9 @@ export function DecisionConsole() {
                     <span className="font-display text-3xl font-medium tracking-tight text-text-primary">
                       {worst.name}
                     </span>
-                    <span className="font-mono text-2xl tabular-nums text-text-primary">
+                    {/* The answer at the name's size: it was 24 px beside a
+                        36 px name (POLISH_AUDIT.md issue 9). */}
+                    <span className="font-mono text-3xl tabular-nums text-text-primary">
                       −{Math.round((portfolio[worst.id] as any).shortfall).toLocaleString()} t
                     </span>
                     {/*
