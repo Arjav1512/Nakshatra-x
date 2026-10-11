@@ -558,8 +558,11 @@ export function DecisionConsole() {
                       {worst.name}
                     </span>
                     {/* The answer at the name's size: it was 24 px beside a
-                        36 px name (POLISH_AUDIT.md issue 9). */}
-                    <span className="font-mono text-3xl tabular-nums text-text-primary">
+                        36 px name (POLISH_AUDIT.md issue 9). leading-none so
+                        the name's line box sets the row: at its own 44 px line
+                        height the mono face sat 1 px lower and grew the band
+                        past its reserved height, a 1 px shift at settle. */}
+                    <span className="font-mono text-3xl leading-none tabular-nums text-text-primary">
                       −{Math.round((portfolio[worst.id] as any).shortfall).toLocaleString()} t
                     </span>
                     {/*
