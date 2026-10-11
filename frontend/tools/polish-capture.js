@@ -248,7 +248,10 @@ const screens = {
       // can take most of a minute; the panel it opens is what is captured.
       m.dossier_seconds = await (async () => {
         const t0 = Date.now()
-        await waitFor(page, () => /Dossier|Prospectivity model unavailable/i.test(document.body.innerText), 75000)
+        // The panel a click opens: "Score at this point" since POLISH_AUDIT.md
+        // issue 1, an "AI prospectivity dossier" before it.
+        await waitFor(page, () => /Score at this point|Dossier|Prospectivity model unavailable/i.test(document.body.innerText) &&
+          !/Scoring this point/i.test(document.body.innerText), 75000)
         return Math.round((Date.now() - t0) / 1000)
       })()
       await sleep(800)
@@ -256,9 +259,10 @@ const screens = {
     m.dossier = {
       clicked: !!pt,
       text: await page.evaluate(() => {
-        const el = [...document.querySelectorAll('div')]
-          .filter((x) => /Dossier|Prospectivity model unavailable/i.test(x.innerText) && x.innerText.length < 1500)
-          .at(-1)
+        const el = document.querySelector('[data-testid="map-point-score"]') ??
+          [...document.querySelectorAll('div')]
+            .filter((x) => /Dossier/i.test(x.innerText) && /Structural/i.test(x.innerText))
+            .sort((a, b) => a.innerText.length - b.innerText.length)[0]
         return el ? el.innerText.slice(0, 600) : null
       }),
     }
