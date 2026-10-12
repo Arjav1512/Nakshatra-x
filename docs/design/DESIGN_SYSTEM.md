@@ -200,11 +200,17 @@ build time and there is no layout shift.
 
 Plus one restricted step:
 
-| `--text-label` | 11 / 16, uppercase, `letter-spacing: 0.08em`, `font-weight: 500` |
+| `--text-label` | 12 / 16, uppercase, `letter-spacing: 0.08em`, `font-weight: 500`, `--text-secondary` |
 
 `--text-label` is permitted **only** for short eyebrow labels of one to three
-words. It is never used for sentences. Nothing else in the product renders below
+words. It is never used for sentences. Nothing in the product renders below
 12px — the 10px and 11px body text found in the audit (T-2) is gone.
+
+*Amended 2026-10-11 (`POLISH_AUDIT.md` issue 4):* the label was 11 px in
+`--text-tertiary`. A label is what a presenter points at, and on a projector it
+measured 3.34:1 washed out; it is 12 px in `--text-secondary` now, the one
+eyebrow style on the demo path. The projector minimums (13 px for anything
+pointed at, key text at 7:1 in `--text-primary`) are in that audit.
 
 ### 4.3 Numerals
 

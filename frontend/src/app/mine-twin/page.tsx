@@ -5,13 +5,18 @@ import Link from 'next/link'
 import { PageHeader } from '@/components/ui/primitives'
 import { FALLBACK_MINES } from '@/components/mission-control/data'
 import MineTwinPanel from '@/components/mine-twin/MineTwinPanel'
-import { Box, ArrowLeft, ArrowRight, MapPin, Sparkles, Home } from 'lucide-react'
+import { ArrowLeft, ArrowRight, MapPin } from 'lucide-react'
 
 export default function MineTwinPage() {
   const [selectedMine, setSelectedMine] = useState(FALLBACK_MINES[0])
 
   return (
-    <main className="relative min-h-screen bg-surface-0 text-text-primary pt-24 md:pt-28 pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <main className="relative min-h-screen bg-surface-0 text-text-primary pt-10 pb-24 px-4 sm:px-6 lg:px-8 overflow-x-clip">
+      {/* pt-10, not pt-24/28: the app bar is sticky, not fixed, so the old
+          padding left 80-112 px of empty screen above the title
+          (POLISH_AUDIT.md issue 6). overflow-x-clip, not overflow-hidden:
+          hidden makes this a scroll container, and the panel's sticky controls
+          would stick to it instead of the page. */}
 
       <div className="relative mx-auto max-w-7xl space-y-8">
         {/*
@@ -51,13 +56,9 @@ export default function MineTwinPage() {
 
         {/* Core Component Section */}
         <div className="space-y-6">
-          <div className="flex items-center gap-2">
-            <Box className="text-accent" size={20} />
-            <h1 className="text-2xl">
-              Mine twin
-            </h1>
-          </div>
-
+          {/* A second H1, "Mine twin", sat here between the page title and
+              the panel's own heading: three titles for one calculator. The
+              page title and the panel's mine name are the two it needs. */}
           <MineTwinPanel selectedMine={selectedMine} />
         </div>
 

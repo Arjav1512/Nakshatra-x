@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import type { MineInfo } from './types'
 import { MOIL_MINES } from './data'
 import { cividis } from '@/lib/colormap'
-import { type MineRow, fetchMines } from '@/lib/console-api'
+import { type MineRow, fetchMines, predictPoint } from '@/lib/console-api'
+import { PointScore } from '@/components/console/PointScore'
 import { ESRI_WORLD_IMAGERY_ATTRIBUTION, UPSTREAMS } from '@/lib/upstreams'
 import {
   type TileLayerDef,
@@ -22,12 +23,8 @@ import {
   Sparkles,
   Compass,
   Navigation,
-  Globe2,
-  Radio,
   Search,
   X,
-  Cpu,
-  Activity,
   Loader2,
   AlertCircle,
 } from 'lucide-react'
@@ -310,7 +307,6 @@ export default function IndiaSatelliteMap({
   }, [])
 
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [radarSweepActive, setRadarSweepActive] = useState(true)
 
   // Interactive AI Map Selection & Prediction States
   const [searchQuery, setSearchQuery] = useState('')
@@ -524,91 +520,27 @@ export default function IndiaSatelliteMap({
     // from a service that names its source.
   }
 
-  const createFallbackPrediction = (lat: number, lng: number, customLocationName?: string) => {
-    const isCentralMnBelt = lat >= 20.5 && lat <= 22.8 && lng >= 78.2 && lng <= 81.5
-    const isOdishaMnBelt = lat >= 20.8 && lat <= 23.2 && lng >= 84.0 && lng <= 87.0
-    const isKarnatakaMnBelt = lat >= 14.0 && lat <= 16.5 && lng >= 75.2 && lng <= 77.8
-
-    let baseProb = 0.22
-    if (isCentralMnBelt) baseProb = 0.88
-    else if (isOdishaMnBelt) baseProb = 0.78
-    else if (isKarnatakaMnBelt) baseProb = 0.70
-
-    const geoSeed = Math.abs(Math.sin(lat * 12.9898 + lng * 78.233) * 43758.5453) % 1
-    const ironOxide = Math.round((0.42 + baseProb * 0.40 + geoSeed * 0.08) * 1000) / 1000
-    const ferrousMineral = Math.round((0.30 + baseProb * 0.32 + geoSeed * 0.06) * 1000) / 1000
-    const swirB11 = Math.round((0.28 + baseProb * 0.18) * 1000) / 1000
-    const swirB12 = Math.round((0.34 + baseProb * 0.22) * 1000) / 1000
-    const elevationM = Math.round(280 + geoSeed * 140)
-    const slopeDeg = Math.round((4.0 + geoSeed * 6.0) * 10) / 10
-
-    const probability = Math.min(0.985, Math.max(0.080, Math.round(baseProb * 1000) / 1000))
-    const confidence = probability >= 0.75 ? 'high' : probability >= 0.45 ? 'medium' : 'low'
-    // REMOVED: historical_success_ratio_pct = probability * 84.0 + 15.2.
-    //
-    // A linear rescale of the model's own probability, relabelled as a
-    // "Historical Success Ratio" and shown as a percentage. There is no
-    // historical drilling-outcome data in this project; the coefficients map
-    // [0,1] onto [15.2, 99.2] so the number always reads as encouraging. The
-    // model's actual validation is LOMO AUC 0.85 with a 95% interval of
-    // [0.723, 0.95], which the Track A panel reports.
-
-    return {
-      success: true,
-      lat,
-      lng,
-      location_name: customLocationName || `Indian Coordinates (${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E)`,
-      probability,
-      confidence,
-      model_accuracy_pct: 100.0,
-      model_type: 'RandomForestClassifier (200 Estimators, Cross-Validated)',
-      nearest_fault_name: 'Balaghat-Bharweli Shear Zone',
-      dist_to_fault_km: 2.8,
-      realtime_telemetry: { temp_c: 28.5, rainfall_mm: 4.2, is_live_api: true },
-      features: {
-        iron_oxide_index: ironOxide,
-        ferrous_mineral_index: ferrousMineral,
-        swir_b11_reflectance: swirB11,
-        swir_b12_reflectance: swirB12,
-        ndvi: 0.34,
-        elevation_m: elevationM,
-        slope_deg: slopeDeg,
-        dist_to_fault_km: 2.8,
-        temp_c: 28.5,
-        rainfall_mm: 4.2,
-      },
-      geological_interpretation: confidence === 'high'
-        ? `High prospectivity manganese reef horizon detected. SWIR absorption (${swirB11}/${swirB12}) confirms pyrolusite orebody proximity.`
-        : `Background geological signal with low spectral anomaly ratio.`,
-      timestamp: new Date().toISOString(),
-    }
-  }
-
   // Trigger AI Prospectivity Machine Learning Model for any clicked / typed Lat/Lng
   const triggerAIPrediction = async (lat: number, lng: number, customLocationName?: string) => {
     setIsPredicting(true)
+    setActivePrediction(null)
 
-    try {
-      const res = await fetch('/api/v1/prospectivity/predict', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat, lng, location_name: customLocationName }),
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        setActivePrediction(data)
-      } else {
-        const fallback = createFallbackPrediction(lat, lng, customLocationName)
-        setActivePrediction(fallback)
-      }
-    } catch (err) {
-      console.error('AI Machine Learning Prediction Failed:', err)
-      const fallback = createFallbackPrediction(lat, lng, customLocationName)
-      setActivePrediction(fallback)
-    } finally {
-      setIsPredicting(false)
-    }
+    // The real model, or its reason for not answering — never a stand-in.
+    //
+    // A failed request used to be answered here by createFallbackPrediction:
+    // a probability from a lat/lng box, features from a sine-hash seed,
+    // `model_accuracy_pct: 100` and `is_live_api: true`, shown as a model
+    // result. The Next route had already been rewritten to return 503 so that
+    // could not happen; this re-created it in the browser (PRD N-6;
+    // docs/design/POLISH_AUDIT.md issue 1). Live is what this click asked for
+    // before; the route's own default.
+    const r = await predictPoint(lat, lng, true)
+    setActivePrediction(
+      r.ok
+        ? { ok: true, lat, lng, location_name: customLocationName, probe: r.data }
+        : { ok: false, lat, lng, location_name: customLocationName, error: r.error }
+    )
+    setIsPredicting(false)
 
     // Place Target Crosshair Marker on Leaflet Map
     const L = LRef.current
@@ -618,15 +550,18 @@ export default function IndiaSatelliteMap({
         map.removeLayer(targetMarkerRef.current)
       }
 
+      // A static ring and dot. It span on a 6 s infinite loop with a 22 px
+      // glow: perpetual motion and a glow on the console, which says "live"
+      // about a point that was scored once (DESIGN_SYSTEM §7.2).
       const targetIcon = L.divIcon({
         className: 'ai-target-crosshair-pin',
-        iconSize: [40, 40],
-        iconAnchor: [20, 20],
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
         html: `
           <div style="
             position: relative;
-            width: 40px;
-            height: 40px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center; ">
@@ -634,16 +569,13 @@ export default function IndiaSatelliteMap({
               position: absolute;
               inset: 0;
               border-radius: 50%;
-              border: 2px dashed var(--color-status-nominal);
-              animation: spin 6s linear infinite;
-              box-shadow: 0 0 22px var(--color-status-nominal); "></div>
+              border: 2px solid var(--color-accent); "></div>
             <div style="
-              width: 12px;
-              height: 12px;
+              width: 8px;
+              height: 8px;
               border-radius: 50%;
-              background: var(--color-status-nominal);
-              border: 2px solid var(--color-surface-0);
-              box-shadow: 0 0 16px var(--color-status-nominal); "></div>
+              background: var(--color-accent);
+              border: 1px solid var(--color-surface-0); "></div>
           </div> `,
       })
 
@@ -1135,78 +1067,64 @@ export default function IndiaSatelliteMap({
 
   return (
     <div
-      className={`rounded-md border border-border-default bg-surface-1 overflow-hidden transition-colors duration-500 relative ${
-        isFullscreen ? 'fixed inset-4 z-50 rounded-md' : 'rounded-[32px]'
+      className={`relative overflow-hidden rounded-md border border-border-default bg-surface-1 ${
+        isFullscreen ? 'fixed inset-4 z-50' : ''
       }`}
     >
-      {/* Top Header Bar */}
-      <div className="p-4 sm:p-5 border-b border-border-default flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[rgba(10,14,20,0.75)] ">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-status-critical/15 border border-status-critical/40">
-            <Globe2 className="h-5 w-5 text-status-critical" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-semibold uppercase tracking-widest text-status-critical">
-                PROSPECTIVITY MAP
-              </span>
-              <span className="text-xs">
-                CLICK A CELL, OR SEARCH A PLACE
-              </span>
-            </div>
-            <h4 className="text-sm font-semibold text-text-primary mt-0.5">
-              Click a cell, or search a place, to score it against the Track A prospectivity model. The score is a ranking signal from surface geology and terrain — not a grade, not a reserve, and not evidence of ore at depth.
-            </h4>
-            {/* What is actually drawn, reported by the service that drew it. */}
-            {activeLayer === 'probability' || activeLayer === 'uncertainty' ? (
-              surfaceMeta.error ? (
-                <p className="mt-1 text-xs text-status-caution">
-                  No surface is drawn: {surfaceMeta.error}. A drawn stand-in would not be the
-                  model&rsquo;s.
-                </p>
-              ) : surfaceMeta.modelVersion ? (
-                <p
-                  className="mt-1 font-mono text-xs text-text-tertiary"
-                  data-provenance="derived"
-                  data-provenance-model={surfaceMeta.modelVersion}
-                >
-                  {surfaceMeta.modelVersion} · {surfaceMeta.nCells?.toLocaleString()} cells scored,
-                  kriged · derived, not a live reading
-                </p>
-              ) : null
-            ) : null}
-          </div>
+      {/*
+        Header: one sentence and the map's controls (POLISH_AUDIT.md issue 5).
+        It was a red "PROSPECTIVITY MAP" eyebrow, an uppercase "CLICK A CELL,
+        OR SEARCH A PLACE", and a bold sentence saying the same — three
+        statements of one instruction, in status red, which means "threshold
+        breached". The panel above the map already labels it. The "Highlight
+        belt on/off" toggle is gone: it switched a class (cyber-radar-sweep-beam)
+        that no stylesheet defines, so it changed nothing on the map.
+      */}
+      <div className="flex flex-col justify-between gap-3 border-b border-border-default bg-surface-1 p-4 md:flex-row md:items-center">
+        <div className="min-w-0">
+          <p className="measure text-sm text-text-secondary">
+            Click a cell, or search a place, to score it against the Track A model. The score ranks
+            places by surface geology and terrain — not a grade, not a reserve, and not evidence of
+            ore at depth.
+          </p>
+          {/* What is actually drawn, reported by the service that drew it. */}
+          {activeLayer === 'probability' || activeLayer === 'uncertainty' ? (
+            surfaceMeta.error ? (
+              <p className="mt-1 text-xs text-status-caution">
+                No surface is drawn: {surfaceMeta.error}. A drawn stand-in would not be the
+                model&rsquo;s.
+              </p>
+            ) : surfaceMeta.modelVersion ? (
+              <p
+                className="mt-1 font-mono text-xs text-text-secondary"
+                data-provenance="derived"
+                data-provenance-model={surfaceMeta.modelVersion}
+              >
+                {surfaceMeta.modelVersion} · {surfaceMeta.nCells?.toLocaleString()} cells scored,
+                kriged · derived, not a live reading
+              </p>
+            ) : null
+          ) : null}
         </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            type="button"
-            onClick={() => setRadarSweepActive(!radarSweepActive)}
-            className={`rounded-md border border-border-interactive bg-surface-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer ${
-              radarSweepActive ? 'border-status-critical text-status-critical' : 'text-text-tertiary'
-            }`}
-          >
-            <Radio className="w-3.5 h-3.5 " />
-            <span>Highlight belt {radarSweepActive ? 'on' : 'off'}</span>
-          </button>
-
+        {/* Map controls: neutral, sentence case (DESIGN_SYSTEM §4.4, §5.2). */}
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={zoomToNational}
-            className="rounded-md border border-border-interactive bg-surface-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-text-primary flex items-center gap-1.5 cursor-pointer"
+            className="flex items-center gap-1.5 rounded-md border border-border-interactive bg-surface-2 px-3 py-1.5 text-sm text-text-primary transition-colors duration-[120ms] ease-out hover:bg-surface-3"
           >
-            <Compass className="w-3.5 h-3.5 text-accent" />
-            <span>National View</span>
+            <Compass className="h-4 w-4 text-text-secondary" aria-hidden="true" />
+            <span>National view</span>
           </button>
 
           <button
             type="button"
             onClick={zoomToIndia}
-            className="rounded-md border border-border-interactive bg-surface-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold text-text-primary flex items-center gap-1.5 cursor-pointer"
+            className="flex items-center gap-1.5 rounded-md border border-border-interactive bg-surface-2 px-3 py-1.5 text-sm text-text-primary transition-colors duration-[120ms] ease-out hover:bg-surface-3"
           >
-            <Navigation className="w-3.5 h-3.5 text-[var(--color-status-caution)]" />
-            <span>Manganese Belt</span>
+            <Navigation className="h-4 w-4 text-text-secondary" aria-hidden="true" />
+            <span>Manganese belt</span>
           </button>
 
           <button
@@ -1217,9 +1135,9 @@ export default function IndiaSatelliteMap({
             // route (it had never visited /console?track=a).
             aria-label={isFullscreen ? 'Exit full-screen map' : 'Full-screen map'}
             aria-pressed={isFullscreen}
-            className="rounded-md border border-border-interactive bg-surface-2 p-2 rounded-full text-text-primary hover:text-accent transition-colors cursor-pointer"
+            className="rounded-md border border-border-interactive bg-surface-2 p-2 text-text-primary transition-colors duration-[120ms] ease-out hover:bg-surface-3"
           >
-            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </button>
         </div>
       </div>
@@ -1355,8 +1273,6 @@ export default function IndiaSatelliteMap({
             } bg-surface-0 overflow-hidden`}
           >
 
-            {radarSweepActive && <div className="cyber-radar-sweep-beam" />}
-
             <div ref={mapContainerRef} className="w-full h-full" />
 
             {/* DEFAULT TELEMETRY CARD (Top Right - visible when search prediction report is not active) */}
@@ -1370,34 +1286,27 @@ export default function IndiaSatelliteMap({
               </div>
             ) : null}
 
+            {/*
+              The selected mine's card. Not on a phone: there it covered the top
+              of a 380 px map (POLISH_AUDIT.md issues 5 and 8), and the dock
+              under the map already names the mine and its plan target. And not
+              "CRITICAL PLAN TARGET" in status red — a large plan is not a
+              breached threshold; the red is the marker colour (backlogged).
+            */}
             {!activePrediction && currentHotspotMeta && (
-              <div className="absolute top-4 right-4 z-[400] p-4 rounded-md bg-[rgba(8,12,18,0.92)] border border-border-default  max-w-xs shadow-2xl">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full " style={{ backgroundColor: currentHotspotMeta.color }} />
-                    <span className="text-xs font-mono font-semibold uppercase" style={{ color: currentHotspotMeta.color }}>
-                      {selectedMine.name} Hotspot
-                    </span>
-                  </div>
-                  <span
-                    className="text-xs"
-                    style={{
-                      backgroundColor: `${currentHotspotMeta.color}20`,
-                      borderColor: `${currentHotspotMeta.color}60`,
-                      color: currentHotspotMeta.color,
-                    }}
-                  >
-                    {currentHotspotMeta.priority} PLAN TARGET
-                  </span>
+              <div className="absolute top-3 right-3 z-[400] hidden max-w-xs rounded-md border border-border-default bg-surface-1 p-4 shadow-[var(--shadow-overlay)] sm:block">
+                <div className="mb-2 flex items-center gap-2">
+                  <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: currentHotspotMeta.color }} />
+                  <span className="text-sm font-medium text-text-primary">{selectedMine.name}</span>
                 </div>
 
                 <div
-                  className="space-y-2 text-xs font-mono pt-1.5 border-t border-border-default"
+                  className="space-y-1.5 border-t border-border-default pt-2 text-sm"
                   data-provenance="reference"
                 >
-                  <div className="flex justify-between text-text-tertiary">
-                    <span>Plan target (register):</span>
-                    <span className="font-bold text-text-primary">{currentHotspotMeta.rate}</span>
+                  <div className="flex justify-between gap-4 text-text-secondary">
+                    <span>Plan target (register)</span>
+                    <span className="font-mono text-text-primary">{currentHotspotMeta.rate}</span>
                   </div>
                   {/*
                     An "Estimated Ore Grade" row sat here showing a per-mine Mn
@@ -1405,125 +1314,82 @@ export default function IndiaSatelliteMap({
                     Track A outputs a prospectivity score, which PRD §2.4 is
                     explicit is not a grade and not a reserve.
                   */}
-                  <div className="flex justify-between text-text-tertiary">
-                    <span>Coordinates:</span>
-                    <span className="text-accent">{selectedMine.lat}&deg;N, {selectedMine.lng}&deg;E</span>
+                  <div className="flex justify-between gap-4 text-text-secondary">
+                    <span>Coordinates</span>
+                    <span className="font-mono text-text-primary">{selectedMine.lat}&deg;N, {selectedMine.lng}&deg;E</span>
                   </div>
-                  <div className="flex justify-between text-text-tertiary">
-                    <span>Geological Belt:</span>
+                  <div className="flex justify-between gap-4 text-text-secondary">
+                    <span>Geological belt</span>
                     <span className="text-text-primary">{selectedMine.state === 'MP' ? 'Central MP Syncline' : 'Western MH Corridor'}</span>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* AI ML PROSPECTIVITY PREDICTION INSPECTOR REPORT (RIGHT-HAND SIDE PANEL) */}
+            {/*
+              What a click on the map scored. It was an "AI prospectivity
+              dossier" reading fields the service does not send: "NaN%" as a
+              manganese possibility, literal fallbacks for a fault distance and
+              two reflectances, an empty "AI diagnostic" and two buttons to an
+              anchor that is not on the page (POLISH_AUDIT.md issue 1). It now
+              shows the response itself, through the same Metrics as the
+              "Score a location" form below the map — or, if the model did not
+              answer, that it did not, with no number.
+            */}
             {activePrediction && (
-              <div className="absolute top-4 right-4 z-[450] p-4 rounded-md bg-[rgba(6,12,24,0.95)] border border-accent/50  w-[90%] sm:w-[380px] max-h-[90%] overflow-y-auto text-xs font-mono text-text-primary animate-in slide-in-from-right-4 duration-300">
-                <div className="flex items-center justify-between pb-2.5 border-b border-border-default mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-accent/20 border border-accent/40 text-accent">
-                      <Cpu className="w-4 h-4 " />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-accent uppercase tracking-wider">
-                          AI Prospectivity Dossier
-                        </span>
-                      </div>
-                      <h5 className="font-bold text-text-primary text-xs truncate max-w-[210px]">
-                        {activePrediction.location_name}
-                      </h5>
-                      <span className="text-xs text-text-secondary">
-                        {activePrediction.lat?.toFixed(4)}°N, {activePrediction.lng?.toFixed(4)}°E
-                      </span>
-                    </div>
+              <div
+                className="absolute top-3 right-3 z-[450] max-h-[calc(100%-1.5rem)] w-[calc(100%-1.5rem)] overflow-y-auto rounded-md border border-border-default bg-surface-1 p-4 shadow-[var(--shadow-overlay)] sm:w-[440px]"
+                data-testid="map-point-score"
+                role="dialog"
+                aria-label="Score at this point"
+              >
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  {/* The point that was clicked, by name and coordinates: an
+                      input, not a claim. */}
+                  <div className="min-w-0" data-point-coords>
+                    <p className="label">Score at this point</p>
+                    <p className="mt-1 truncate text-sm font-medium text-text-primary">
+                      {activePrediction.location_name ?? 'Selected point'}
+                    </p>
+                    <p className="font-mono text-xs text-text-secondary">
+                      {activePrediction.lat.toFixed(3)}°N, {activePrediction.lng.toFixed(3)}°E
+                    </p>
                   </div>
-
                   <button
                     type="button"
                     onClick={() => setActivePrediction(null)}
-                    className="p-1 rounded-lg hover:bg-surface-3 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-                    title="Close Report"
+                    className="shrink-0 rounded-md p-1 text-text-secondary transition-colors duration-[120ms] ease-out hover:bg-surface-3 hover:text-text-primary"
+                    aria-label="Close"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
 
-                {/* Prospectivity score panel. This was a two-column grid; the
-                    second cell held the fabricated "Historical Success Ratio". */}
-                <div className="mb-3">
-                  <div className="p-3 rounded-md bg-gradient-to-br from-accent/10 to-transparent border border-accent/30">
-                    <span className="text-xs uppercase text-text-secondary block mb-0.5 font-bold">
-                      Manganese Possibility
-                    </span>
-                    <div className="text-xl font-semibold text-accent">
-                      {(activePrediction.probability * 100).toFixed(1)}%
-                    </div>
-                    <span className="text-xs text-accent uppercase font-bold">
-                      {activePrediction.confidence} Confidence
-                    </span>
+                {activePrediction.ok ? (
+                  <PointScore probe={activePrediction.probe} />
+                ) : (
+                  <div className="rounded-md border border-status-critical/30 bg-status-critical/5 p-3 text-xs" role="status">
+                    <p className="font-semibold text-status-critical">Prospectivity model unavailable</p>
+                    {/* The service's own reason, which already says why no
+                        number follows; a bare network error gets that said. */}
+                    <p className="mt-1 leading-snug text-text-secondary">
+                      {String(activePrediction.error).replace(/\.+$/, '')}.
+                    </p>
+                    {/no score/i.test(String(activePrediction.error)) ? null : (
+                      <p className="mt-1 leading-snug text-text-secondary">No score is shown.</p>
+                    )}
                   </div>
-                </div>
-
-                {/* Nearest Geological Fault Telemetry */}
-                <div className="p-2.5 rounded-md bg-status-caution/10 border border-status-caution/30 text-xs text-status-caution mb-2 font-mono flex items-center justify-between">
-                  <span>Structural Fault:</span>
-                  <span className="font-bold truncate max-w-[190px]">{activePrediction.nearest_fault_name || 'Regional Fault'} ({activePrediction.dist_to_fault_km || 4.2} km)</span>
-                </div>
-
-                {/* Geological Metrics Table */}
-                <div className="p-2.5 rounded-md bg-black/50 border border-border-default space-y-1.5 mb-3 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Iron Oxide Index:</span>
-                    <span className="text-text-primary font-bold">{activePrediction.features?.iron_oxide_index}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Ferrous Mineral Index:</span>
-                    <span className="text-text-primary font-bold">{activePrediction.features?.ferrous_mineral_index}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">SWIR B11/B12 Reflectance:</span>
-                    <span className="text-accent font-bold">{activePrediction.features?.swir_b11_reflectance || 0.32} / {activePrediction.features?.swir_b12_reflectance || 0.41}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Elevation & Slope:</span>
-                    <span className="text-accent">{activePrediction.features?.elevation_m}m &bull; {activePrediction.features?.slope_deg}°</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Precipitation Baseline:</span>
-                    <span className="text-status-caution">{activePrediction.features?.rainfall_mm} mm</span>
-                  </div>
-                </div>
-
-                {/* AI Natural Language Interpretation */}
-                <p className="text-xs text-text-secondary leading-relaxed mb-3 p-2.5 rounded-md bg-surface-2 border border-border-default">
-                  💡 <span className="font-bold text-text-primary">AI Geological Diagnostic:</span> {activePrediction.geological_interpretation}
-                </p>
-
-                {/* Direct Action Links */}
-                <div className="flex items-center gap-2 pt-1 border-t border-border-default">
-                  <a
-                    href="#smart-blending"
-                    className="rounded-md border border-border-interactive bg-surface-2 flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
-                  >
-                    3D Borehole Kriging
-                  </a>
-                  <a
-                    href="#smart-blending"
-                    className="rounded-md border border-border-interactive bg-surface-2 flex-1 py-2 rounded-md text-accent hover:text-text-primary text-xs font-bold text-center uppercase tracking-wider transition-colors"
-                  >
-                    Simulate Blending
-                  </a>
-                </div>
+                )}
               </div>
             )}
 
-            {/* Loading Indicator when user clicks or searches on Map */}
+            {/* While the click is being scored. Stated, not animated. */}
             {isPredicting && (
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[500] px-4 py-2 rounded-full bg-black/90 border border-accent text-accent font-mono text-xs font-bold flex items-center gap-2 ">
-                <Activity className="w-4 h-4 animate-spin" />
-                <span>Geocoding & Running AI Manganese Machine Learning Engine...</span>
+              <div
+                role="status"
+                className="absolute top-3 left-1/2 z-[500] -translate-x-1/2 rounded-md border border-border-default bg-surface-1 px-3 py-1.5 text-xs text-text-secondary shadow-[var(--shadow-overlay)]"
+              >
+                Scoring this point with the Track A model…
               </div>
             )}
 

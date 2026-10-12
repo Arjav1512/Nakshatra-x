@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { derived, measured, measuredOrNull, measuredValue } from '@/lib/provenance'
+import { derived, measuredValue } from '@/lib/provenance'
 import {
   type DrillTargetsResponse, type TrackAMetrics,
   fetchDrillTargets, fetchTrackAMetrics, predictPoint,
 } from '@/lib/console-api'
 import { cividis } from '@/lib/colormap'
 import { Metric } from './Evidence'
+import { PointScore } from './PointScore'
 import { DEFAULT_LAYER, type LayerType } from '@/components/mission-control/IndiaSatelliteMap'
 import type { MineInfo } from '@/components/mission-control/types'
 
@@ -75,7 +76,7 @@ function Unavailable({ what, reason }: { what: string; reason: string }) {
 function Spinner({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-2 py-6 text-xs text-text-secondary">
-      <span className="h-3 w-3 animate-spin rounded-full border-2 border-text-tertiary border-t-status-nominal" />
+      <span className="h-3 w-3 animate-spin rounded-full border-2 border-text-tertiary border-t-accent" />
       {label}
     </div>
   )
@@ -118,11 +119,12 @@ export function TrackAPanel() {
   return (
     <section className="space-y-4">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-status-nominal">
-          Track A · Prospectivity
-        </h2>
+        {/* A label, not status green: green means "within expected range"
+            for a measured thing, and a track heading is neither
+            (POLISH_AUDIT.md issue 4). */}
+        <h2 className="label">Track A · Prospectivity</h2>
         {metrics ? (
-          <p className="font-mono text-xs text-text-tertiary">
+          <p className="font-mono text-xs text-text-secondary">
             {metrics.model_version} · validated {metrics.validation}
           </p>
         ) : null}
@@ -220,9 +222,8 @@ export function TrackAPanel() {
 
       {/* --- A-5 ranked drill targets with evidence --- */}
       <div className="rounded-md border border-border-default bg-surface-2 p-3">
-        <p className="mb-2 text-xs uppercase tracking-wider text-text-secondary">
-          Ranked drill targets (PRD A-5) — ranked by score, each with its evidence
-        </p>
+        <p className="label mb-2">Ranked drill targets (PRD A-5)</p>
+        <p className="mb-2 text-sm text-text-secondary">Ranked by score, each with its evidence.</p>
         {tErr ? (
           <Unavailable what="Drill targets" reason={tErr} />
         ) : !targets ? (
@@ -288,7 +289,7 @@ export function TrackAPanel() {
               </table>
             </section>
             <details className="mt-2" data-provenance="derived" data-provenance-model={targets.model_version}>
-              <summary className="cursor-pointer text-xs uppercase tracking-wider text-text-tertiary hover:text-text-secondary">
+              <summary className="label cursor-pointer hover:text-text-primary">
                 evidence for rank 1
               </summary>
               <p className="mt-1 text-xs leading-snug text-text-secondary">{targets.targets[0]?.evidence}</p>
@@ -302,26 +303,24 @@ export function TrackAPanel() {
 
       {/* --- map-click equivalent: the real model, with uncertainty --- */}
       <div className="rounded-md border border-border-default bg-surface-2 p-3">
-        <p className="mb-2 text-xs uppercase tracking-wider text-text-secondary">
-          Score a location (PRD A-3, A-4, A-7)
-        </p>
+        <p className="label mb-2">Score a location (PRD A-3, A-4, A-7)</p>
         <div className="flex flex-wrap items-end gap-2">
-          <label className="text-xs text-text-tertiary">
-            <span className="mb-1 block uppercase tracking-wider">Latitude</span>
+          <label className="text-xs">
+            <span className="label mb-1 block">Latitude</span>
             <input
               value={lat} onChange={(e) => setLat(e.target.value)} inputMode="decimal"
-              className="w-28 rounded border border-border-default bg-black/40 px-2 py-1 font-mono text-xs text-text-primary outline-none focus:border-status-nominal/60"
+              className="w-28 rounded-md border border-border-interactive bg-surface-1 px-2 py-1 font-mono text-sm text-text-primary"
             />
           </label>
-          <label className="text-xs text-text-tertiary">
-            <span className="mb-1 block uppercase tracking-wider">Longitude</span>
+          <label className="text-xs">
+            <span className="label mb-1 block">Longitude</span>
             <input
               value={lng} onChange={(e) => setLng(e.target.value)} inputMode="decimal"
-              className="w-28 rounded border border-border-default bg-black/40 px-2 py-1 font-mono text-xs text-text-primary outline-none focus:border-status-nominal/60"
+              className="w-28 rounded-md border border-border-interactive bg-surface-1 px-2 py-1 font-mono text-sm text-text-primary"
             />
           </label>
           <label className="flex items-center gap-1.5 pb-1 text-xs text-text-secondary">
-            <input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} className="accent-status-nominal" />
+            <input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} className="accent-accent" />
             fetch live Sentinel-2 (slower)
           </label>
           <button type="button"
@@ -341,55 +340,8 @@ export function TrackAPanel() {
         {pErr ? <div className="mt-3"><Unavailable what="Prediction" reason={pErr} /></div> : null}
 
         {probe ? (
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <Metric
-              label="Kriged prospectivity"
-              emphasis
-              data={measuredValue(derived(probe.kriged_prospectivity_score, 'score 0-1', 'Ordinary kriging over measured observations', {
-                model_version: probe.model_version,
-                method: probe.uncertainty_basis,
-                // `?? 0` here reported an uncertainty of ZERO when the kriging
-                // standard deviation was missing — the single most misleading
-                // value available, since it claims the estimate is exact. An
-                // absent spread is now "not quantified", which is what Metric
-                // renders when `uncertainty` is undefined.
-                uncertainty:
-                  probe.uncertainty_sd != null
-                    ? {
-                        plus_minus: Number(probe.uncertainty_sd.toFixed(3)),
-                        confidence: 0.68,
-                        basis:
-                          probe.variogram?.range_m != null
-                            ? `Kriging standard deviation; variogram range ${Math.round(probe.variogram.range_m / 1000)} km.`
-                            : 'Kriging standard deviation; variogram range not reported.',
-                      }
-                    : undefined,
-              }), () => String(probe.kriged_prospectivity_score?.toFixed(3)))}
-          />
-            {probe.direct_model_score != null ? (
-              <Metric
-                label="Direct model score (live read)"
-                emphasis
-              data={measuredValue(measured(probe.direct_model_score, 'probability', probe.source ?? 'Sentinel-2 L2A + SRTM', {
-                  model_version: probe.model_version,
-                  vintage: probe.scene?.datetime,
-                  method: `Scene ${probe.scene?.scene_id} · cloud ${probe.scene?.cloud_cover_pct}%`,
-                }), () => String(probe.direct_model_score.toFixed(3)))}
-          />
-            ) : (
-              <Metric
-                label="Direct model score (live read)"
-                data={measuredOrNull(null)}
-            unavailable={probe.note ?? 'Live satellite read not requested.'}
-          />
-            )}
-          </div>
-        ) : null}
-
-        {probe?.guardrails ? (
-          <div className="mt-3 space-y-1 rounded-md border border-border-default bg-surface-1 p-3 text-xs leading-snug text-text-secondary">
-            <p>{probe.guardrails.no_subsurface_detection}</p>
-            <p>{probe.guardrails.not_a_reserve}</p>
+          <div className="mt-3">
+            <PointScore probe={probe} />
           </div>
         ) : null}
       </div>

@@ -372,6 +372,23 @@ export function DecisionConsole() {
                 </span>
               </p>
             </>
+          ) : track === 'A' ? (
+            /*
+              Track A names itself. It repeated the portfolio's hero — "Decision
+              support for MOIL" and its four-line thesis — above the map, which
+              put the map's top edge at y = 586 on a 768 px screen
+              (POLISH_AUDIT.md issue 5). The thesis stays on the portfolio,
+              where the demo opens on it.
+            */
+            <>
+              <h1 className="font-display text-3xl font-medium tracking-tight md:text-4xl">
+                Where to prospect
+              </h1>
+              <p className="measure mt-2 text-base text-text-secondary">
+                Track A ranks places over years from surface geology and terrain. Nothing here
+                claims to see ore underground.
+              </p>
+            </>
           ) : (
             <>
               <h1 className="font-display text-3xl font-medium tracking-tight md:text-4xl">
@@ -398,26 +415,29 @@ export function DecisionConsole() {
           already holds, so it needs nothing the panel has.
         */}
         {selected && track === 'B' && portfolio[selected.id] && !isFailure(portfolio[selected.id]!) ? (
+          /*
+            One line, 48 px. It was two lines and about 90 px, sticky at 56 px,
+            while the section tabs are sticky at 104 px (6.5rem = 56 + 48): once
+            you scrolled, the summary slid over the tabs and hid them
+            (POLISH_AUDIT.md issue 8).
+          */
           <div
-            className="sticky top-14 z-20 -mx-4 border-y border-border-default bg-surface-1/95 px-4 py-3 md:hidden"
+            className="sticky top-14 z-20 -mx-4 flex h-12 items-center justify-between gap-3 border-y border-border-default bg-surface-1 px-4 md:hidden"
             data-testid="mine-sticky-summary"
             data-provenance="derived"
             data-provenance-model={PORTFOLIO_ENV.model_version ?? undefined}
           >
-            <div className="flex items-baseline justify-between gap-3">
-              <span className="min-w-0 truncate text-sm font-medium text-text-primary">
-                {selected.name}
-              </span>
-              <span className="shrink-0 font-mono text-lg tabular-nums text-text-primary">
+            <span className="min-w-0 truncate text-sm font-medium text-text-primary">
+              {selected.name}
+            </span>
+            <span className="flex shrink-0 items-baseline gap-2">
+              <span className="font-mono text-lg tabular-nums text-text-primary">
                 &minus;{Math.round((portfolio[selected.id] as any).shortfall).toLocaleString()} t
               </span>
-            </div>
-            <div className="mt-1 flex flex-wrap items-center gap-x-2 text-xs">
-              <span className="font-mono tabular-nums text-text-secondary">
+              <span className="font-mono text-xs tabular-nums text-text-secondary">
                 of {Math.round((portfolio[selected.id] as any).plan).toLocaleString()} t plan
               </span>
-              <span className="text-text-tertiary">expected shortfall, summed over grades</span>
-            </div>
+            </span>
           </div>
         ) : null}
 
@@ -478,24 +498,39 @@ export function DecisionConsole() {
                 detail={minesErr}
               />
             ) : !mines ? (
-              <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {/* One placeholder per mine in MOIL's register. Six were
-                    rendered here while ten cards were about to arrive, so the
-                    page grew by four rows the moment the register resolved —
-                    which is most of the console's layout shift. If the register
-                    ever returns a different count the cost is one small shift,
-                    not the four-row jump. */}
-                {Array.from({ length: 10 }, (_, i) => i).map((i) => (
-                  <Card key={i}>
-                    <div className="space-y-2 p-4">
-                      <Skeleton className="h-4 w-28" />
-                      <Skeleton className="h-3 w-20" />
-                      <Skeleton className="h-4 w-32" />
-                    </div>
-                  </Card>
-                ))}
+              /*
+                While the register loads, the same boxes the loaded page draws:
+                the focal band's reserved slot, then ten card-height
+                placeholders. This drew ten short skeleton cards (82 px) and no
+                band, so when the register arrived the band appeared above them
+                and every card grew to 170 px — a shift of 0.063 at 1280x800 and
+                0.101 in Lighthouse's 1350x940 desktop run, over its 0.1 target
+                (POLISH_AUDIT.md, result). Six were once drawn for ten mines;
+                ten still are. If the register ever returns a different count
+                the cost is one small shift, not this jump.
+              */
+              <>
+                <div className="mt-4 min-h-[10.625rem] md:min-h-[9.125rem]">
+                  <div className="h-full rounded-md border border-border-subtle bg-surface-1/50 p-5">
+                    <span className="label">Largest expected shortfall</span>
+                    <p className="mt-2 text-sm text-text-secondary">Loading the mine register&hellip;</p>
+                  </div>
+                </div>
+                <ul aria-hidden="true" className="mt-4 grid list-none gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {Array.from({ length: 10 }, (_, i) => i).map((i) => (
+                    <li key={`slot-${i}`}>
+                      <Card className="h-full min-h-[10.625rem]">
+                        <div className="space-y-2 p-4">
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-3 w-20" />
+                          <Skeleton className="h-4 w-32" />
+                        </div>
+                      </Card>
+                    </li>
+                  ))}
+                </ul>
                 <p className="sr-only">Loading mine register</p>
-              </div>
+              </>
             ) : (
               <>
               {/*
@@ -537,7 +572,12 @@ export function DecisionConsole() {
                     <span className="font-display text-3xl font-medium tracking-tight text-text-primary">
                       {worst.name}
                     </span>
-                    <span className="font-mono text-2xl tabular-nums text-text-primary">
+                    {/* The answer at the name's size: it was 24 px beside a
+                        36 px name (POLISH_AUDIT.md issue 9). leading-none so
+                        the name's line box sets the row: at its own 44 px line
+                        height the mono face sat 1 px lower and grew the band
+                        past its reserved height, a 1 px shift at settle. */}
+                    <span className="font-mono text-3xl leading-none tabular-nums text-text-primary">
                       −{Math.round((portfolio[worst.id] as any).shortfall).toLocaleString()} t
                     </span>
                     {/*
@@ -572,10 +612,19 @@ export function DecisionConsole() {
                 className="mt-4 grid list-none gap-3 sm:grid-cols-2 lg:grid-cols-3"
               >
                 {!portfolioSettled
-                  ? (mines ?? []).map((m) => (
+                  ? (mines ?? []).map((_, i) => (
                       // Same box as a real card, so swapping one for the other
                       // moves nothing. No name: its slot is not known yet.
-                      <li key={m.id} aria-hidden="true">
+                      //
+                      // Keyed by slot, not by mine, here and in the ranked list
+                      // below. Keyed by mine, React moved each card's DOM node
+                      // from its register position to its ranked one when the
+                      // ranking landed, and the browser counts a moved node as
+                      // layout shift: 0.063 at 1280x800, 0.101 in Lighthouse's
+                      // desktop run (POLISH_AUDIT.md, result). By slot, the
+                      // nodes stay where they are and only their content changes.
+                      // biome-ignore lint/suspicious/noArrayIndexKey: the slot is the identity on purpose; a key per mine moves the DOM node when the ranking lands, which is the layout shift this fixes.
+                      <li key={`slot-${i}`} aria-hidden="true">
                         <Card className="h-full min-h-[10.625rem]">
                           <div className="h-full w-full animate-pulse rounded-md bg-surface-2/40" />
                         </Card>
@@ -585,7 +634,8 @@ export function DecisionConsole() {
                   const v = portfolio[m.id]
                   const isPilot = m.mine_code === PILOT_CODE
                   return (
-                    <li key={m.id}>
+                    // biome-ignore lint/suspicious/noArrayIndexKey: keyed by slot like the placeholders above, so each card replaces its placeholder in place instead of moving (no layout shift).
+                    <li key={`slot-${rank}`}>
                       <Card
                         interactive
                         // One height for every card. Content gives 146 or 170px, so

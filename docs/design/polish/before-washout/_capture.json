@@ -1,0 +1,158 @@
+{
+  "base": "http://localhost:3000",
+  "washout": true,
+  "viewports": {
+    "1366": {
+      "width": 1366,
+      "height": 768,
+      "dpr": 1,
+      "landing": {
+        "h1": {
+          "top": 185,
+          "bottom": 229
+        },
+        "fonts": [
+          "Inter",
+          "Inter Fallback",
+          "IBM Plex Mono"
+        ]
+      },
+      "portfolio": {
+        "focal_band": {
+          "top": 374,
+          "bottom": 520
+        },
+        "list": {
+          "top": 536,
+          "bottom": 1252
+        },
+        "withdrawn": {
+          "top": 1340,
+          "bottom": 1388
+        }
+      },
+      "balaghat": {
+        "shortfall_tile": {
+          "top": 2070,
+          "bottom": 2098
+        },
+        "expected_shortfall": {
+          "top": 562,
+          "bottom": 706
+        },
+        "chart": {
+          "top": 901,
+          "bottom": 1125
+        },
+        "backtest": {
+          "top": 1272,
+          "bottom": 1288
+        },
+        "actions": {
+          "top": 1179,
+          "bottom": 1215
+        }
+      },
+      "minetwin": {
+        "verdict": {
+          "top": 2049,
+          "bottom": 2190
+        }
+      },
+      "tracka": {
+        "map": {
+          "top": 586,
+          "bottom": 1206
+        },
+        "metrics": {
+          "top": 1327,
+          "bottom": 1442
+        }
+      },
+      "dossier_seconds": 2,
+      "dossier": {
+        "clicked": true,
+        "text": "AI PROSPECTIVITY DOSSIER"
+      }
+    },
+    "1366z125": {
+      "width": 1093,
+      "height": 614,
+      "dpr": 1.25,
+      "landing": {
+        "h1": {
+          "top": 185,
+          "bottom": 229
+        },
+        "fonts": [
+          "Inter",
+          "Inter Fallback",
+          "IBM Plex Mono"
+        ]
+      },
+      "portfolio": {
+        "focal_band": {
+          "top": 374,
+          "bottom": 520
+        },
+        "list": {
+          "top": 536,
+          "bottom": 1252
+        },
+        "withdrawn": {
+          "top": 1340,
+          "bottom": 1388
+        }
+      },
+      "balaghat": {
+        "shortfall_tile": {
+          "top": 2342,
+          "bottom": 2370
+        },
+        "expected_shortfall": {
+          "top": 562,
+          "bottom": 722
+        },
+        "chart": {
+          "top": 993,
+          "bottom": 1217
+        },
+        "backtest": {
+          "top": 1364,
+          "bottom": 1380
+        },
+        "actions": {
+          "top": 1271,
+          "bottom": 1307
+        }
+      },
+      "minetwin": {
+        "verdict": {
+          "top": 2065,
+          "bottom": 2206
+        }
+      },
+      "tracka": {
+        "map": {
+          "top": 618,
+          "bottom": 1238
+        },
+        "metrics": {
+          "top": 1359,
+          "bottom": 1474
+        }
+      },
+      "dossier_seconds": 2,
+      "dossier": {
+        "clicked": true,
+        "text": "AI PROSPECTIVITY DOSSIER"
+      }
+    }
+  },
+  "console_errors": {
+    "1366": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "1366z125": []
+  }
+}

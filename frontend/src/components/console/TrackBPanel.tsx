@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import {
-  Area, AreaChart, CartesianGrid, Line, ResponsiveContainer, Tooltip, XAxis, YAxis,
+  Area, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
 import { PLAN_TARGET_NOTE, derived, measuredValue, reference, synthetic } from '@/lib/provenance'
 import {
@@ -104,6 +104,17 @@ function describeWindow(origin: string, start: string, end: string) {
     ended,
     inProgress: started && !ended,
   }
+}
+
+/**
+ * The calendar day of a horizon. Day 1 is the window's first day; the chart
+ * labels days by date because the window is fixed, not "the next N days"
+ * (D-030).
+ */
+function dayOf(windowStart: string, horizonDays: number) {
+  const d = new Date(`${windowStart}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + horizonDays - 1)
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
 }
 
 export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: string }) {
@@ -237,22 +248,13 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
     // Calm arrival for the whole panel when a different mine is opened. Keyed
     // on the mine so it plays on change, not on every re-render.
     <section key={mineId} className="panel-enter space-y-4">
-      <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-accent">
-          Track B · Production shortfall
-        </h2>
-        {forecast ? (
-          <p className="font-mono text-xs text-text-tertiary">
-            {forecast.model_version} ·{' '}
-            {describeWindow(
-              forecast.forecast_origin,
-              forecast.window.start,
-              forecast.window.end
-            ).text}
-          </p>
-        ) : null}
-      </header>
-
+      {/*
+        No kicker row. "TRACK B · PRODUCTION SHORTFALL" in accent blue sat here
+        and said what the breadcrumb ("production risk") and the subtitle
+        ("Production shortfall, days to months") already say, 40 px above the
+        answer; the model version it carried is in the window line below
+        (POLISH_AUDIT.md issues 2 and 4).
+      */}
       {forecast
         ? (() => {
             const w = describeWindow(
@@ -261,8 +263,15 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
               forecast.window.end
             )
             return (
+              /*
+                One line, not a boxed paragraph (POLISH_AUDIT.md issue 2). It
+                was 105 px of prose between the mine's name and its answer.
+                The facts are the same — origin, the fixed window, a stored
+                artifact and its age, not a live reading — and so are the hooks
+                tools/e2e-forecast-dates.js reads. An ended window keeps its
+                full warning: that one has to stop the presenter.
+              */
               <div
-                className="rounded-md border border-border-default bg-surface-1 p-3"
                 data-testid="forecast-provenance"
                 data-provenance="synthetic"
                 data-provenance-model={forecast.model_version}
@@ -272,29 +281,26 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 data-window-end={forecast.window.end}
                 data-window-ended={String(w.ended)}
               >
-                <p className="measure text-xs text-text-secondary">
-                  {w.ended ? (
-                    <>
-                      <strong className="font-medium text-status-caution">
-                        This forecast&rsquo;s window has already ended.
-                      </strong>{' '}
-                      It covers {w.span}, forecast from {w.from}, which is in the past. The figures
-                      below are what the model predicted for that window, not a plan for today.
-                      Regenerate the artifacts to forecast from today (docs/DEMO.md).
-                    </>
-                  ) : (
-                    <>
-                      Figures below cover one fixed fortnight — {w.text} — set when the artifact was
-                      generated. It is not a window that rolls forward with today&rsquo;s date. It is
-                      served from a stored artifact
-                      {forecast.artifact_age_hours != null
-                        ? `, generated ${forecast.artifact_age_hours.toFixed(1)} h ago`
-                        : ''}
-                      , so it is a computed prediction rather than a live reading. The conditions
-                      panel, after the forecast, is measured live and carries its own vintage.
-                    </>
-                  )}
-                </p>
+                {w.ended ? (
+                  <p className="measure rounded-md border border-status-caution/40 bg-status-caution/10 p-3 text-sm text-text-primary">
+                    <strong className="font-medium text-status-caution">
+                      This forecast&rsquo;s window has already ended.
+                    </strong>{' '}
+                    It covers {w.span}, forecast from {w.from}, which is in the past. The figures
+                    below are what the model predicted for that window, not a plan for today.
+                    Regenerate the artifacts to forecast from today (docs/DEMO.md).
+                  </p>
+                ) : (
+                  <p className="text-sm text-text-secondary">
+                    <span className="text-text-primary">{w.span}</span>, forecast from {w.from} by{' '}
+                    <span className="font-mono text-xs">{forecast.model_version}</span> · a fixed
+                    fortnight from a stored artifact
+                    {forecast.artifact_age_hours != null
+                      ? ` (generated ${forecast.artifact_age_hours.toFixed(1)} h ago)`
+                      : ''}
+                    , not a live reading and not a window that rolls with today&rsquo;s date
+                  </p>
+                )}
               </div>
             )
           })()
@@ -337,81 +343,115 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
         <Spinner label={`Loading ${mineName}…`} />
       ) : (
         <>
-          <div className={`grid gap-3 sm:grid-cols-2 lg:grid-cols-4 ${sectionCls('answer')}`}>
-            <Metric
-              label="Plan target (horizon)"
-              emphasis
-              unit="t"
-              data={measuredValue(reference(
-                Math.round(forecast.portfolio.plan_target_tonnes),
-                'tonnes',
-                'plan_target, ingestion contract v1.0.0',
-                { model_version: 'nakshatra-synthetic-v1', method: 'Monthly plan pro-rated across the forecast window.' }
-              ))}
-          />
-            <Metric
-              label="Expected production"
-              emphasis
-              unit="t"
-              data={measuredValue(synthetic(
-                Math.round(forecast.portfolio.expected_cumulative_tonnes),
-                'tonnes',
-                SYNTH_SOURCE,
-                {
-                  model_version: forecast.model_version,
-                  method: 'Quantile gradient boosting with conformalised intervals; grade is a model feature.',
-                }
-              ))}
-          />
-            {/*
-              The focal number (D-044): the API's mine-level figure, which
-              sums each grade's own shortfall — a surplus in one grade does
-              not cancel a deficit in another (PRD §3).
-            */}
-            <Metric
-              label="Expected shortfall"
-              emphasis
-              unit="t"
-              data={measuredValue(derived(
-                Math.round(forecast.portfolio.expected_shortfall_tonnes),
-                'tonnes',
-                'Sum over grades of max(0, plan target − expected production)',
-                {
-                  model_version: forecast.model_version,
-                  method:
-                    'Each grade is short or not on its own: a surplus in one grade does not cover a deficit in another (PRD §3). A mean, so it does not depend on how the days are correlated.',
-                }
-              ))}
-          />
-            {/* Where the worst-grade P(shortfall) was: withdrawn, no number (D-044). */}
-            <ProbabilityWithdrawn variant="tile" />
-          </div>
-
           {/*
-            B-1 confusion 6. Below the four answer cards: the drivers on the
-            left, and how far to trust the answer on the right, side by side
-            from lg up. The trust column comes first in the DOM — it qualifies
-            the number directly above it, so that is where a screen reader and
-            the mobile tabs meet it — and is moved to the right visually.
+            One focal figure, two that frame it, and the chart beside them
+            (POLISH_AUDIT.md issues 2 and 3).
+
+            These were four equal tiles. The largest numbers on the screen
+            were the plan (13,030) and expected production (13,012) — five
+            digits each — and the answer, the expected shortfall, was the
+            third tile at the same size and read as the smallest thing there.
+            The shortfall is now the focal tile, in display size, with the
+            withdrawal of P(shortfall) stated under it as an annotation of the
+            number it would have qualified, instead of a fourth tile shaped
+            like one that failed to load. Plan and expected production sit
+            under it as the pair the shortfall is measured against.
+
+            The grades and their daily band sit beside the answer rather than
+            under it: stacked, the chart started at y = 901-956 on a 1280x800
+            screen and the presenter had to scroll mid-sentence. How far to
+            trust the band follows the chart, in the same column.
           */}
           <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
-          <div className="space-y-3 lg:order-last lg:col-span-5">
-          <div className={sectionCls('answer')}>
-            <IntervalCalibration mineCode={forecast.mine_code} mineName={mineName} />
+          <div className="space-y-3 lg:col-span-5">
+            <div className={sectionCls('answer')}>
+              {/*
+                The focal number (D-044): the API's mine-level figure, which
+                sums each grade's own shortfall — a surplus in one grade does
+                not cancel a deficit in another (PRD §3).
+              */}
+              <Metric
+                label="Expected shortfall"
+                focal
+                unit="t"
+                data={measuredValue(derived(
+                  Math.round(forecast.portfolio.expected_shortfall_tonnes),
+                  'tonnes',
+                  'Sum over grades of max(0, plan target − expected production)',
+                  {
+                    model_version: forecast.model_version,
+                    method:
+                      'Each grade is short or not on its own: a surplus in one grade does not cover a deficit in another (PRD §3). A mean, so it does not depend on how the days are correlated.',
+                  }
+                ))}
+                footer={
+                  <>
+                    <p className="mb-3 text-sm text-text-secondary">
+                      Summed over grades, for {describeWindow(
+                        forecast.forecast_origin,
+                        forecast.window.start,
+                        forecast.window.end
+                      ).span}
+                    </p>
+                    {/* Where the worst-grade P(shortfall) was: withdrawn, no number (D-044). */}
+                    <ProbabilityWithdrawn variant="note" />
+                  </>
+                }
+              />
+            </div>
+            <div className={`grid gap-3 sm:grid-cols-2 ${sectionCls('answer')}`}>
+              <Metric
+                label="Plan target (horizon)"
+                emphasis
+                unit="t"
+                data={measuredValue(reference(
+                  Math.round(forecast.portfolio.plan_target_tonnes),
+                  'tonnes',
+                  'plan_target, ingestion contract v1.0.0',
+                  { model_version: 'nakshatra-synthetic-v1', method: 'Monthly plan pro-rated across the forecast window.' }
+                ))}
+              />
+              <Metric
+                label="Expected production"
+                emphasis
+                unit="t"
+                data={measuredValue(synthetic(
+                  Math.round(forecast.portfolio.expected_cumulative_tonnes),
+                  'tonnes',
+                  SYNTH_SOURCE,
+                  {
+                    model_version: forecast.model_version,
+                    method: 'Quantile gradient boosting with conformalised intervals; grade is a model feature.',
+                  }
+                ))}
+              />
+            </div>
+            <div className={sectionCls('answer')}>
+              {/* Someone will subtract these two and get a different number
+                  from the focal one. That is the point of PRD §3; say so here. */}
+              <p className="text-sm text-text-secondary ">
+                The shortfall is not plan minus production: each grade is short or not on its own,
+                and a surplus in one grade does not cover a deficit in another (PRD §3). Each
+                grade&rsquo;s own shortfall and daily band are under &ldquo;By grade&rdquo;.
+              </p>
+            </div>
           </div>
 
-          <p className={`measure text-xs text-text-tertiary ${sectionCls('answer')}`}>
-            {PLAN_TARGET_NOTE}
-          </p>
-          </div>
-
-          <div className="space-y-4 lg:col-span-7">
-          {/* --- grade-aware breakdown: PRD B-5 is per-grade at P0 --- */}
-          <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('drivers')}`}>
-            <p className="mb-2 text-xs uppercase tracking-wider text-text-secondary">
-              By grade — a shortfall in one grade is not fungible with a surplus in another (PRD §3)
+          <div className="space-y-3 lg:col-span-7">
+          {/*
+            The grades and the chart are one card now (POLISH_AUDIT.md issue 3).
+            The chips are the chart's grade selector, and as a card of their
+            own they cost a border, padding and a gap — part of what put the
+            chart's top at y = 901 on a 1280x800 screen.
+          */}
+          <div className={`rounded-md border border-border-default bg-surface-2 p-3 md:p-4 ${sectionCls('drivers')}`}>
+            {/* --- grade-aware breakdown: PRD B-5 is per-grade at P0 --- */}
+            <p className="label">By grade</p>
+            <p className="mt-1 text-sm text-text-secondary">
+              A shortfall in one grade is not fungible with a surplus in another (PRD §3). Choose a
+              grade to see its daily band.
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               {grades.map((g) => {
                 const on = (grade ?? grades[0]?.grade) === g.grade
                 // The grade's own expected shortfall. This chip showed its
@@ -425,62 +465,88 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                     aria-pressed={on}
                     data-provenance="derived"
                     data-provenance-model={forecast.model_version}
-                    className={`rounded-md border px-3 py-2 text-left text-xs transition-colors ${
-                      on ? 'border-accent/60 bg-accent/10' : 'border-border-default bg-surface-2 hover:border-border-interactive'
+                    className={`rounded-md border px-3 py-2 text-left text-sm transition-colors duration-[120ms] ease-out ${
+                      on ? 'border-accent bg-accent-muted' : 'border-border-interactive bg-surface-2 hover:bg-surface-3'
                     }`}
                   >
                     <span className="block font-medium text-text-primary">
                       {g.grade.replace(/_/g, ' ')}
                     </span>
-                    <span className="mt-0.5 block font-mono tabular-nums text-text-secondary">
+                    <span className="mt-0.5 block font-mono text-xs tabular-nums text-text-secondary">
                       {short > 0 ? `−${short.toLocaleString()} t expected` : 'no shortfall expected'}
                     </span>
                   </button>
                 )
               })}
             </div>
-          </div>
 
           {/* --- trajectory with prediction interval + baseline --- */}
           {selected ? (
-            <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('drivers')}`}>
-              <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-                <p className="text-xs uppercase tracking-wider text-text-secondary">
-                  {selected.grade.replace(/_/g, ' ')} · daily trajectory
+            <div className="mt-4 border-t border-border-default pt-3">
+              <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <p className="text-sm font-medium text-text-primary">
+                  {selected.grade.replace(/_/g, ' ')} · daily production, tonnes
                 </p>
-                <p className="font-mono text-xs text-text-tertiary">
-                  band = {Math.round(forecast.interval.nominal_coverage * 100)}% prediction interval ·
-                  dashed = {forecast.baseline_version}
-                </p>
+                {/*
+                  A key with the marks themselves, in 13 px secondary. It was
+                  one 12 px tertiary mono line ("band = 80% prediction interval ·
+                  dashed = seasonal-naive-365-v1"): 5.1:1, 3.3:1 on a washed-out
+                  projector, and a sentence to decode instead of a mark to match.
+                */}
+                <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-secondary" aria-label="Chart key">
+                  <li className="flex items-center gap-1.5">
+                    <span aria-hidden="true" className="inline-block h-3 w-4 rounded-sm border border-accent/70 bg-accent/30" />
+                    {Math.round(forecast.interval.nominal_coverage * 100)}% prediction interval
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span aria-hidden="true" className="inline-block h-0.5 w-4 rounded-full bg-accent" />
+                    median
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span aria-hidden="true" className="inline-block w-4 border-t-2 border-dashed border-text-secondary" />
+                    seasonal-naive baseline
+                  </li>
+                </ul>
               </div>
-              <div className="h-56 w-full" data-forecast-chart={selected.grade}>
+              <div className="h-56 w-full md:h-60" data-forecast-chart={selected.grade}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={selected.trajectory} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
+                  <ComposedChart data={selected.trajectory} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
                     {/* Recharts theme — docs/design/DESIGN_SYSTEM.md section 8.
                         Colours reference the design tokens through var(); no hex
                         literal appears outside tokens.css. Entrance animation is
                         off: an animating chart is a count-up by another name. */}
-                    <defs>
-                      <linearGradient id="pi" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.16} />
-                        <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0.16} />
-                      </linearGradient>
-                    </defs>
                     <CartesianGrid
                       vertical={false}
-                      stroke="var(--color-border-subtle)"
+                      stroke="var(--color-border-default)"
                     />
                     <XAxis
                       dataKey="horizon_days"
-                      tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }}
+                      tick={{ fontSize: 13, fill: 'var(--color-text-secondary)' }}
+                      tickFormatter={(h) => dayOf(forecast.window.start, h)}
                       tickLine={false}
                       axisLine={false}
+                      // Evenly spaced dates that fit at 13 px: every other
+                      // day on a desktop, fewer on a phone.
+                      interval="equidistantPreserveStart"
+                      minTickGap={16}
                     />
+                    {/*
+                      Fitted to the data, not from zero. From zero, values of
+                      about 150-210 t used the top fifth of the plot and the
+                      band was a sliver (POLISH_AUDIT.md issue 3). The ticks
+                      state the range, so nothing implies a zero that is not
+                      drawn.
+                    */}
                     <YAxis
-                      tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }}
+                      tick={{ fontSize: 13, fill: 'var(--color-text-secondary)' }}
                       tickLine={false}
                       axisLine={false}
-                      width={48}
+                      width={44}
+                      domain={[
+                        (lo: number) => Math.max(0, Math.floor((lo * 0.9) / 10) * 10),
+                        (hi: number) => Math.ceil((hi * 1.05) / 10) * 10,
+                      ]}
+                      allowDecimals={false}
                     />
                     <Tooltip
                       contentStyle={{
@@ -491,36 +557,63 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                         fontVariantNumeric: 'tabular-nums',
                         color: 'var(--color-text-primary)',
                       }}
-                      labelFormatter={(v) => `Day +${v}`}
+                      labelFormatter={(v) => dayOf(forecast.window.start, Number(v))}
                     />
-                    {/* The class names let tools/forecast-band.js read each
-                        series from the rendered SVG and check the median never
-                        leaves its band (DECISIONS.md D-043, A1). */}
+                    {/*
+                      The band is one ranged area between p10 and p90, with its
+                      edges drawn as lines. It was a p90 area with a p10 area
+                      painted in the card's own colour over its lower half: a
+                      16% tint against near-black, with a slab of mask under
+                      it, and nothing left of it on a washed-out projector. The
+                      edges carry the interval now; the fill only groups it.
+                      The p10 / p90 / median class names are what
+                      tools/forecast-band.js reads (DECISIONS.md D-043, A1).
+                    */}
                     <Area
-                      type="monotone" dataKey="p90_tonnes" stroke="none" fill="url(#pi)"
+                      type="monotone"
+                      dataKey={(d: any) => [d.p10_tonnes, d.p90_tonnes]}
+                      stroke="none" fill="var(--color-accent)" fillOpacity={0.28}
+                      name="80% interval" isAnimationActive={false} className="forecast-band"
+                      activeDot={false}
+                    />
+                    <Line
+                      type="monotone" dataKey="p90_tonnes" stroke="var(--color-accent)"
+                      strokeOpacity={0.7} strokeWidth={1} dot={false} activeDot={false}
                       name="p90" isAnimationActive={false} className="forecast-p90"
                     />
-                    <Area
-                      type="monotone" dataKey="p10_tonnes" stroke="none"
-                      fill="var(--color-surface-2)" name="p10" isAnimationActive={false}
-                      className="forecast-p10"
+                    <Line
+                      type="monotone" dataKey="p10_tonnes" stroke="var(--color-accent)"
+                      strokeOpacity={0.7} strokeWidth={1} dot={false} activeDot={false}
+                      name="p10" isAnimationActive={false} className="forecast-p10"
                     />
                     <Line
                       type="monotone" dataKey="median_tonnes" stroke="var(--color-accent)"
-                      strokeWidth={2} dot={false} name="median" isAnimationActive={false}
+                      strokeWidth={2.5} dot={false} name="median" isAnimationActive={false}
                       className="forecast-median"
                     />
                     <Line
                       type="monotone" dataKey="baseline_tonnes"
-                      stroke="var(--color-text-tertiary)"
-                      strokeWidth={1} strokeDasharray="4 3" dot={false}
+                      stroke="var(--color-text-secondary)"
+                      strokeWidth={1.5} strokeDasharray="5 4" dot={false}
                       name="seasonal-naive" isAnimationActive={false}
                     />
-                  </AreaChart>
+                  </ComposedChart>
                 </ResponsiveContainer>
               </div>
+              <p className="mt-1 font-mono text-xs text-text-secondary">
+                baseline: {forecast.baseline_version}
+              </p>
             </div>
           ) : null}
+          </div>
+
+          <div className={sectionCls('answer')}>
+            <IntervalCalibration mineCode={forecast.mine_code} mineName={mineName} />
+          </div>
+
+          <p className={`measure text-xs text-text-tertiary ${sectionCls('answer')}`}>
+            {PLAN_TARGET_NOTE}
+          </p>
           </div>
           </div>
         </>
@@ -557,9 +650,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
       {/* --- N-8: backtest visible in the UI --- */}
       <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('evidence')}`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-xs uppercase tracking-wider text-text-secondary">
-            Backtest — held-out accuracy (PRD B-10, N-8)
-          </p>
+          <p className="label">Backtest — held-out accuracy (PRD B-10, N-8)</p>
           {!backtest && !btLoading && !noBacktest ? (
             <button type="button"
               onClick={runBacktest}
@@ -619,7 +710,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             data-provenance-model={backtest.model_version}
             data-provenance-vintage={backtest.computed_at}
           >
-            <p className="text-xs text-text-secondary">{backtest.verdict}</p>
+            <p className="text-sm text-text-primary">{backtest.verdict}</p>
             <div className="grid gap-3 sm:grid-cols-3">
               <Metric
                 label="Model MAPE"
@@ -643,8 +734,10 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 }), () => String(String(backtest.model.coverage_80)))}
           />
             </div>
-            <table className="w-full text-xs">
-              <thead className="text-text-tertiary">
+            {/* Model and baseline columns in text colours, not accent blue and
+                status amber: neither is a state (POLISH_AUDIT.md issue 4). */}
+            <table className="w-full text-sm">
+              <thead className="text-text-secondary">
                 <tr className="border-b border-border-default text-left">
                   <th className="py-1 font-normal">Horizon</th>
                   <th className="py-1 font-normal">Model MAPE</th>
@@ -656,8 +749,8 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 {backtest.by_horizon.map((h: any) => (
                   <tr key={h.horizon_days} className="border-b border-border-subtle">
                     <td className="py-1">{h.horizon_days} d</td>
-                    <td className="py-1 text-accent">{h.model_mape_pct}%</td>
-                    <td className="py-1 text-status-caution">{h.baseline_mape_pct}%</td>
+                    <td className="py-1 text-text-primary">{h.model_mape_pct}%</td>
+                    <td className="py-1">{h.baseline_mape_pct}%</td>
                     <td className="py-1">{h.coverage_80}</td>
                   </tr>
                 ))}
@@ -696,9 +789,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
 
       {/* --- D-4 + C-5: recommendations, and what the engine rejected --- */}
       <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('actions')}`}>
-        <p className="mb-2 text-xs uppercase tracking-wider text-text-secondary">
-          Corrective actions (PRD C-1..C-5) — every action constraint-checked
-        </p>
+        <p className="label mb-2">Corrective actions (PRD C-1..C-5)</p>
         {rWarm ? (
           <WarmingState what="Recommendations" warming={rWarm} attempt={attempt} />
         ) : rErr ? (
