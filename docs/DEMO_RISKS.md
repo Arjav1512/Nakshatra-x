@@ -72,6 +72,8 @@ honest sentence is always available.
 | 2:30 Track A | Basemap (ESRI) unreachable | the map background is **blank** (0 of 16 basemap tiles); the model layers still draw over it | Say: the basemap is context, not data; the layers on it are served locally. |
 | 2:30 Track A | "fetch live Sentinel-2" ticked with no network | answers at once with the kriged score and *"Live satellite read failed; only the kriged surface is returned."* — no feature values | Leave it unticked offline; the stored features score instantly. |
 | 2:55 close | — | Export CSV is generated in the browser from what is on screen. | — |
+| any | A judge opens **AI-X** (top right, every page) | It answers from written notes about the project and quotes no figures; it points to the console for those. Until the interaction-sweep PR it printed invented ones — per-place "manganese possibility" and "discovery success" percentages, "100% hosted on NIC MeghRaj", a dispatched SCADA order | Let them ask. If a question has no written answer it says so; nothing it says is a measurement. |
+| 2:30 Track A | Looking for the search presets | *(removed)* the Bhopal / Delhi / Mumbai chips flew the map out of the study area | **Manganese belt** above the map returns to the study area; the dock under the map has every mine in the register. |
 | any | Laptop sleeps, backend killed | console panels go **unavailable** | Keep the machine awake; restart the backend (1–2 s to ready on matching artifacts). |
 | any | Projector at an odd resolution | every route is captured at 375, 768, 1280 and 1920 px (`frontend/tools/capture.js`) | Use browser zoom; nothing depends on a fixed width. |
 

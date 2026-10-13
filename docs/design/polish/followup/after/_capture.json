@@ -1,0 +1,20 @@
+{
+  "base": "http://localhost:3000",
+  "washout": false,
+  "viewports": {
+    "375": {
+      "width": 375,
+      "height": 812,
+      "dpr": 1
+    },
+    "1366": {
+      "width": 1366,
+      "height": 768,
+      "dpr": 1
+    }
+  },
+  "console_errors": {
+    "375": [],
+    "1366": []
+  }
+}

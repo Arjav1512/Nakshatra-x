@@ -270,6 +270,88 @@ const screens = {
   },
 }
 
+/**
+ * Screens the interaction-sweep PR changed, captured only when named with
+ * --screens: what a judge reaches by pressing something, not the default
+ * demo-path set above.
+ */
+const extras = {
+  /** The AI-X assistant: opened, a question naming a place, the security answer, the dewatering action. */
+  async assistant(page, vp) {
+    await open(page, '/console', null, 2500)
+    await page.evaluate(() => document.querySelector('[aria-label="Open the AI-X assistant"]')?.click())
+    await sleep(900)
+    await snap(page, vp, '10-assistant-open')
+    const ask = async (q) => {
+      const input = await page.$('input[placeholder^="Ask"]')
+      await input.click({ clickCount: 3 })
+      await input.type(q)
+      await page.keyboard.press('Enter')
+      await sleep(1500)
+      // The newest answer, scrolled into view inside the transcript.
+      // The newest answer from its first line, not the transcript's end
+      // (which is the answer's action button).
+      // Each message's text is a whitespace-pre-line div, in both versions.
+      await page.evaluate(() => {
+        [...document.querySelectorAll('.whitespace-pre-line')].at(-1)?.scrollIntoView({ block: 'start' })
+      })
+      await sleep(300)
+    }
+    await ask('tell me about balaghat')
+    await snap(page, vp, '11-assistant-place')
+    await ask('how is data secured')
+    await snap(page, vp, '12-assistant-security')
+    await ask('monsoon flooding')
+    await page.evaluate(() => {
+      const b = [...document.querySelectorAll('button')].filter((x) => /dewatering/i.test(x.innerText)).at(-1)
+      b?.click()
+    })
+    await sleep(900)
+    await page.evaluate(() => {
+      const log = document.querySelector('[role="log"]') ??
+        [...document.querySelectorAll('div')].find((d) => d.className.includes('overflow-y-auto') && /assistant|NAKSHATRA/i.test(d.innerText))
+      if (log) log.scrollTop = log.scrollHeight
+    })
+    await sleep(300)
+    await snap(page, vp, '13-assistant-dewatering')
+  },
+
+  /** Mine twin's 50-year chart, and its Reserves series where one exists. */
+  async chart50(page, vp) {
+    await open(page, '/mine-twin', null, 2500)
+    const toChart = () => page.evaluate(() => {
+      const h = [...document.querySelectorAll('h3')].find((x) => /50-year/i.test(x.innerText))
+      h?.scrollIntoView({ block: 'start' })
+      window.scrollBy(0, -80)
+    })
+    await toChart()
+    await sleep(400)
+    await snap(page, vp, '14-minetwin-50yr')
+    const hadReserves = await page.evaluate(() => {
+      const b = [...document.querySelectorAll('button')].find((x) => /^Reserves/i.test(x.innerText.trim()))
+      b?.click()
+      return !!b
+    })
+    if (hadReserves) {
+      await sleep(500)
+      await toChart()
+      await snap(page, vp, '15-minetwin-50yr-reserves')
+    }
+  },
+
+  /** The map's search bar, where the presets were. */
+  async mapsearch(page, vp) {
+    await open(page, '/console?track=a', () => document.querySelectorAll('[data-layer-button]').length > 0, 3000)
+    await page.evaluate(() => {
+      const f = document.querySelector('form input[type="text"]')?.closest('form')
+      f?.scrollIntoView({ block: 'start' })
+      window.scrollBy(0, -170)
+    })
+    await sleep(500)
+    await snap(page, vp, '16-map-search', true)
+  },
+}
+
 ;(async () => {
   fs.mkdirSync(OUT, { recursive: true })
   const browser = await puppeteer.launch({
@@ -292,7 +374,7 @@ const screens = {
     for (const name of names) {
       const t0 = Date.now()
       try {
-        await screens[name](page, vp, m)
+        await (screens[name] ?? extras[name])(page, vp, m)
         console.log(`  ${vp.id.padEnd(9)} ${name.padEnd(10)} ${Math.round((Date.now() - t0) / 1000)}s`)
       } catch (e) {
         console.log(`  ${vp.id.padEnd(9)} ${name.padEnd(10)} FAILED: ${e.message}`)
