@@ -27,7 +27,11 @@ run() {
 
 case "$GROUP" in
   console)
-    for s in test:e2e test:dates test:pilot test:scenario test:surface test:nav test:auth test:motion test:fonts test:band test:blending; do run "$s"; done ;;
+    for s in test:e2e test:dates test:pilot test:scenario test:surface test:nav test:auth test:motion test:fonts test:band test:blending; do run "$s"; done
+    # Every control on the demo path pressed, and the provenance rule applied to
+    # what it draws (tools/interaction-sweep.js); the backend-down pass is in
+    # routes-provenance, which stops the backend.
+    run test:interactions -- --out "$LOGS/interactions.json" ;;
   routes-provenance)
     run test:routes -- --external-offline
     run test:provenance
@@ -37,7 +41,10 @@ case "$GROUP" in
     # that starts the real interpreter as a child, so the PID is not the server.
     pkill -f "uvicorn app.main:app --port 8000"; sleep 2
     if curl -s -o /dev/null http://127.0.0.1:8000/api/v1/healthz; then echo "backend still up"; exit 1; fi
-    run test:provenance -- --offline ;;
+    run test:provenance -- --offline
+    # The same sweep with the backend down: every control must lead to an
+    # unavailable state, never a number.
+    run test:interactions -- --backend-down --out "$LOGS/interactions-backend-down.json" ;;
   cls)
     run test:cls ;;
   # axe (WCAG 2.2 AA, serious/critical) plus every status label measured
