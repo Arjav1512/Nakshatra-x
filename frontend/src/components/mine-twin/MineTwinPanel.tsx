@@ -171,8 +171,11 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   const [loading, setLoading] = useState(false)
   const [comparedScenario, setComparedScenario] = useState<Scenario | null>(null)
 
-  // Minimalistic 50-Year History Graph Controls
-  const [chartMetric, setChartMetric] = useState<'production' | 'reserves' | 'grade'>('production')
+  // The 50-year series shows production only. It also offered "Reserves (T)"
+  // — projectedProvedReservesTonnes, a UNFC reserve term on a synthetic series,
+  // which PRD §2.4 rules out — and "Grade (% Mn)", whose forward years were
+  // the formula 38.0 + (year − 2026) × 0.15. No demo beat used either; both are
+  // removed (docs/design/POLISH_AUDIT.md, follow-up PR).
   const [activeHoverYear, setActiveHoverYear] = useState<number | null>(2025)
 
   // Combined SYNTHETIC 1977-2026 history and the illustrative 2026-2040
@@ -182,15 +185,8 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   const fullTimeline = [
     ...HISTORICAL_DATABASE_1977_2026.map((d) => ({
       year: d.year,
-      value:
-        chartMetric === 'production'
-          ? d.totalProductionTonnes
-          : chartMetric === 'reserves'
-          ? d.indicativeResourceBaseTonnes
-          : d.avgMnGradePct,
+      value: d.totalProductionTonnes,
       productionTonnes: d.totalProductionTonnes,
-      reservesTonnes: d.indicativeResourceBaseTonnes,
-      gradePct: d.avgMnGradePct,
       isForecast: false,
       milestone: d.majorMilestone,
       grade: d.gradeType,
@@ -198,19 +194,17 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
     })),
     ...FUTURE_FORECASTS_2026_2040.map((f) => ({
       year: f.year,
-      value:
-        chartMetric === 'production'
-          ? f.predictedProductionTonnes
-          : chartMetric === 'reserves'
-          ? f.projectedProvedReservesTonnes
-          : 38.0 + (f.year - 2026) * 0.15,
+      value: f.predictedProductionTonnes,
       productionTonnes: f.predictedProductionTonnes,
-      reservesTonnes: f.projectedProvedReservesTonnes,
-      gradePct: 38.0 + (f.year - 2026) * 0.15,
       isForecast: true,
-      milestone: f.aiStrategyDirective,
-      grade: 'SciPy Refined Grade',
-      source: `NAKSHATRA-X 2040 (${f.modelBasis})`,
+      // These years are a drawn trajectory, not a plan: the data's
+      // `aiStrategyDirective` text ("Automated SCADA perimeter pump
+      // interlocks…", "Deep underground shaft expansion…") read on hover as
+      // a model's recommendation, and `modelBasis` named models that do not
+      // exist. Neither is shown or cited.
+      milestone: 'Illustrative trajectory — no plan, directive or model behind it.',
+      grade: 'illustrative, not a forecast',
+      source: 'nakshatra-synthetic-v1 (illustrative)',
     })),
   ]
 
@@ -693,27 +687,9 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 </h3>
               </div>
 
-              {/* Metric Pill Toggles */}
-              <div className="flex items-center gap-1.5 text-xs font-mono">
-                {[
-                  { key: 'production', label: 'ROM Output (T)' },
-                  { key: 'reserves', label: 'Reserves (T)' },
-                  { key: 'grade', label: 'Grade (% Mn)' },
-                ].map((m) => (
-                  <button
-                    key={m.key}
-                    onClick={() => setChartMetric(m.key as any)}
-                    className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer font-bold ${
-                      chartMetric === m.key
-                        ? 'bg-accent/20 border border-accent text-accent'
-                        : 'bg-surface-2 border border-border-default text-text-secondary hover:text-text-primary'
-                    }`}
-                    type="button"
-                  >
-                    {m.label}
-                  </button>
-                ))}
-              </div>
+              {/* One series now: run-of-mine output. The Reserves and Grade
+                  toggles went with their series (see chart state above). */}
+              <span className="text-xs text-text-secondary">ROM output, tonnes per year</span>
             </div>
 
             {/* SVG Minimalistic Trend Line */}
