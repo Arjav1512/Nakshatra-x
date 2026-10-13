@@ -51,7 +51,14 @@ const DEFAULT_MINE: MineInfo = {
   currentProduction: 1140,
 }
 
-const STARTER_QUESTIONS = [ 'How does NAKSHATRA-X discover hidden manganese reserves?', 'What are the main pages and features on the website?', 'How do we prevent monsoon pit flooding and shortfall?', 'Walk me through SciPy ore blending optimization', 'What is the 3D Mine Twin Digital Simulator?', 'Tell me about SIH Problem Statement 26009 for MOIL!',
+// Each is a question the knowledge base answers (src/lib/chatbot/knowledge.ts).
+const STARTER_QUESTIONS = [
+  'How does NAKSHATRA-X discover hidden manganese reserves?',
+  'What are the main pages and features on the NAKSHATRA-X website?',
+  'How do we prevent monsoon pit flooding and operational shortfall?',
+  'How does the SciPy Ore Blending Optimization work?',
+  'What is the Mine twin page (/mine-twin)?',
+  'Who built NAKSHATRA-X and what is SIH Problem Statement 26009?',
 ]
 
 export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }: Props) {
@@ -71,11 +78,20 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
     return () => window.removeEventListener('open-aix-copilot', handleOpen)
   }, [])
 
+  // A modal closes on Escape. This one did not, so the overlay stayed over
+  // the page until the close button was found (WCAG 2.1.2).
+  useEffect(() => {
+    if (!isOpen) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsOpen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [isOpen])
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome-1',
       sender: 'assistant',
-      text: `Hello! I'm your **NAKSHATRA-X** Space-Geological Assistant. I can guide you through all project features, website modules, satellite discovery math, SciPy ore blending, 3D Kriging, and SIH Problem Statement 26009 details. What would you like to know?`,
+      text: `Hello! I'm the **NAKSHATRA-X** assistant. I answer from written notes about the project — its two tracks, its pages, what it measures and what it does not claim. I quote no figures: those are on the console, each with its source. What would you like to know?`,
       timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
     },
   ])
@@ -170,7 +186,12 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
         {
           id: `act-confirm-${Date.now()}`,
           sender: 'assistant',
-          text: `✅ **Emergency Dispatch Transmitted**: Dewatering order sent to pit manager via SCADA Interlock.`,
+          // Was: "✅ Emergency Dispatch Transmitted: Dewatering order sent to
+          // pit manager via SCADA Interlock." Nothing was sent — there is no
+          // SCADA connection and this system controls no equipment. The blend
+          // branch below was corrected for the same reason; this one was
+          // found by the interaction sweep (docs/design/POLISH_AUDIT.md).
+          text: `**No.** Nothing is sent from here: this system has no SCADA connection and controls no equipment (PRD §4 non-goal 2). A forecast shortfall is for a person to act on.`,
           timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
         },
       ])
@@ -185,7 +206,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
           // there is no SCADA integration in this system, and no grade is
           // locked. A chat reply claiming an action was taken is worse than a
           // wrong number, because someone may act on the belief that it was.
-          text: `**Blend plan ready.** Open the blending tool to see the allocation the optimiser produced. Nothing has been dispatched: this is decision support, and applying a plan happens in your own systems.`,
+          text: `Blending runs on the **Blending** page (\`/blending\`): set the grade constraints and it returns the least-cost allocation, or says which constraint cannot be met. Nothing is dispatched from there either: applying a plan happens in your own systems.`,
           timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
         },
       ])
@@ -203,7 +224,8 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
       if (btn.label?.includes('s25cseu1930') || btn.label?.includes('Email')) {
         window.location.href = 'mailto:s25cseu1930@bennett.edu.in'
       } else {
-        window.location.href = '/features'
+        // /features is a redirect to the console now; go there directly.
+        window.location.href = '/console'
       }
     }
   }
@@ -213,7 +235,12 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
       {/* AI-X Copilot Modal Overlay */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-end p-2 sm:p-6 bg-surface-0/80  animate-in fade-in duration-200">
-          <div className="rounded-md border border-border-default bg-surface-1 w-full sm:max-w-md md:max-w-lg h-[660px] max-h-[92vh] flex flex-col justify-between overflow-hidden shadow-2xl border border-border-interactive rounded-md relative">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="AI-X assistant"
+            className="rounded-md border border-border-default bg-surface-1 w-full sm:max-w-md md:max-w-lg h-[660px] max-h-[92vh] flex flex-col justify-between overflow-hidden shadow-2xl border border-border-interactive rounded-md relative"
+          >
             {/* Header */}
             <div className="p-4 sm:p-5 border-b border-border-default bg-gradient-to-r from-[rgba(6,12,24,0.95)] to-[rgba(10,20,35,0.95)] flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -265,8 +292,9 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
               ))}
             </div>
 
-            {/* Messages Scroll Area */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-4 font-sans text-xs leading-relaxed">
+            {/* Messages Scroll Area. role="log": a transcript that grows, so a
+                screen reader announces new answers as they arrive. */}
+            <div role="log" aria-label="Conversation" className="flex-1 p-4 overflow-y-auto space-y-4 font-sans text-xs leading-relaxed">
               {messages.map((m) => (
                 <div
                   key={m.id}
