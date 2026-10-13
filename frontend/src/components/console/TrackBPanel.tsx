@@ -482,7 +482,14 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
 
           {/* --- trajectory with prediction interval + baseline --- */}
           {selected ? (
-            <div className="mt-4 border-t border-border-default pt-3">
+            // The chart, its key and its hover tooltip all show forecast output
+            // over synthetic data; the envelope is on the block so the tooltip,
+            // which Recharts draws inside it, is covered too.
+            <div
+              className="mt-4 border-t border-border-default pt-3"
+              data-provenance="synthetic"
+              data-provenance-model={forecast.model_version}
+            >
               <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                 <p className="text-sm font-medium text-text-primary">
                   {selected.grade.replace(/_/g, ' ')} · daily production, tonnes

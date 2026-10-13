@@ -429,7 +429,13 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
         {/* Sticky from lg: the controls (about 420 px) stay beside the
             results as they scroll, so at the demo's beat — "+6H delay", run
             again — the control and the verdict are on screen together. */}
-        <div className="space-y-5 rounded-md border border-border-default bg-surface-2 p-5 lg:sticky lg:top-20 lg:col-span-5">
+        {/* Every value in this column is a planner's chosen input — a shift,
+            a delay, a tolerance — so the column carries the assumption kind,
+            as the results it feeds do. */}
+        <div
+          className="space-y-5 rounded-md border border-border-default bg-surface-2 p-5 lg:sticky lg:top-20 lg:col-span-5"
+          data-provenance="assumption"
+        >
           <div className="flex items-center justify-between border-b border-border-default pb-2">
             <div className="flex items-center gap-2">
               <Sliders className="w-4 h-4 text-accent" />
