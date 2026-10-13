@@ -124,7 +124,12 @@ function collectTextNodes() {
     // nothing about whether the app invents data. Narrow on purpose: only
     // inside a <figure> that carries a provenance attribute.
     const isAssetCaption = !!el.closest('figure') && !!holder
-    out.push({ text: text.slice(0, 120), attributed, inUnavailable, isAssetCaption, where: where.join(' < ') })
+    // A control's own value — the option a planner picked, a slider's
+    // setting — marked data-provenance="input". It is what the person in front
+    // of the screen chose, the same thing OFFLINE_ALLOW lets through for typed
+    // numbers, so it may stay on screen with the backend down.
+    const isInput = holder?.getAttribute('data-provenance') === 'input'
+    out.push({ text: text.slice(0, 120), attributed, inUnavailable, isAssetCaption, isInput, where: where.join(' < ') })
   }
   return out
 }
@@ -143,7 +148,7 @@ function violationsIn(nodes, { offline = false } = {}) {
     if (!looksLikeData(node.text)) continue
     if (allowed(node.text)) continue
     if (node.attributed) {
-      if (offline && !node.inUnavailable && !node.isAssetCaption &&
+      if (offline && !node.inUnavailable && !node.isAssetCaption && !node.isInput &&
           !OFFLINE_ALLOW.some((re) => re.test(node.text))) {
         out.push({ ...node, rule: 'a figure is on screen with the backend down' })
       }

@@ -121,7 +121,7 @@ export default function SmartOreBlendingModal({ mine }: Props) {
           <div className="flex justify-between text-xs font-mono mb-1.5">
             <label htmlFor="blend-grade" className="text-text-tertiary">Contract minimum Mn grade:</label>
             {/* The slider's own value: the planner's chosen contract minimum. */}
-            <span className="font-bold text-status-caution" data-provenance="assumption">{targetMnMin}% Mn</span>
+            <span className="font-bold text-status-caution" data-provenance="input">{targetMnMin}% Mn</span>
           </div>
           <input
             id="blend-grade"

@@ -423,12 +423,13 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
         {/* Sticky from lg: the controls (about 420 px) stay beside the
             results as they scroll, so at the demo's beat — "+6H delay", run
             again — the control and the verdict are on screen together. */}
-        {/* Every value in this column is a planner's chosen input — a shift,
-            a delay, a tolerance — so the column carries the assumption kind,
-            as the results it feeds do. */}
+        {/* Every value in this column is a control's own setting — the shift,
+            delay and tolerance the planner picked — so it carries the input
+            kind: the person's choice, not a claim (tools/provenance-rules.js).
+            The estimate those choices produce carries the assumption kind. */}
         <div
           className="space-y-5 rounded-md border border-border-default bg-surface-2 p-5 lg:sticky lg:top-20 lg:col-span-5"
-          data-provenance="assumption"
+          data-provenance="input"
         >
           <div className="flex items-center justify-between border-b border-border-default pb-2">
             <div className="flex items-center gap-2">
@@ -672,8 +673,11 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               </p>
             </div>
 
-          {/* SLEEK MINIMALISTIC 50-YEAR HISTORY (1975-2025) & 2040 FORECAST GRAPH */}
-          <div className="rounded-md border border-border-subtle bg-surface-2 p-5 rounded-md border border-border-default space-y-3 relative overflow-hidden bg-[var(--color-surface-1)]/90">
+          {/* The 50-year synthetic series. A <figure>: it is a chart, and its
+              data ships with the page (historical-database.ts), labelled
+              synthetic — which is how the offline provenance rule recognises
+              an asset rather than a client-side copy of service data. */}
+          <figure className="rounded-md border border-border-subtle bg-surface-2 p-5 rounded-md border border-border-default space-y-3 relative overflow-hidden bg-[var(--color-surface-1)]/90">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-default pb-2">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-accent" />
@@ -815,7 +819,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 </div>
               </div>
             )}
-          </div>
+          </figure>
 
           {/* Daily forecast trajectory — the real Track B artifact, not a shape */}
           <div
