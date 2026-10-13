@@ -206,7 +206,10 @@ async function main() {
     for (const route of ROUTES) {
       const run = { route, width, activated: [], notActivated: [], violations: [] }
       report.runs.push(run)
-      const page = await browser.newPage()
+      // Each route in a fresh context: a control on one route may sign the
+      // browser in ("Enter guest mode") and change what the next one shows.
+      const context = await browser.createBrowserContext()
+      const page = await context.newPage()
       await page.setViewport({ width, height: width < 768 ? 812 : 800, isMobile: width < 768, hasTouch: width < 768 })
       // Exports download a file and print; neither may block the run.
       const cdp = await page.createCDPSession()
@@ -245,7 +248,7 @@ async function main() {
       } catch (e) {
         run.notActivated.push({ label: '(route)', reason: `route did not load: ${e.message}`, failed: true })
         failedActivations++
-        await page.close()
+        await context.close()
         continue
       }
       await check('page load')
@@ -268,14 +271,24 @@ async function main() {
        * the suggestion inside it).
        */
       const reach = async (d, chain) => {
-        await load()
-        for (const opener of chain) {
-          const h = await find(opener)
-          if (!h) return null
-          await activate(h)
-          await net.settle()
+        const attempt = async () => {
+          await load()
+          for (const opener of chain) {
+            const h = await find(opener)
+            if (!h) return null
+            await activate(h)
+            await net.settle()
+          }
+          return find(d)
         }
-        return find(d)
+        const h = await attempt()
+        if (h) return h
+        // An earlier control may have changed what this route shows — signed
+        // in as a guest, say, so "Sign in" became "Signed in as …". Start
+        // from a clean browser state and try once more.
+        await page.deleteCookie(...(await page.cookies()))
+        await page.evaluate(() => { try { localStorage.clear(); sessionStorage.clear() } catch {} })
+        return attempt()
       }
 
       /** Which of the listed cells to activate: a spread across the visible grid. */
@@ -393,7 +406,7 @@ async function main() {
         })
       }
       violationsTotal += run.violations.length
-      await page.close()
+      await context.close()
 
       // Report for this route and width.
       const failedHere = run.notActivated.filter((n) => n.failed).length

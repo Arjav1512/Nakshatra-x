@@ -45,6 +45,8 @@ const ALLOW = [
   { re: /track-a-[a-z0-9-]+/i,                   why: 'Track A model version identifier' },
   { re: /\b\d{1,2}:\d{2}\b/,                     why: 'clock time' },
   { re: /MOIL-[A-Z]{3}-\d{2}/,                   why: 'mine code' },
+  { re: /^\s*-?\d{1,2}(?:\.\d+)?\s?°\s?[NS],?\s*-?\d{1,3}(?:\.\d+)?\s?°\s?[EW]\s*$/,
+    why: 'a coordinate pair on its own — where a value is (a clicked point, a mine), not a value' },
   { re: /\b(?:past|last|previous|rolling|over|preceding)\s+\d+\s*(?:days?|hours?|weeks?|months?)\b/i,
     why: 'time-window phrase in prose — names the window a figure covers, is not itself a figure' },
   { re: /^[A-Za-z][A-Za-z ()/-]{0,30},?\s*\d+\s*-?\s*(?:d|day|days|h|hour|hours|wk|week|weeks|mo|month|months)\b\.?$/i,
