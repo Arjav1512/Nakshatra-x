@@ -20,12 +20,10 @@ import {
   MapPin,
   Maximize2,
   Minimize2,
-  Sparkles,
   Compass,
   Navigation,
   Search,
   X,
-  Loader2,
   AlertCircle,
 } from 'lucide-react'
 
@@ -1152,7 +1150,7 @@ export default function IndiaSatelliteMap({
               value={searchQuery}
               onChange={handleInputChange}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-              placeholder="Type any city, area, district, or coordinates in India (e.g. Lucknow, Noida, Pune, Balaghat, 21.83, 80.19)..."
+              placeholder="Search a place or coordinates (e.g. Balaghat, or 21.83, 80.19)"
               className="w-full pl-9 pr-8 py-2 rounded-md bg-surface-3 border border-border-interactive text-xs font-mono text-text-primary placeholder-text-secondary focus:outline-none focus:border-accent transition-colors"
             />
             {searchQuery && (
@@ -1208,38 +1206,22 @@ export default function IndiaSatelliteMap({
             disabled={isSearching}
             className="rounded-md border border-border-interactive bg-surface-2 px-5 py-2 rounded-md text-xs font-mono font-bold text-accent hover:text-text-primary border border-accent/40 hover:border-accent flex items-center gap-2 cursor-pointer transition-colors shrink-0 disabled:opacity-50"
           >
-            {isSearching ? (
-              <Loader2 className="w-3.5 h-3.5 text-accent animate-spin" />
-            ) : (
-              <Sparkles className="w-3.5 h-3.5 text-accent " />
-            )}
-            <span>{isSearching ? 'Locating...' : 'Locate AI'}</span>
+            {/* "Locate AI" with a sparkle: it is a geocoder lookup, then the
+                same model score a click gives. Named for what it does. */}
+            <Search className="w-3.5 h-3.5 text-accent" aria-hidden="true" />
+            <span>{isSearching ? 'Searching…' : 'Search'}</span>
           </button>
         </form>
 
-        {/* Preset Location Quick Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto no-scrollbar">
-          <span className="text-xs font-mono text-text-tertiary uppercase shrink-0 font-bold">
-            Presets:
-          </span>
-          {['bhopal', 'keonjhar', 'sandur', 'jaipur', 'nagpur', 'lucknow', 'delhi', 'mumbai'].map((key) => {
-            const loc = INDIAN_MINING_LOCATIONS[key] || { lat: 21.1458, lng: 79.0882, name: key.toUpperCase() }
-            return (
-              <button
-                type="button"
-                key={key}
-                onClick={() => {
-                  setSearchQuery(loc.name)
-                  setSearchError(null)
-                  triggerAIPrediction(loc.lat, loc.lng, loc.name)
-                }}
-                className="rounded-md border border-border-interactive bg-surface-2 px-3 py-1 rounded-full text-xs font-mono text-text-secondary hover:text-accent whitespace-nowrap transition-colors cursor-pointer shrink-0"
-              >
-                {key.toUpperCase()}
-              </button>
-            )
-          })}
-        </div>
+        {/*
+          REMOVED: the preset chips (Bhopal, Keonjhar, Sandur, Jaipur, Nagpur,
+          Lucknow, Delhi, Mumbai). Pressing one flew the map out of the study
+          area and scored a place the model was never fitted near, as if it
+          were a candidate — a judge pressing "DELHI" landed in Delhi. The two
+          honest destinations already have controls: "Manganese belt" above
+          the map for the study area, and the dock under it for every mine in
+          the register, each of which scores its location.
+        */}
       </div>
 
       {/* SEARCH ERROR BANNER */}
