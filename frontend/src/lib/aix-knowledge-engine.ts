@@ -35,7 +35,7 @@ export function queryAIXKnowledgeBase(query: string, mineName: string, mineCode:
     matched: false,
     answer: `I don't have a pre-set answer in my current knowledge base for your question:\n*"${query}"*\n\n` +
       `For immediate contact and fast resolution to your issue, please email our lead development team directly at:\n\n` +
-      `📧 **s25cseu1930@bennett.edu.in**\n\n` +
+      `📧 s25cseu1930@bennett.edu.in\n\n` +
       `Our engineering team will assist you immediately with your query!`,
     category: 'Immediate Support Contact',
     suggestions: knowledgeBase.slice(0, 4).map(k => k),

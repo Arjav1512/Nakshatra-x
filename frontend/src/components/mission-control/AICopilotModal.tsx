@@ -51,11 +51,12 @@ const DEFAULT_MINE: MineInfo = {
   currentProduction: 1140,
 }
 
-// Each is a question the knowledge base answers (src/lib/chatbot/knowledge.ts).
+// Each matches a written answer (src/lib/chatbot/knowledge.ts) by keyword;
+// kept short enough to fit the panel on one line.
 const STARTER_QUESTIONS = [
   'How does NAKSHATRA-X discover hidden manganese reserves?',
-  'What are the main pages and features on the NAKSHATRA-X website?',
-  'How do we prevent monsoon pit flooding and operational shortfall?',
+  'What are the main pages and features on the website?',
+  'How do we prevent monsoon pit flooding and shortfall?',
   'How does the SciPy Ore Blending Optimization work?',
   'What is the Mine twin page (/mine-twin)?',
   'Who built NAKSHATRA-X and what is SIH Problem Statement 26009?',
@@ -91,7 +92,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
     {
       id: 'welcome-1',
       sender: 'assistant',
-      text: `Hello! I'm the **NAKSHATRA-X** assistant. I answer from written notes about the project — its two tracks, its pages, what it measures and what it does not claim. I quote no figures: those are on the console, each with its source. What would you like to know?`,
+      text: `Hello! I'm the NAKSHATRA-X assistant. I answer from written notes about the project — its two tracks, its pages, what it measures and what it does not claim. I quote no figures: those are on the console, each with its source. What would you like to know?`,
       timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
     },
   ])
@@ -155,7 +156,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
         suggs = (result.suggestions || []).map((s: any) => s.question)
         category = result.category || ''
       } else {
-        replyText = result.answer || `I don't have a pre-set answer for "${query}".\n\nFor immediate contact and solving your problem, please email our lead engineering team directly at:\n\n📧 **s25cseu1930@bennett.edu.in**`
+        replyText = result.answer || `I don't have a pre-set answer for "${query}".\n\nFor immediate contact and solving your problem, please email our lead engineering team directly at:\n\n📧 s25cseu1930@bennett.edu.in`
         suggs = (result.suggestions || []).map((s: any) => s.question)
         category = 'Immediate Contact'
         actionBtn = {
@@ -191,7 +192,9 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
           // SCADA connection and this system controls no equipment. The blend
           // branch below was corrected for the same reason; this one was
           // found by the interaction sweep (docs/design/POLISH_AUDIT.md).
-          text: `**No.** Nothing is sent from here: this system has no SCADA connection and controls no equipment (PRD §4 non-goal 2). A forecast shortfall is for a person to act on.`,
+          // Plain text: messages render as written (whitespace-pre-line), so
+          // markdown asterisks would show literally.
+          text: `No. Nothing is sent from here: this system has no SCADA connection and controls no equipment (PRD §4 non-goal 2). A forecast shortfall is for a person to act on.`,
           timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
         },
       ])
@@ -206,7 +209,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
           // there is no SCADA integration in this system, and no grade is
           // locked. A chat reply claiming an action was taken is worse than a
           // wrong number, because someone may act on the belief that it was.
-          text: `Blending runs on the **Blending** page (\`/blending\`): set the grade constraints and it returns the least-cost allocation, or says which constraint cannot be met. Nothing is dispatched from there either: applying a plan happens in your own systems.`,
+          text: `Blending runs on the Blending page (\`/blending\`): set the grade constraints and it returns the least-cost allocation, or says which constraint cannot be met. Nothing is dispatched from there either: applying a plan happens in your own systems.`,
           timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
         },
       ])
@@ -216,7 +219,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
         {
           id: `act-confirm-${Date.now()}`,
           sender: 'assistant',
-          text: `**Note**: this build does not compute kriged block models or UNFC reserve classes. Prospectivity output is decision-support only.`,
+          text: `Note: this build does not compute kriged block models or UNFC reserve classes. Prospectivity output is decision-support only.`,
           timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
         },
       ])
