@@ -171,8 +171,11 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   const [loading, setLoading] = useState(false)
   const [comparedScenario, setComparedScenario] = useState<Scenario | null>(null)
 
-  // Minimalistic 50-Year History Graph Controls
-  const [chartMetric, setChartMetric] = useState<'production' | 'reserves' | 'grade'>('production')
+  // The 50-year series shows production only. It also offered "Reserves (T)"
+  // — projectedProvedReservesTonnes, a UNFC reserve term on a synthetic series,
+  // which PRD §2.4 rules out — and "Grade (% Mn)", whose forward years were
+  // the formula 38.0 + (year − 2026) × 0.15. No demo beat used either; both are
+  // removed (docs/design/POLISH_AUDIT.md, follow-up PR).
   const [activeHoverYear, setActiveHoverYear] = useState<number | null>(2025)
 
   // Combined SYNTHETIC 1977-2026 history and the illustrative 2026-2040
@@ -182,15 +185,8 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   const fullTimeline = [
     ...HISTORICAL_DATABASE_1977_2026.map((d) => ({
       year: d.year,
-      value:
-        chartMetric === 'production'
-          ? d.totalProductionTonnes
-          : chartMetric === 'reserves'
-          ? d.indicativeResourceBaseTonnes
-          : d.avgMnGradePct,
+      value: d.totalProductionTonnes,
       productionTonnes: d.totalProductionTonnes,
-      reservesTonnes: d.indicativeResourceBaseTonnes,
-      gradePct: d.avgMnGradePct,
       isForecast: false,
       milestone: d.majorMilestone,
       grade: d.gradeType,
@@ -198,19 +194,17 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
     })),
     ...FUTURE_FORECASTS_2026_2040.map((f) => ({
       year: f.year,
-      value:
-        chartMetric === 'production'
-          ? f.predictedProductionTonnes
-          : chartMetric === 'reserves'
-          ? f.projectedProvedReservesTonnes
-          : 38.0 + (f.year - 2026) * 0.15,
+      value: f.predictedProductionTonnes,
       productionTonnes: f.predictedProductionTonnes,
-      reservesTonnes: f.projectedProvedReservesTonnes,
-      gradePct: 38.0 + (f.year - 2026) * 0.15,
       isForecast: true,
-      milestone: f.aiStrategyDirective,
-      grade: 'SciPy Refined Grade',
-      source: `NAKSHATRA-X 2040 (${f.modelBasis})`,
+      // These years are a drawn trajectory, not a plan: the data's
+      // `aiStrategyDirective` text ("Automated SCADA perimeter pump
+      // interlocks…", "Deep underground shaft expansion…") read on hover as
+      // a model's recommendation, and `modelBasis` named models that do not
+      // exist. Neither is shown or cited.
+      milestone: 'Illustrative trajectory — no plan, directive or model behind it.',
+      grade: 'illustrative, not a forecast',
+      source: 'nakshatra-synthetic-v1 (illustrative)',
     })),
   ]
 
@@ -429,7 +423,14 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
         {/* Sticky from lg: the controls (about 420 px) stay beside the
             results as they scroll, so at the demo's beat — "+6H delay", run
             again — the control and the verdict are on screen together. */}
-        <div className="space-y-5 rounded-md border border-border-default bg-surface-2 p-5 lg:sticky lg:top-20 lg:col-span-5">
+        {/* Every value in this column is a control's own setting — the shift,
+            delay and tolerance the planner picked — so it carries the input
+            kind: the person's choice, not a claim (tools/provenance-rules.js).
+            The estimate those choices produce carries the assumption kind. */}
+        <div
+          className="space-y-5 rounded-md border border-border-default bg-surface-2 p-5 lg:sticky lg:top-20 lg:col-span-5"
+          data-provenance="input"
+        >
           <div className="flex items-center justify-between border-b border-border-default pb-2">
             <div className="flex items-center gap-2">
               <Sliders className="w-4 h-4 text-accent" />
@@ -672,8 +673,11 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               </p>
             </div>
 
-          {/* SLEEK MINIMALISTIC 50-YEAR HISTORY (1975-2025) & 2040 FORECAST GRAPH */}
-          <div className="rounded-md border border-border-subtle bg-surface-2 p-5 rounded-md border border-border-default space-y-3 relative overflow-hidden bg-[var(--color-surface-1)]/90">
+          {/* The 50-year synthetic series. A <figure>: it is a chart, and its
+              data ships with the page (historical-database.ts), labelled
+              synthetic — which is how the offline provenance rule recognises
+              an asset rather than a client-side copy of service data. */}
+          <figure className="rounded-md border border-border-subtle bg-surface-2 p-5 rounded-md border border-border-default space-y-3 relative overflow-hidden bg-[var(--color-surface-1)]/90">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-default pb-2">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-accent" />
@@ -687,27 +691,9 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 </h3>
               </div>
 
-              {/* Metric Pill Toggles */}
-              <div className="flex items-center gap-1.5 text-xs font-mono">
-                {[
-                  { key: 'production', label: 'ROM Output (T)' },
-                  { key: 'reserves', label: 'Reserves (T)' },
-                  { key: 'grade', label: 'Grade (% Mn)' },
-                ].map((m) => (
-                  <button
-                    key={m.key}
-                    onClick={() => setChartMetric(m.key as any)}
-                    className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer font-bold ${
-                      chartMetric === m.key
-                        ? 'bg-accent/20 border border-accent text-accent'
-                        : 'bg-surface-2 border border-border-default text-text-secondary hover:text-text-primary'
-                    }`}
-                    type="button"
-                  >
-                    {m.label}
-                  </button>
-                ))}
-              </div>
+              {/* One series now: run-of-mine output. The Reserves and Grade
+                  toggles went with their series (see chart state above). */}
+              <span className="text-xs text-text-secondary">ROM output, tonnes per year</span>
             </div>
 
             {/* SVG Minimalistic Trend Line */}
@@ -833,7 +819,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 </div>
               </div>
             )}
-          </div>
+          </figure>
 
           {/* Daily forecast trajectory — the real Track B artifact, not a shape */}
           <div
