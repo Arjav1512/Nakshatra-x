@@ -353,6 +353,31 @@ export function Switch({
 }
 
 /* -------------------------------------------------------------------------- */
+/* Data well and source fills                                                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The dark ground every chart sits on: the reference's media well (.feature
+ * .media, .stage) as a .chrome-dark scope, so the text, grid and tooltip
+ * inside resolve to the dark tokens and the series can use the reference
+ * brights (tokens.css, "Data"). Add the radius at the call site: the card's
+ * own radius when the well is the card, `rounded-tile` when it is nested.
+ */
+export const DATA_WELL = 'chrome-dark border border-border-default bg-surface-1 text-text-primary'
+
+/**
+ * Reference brights as tag fills (tokens.css, "Fills"): a tint with ink on
+ * light surfaces, the full bright inside .chrome-dark. Keyed by hue; callers
+ * choose by meaning (green measured or live, mint derived, yellow synthetic
+ * or cached) and the label always names it.
+ */
+export const FILL = {
+  green: 'border-transparent bg-fill-green text-on-fill',
+  mint: 'border-transparent bg-fill-mint text-on-fill',
+  yellow: 'border-transparent bg-fill-yellow text-on-fill',
+} as const
+
+/* -------------------------------------------------------------------------- */
 /* Field — reference .field + .input                                           */
 /* -------------------------------------------------------------------------- */
 

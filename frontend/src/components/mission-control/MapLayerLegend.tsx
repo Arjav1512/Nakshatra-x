@@ -1,5 +1,6 @@
 'use client'
 
+import { FILL } from '@/components/ui/primitives'
 import { CIVIDIS } from '@/lib/colormap'
 import { type LegendFact, type TileSourceMode, fetchDate } from '@/lib/map-tile-layers'
 
@@ -54,12 +55,12 @@ export type LegendModel = {
 const KIND_BADGE: Record<string, { label: string; cls: string; title: string }> = {
   measured: {
     label: 'MEASURED',
-    cls: 'border-status-nominal/40 bg-status-nominal/10 text-status-nominal',
+    cls: FILL.green,
     title: 'Observed by a sensor. Not model output.',
   },
   derived: {
     label: 'DERIVED',
-    cls: 'border-accent/40 bg-accent-muted text-accent',
+    cls: FILL.mint,
     title: 'Computed by a model from measured inputs. Not an observation.',
   },
 }
@@ -86,10 +87,10 @@ function TileSourcePill({ mode, fetchedAt }: { mode: TileSourceMode; fetchedAt: 
             : 'LOADING'
   const cls =
     mode === 'live'
-      ? 'border-status-nominal/40 bg-status-nominal/10 text-status-nominal'
+      ? FILL.green
       : mode === 'cache' || mode === 'mixed'
-        ? 'border-status-caution/50 bg-status-caution/10 text-status-caution'
-        : 'border-border-default bg-surface-1 text-text-tertiary'
+        ? FILL.yellow
+        : 'border-transparent bg-surface-3 text-text-secondary'
   return (
     <span
       data-tile-source={mode}

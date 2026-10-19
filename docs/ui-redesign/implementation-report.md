@@ -143,3 +143,61 @@ results above are from the corrected runs.
 | `POST /api/auth/session` with a client-made "verified" user | 405 (no POST handler): no session minted |
 | Unsigned JSON `nx-operator-session` cookie | `{"user":null}`: not accepted as a session |
 | `/api/admin/profiles` without credentials | 401 |
+
+## Colour restoration (2026-10-20)
+
+**Why.** The first pass applied the reference's rule 3 ("brights … never on
+chrome") but not its other half ("colour inside content … media, block
+previews"). So the charts were ink on grey, and the reference palette appeared
+only as one mint tag.
+
+**Source.** `churn-design-system.html` (SHA-256 `6665ef69…`): `--p-mint`,
+`--p-blue`, `--p-pink`, `--p-yellow`, `--p-green`, `--p-red`. Paper's "Butter —
+Design System" tokens were read once (`get_basic_info`) and list the same
+values. The artboard tree was not readable: Paper's weekly MCP limit, "resets in
+4 days". No new palette was invented. Every value used is a reference value or
+a measured tint of one.
+
+**What changed.** Design rules: `DESIGN_SYSTEM.md` §3.9 and §8, and mapping §5.2
+(amended).
+- `tokens.css`:
+  - data roles `--data-model / measured / synthetic / illustrative /
+    comparison / axis / grid`
+  - fills `--fill-green / mint / yellow` and `--on-fill`: tints on light, full
+    brights in `.chrome-dark`
+- `primitives.tsx`: `DATA_WELL` (a dark data well) and `FILL`.
+- `lib/chart-theme.ts`: ticks, grid, tooltip and cursor, shared by every chart.
+- Charts, each now in a data well, with series colour by role:
+  - Track B forecast band (mint median and interval, neutral dashed baseline)
+  - rainfall (blue bars; yellow caution threshold)
+  - MineTwin 50-year series (yellow synthetic; pink dashed illustrative; new key)
+  - MineTwin daily bars (mint against neutral)
+  - Method deck and model-card feature importances (mint)
+- Chart readability fixes:
+  - rainfall y-axis ticks were clipped to "ım" by a −18px margin
+  - the 50-year chart's year ticks were 8-unit SVG text squashed by
+    `preserveAspectRatio="none"`; they are now HTML at 12px, and the lines use
+    non-scaling strokes
+  - the deck chart was dropping alternate feature names
+- Source tags (`SourceBadge`, map legend, blending result) are reference fills
+  with ink on them.
+- `globals.css`: `.chrome-dark` prints its ground, so `Export PDF` never prints
+  light text on white. Verified with backgrounds off.
+- Unchanged: chart data, calculations, axes' domains, interactions, the cividis
+  colormap, and chrome (navigation, buttons, segmented controls, inputs, focus
+  on light).
+
+**Checks** (build `km_dfMW6VQErxnyPniDVv`; suites on fresh :3100 / :8100 per
+group, health recorded before and after each):
+
+| Check | Result |
+|---|---|
+| `tsc --noEmit`, `lint:literals`, `npm run build` | PASS |
+| Biome no-worse vs `20d1cdd` | PASS: 20 / 75 vs 33 / 77 (unchanged from the PR head) |
+| Backend pytest (CI command) | PASS: 141 passed, 1 deselected; both guard lines present. No backend file changed |
+| Console group: e2e, dates, pilot, scenario, surface, nav, auth, motion, fonts, band, blending, interactions | PASS, 12/12. Interactions: 337 activations, 0 violations |
+| Routes, provenance, provenance `--offline`, interactions `--backend-down` | PASS: 108/108 (1 external skip); 0 unattributed; 215 activations, 0 violations |
+| CLS | PASS: worst 0.014 |
+| a11y (17 routes × 2 viewports), a11y-map | PASS: 0 serious/critical. Status labels 92, lowest 5.21:1. The count fell from 155 because source tags are now ink on a fill, not status-coloured text; axe's colour-contrast rule covers them, and ink on each fill measures at least 13.77:1 |
+| `test:map`, live Planetary Computer, against the review server | PASS: 41 checks, 0 failures |
+| Live render (17 routes × 1440 / 390) and overflow (14 routes × 360 / 390 / 1024 / 1440) | PASS |

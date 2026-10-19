@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { FILL } from '@/components/ui/primitives'
 import type { MineInfo } from './types'
 import { Sparkles, Scale, } from 'lucide-react'
 
@@ -206,7 +207,7 @@ export default function SmartOreBlendingModal({ mine }: Props) {
           <div className="rounded-xl border border-border-default bg-surface-1 p-4">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <span className="label">Blend allocation</span>
-              <span className="inline-flex items-center gap-1 rounded-sm border border-status-caution/40 bg-status-caution/10 px-1.5 py-0.5 font-mono text-xs text-status-caution">
+              <span className={`inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 font-mono text-xs ${FILL.yellow}`}>
                 SYNTHETIC INPUTS
               </span>
             </div>

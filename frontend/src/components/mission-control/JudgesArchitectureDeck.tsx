@@ -5,7 +5,8 @@ import { Sparkles, Brain, Layers, GitBranch, Terminal, ShieldAlert, Award, } fro
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 import { type TrackAMetrics, fetchDrillTargets, fetchTrackAMetrics } from '@/lib/console-api'
 import { Metric } from '@/components/console/Evidence'
-import { EmptyState, Skeleton } from '@/components/ui/primitives'
+import { DATA_WELL, EmptyState, Skeleton } from '@/components/ui/primitives'
+import { AXIS_TICK, BAR_CURSOR, GRID_STROKE, TOOLTIP_LABEL_STYLE, TOOLTIP_STYLE } from '@/lib/chart-theme'
 import { derived, measuredValue } from '@/lib/provenance'
 
 export default function JudgesArchitectureDeck() {
@@ -393,7 +394,8 @@ export default function JudgesArchitectureDeck() {
               Feature importance — {metrics.features.length} features, model{' '}
               {metrics.model_version}
             </p>
-            <div className="h-[240px] w-full">
+            {/* Importances are the model's own output: the model data role. */}
+            <div className={`h-[240px] w-full rounded-tile p-2 ${DATA_WELL}`}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={featureImportances}
@@ -402,12 +404,12 @@ export default function JudgesArchitectureDeck() {
                 >
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="var(--color-border-subtle)"
+                    stroke={GRID_STROKE}
                     horizontal={false}
                   />
                   <XAxis
                     type="number"
-                    tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }}
+                    tick={AXIS_TICK}
                     tickLine={false}
                     axisLine={false}
                     unit="%"
@@ -415,25 +417,23 @@ export default function JudgesArchitectureDeck() {
                   <YAxis
                     type="category"
                     dataKey="name"
-                    tick={{ fontSize: 12, fill: 'var(--color-text-secondary)' }}
+                    tick={AXIS_TICK}
                     tickLine={false}
                     axisLine={false}
                     width={150}
+                    // Every feature named: left to Recharts, it drops alternate
+                    // labels it judges too close, which leaves bars unnamed.
+                    interval={0}
                   />
                   <Tooltip
-                    contentStyle={{
-                      background: 'var(--color-surface-3)',
-                      border: '1px solid var(--color-border-default)',
-                      borderRadius: 4,
-                      fontSize: 13,
-                      fontVariantNumeric: 'tabular-nums',
-                      color: 'var(--color-text-primary)',
-                    }}
+                    contentStyle={TOOLTIP_STYLE}
+                    labelStyle={TOOLTIP_LABEL_STYLE}
+                    cursor={BAR_CURSOR}
                     formatter={(value: any) => [`${value}%`, 'importance']}
                   />
                   <Bar
                     dataKey="value"
-                    fill="var(--color-accent)"
+                    fill="var(--color-data-model)"
                     radius={[0, 2, 2, 0]}
                     isAnimationActive={false}
                   />

@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { fetchForecast } from '@/lib/console-api'
 import { ASSUMPTION_GROUPS, ASSUMPTION_NOTE } from '@/lib/scenario-assumptions'
 import { Metric } from '@/components/console/Evidence'
-import { StatusDot } from '@/components/ui/primitives'
+import { DATA_WELL, StatusDot } from '@/components/ui/primitives'
+import { GRID_STROKE } from '@/lib/chart-theme'
 import { assumption, measuredValue, reference } from '@/lib/provenance'
 import type { MineInfo } from '@/components/mission-control/types'
 import {
@@ -621,7 +622,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               data ships with the page (historical-database.ts), labelled
               synthetic — which is how the offline provenance rule recognises
               an asset rather than a client-side copy of service data. */}
-          <figure className="relative space-y-3 overflow-hidden rounded-xl border border-border-default bg-surface-1 p-5">
+          <figure className={`relative space-y-3 overflow-hidden rounded-xl p-5 ${DATA_WELL}`}>
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-default pb-2">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-text-tertiary" aria-hidden="true" />
@@ -640,16 +641,29 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               <span className="text-xs text-text-secondary">ROM output, tonnes per year</span>
             </div>
 
+            {/* Two marks, two meanings: the generated series (synthetic data
+                role, solid) and its illustrative continuation (dashed). */}
+            <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary" aria-label="Chart key">
+              <li className="flex items-center gap-1.5">
+                <span aria-hidden="true" className="inline-block h-0.5 w-4 rounded-full bg-data-synthetic" />
+                synthetic series
+              </li>
+              <li className="flex items-center gap-1.5">
+                <span aria-hidden="true" className="inline-block w-4 border-t-2 border-dashed border-data-illustrative" />
+                illustrative, not a forecast
+              </li>
+            </ul>
+
             {/* SVG Minimalistic Trend Line */}
             <div className="relative h-36 w-full pt-2">
               <svg className="w-full h-full overflow-visible" viewBox="0 0 1000 150" preserveAspectRatio="none">
                 {/* Horizontal guide lines */}
                 {[0, 37.5, 75, 112.5, 150].map((yVal, i) => (
-                  <line key={i} x1="0" y1={yVal} x2="1000" y2={yVal} stroke="var(--color-border-default)" strokeDasharray="3 3" />
+                  <line key={i} x1="0" y1={yVal} x2="1000" y2={yVal} stroke={GRID_STROKE} strokeDasharray="3 3" vectorEffect="non-scaling-stroke" />
                 ))}
 
                 {/* 2026 Boundary vertical line */}
-                <line x1="770" y1="0" x2="770" y2="150" stroke="var(--color-border-interactive)" strokeDasharray="4 4" strokeWidth="1" />
+                <line x1="770" y1="0" x2="770" y2="150" stroke="var(--color-border-interactive)" strokeDasharray="4 4" strokeWidth="1" vectorEffect="non-scaling-stroke" />
 
                 {(() => {
                   const points = fullTimeline.map((item, index) => {
@@ -676,8 +690,8 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                     <>
                       <defs>
                         <linearGradient id="miniHistArea" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="var(--color-text-primary)" stopOpacity="0.08" />
-                          <stop offset="100%" stopColor="var(--color-text-primary)" stopOpacity="0.0" />
+                          <stop offset="0%" stopColor="var(--color-data-synthetic)" stopOpacity="0.18" />
+                          <stop offset="100%" stopColor="var(--color-data-synthetic)" stopOpacity="0.0" />
                         </linearGradient>
                       </defs>
 
@@ -687,8 +701,9 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                         <path
                           d={historyPath}
                           fill="none"
-                          stroke="var(--color-text-primary)"
+                          stroke="var(--color-data-synthetic)"
                           strokeWidth="2"
+                          vectorEffect="non-scaling-stroke"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         />
@@ -698,8 +713,9 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                         <path
                           d={forecastPath}
                           fill="none"
-                          stroke="var(--color-text-tertiary)"
+                          stroke="var(--color-data-illustrative)"
                           strokeWidth="2"
+                          vectorEffect="non-scaling-stroke"
                           strokeDasharray="5 3"
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -718,22 +734,10 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                               cx={p.x}
                               cy={p.y}
                               r={isHovered ? 6 : p.item.year % 5 === 0 ? 3.5 : 2}
-                              fill={isHovered ? 'var(--color-surface-0)' : p.item.isForecast ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)'}
+                              fill={isHovered ? 'var(--color-surface-1)' : p.item.isForecast ? 'var(--color-data-illustrative)' : 'var(--color-data-synthetic)'}
                               stroke={isHovered ? 'var(--color-text-primary)' : 'none'}
                               strokeWidth={2}
                             />
-                            {(p.item.year % 10 === 0 || p.item.year === 2040) && (
-                              <text
-                                x={p.x}
-                                y="148"
-                                fill="var(--color-text-tertiary)"
-                                fontSize="8"
-                                fontFamily="monospace"
-                                textAnchor="middle"
-                              >
-                                {p.item.year}
-                              </text>
-                            )}
                           </g>
                         )
                       })}
@@ -741,6 +745,23 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                   )
                 })()}
               </svg>
+            </div>
+
+            {/* Year ticks in HTML. The SVG stretches to the panel
+                (preserveAspectRatio "none"), which squashed its 8-unit text to
+                a sliver a few pixels wide; these stay at the type scale. */}
+            <div className="relative h-4 font-mono text-xs tabular-nums text-text-tertiary">
+              {fullTimeline.map((item, index) =>
+                item.year % 10 === 0 || item.year === 2040 ? (
+                  <span
+                    key={item.year}
+                    className="absolute top-0 -translate-x-1/2"
+                    style={{ left: `${(index / Math.max(fullTimeline.length - 1, 1)) * 100}%` }}
+                  >
+                    {item.year}
+                  </span>
+                ) : null,
+              )}
             </div>
 
             {/* Minimal Active Year Inspection Badge */}
@@ -765,7 +786,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
 
           {/* Daily forecast trajectory — the real Track B artifact, not a shape */}
           <div
-            className="space-y-3 rounded-xl border border-border-default bg-surface-1 p-5"
+            className={`space-y-3 rounded-xl p-5 ${DATA_WELL}`}
             data-provenance={trajectoryState === 'ready' ? 'synthetic' : 'unavailable'}
             data-provenance-model={forecastMeta?.model}
           >
@@ -778,10 +799,10 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               </div>
               <div className="flex items-center gap-3 text-xs font-mono">
                 <span className="flex items-center gap-1 text-text-primary">
-                  <span aria-hidden="true" className="inline-block h-2.5 w-2.5 rounded-xs bg-accent" /> forecast median
+                  <span aria-hidden="true" className="inline-block h-2.5 w-2.5 rounded-xs bg-data-model" /> forecast median
                 </span>
                 <span className="flex items-center gap-1 text-text-secondary">
-                  <span aria-hidden="true" className="inline-block h-2.5 w-2.5 rounded-xs bg-text-tertiary" /> seasonal-naive
+                  <span aria-hidden="true" className="inline-block h-2.5 w-2.5 rounded-xs bg-data-comparison" /> seasonal-naive
                 </span>
               </div>
             </div>
@@ -808,12 +829,12 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                         <div className="w-full flex items-end justify-center gap-0.5 h-24">
                           <div
                             style={{ height: `${medianH}%` }}
-                            className="w-1.5 bg-accent rounded-t-sm"
+                            className="w-1.5 bg-data-model rounded-t-sm"
                             title={`${d.date} · forecast median ${Math.round(d.median).toLocaleString()} t`}
                           />
                           <div
                             style={{ height: `${baseH}%` }}
-                            className="w-1.5 bg-text-tertiary rounded-t-sm"
+                            className="w-1.5 bg-data-comparison rounded-t-sm"
                             title={`${d.date} · seasonal-naive ${Math.round(d.baseline).toLocaleString()} t`}
                           />
                         </div>

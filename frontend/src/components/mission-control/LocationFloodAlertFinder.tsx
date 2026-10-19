@@ -5,7 +5,8 @@ import { Search } from 'lucide-react'
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine,
 } from 'recharts'
-import { Button, EmptyState, Skeleton, StatusDot, type Status } from '@/components/ui/primitives'
+import { Button, DATA_WELL, EmptyState, Skeleton, StatusDot, type Status } from '@/components/ui/primitives'
+import { AXIS_TICK, BAR_CURSOR, GRID_STROKE, TOOLTIP_LABEL_STYLE, TOOLTIP_STYLE } from '@/lib/chart-theme'
 import { Metric } from '@/components/console/Evidence'
 import { derived, measured, measuredOrNull, measuredValue } from '@/lib/provenance'
 import { UPSTREAMS } from '@/lib/upstreams'
@@ -229,7 +230,7 @@ export default function LocationFloodAlertFinder(_props: Props) {
           />
           </div>
 
-          <div className="rounded-xl border border-border-default bg-surface-1 p-4">
+          <div className={`rounded-xl p-4 ${DATA_WELL}`}>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h4 className="label">Daily rainfall, measured</h4>
               <span className="inline-flex items-center gap-1.5 text-sm text-text-secondary">
@@ -240,41 +241,39 @@ export default function LocationFloodAlertFinder(_props: Props) {
 
             <div className="mt-4 h-56 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data.readings} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
-                  <CartesianGrid vertical={false} stroke="var(--color-border-subtle)" />
+                {/* The y-axis had a -18 px left margin and a 40 px width, which cut
+                    its "mm" ticks to "ım". Measured rainfall is the measured
+                    data role (blue); the threshold line is a caution status. */}
+                <BarChart data={data.readings} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid vertical={false} stroke={GRID_STROKE} />
                   <XAxis
                     dataKey="date"
-                    tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }}
+                    tick={AXIS_TICK}
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(d: string) => d.slice(5)}
                   />
                   <YAxis
-                    tick={{ fontSize: 12, fill: 'var(--color-text-tertiary)' }}
+                    tick={AXIS_TICK}
                     tickLine={false}
                     axisLine={false}
-                    width={40}
+                    width={56}
                     unit="mm"
                   />
                   <Tooltip
-                    contentStyle={{
-                      background: 'var(--color-surface-3)',
-                      border: '1px solid var(--color-border-default)',
-                      borderRadius: 4,
-                      fontSize: 13,
-                      fontVariantNumeric: 'tabular-nums',
-                      color: 'var(--color-text-primary)',
-                    }}
+                    contentStyle={TOOLTIP_STYLE}
+                    labelStyle={TOOLTIP_LABEL_STYLE}
+                    cursor={BAR_CURSOR}
                     formatter={(v: any) => [v == null ? 'no record' : `${v} mm`, 'rainfall']}
                   />
                   <ReferenceLine
                     y={ELEVATED_MM / 14}
-                    stroke="var(--color-text-tertiary)"
+                    stroke="var(--color-status-caution)"
                     strokeDasharray="4 3"
                   />
                   <Bar
                     dataKey="rainfallMm"
-                    fill="var(--color-accent)"
+                    fill="var(--color-data-measured)"
                     radius={[2, 2, 0, 0]}
                     isAnimationActive={false}
                   />

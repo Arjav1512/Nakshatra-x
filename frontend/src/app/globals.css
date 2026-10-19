@@ -268,6 +268,13 @@
     border-color: #ccc !important;
   }
 
+  /* A dark scope's text is light. Browsers drop backgrounds when printing, so
+     without this a chart or the map panel prints light text on white paper. */
+  .chrome-dark {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
   /* Evidence disclosures are collapsed on screen; on paper they must all be
      open, because a printed figure without its provenance is exactly what the
      provenance rule exists to prevent. */

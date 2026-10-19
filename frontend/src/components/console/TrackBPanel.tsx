@@ -10,6 +10,8 @@ import {
   type RecommendationsResponse, type WarmingInfo,
   fetchBacktest, fetchForecast, fetchRecommendations,
 } from '@/lib/console-api'
+import { DATA_WELL } from '@/components/ui/primitives'
+import { AXIS_TICK, GRID_STROKE, LINE_CURSOR, TOOLTIP_LABEL_STYLE, TOOLTIP_STYLE } from '@/lib/chart-theme'
 import { Metric } from './Evidence'
 import { IntervalCalibration } from './IntervalCalibration'
 import { ProbabilityWithdrawn } from './ProbabilityWithdrawn'
@@ -486,7 +488,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             // over synthetic data; the envelope is on the block so the tooltip,
             // which Recharts draws inside it, is covered too.
             <div
-              className="mt-4 border-t border-border-default pt-3"
+              className={`mt-4 rounded-tile p-3 md:p-4 ${DATA_WELL}`}
               data-provenance="synthetic"
               data-provenance-model={forecast.model_version}
             >
@@ -502,15 +504,15 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 */}
                 <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-secondary" aria-label="Chart key">
                   <li className="flex items-center gap-1.5">
-                    <span aria-hidden="true" className="inline-block h-3 w-4 rounded-sm border border-accent/70 bg-accent/30" />
+                    <span aria-hidden="true" className="inline-block h-3 w-4 rounded-sm border border-data-model/70 bg-data-model/25" />
                     {Math.round(forecast.interval.nominal_coverage * 100)}% prediction interval
                   </li>
                   <li className="flex items-center gap-1.5">
-                    <span aria-hidden="true" className="inline-block h-0.5 w-4 rounded-full bg-accent" />
+                    <span aria-hidden="true" className="inline-block h-0.5 w-4 rounded-full bg-data-model" />
                     median
                   </li>
                   <li className="flex items-center gap-1.5">
-                    <span aria-hidden="true" className="inline-block w-4 border-t-2 border-dashed border-text-secondary" />
+                    <span aria-hidden="true" className="inline-block w-4 border-t-2 border-dashed border-data-comparison" />
                     seasonal-naive baseline
                   </li>
                 </ul>
@@ -519,16 +521,14 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={selected.trajectory} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
                     {/* Recharts theme — docs/design/DESIGN_SYSTEM.md section 8.
-                        Colours reference the design tokens through var(); no hex
-                        literal appears outside tokens.css. Entrance animation is
-                        off: an animating chart is a count-up by another name. */}
-                    <CartesianGrid
-                      vertical={false}
-                      stroke="var(--color-border-default)"
-                    />
+                        Colours are the data roles in tokens.css, through var();
+                        the well is dark, so the forecaster's output is mint and
+                        the baseline a neutral dash. Entrance animation is off:
+                        an animating chart is a count-up by another name. */}
+                    <CartesianGrid vertical={false} stroke={GRID_STROKE} />
                     <XAxis
                       dataKey="horizon_days"
-                      tick={{ fontSize: 13, fill: 'var(--color-text-secondary)' }}
+                      tick={{ ...AXIS_TICK, fontSize: 13 }}
                       tickFormatter={(h) => dayOf(forecast.window.start, h)}
                       tickLine={false}
                       axisLine={false}
@@ -545,7 +545,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                       drawn.
                     */}
                     <YAxis
-                      tick={{ fontSize: 13, fill: 'var(--color-text-secondary)' }}
+                      tick={{ ...AXIS_TICK, fontSize: 13 }}
                       tickLine={false}
                       axisLine={false}
                       width={44}
@@ -556,14 +556,9 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                       allowDecimals={false}
                     />
                     <Tooltip
-                      contentStyle={{
-                        background: 'var(--color-surface-0)',
-                        border: '1px solid var(--color-border-strong)',
-                        borderRadius: 8,
-                        fontSize: 13,
-                        fontVariantNumeric: 'tabular-nums',
-                        color: 'var(--color-text-primary)',
-                      }}
+                      contentStyle={TOOLTIP_STYLE}
+                      labelStyle={TOOLTIP_LABEL_STYLE}
+                      cursor={LINE_CURSOR}
                       labelFormatter={(v) => dayOf(forecast.window.start, Number(v))}
                     />
                     {/*
@@ -579,28 +574,28 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                     <Area
                       type="monotone"
                       dataKey={(d: any) => [d.p10_tonnes, d.p90_tonnes]}
-                      stroke="none" fill="var(--color-accent)" fillOpacity={0.14}
+                      stroke="none" fill="var(--color-data-model)" fillOpacity={0.16}
                       name="80% interval" isAnimationActive={false} className="forecast-band"
                       activeDot={false}
                     />
                     <Line
-                      type="monotone" dataKey="p90_tonnes" stroke="var(--color-accent)"
-                      strokeOpacity={0.7} strokeWidth={1} dot={false} activeDot={false}
+                      type="monotone" dataKey="p90_tonnes" stroke="var(--color-data-model)"
+                      strokeOpacity={0.6} strokeWidth={1} dot={false} activeDot={false}
                       name="p90" isAnimationActive={false} className="forecast-p90"
                     />
                     <Line
-                      type="monotone" dataKey="p10_tonnes" stroke="var(--color-accent)"
-                      strokeOpacity={0.7} strokeWidth={1} dot={false} activeDot={false}
+                      type="monotone" dataKey="p10_tonnes" stroke="var(--color-data-model)"
+                      strokeOpacity={0.6} strokeWidth={1} dot={false} activeDot={false}
                       name="p10" isAnimationActive={false} className="forecast-p10"
                     />
                     <Line
-                      type="monotone" dataKey="median_tonnes" stroke="var(--color-accent)"
+                      type="monotone" dataKey="median_tonnes" stroke="var(--color-data-model)"
                       strokeWidth={2.5} dot={false} name="median" isAnimationActive={false}
                       className="forecast-median"
                     />
                     <Line
                       type="monotone" dataKey="baseline_tonnes"
-                      stroke="var(--color-text-secondary)"
+                      stroke="var(--color-data-comparison)"
                       strokeWidth={1.5} strokeDasharray="5 4" dot={false}
                       name="seasonal-naive" isAnimationActive={false}
                     />

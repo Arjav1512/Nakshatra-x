@@ -10,6 +10,12 @@ sets a colour, size, spacing, radius or animation that is not defined here.
   Hanken Grotesk / Geist Mono, nested radii, flat elevation. Principles (§1),
   the provenance rule (§10) and the motion bans (§7.2) are unchanged in
   substance; §3-§7 record the new values and every deliberate amendment.
+- **Revised:** 2026-10-20 — colour restored inside content, as the reference
+  directs (rule 3: "brights appear in media, block previews and one accent per
+  view"). Every chart now sits in a dark data well and takes its series colour
+  from the reference brights by role (§3.9, §8); source-kind tags are bright
+  fills with ink on them (§3.9). Chrome — navigation, buttons, segmented
+  controls — stays monochrome, as the reference requires.
 - **Companion documents:** `DESIGN_AUDIT.md` (what was wrong), `IA.md` (structure)
 
 ---
@@ -101,9 +107,10 @@ dimmer text token: text too unimportant to meet AA is too unimportant to render.
 
 Mint is 1.24:1 on `#FAFAFA` and can never be text there. On light, `accent` is
 the reference's inverse ink, so chrome stays monochrome (reference rule 3:
-"brights … never on chrome"). Mint appears once per view as a fill — the
-console's focal answer, the landing page's measured points — and as the accent
-inside dark chrome. Links in prose are underlined (`.prose-link`), because an
+"brights … never on chrome"). As an accent, mint appears once per view as a
+fill — the console's focal answer — and as the accent inside dark chrome.
+Inside content it is also the model's data colour and the DERIVED tag's fill
+(§3.9); those are content, which the reference colours. Links in prose are underlined (`.prose-link`), because an
 ink link in ink text is distinguished by colour alone otherwise.
 
 ### 3.4 Status — data semantics only
@@ -196,6 +203,55 @@ border-interactive   3.98       3.96       3.88       3.63      3.0    PASS
 resolves to nothing in `tokens.css`. Separation is a surface step plus a 1px
 line; floating chrome (the app bar) uses an 18px backdrop blur over
 `--nav-bg`. `--shadow-overlay` survives only as a name, now a 1px line ring.
+
+### 3.9 Colour inside content — data colour and fills
+
+The reference's brights (`--p-mint #00FFD0`, `--p-blue #4DC5E5`, `--p-pink
+#F9ABFF`, `--p-yellow #E9D352`, `--p-green #63AD45`, `--p-red #FF3333`; the
+Paper file names the same values butter, cyan, green, pink and red) belong
+inside content, never on chrome. On the light page none of them reaches 3:1 as a
+mark (mint 1.24, yellow 1.45, pink 1.64, blue 1.93, green 2.65; red 3.48 is the
+only one that would pass), so the reference
+shows them on a dark media ground (`.feature .media`, `.stage`). Two ways in:
+
+**Data colour.** Every chart sits in a dark data well — `DATA_WELL` in
+`primitives.tsx`, a `.chrome-dark` scope on `--ui-bg #151515` — and takes its
+series colour by what the series *is*, never by its position:
+
+| Token | Value | Role | On the well |
+|---|---|---|---|
+| `--data-model` | mint `#00FFD0` | The forecaster's own output: median, interval, feature importances | 14.10:1 |
+| `--data-measured` | blue `#4DC5E5` | Observed inputs: rainfall | 9.07:1 |
+| `--data-synthetic` | yellow `#E9D352` | A generated series: MineTwin's 50 years | 12.09:1 |
+| `--data-illustrative` | pink `#F9ABFF` | An assumption-based continuation; always dashed | 10.69:1 |
+| `--data-comparison` | ink-white at 56% | Baselines; dashed where it is a line | 6.10:1 |
+| `--data-axis` / `--data-grid` | `#B6B6B6` / white at 8% | Ticks / gridlines | 9.01:1 / — |
+
+Where two series share a chart they differ in more than hue: mint against a
+neutral (lightness), solid against dashed (line style), or bar order with a
+key. Thresholds keep the status colours, which `.chrome-dark` redefines for the
+well. Track A's colormap (§3.5) is unchanged.
+
+**Fills.** A bright as a fill with ink on it, the reference's `.tag.new`: a
+tint on light surfaces, the full bright inside `.chrome-dark`. Used for the
+source-kind tags (`SourceBadge`, the map legend, the blending result), keyed by
+hue in `FILL` (`primitives.tsx`):
+
+| Token | Light | Dark chrome | Used for | Ink on it |
+|---|---|---|---|---|
+| `--fill-green` | `#CBE1C2` (green 30%) | `#63AD45` | LIVE / MEASURED | 13.77 / 6.93 |
+| `--fill-mint` | `#ADF9EB` (mint 30%) | `#00FFD0` | DERIVED | 16.00 / 14.80 |
+| `--fill-yellow` | `#F1E9B5` (yellow 40%) | `#E9D352` | SYNTHETIC, cached tiles | 15.57 / 12.69 |
+| `--on-fill` | `#0F0F0F` | `#0F0F0F` | The text on any fill | — |
+
+REFERENCE is the neutral `.tag`; ASSUMPTION stays dashed and unfilled,
+deliberately unlike the kinds that have a source. The word always names the
+kind, so colour is never the only channel.
+
+**Still monochrome:** the app bar and its active link, buttons, segmented
+controls, inputs and focus on light surfaces — the reference's chrome. Mint as
+selection appears where the reference puts it: the selected grade tile's fill,
+and selection and focus inside dark chrome.
 
 ---
 
@@ -415,20 +471,24 @@ Every animation that survives, enumerated. Anything not on this list is a defect
 
 ## 8. Charts — Recharts theme
 
-Recharts stays (6 existing imports; no new charting dependency).
+Recharts stays (no new charting dependency). Shared values live in
+`frontend/src/lib/chart-theme.ts`; colours are the data roles in §3.9.
 
 | Element | Treatment |
 |---|---|
-| Grid | `--border-default`, horizontal lines only, 1px |
-| Axes | `--text-secondary`, 13px, no axis line, no tick marks |
-| Axis labels | `--text-secondary`, `--text-xs` |
-| Series (single) | `--accent` (ink on light) |
-| Series (categorical) | cividis at evenly spaced stops — never arbitrary hues, never status colours |
-| Prediction interval | `--accent` at 14% fill, its p10 / p90 edges drawn as 1px lines at 70% |
-| Median / point forecast | `--accent`, 2.5px |
-| Baseline / comparison | `--text-secondary`, 1.5px, dashed |
-| Threshold line | `--status-caution` or `--status-critical`, 1px dashed, **always labelled in text** |
-| Tooltip | `surface-0`, 1px `--border-strong`, `--radius-md`, tabular numerals |
+| Ground | A dark data well (`DATA_WELL`): `--radius-xl` when the well is the card, `--radius-tile` when nested in one |
+| Grid | `--data-grid`, horizontal lines only, 1px |
+| Axes | `--data-axis`, 12–13px, no axis line, no tick marks; every category labelled |
+| Series | By role (§3.9): model mint, measured blue, synthetic yellow, illustrative pink dashed, comparison neutral dashed |
+| Series (categorical, more than the roles) | cividis at evenly spaced stops — never arbitrary hues, never status colours |
+| Prediction interval | `--data-model` at 16% fill, its p10 / p90 edges drawn as 1px lines at 60% |
+| Median / point forecast | `--data-model`, 2.5px |
+| Baseline / comparison | `--data-comparison`, 1.5px, dashed |
+| Threshold line | `--status-caution` or `--status-critical` (dark-chrome values), 1px dashed, **always explained in text** |
+| Key | Inside the well: the marks themselves (fill, line, dash) with a word each |
+| Tooltip | `surface-0` of the well, 1px `--border-strong`, `--radius-md`, tabular numerals; hover column `--data-grid` |
+| Hand-drawn SVG charts | Same roles; strokes `vector-effect: non-scaling-stroke` where the SVG stretches; tick text in HTML at the type scale |
+| Print | `.chrome-dark` prints its ground (`print-color-adjust: exact`), so a chart never prints light text on white |
 | Empty state | "No data" in `--text-tertiary` — never a zero-line implying a measured zero |
 | Animation | **off** (`isAnimationActive={false}`) — chart entrance animation is a count-up by another name |
 
@@ -501,8 +561,9 @@ the same job (`design-system-mapping.md` §4.6):
 `RollLabel` · `Card` / `CardHeader` / `CardBody` · `Tag` · `Badge` ·
 `StatusDot` / `StatusLabel` (colour **+** shape **+** label) · `Segmented` ·
 `Switch` · `Field` / `INPUT_CLASS` · `Skeleton` · `EmptyState` · `PageHeader` ·
-`Section` · `MineSwitcher` · `PageNav` · `Metric` (in `console/Evidence.tsx` —
-the provenance gate stays where it is).
+`Section` · `MineSwitcher` · `PageNav` · `DATA_WELL` (every chart's ground) ·
+`FILL` (bright tag fills) · `Metric` (in `console/Evidence.tsx` — the provenance
+gate stays where it is). Chart values: `lib/chart-theme.ts`.
 
 ### 11.3 Enforced
 

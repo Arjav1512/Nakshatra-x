@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { DATA_WELL } from '@/components/ui/primitives'
 import type { MineInfo } from './types'
 
 /**
@@ -147,7 +148,12 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
               Feature importance — {m.features.length} features, none derived from distance to a
               known mine
             </p>
-            <div className="space-y-1" data-provenance="derived" data-provenance-model={m.model_version}>
+            {/* The model's own output, so the model data role, on a data well. */}
+            <div
+              className={`space-y-1 rounded-tile px-3 py-2.5 ${DATA_WELL}`}
+              data-provenance="derived"
+              data-provenance-model={m.model_version}
+            >
               {Object.entries(m.feature_importance)
                 .sort((a, b) => b[1] - a[1])
                 .map(([name, imp]) => (
@@ -155,7 +161,7 @@ export default function RealtimeMLTrainingStudio({ mine }: Props) {
                     <span className="w-44 shrink-0 font-mono text-xs text-text-secondary">{name}</span>
                     <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-3">
                       <div
-                        className="h-full rounded-full bg-accent"
+                        className="h-full rounded-full bg-data-model"
                         style={{ width: `${Math.min(100, imp * 100 * 2)}%` }}
                       />
                     </div>

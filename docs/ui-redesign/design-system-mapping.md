@@ -434,6 +434,24 @@ as text on light (1.24:1). Nakshatra's `accent` token is used ~300 times as
 Links inside prose are underlined, because an ink link in ink text would be
 distinguished by colour alone (WCAG 1.4.1).
 
+**Amended 2026-10-20 (colour inside content).** The first implementation
+applied rule 3's "never on chrome" and left content almost as monochrome as
+the chrome, so its charts were ink on grey. Rule 3 also says where the brights
+*do* go: "inside content … media, block previews". Content now uses them:
+
+- Every chart sits in a dark data well (the reference's `.feature .media` /
+  `.stage` ground), where all six brights measure 5:1 or more, and takes its
+  series colour by role: mint for the model's output, blue for measured inputs,
+  yellow for a synthetic series, pink dashed for an illustrative continuation,
+  a neutral dash for baselines. Values and contrast are in `DESIGN_SYSTEM.md`
+  §3.9 and §8.
+- Source-kind tags are a bright as a fill with ink on it (`.tag.new`): a tint
+  on light surfaces, the full bright in dark chrome.
+- `highlight` is still the one mint *accent* per view; the model's mint series
+  and the DERIVED fill are data, not accent.
+- Chrome is unchanged: navigation, buttons, segmented controls, inputs and
+  light-surface focus stay ink.
+
 ### 5.3 Status colours
 
 The reference has no status semantics; this product's statuses (nominal,
