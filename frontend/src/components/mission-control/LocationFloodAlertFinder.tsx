@@ -153,7 +153,7 @@ export default function LocationFloodAlertFinder(_props: Props) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Balaghat, Nagpur, a district or a place name"
-            className="h-10 w-full rounded-md border border-border-interactive bg-surface-2 px-3 text-base text-text-primary transition-colors duration-[120ms] ease-out placeholder:text-text-tertiary hover:bg-surface-3"
+            className="h-[46px] w-full rounded-md border border-border-interactive bg-surface-0 px-3.5 text-base tracking-[0.02em] text-text-primary transition-[border-color] duration-[180ms] ease-out hover:border-text-primary focus:border-text-primary"
           />
         </div>
         <Button type="submit" variant="primary" size="md" disabled={loading || !query.trim()}>
@@ -229,7 +229,7 @@ export default function LocationFloodAlertFinder(_props: Props) {
           />
           </div>
 
-          <div className="rounded-md border border-border-default bg-surface-2 p-4">
+          <div className="rounded-xl border border-border-default bg-surface-1 p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h4 className="label">Daily rainfall, measured</h4>
               <span className="inline-flex items-center gap-1.5 text-sm text-text-secondary">

@@ -67,36 +67,36 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface-0)] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,233,0.15),rgba(255,255,255,0))] flex items-center justify-center p-4 font-mono">
+    <div className="min-h-[calc(100dvh-3.5rem)] bg-surface-0  flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         {/* Slot Available Notice Banner */}
         {slotAvailable === true && (
-          <div className="mb-4 p-3.5 rounded-md bg-accent/10 border border-accent/40 text-accent flex items-center justify-between animate-in fade-in">
+          <div className="mb-4 p-3.5 rounded-tile bg-surface-2 text-text-primary flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs">
               <Sparkles size={16} className="shrink-0" />
               <span>Single Admin Slot Open (0/1 registered)</span>
             </div>
             <Link
               href="/admin/setup"
-              className="px-2.5 py-1 rounded-lg bg-accent text-black font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-opacity"
+              className="px-2.5 py-1 rounded-sm bg-inverse-bg text-inverse-fg text-xs tracking-[0.044em] hover:bg-inverse-hover transition-[background-color]"
             >
               Claim Slot
             </Link>
           </div>
         )}
 
-        <div className="rounded-md bg-surface-1/90 border border-border-default p-8  relative overflow-hidden">
+        <div className="rounded-2xl bg-surface-1 border border-border-default p-8 relative overflow-hidden">
           {/* Top Radial Glow */}
 
           {/* Header */}
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="h-14 w-14 rounded-md bg-accent/10 border border-accent/40 flex items-center justify-center text-accent mb-3">
+            <div className="h-14 w-14 rounded-tile bg-surface-2 flex items-center justify-center text-text-primary mb-3">
               <Shield size={28} />
             </div>
-            <div className="text-xs font-bold uppercase tracking-[0.25em] text-accent">
-              RESTRICTED COMMAND ACCESS
+            <div className="label">
+              Restricted command access
             </div>
-            <h1 className="text-xl sm:text-2xl font-semibold text-text-primary mt-1">
+            <h1 className="text-xl sm:text-2xl text-text-primary mt-1">
               Commander Terminal
             </h1>
             <p className="text-xs text-text-secondary mt-1">
@@ -108,7 +108,7 @@ export default function AdminLoginPage() {
 
           {/* Error Banner */}
           {error && (
-            <div className="mb-5 p-3 rounded-md bg-status-critical/15 border border-status-critical/50 text-status-critical text-xs flex items-start gap-2 animate-in fade-in">
+            <div className="mb-5 p-3 rounded-md bg-status-critical/15 border border-status-critical/50 text-status-critical text-xs flex items-start gap-2">
               <AlertCircle size={16} className="shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
@@ -117,7 +117,7 @@ export default function AdminLoginPage() {
           {/* Form */}
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs uppercase tracking-wider text-text-secondary mb-1.5 flex items-center gap-1">
+              <label className="mb-1.5 flex text-sm tracking-[0.044em] text-text-secondary items-center gap-1">
                 <User size={12} className="text-accent" /> Commander Call Sign / Email
               </label>
               <input
@@ -126,12 +126,12 @@ export default function AdminLoginPage() {
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 required
-                className="w-full bg-surface-0/80 border border-border-default rounded-md py-3 px-3.5 text-xs text-text-primary placeholder-text-tertiary focus:outline-none focus:border-accent transition-colors"
+                className="w-full bg-surface-0 border border-border-interactive rounded-md py-3 px-3.5 text-base text-text-primary focus:border-text-primary transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-xs uppercase tracking-wider text-text-secondary mb-1.5 flex items-center gap-1">
+              <label className="mb-1.5 flex text-sm tracking-[0.044em] text-text-secondary items-center gap-1">
                 <KeyRound size={12} className="text-accent" /> Master Access Passphrase
               </label>
               <div className="relative">
@@ -141,7 +141,7 @@ export default function AdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full bg-surface-0/80 border border-border-default rounded-md py-3 pl-3.5 pr-10 text-xs text-text-primary placeholder-text-tertiary focus:outline-none focus:border-accent transition-colors"
+                  className="w-full bg-surface-0 border border-border-interactive rounded-md py-3 pl-3.5 pr-10 text-base text-text-primary focus:border-text-primary transition-colors"
                 />
                 <button
                   type="button"
@@ -162,7 +162,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3 px-4 rounded-md bg-gradient-to-r from-accent to-accent text-black font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full mt-2 py-3 px-4 rounded-md bg-inverse-bg text-inverse-fg text-base tracking-[0.044em] hover:bg-inverse-hover transition-[background-color] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               {loading ? (
                 <>

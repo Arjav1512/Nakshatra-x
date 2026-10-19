@@ -71,7 +71,7 @@ export function SourceBadge({ env }: { env: Envelope<any> }) {
   return (
     <span
       title={m.title}
-      className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-xs font-medium tracking-wide ${m.cls}`}
+      className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-xs tracking-[0.06em] ${m.cls}`}
     >
       {m.label}
     </span>
@@ -161,7 +161,10 @@ export function Metric(props: MetricProps) {
 
   return (
     <div
-      className={`rounded-md border bg-surface-2 ${focal ? 'h-full border-border-strong p-4 md:p-5' : 'border-border-default p-3'}`}
+      // Padding is unchanged from the previous system: the console reserves
+      // the measured heights of the blocks these tiles sit in. Radius follows
+      // the reference's nesting — a tile is r11, the focal card r20.
+      className={`border bg-surface-1 ${focal ? 'h-full rounded-xl border-border-strong p-4 md:p-5' : 'rounded-tile border-border-default p-3'}`}
       // B-6: the rendered-page provenance guard reads this. The attribute goes
       // on the whole card, not just the value node, because the label and the
       // unit are part of the claim — "rainfall 14d mm" beside "104.71" says
@@ -205,7 +208,7 @@ export function Metric(props: MetricProps) {
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
-            className="mt-2 rounded-sm font-mono text-xs tracking-wide text-text-tertiary transition-colors duration-[120ms] ease-out hover:text-text-secondary"
+            className="mt-2 rounded-sm font-mono text-xs tracking-wide text-text-tertiary transition-[color] duration-[180ms] ease-out hover:text-text-primary"
           >
             {open ? '− evidence' : '+ evidence'}
           </button>
@@ -239,7 +242,10 @@ export function IntegrityBanner({
   return (
     <div
       role="status"
-      className={`rounded-md border px-3 py-2 text-xs leading-relaxed ${
+      // Box metrics fixed: DecisionConsole reserves this banner's measured
+      // height while telemetry loads (97 / 77 / 58 px), so padding, size and
+      // leading must not change without re-measuring that reservation.
+      className={`rounded-tile border px-3 py-2 text-xs leading-relaxed ${
         degraded
           ? 'border-status-critical/40 bg-status-critical/10 text-text-primary'
           : integrity.contains_synthetic

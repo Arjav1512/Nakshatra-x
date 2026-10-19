@@ -237,88 +237,86 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
     <>
       {/* AI-X Copilot Modal Overlay */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-end p-2 sm:p-6 bg-surface-0/80  animate-in fade-in duration-200">
+        // A side sheet over a scrim, flat (no shadow), as the reference's
+        // surfaces: a 1px line and a tone step separate it from the page.
+        <div className="fixed inset-0 z-50 flex items-end justify-end bg-text-primary/20 p-2 sm:items-center sm:p-6">
           <div
             role="dialog"
             aria-modal="true"
             aria-label="AI-X assistant"
-            className="rounded-md border border-border-default bg-surface-1 w-full sm:max-w-md md:max-w-lg h-[660px] max-h-[92vh] flex flex-col justify-between overflow-hidden shadow-2xl border border-border-interactive rounded-md relative"
+            className="relative flex h-[660px] max-h-[92vh] w-full flex-col justify-between overflow-hidden rounded-2xl border border-border-strong bg-surface-0 sm:max-w-md md:max-w-lg"
           >
             {/* Header */}
-            <div className="p-4 sm:p-5 border-b border-border-default bg-gradient-to-r from-[rgba(6,12,24,0.95)] to-[rgba(10,20,35,0.95)] flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="relative p-2.5 rounded-md bg-accent/15 border border-accent/40">
-                  <Cpu className="w-5 h-5 text-accent" />
-                  <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-accent border border-black" />
+            <div className="flex items-center justify-between gap-3 border-b border-border-default bg-surface-1 p-4 sm:px-5">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-tile bg-inverse-bg text-inverse-fg">
+                  <Cpu className="h-[18px] w-[18px]" aria-hidden="true" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
-                    <h3 className="text-base font-semibold text-text-primary tracking-wider flex items-center flex-nowrap whitespace-nowrap leading-none font-sans shrink-0">
-                      <span className="text-text-primary drop-">AI</span>
-                      <span className="font-3d-cyber text-cyber-liquid-red ml-0.5 inline-block font-semibold text-base">
-                        -X
-                      </span>
-                      <span className="text-text-secondary font-semibold text-xs ml-1.5 font-mono">Platform Copilot</span>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <h3 className="text-base leading-none text-text-primary">
+                      AI&#8209;X <span className="text-text-secondary">assistant</span>
                     </h3>
                     {/* data-literal-ok: describes how the assistant runs (a local
                         canned-answer matcher in aix-knowledge-engine, no API
                         call), not a measurement of anything. */}
-                    <span className="text-xs py-0.5 px-2 font-mono font-bold whitespace-nowrap shrink-0">
+                    <span className="inline-flex h-[22px] items-center whitespace-nowrap rounded-sm bg-surface-2 px-2 text-xs tracking-[0.044em] text-text-secondary">
                       Runs on-device
                     </span>
                   </div>
-                  <p className="text-xs font-mono text-text-secondary">
-                    Project Scope: <span className="text-accent font-bold">MOIL Manganese Mining &amp; Space Intelligence</span>
+                  <p className="mt-1 truncate text-xs tracking-[0.036em] text-text-tertiary">
+                    Scope: MOIL manganese mining and space data
                   </p>
                 </div>
               </div>
 
               <button type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-2 rounded-md bg-surface-3 hover:bg-white/20 text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-                title="Close AI-X Assistant"
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-2 text-text-primary transition-[background-color] duration-[180ms] ease-out hover:bg-surface-3"
+                title="Close the AI-X assistant"
+                aria-label="Close the AI-X assistant"
               >
-                <X className="w-4 h-4" />
+                <X className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
 
-            {/* Quick Starter Chips Bar */}
-            <div className="px-4 py-2 bg-black/40 border-b border-border-subtle flex flex-wrap gap-2 shrink-0">
+            {/* Starter questions, as the reference's pill tags. */}
+            <div className="flex shrink-0 flex-wrap gap-1.5 border-b border-border-default px-4 py-3">
               {STARTER_QUESTIONS.map((q, idx) => (
                 <button type="button"
                   key={idx}
                   onClick={() => handleSelectSuggestion(q)}
-                  className="px-3 py-1.5 rounded-full bg-surface-2 hover:bg-accent/20 border border-border-default hover:border-accent/40 text-xs font-mono text-text-secondary hover:text-accent transition-colors cursor-pointer shrink-0"
+                  className="inline-flex min-h-[26px] items-center rounded-pill bg-surface-2 px-2.5 py-1 text-left text-xs tracking-[0.036em] text-text-secondary transition-[background-color,color] duration-[180ms] ease-out hover:bg-surface-3 hover:text-text-primary"
                 >
-                  ✦ {q}
+                  {q}
                 </button>
               ))}
             </div>
 
             {/* Messages Scroll Area. role="log": a transcript that grows, so a
                 screen reader announces new answers as they arrive. */}
-            <div role="log" aria-label="Conversation" className="flex-1 p-4 overflow-y-auto space-y-4 font-sans text-xs leading-relaxed">
+            <div role="log" aria-label="Conversation" className="flex-1 space-y-4 overflow-y-auto p-4 text-sm">
               {messages.map((m) => (
                 <div
                   key={m.id}
                   className={`flex gap-3 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {m.sender === 'assistant' && (
-                    <div className="h-8 w-8 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center shrink-0">
-                      <Bot className="w-4 h-4 text-accent" />
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-2 text-text-primary">
+                      <Bot className="h-4 w-4" aria-hidden="true" />
                     </div>
                   )}
 
                   <div className="max-w-[85%] space-y-2">
                     <div
-                      className={`p-3.5 rounded-md ${
+                      className={`rounded-xl p-3.5 ${
                         m.sender === 'user'
-                          ? 'bg-gradient-to-r from-accent to-[var(--color-accent)] text-black font-semibold rounded-br-none'
-                          : 'bg-surface-3 border border-border-default text-text-primary rounded-bl-none shadow-lg'
+                          ? 'rounded-br-sm bg-inverse-bg text-inverse-fg'
+                          : 'rounded-bl-sm bg-surface-2 text-text-primary'
                       }`}
                     >
                       {m.category && (
-                        <div className="text-xs font-mono uppercase tracking-widest text-accent font-bold mb-1">
+                        <div className="label mb-1">
                           {m.category}
                         </div>
                       )}
@@ -331,17 +329,17 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
                             <button type="button"
                               key={idx}
                               onClick={() => handleSelectSuggestion(s)}
-                              className="px-2 py-1 rounded-full bg-surface-2 hover:bg-accent/20 border border-border-default text-xs font-mono text-text-secondary hover:text-accent transition-colors cursor-pointer"
+                              className="inline-flex min-h-[26px] items-center rounded-pill bg-surface-0 px-2.5 py-1 text-left text-xs tracking-[0.036em] text-text-secondary transition-[background-color,color] duration-[180ms] ease-out hover:bg-surface-3 hover:text-text-primary"
                             >
-                              ✦ {s}
+                              {s}
                             </button>
                           ))}
                         </div>
                       )}
 
                       <div
-                        className={`text-xs font-mono mt-1.5 text-right ${
-                          m.sender === 'user' ? 'text-black/70' : 'text-text-secondary'
+                        className={`mt-1.5 text-right font-mono text-xs ${
+                          m.sender === 'user' ? 'text-inverse-fg/75' : 'text-text-tertiary'
                         }`}
                       >
                         {m.timestamp}
@@ -352,31 +350,32 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
                     {m.actionButton && (
                       <button type="button"
                         onClick={() => triggerAction(m.actionButton!)}
-                        className="w-full p-2.5 rounded-md bg-accent/20 hover:bg-accent/35 border border-accent/50 text-accent font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                        className="flex h-9 w-full items-center justify-center gap-2 rounded-md bg-inverse-bg px-3 text-[14px] tracking-[0.044em] text-inverse-fg transition-[background-color,scale] duration-[180ms] ease-out hover:bg-inverse-hover active:scale-[.97]"
                       >
-                        <Zap className="w-3.5 h-3.5" />
+                        <Zap className="h-3.5 w-3.5" aria-hidden="true" />
                         <span>{m.actionButton.label}</span>
                       </button>
                     )}
                   </div>
 
                   {m.sender === 'user' && (
-                    <div className="h-8 w-8 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center shrink-0">
-                      <User className="w-4 h-4 text-accent" />
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-2 text-text-primary">
+                      <User className="h-4 w-4" aria-hidden="true" />
                     </div>
                   )}
                 </div>
               ))}
 
               {isTyping && (
-                <div className="flex gap-3 items-center text-text-secondary font-mono text-xs">
-                  <div className="h-8 w-8 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center shrink-0">
-                    <Bot className="w-4 h-4 text-accent animate-spin" />
+                <div className="flex items-center gap-3 text-xs text-text-secondary">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-2 text-text-primary">
+                    <Bot className="h-4 w-4" aria-hidden="true" />
                   </div>
-                  <div className="p-3 rounded-md bg-surface-3 border border-border-default flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full bg-accent " />
-                    <span className="h-1.5 w-1.5 rounded-full bg-accent [animation-delay:0.2s]" />
-                    <span className="h-1.5 w-1.5 rounded-full bg-accent [animation-delay:0.4s]" />
+                  <div className="flex items-center gap-1.5 rounded-xl bg-surface-2 p-3" role="status">
+                    <span className="sr-only">AI-X is answering</span>
+                    <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-text-tertiary" />
+                    <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-text-tertiary" />
+                    <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-text-tertiary" />
                   </div>
                 </div>
               )}
@@ -385,19 +384,19 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
 
             {/* DYNAMIC AUTO-SUGGEST DROPDOWN OVERLAY */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute bottom-[68px] left-3 right-3 z-50 p-2 rounded-md bg-[var(--color-surface-1)]/95 border border-accent/40  animate-in slide-in-from-bottom-2 duration-200">
-                <div className="text-xs font-mono text-accent font-bold px-3 py-1 flex items-center gap-1.5 border-b border-border-default mb-1">
-                  <Sparkles className="w-3 h-3 text-accent" />
-                  <span>Suggested Questions:</span>
+              <div className="absolute bottom-[76px] left-3 right-3 z-50 rounded-lg border border-border-strong bg-surface-0 p-1.5">
+                <div className="label mb-1 flex items-center gap-1.5 border-b border-border-default px-3 pb-2 pt-1">
+                  <Sparkles className="h-3 w-3" aria-hidden="true" />
+                  <span>Suggested questions</span>
                 </div>
                 <div className="space-y-1 max-h-48 overflow-y-auto">
                   {suggestions.map((item, idx) => (
                     <button type="button"
                       key={idx}
                       onClick={() => handleSelectSuggestion(item)}
-                      className="w-full text-left px-3 py-2 rounded-md text-xs font-mono text-text-primary hover:text-text-primary hover:bg-accent/20 transition-colors flex items-center gap-2 cursor-pointer border border-transparent hover:border-accent/30"
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-text-primary transition-[background-color] duration-[180ms] ease-out hover:bg-surface-2"
                     >
-                      <Search className="w-3.5 h-3.5 text-accent shrink-0" />
+                      <Search className="h-3.5 w-3.5 shrink-0 text-text-tertiary" aria-hidden="true" />
                       <span className="truncate">{item}</span>
                     </button>
                   ))}
@@ -406,7 +405,9 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
             )}
 
             {/* Input Bar */}
-            <div className="p-3 sm:p-4 border-t border-border-default bg-black/70 flex items-center gap-2 relative">
+            {/* The reference's prompt bar: a surface field with its action inside. */}
+            <div className="relative border-t border-border-default p-3 sm:p-4">
+              <div className="flex items-center gap-2 rounded-xl bg-surface-2 py-1.5 pl-4 pr-1.5 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus">
               <input
                 ref={inputRef}
                 type="text"
@@ -417,16 +418,19 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
                   if (e.key === 'Enter') handleSend()
                   if (e.key === 'Escape') setShowSuggestions(false)
                 }}
-                placeholder={`Ask anything about NAKSHATRA-X…`}
-                className="flex-1 p-3 rounded-md bg-surface-3 border border-border-interactive text-xs font-sans text-text-primary placeholder-text-secondary focus:outline-none focus:border-accent transition-colors"
+                placeholder={`Ask anything about Nakshatra-X…`}
+                aria-label="Ask AI-X a question"
+                className="min-w-0 flex-1 bg-transparent py-2 text-base text-text-primary focus:outline-none"
               />
               <button type="button"
                 onClick={() => handleSend()}
                 disabled={!input.trim() || isTyping}
-                className="p-3 rounded-md bg-accent hover:bg-accent/80 text-black font-bold disabled:opacity-50 transition-colors cursor-pointer"
+                aria-label="Send"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-inverse-bg text-inverse-fg transition-[background-color,scale] duration-[180ms] ease-out hover:bg-inverse-hover active:scale-[.97] disabled:opacity-35"
               >
-                <Send className="w-4 h-4" />
+                <Send className="h-4 w-4" aria-hidden="true" />
               </button>
+              </div>
             </div>
           </div>
         </div>

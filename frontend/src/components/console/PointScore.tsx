@@ -63,7 +63,7 @@ export function PointScore({ probe }: { probe: any }) {
 
       {probe.guardrails ? (
         <div
-          className="mt-3 space-y-1 rounded-md border border-border-default bg-surface-1 p-3 text-xs leading-snug text-text-secondary"
+          className="mt-3 space-y-1 rounded-xl border border-border-default bg-surface-1 p-3 text-xs leading-snug text-text-secondary"
           // Statements the service returns with every score. They name
           // "Sentinel-2" and "PRD 2.4"; the kind says where they come from.
           data-provenance="reference"

@@ -58,14 +58,14 @@ export default function AdminProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface-0)] text-text-primary p-8 font-mono">
+    <div className="min-h-[calc(100dvh-3.5rem)] bg-surface-0 text-text-primary p-8">
       <div className="max-w-6xl mx-auto">
         <header className="flex justify-between items-center border-b border-border-default pb-6 mb-8">
           <div className="flex items-center gap-4">
             <Users className="h-8 w-8 text-accent" />
             <div>
-              <h1 className="text-2xl font-bold tracking-widest text-accent">USER DATABASE</h1>
-              <p className="text-xs text-text-tertiary uppercase">Admin Only &bull; Mission Operator Registry</p>
+              <h1 className="text-2xl tracking-[0.044em] text-accent">User database</h1>
+              <p className="text-xs text-text-tertiary">Admin Only &bull; Mission Operator Registry</p>
             </div>
           </div>
           <div className="flex gap-4">
@@ -98,7 +98,7 @@ export default function AdminProfilePage() {
 
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold flex items-center gap-2">
+            <h2 className="text-xl flex items-center gap-2">
               <Shield className="text-accent" /> Registered Users ({users.length})
             </h2>
           </div>
@@ -108,16 +108,16 @@ export default function AdminProfilePage() {
               <Orbit className="animate-spin text-accent h-8 w-8" />
             </div>
           ) : users.length === 0 ? (
-            <div className="bg-[var(--color-surface-0)] border border-border-default rounded-md p-12 text-center">
+            <div className="bg-surface-0 border border-border-default rounded-md p-12 text-center">
               <Users className="h-12 w-12 text-text-tertiary mx-auto mb-4" />
               <p className="text-text-secondary font-mono text-sm">
                 No users found. Users will appear here after signing in with Google OAuth.
               </p>
             </div>
           ) : (
-            <div className="bg-[var(--color-surface-0)] border border-border-default rounded-md overflow-hidden">
+            <div className="bg-surface-0 border border-border-default rounded-md overflow-hidden">
               <table className="w-full text-sm text-left">
-                <thead className="bg-surface-2 text-text-tertiary uppercase text-xs">
+                <thead className="bg-surface-2 text-text-tertiary text-xs">
                   <tr>
                     <th className="px-6 py-4">Avatar</th>
                     <th className="px-6 py-4">Full Name</th>
@@ -138,10 +138,10 @@ export default function AdminProfilePage() {
                         />
                       </td>
 
-                      <td className="px-6 py-4 text-text-primary font-bold">{user.full_name || 'N/A'}</td>
+                      <td className="px-6 py-4 text-text-primary">{user.full_name || 'N/A'}</td>
                       <td className="px-6 py-4 text-accent">{user.email || 'N/A'}</td>
                       <td className="px-6 py-4">
-                        <span className="px-2 py-1 rounded-full bg-accent/15 border border-accent/40 text-accent text-xs font-bold uppercase">
+                        <span className="px-2 py-1 rounded-sm bg-accent/15 border border-accent/40 text-accent text-xs">
                           {user.role || 'operator'}
                         </span>
                       </td>

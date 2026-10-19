@@ -71,7 +71,7 @@ function AuthCallbackContent() {
             email_verified: !!user.email_confirmed_at,
           }
 
-          if (isMounted) setStatus('Synchronizing orbital operator profile...')
+          if (isMounted) setStatus('Loading your profile…')
 
           // 4. Upsert into Supabase profiles table
           try {
@@ -112,7 +112,7 @@ function AuthCallbackContent() {
           }
 
           if (isMounted) {
-            setStatus('Identity confirmed! Entering Orbital Console...')
+            setStatus('Signed in. Opening the console…')
             setTimeout(() => {
               window.location.href = next
             }, 300)
@@ -138,49 +138,49 @@ function AuthCallbackContent() {
     }
   }, [searchParams, router])
 
+  // The design reference's flat card on the page ground; the pure-black full
+  // screen and the "orbital clearance" copy are gone. The status line is
+  // announced, so a screen reader hears the sign-in progress.
   return (
-    <div className="relative isolate min-h-screen overflow-hidden bg-black text-text-primary flex items-center justify-center p-4">
-      <GlassCard className="relative z-10 w-full max-w-md p-8 text-center border border-border-default">
-        <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-md bg-accent/10 border border-accent/40 text-accent mb-4">
-          <ShieldCheck size={30} />
-        </div>
+    <main className="flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-4 py-12">
+      <GlassCard className="w-full max-w-md p-8 text-left">
+        <p className="label flex items-center gap-2">
+          <ShieldCheck size={14} aria-hidden="true" />
+          Nakshatra&#8209;X · sign-in
+        </p>
 
-        <div className="font-mono text-xs font-bold uppercase tracking-[0.25em] text-accent mb-1">
-          NAKSHATRA-X SECURITY GATEWAY
-        </div>
-
-        <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-text-primary mb-2">
-          Supabase Authentication
-        </h2>
+        <h1 className="mt-3 font-display text-3xl text-text-primary">
+          Completing sign-in
+        </h1>
 
         {error ? (
-          <div className="space-y-4 text-left">
-            <div className="p-3.5 text-xs font-mono rounded-md bg-status-critical/15 border border-status-critical/50 text-status-critical flex items-start gap-2.5">
-              <AlertCircle size={16} className="shrink-0 mt-0.5" />
+          <div className="mt-6 space-y-4">
+            <div role="alert" className="flex items-start gap-2.5 rounded-tile border border-status-critical/40 bg-status-critical/[0.06] p-3.5 text-sm text-status-critical">
+              <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
               <span>{error}</span>
             </div>
 
             <Link
               href="/login"
-              className="w-full py-3 px-4 rounded-md bg-accent/20 hover:bg-accent/30 border border-accent/60 text-accent hover:text-text-primary font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2"
+              className="flex h-[42px] w-full items-center justify-center gap-2 rounded-md bg-inverse-bg px-4 text-base tracking-[0.044em] text-inverse-fg transition-[background-color] duration-[180ms] ease-out hover:bg-inverse-hover"
             >
               <span>Return to Login</span>
-              <ArrowRight size={14} />
+              <ArrowRight size={14} aria-hidden="true" />
             </Link>
           </div>
         ) : (
-          <div className="space-y-4 pt-2">
-            <div className="flex items-center justify-center gap-3 text-sm font-mono text-accent">
-              <Loader2 size={18} className="animate-spin text-accent" />
+          <div className="mt-6 space-y-3">
+            <div role="status" className="flex items-center gap-3 text-base text-text-primary">
+              <Loader2 size={18} className="animate-spin text-text-secondary" aria-hidden="true" />
               <span>{status}</span>
             </div>
-            <p className="text-xs font-mono text-text-secondary">
-              Validating real Google credentials &amp; orbital clearance...
+            <p className="text-sm text-text-secondary">
+              Checking the credentials your provider returned.
             </p>
           </div>
         )}
       </GlassCard>
-    </div>
+    </main>
   )
 }
 
@@ -188,9 +188,9 @@ export default function AuthCallbackPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-black text-text-primary flex items-center justify-center font-mono text-xs text-text-secondary">
-          Loading orbital authentication gateway...
-        </div>
+        <main className="flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-4 text-sm text-text-secondary">
+          Loading sign-in…
+        </main>
       }
     >
       <AuthCallbackContent />

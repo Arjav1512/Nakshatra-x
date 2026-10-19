@@ -110,7 +110,7 @@ export function IntervalCalibration({ mineCode, mineName }: { mineCode: string; 
   const { daily } = data
   return (
     <div
-      className="space-y-1 rounded-md border border-border-default bg-surface-1 p-3 text-xs"
+      className="space-y-1 rounded-xl border border-border-default bg-surface-1 p-3 text-xs"
       data-provenance="derived"
       data-provenance-model={data.model_version}
       data-provenance-vintage={data.generated_at}

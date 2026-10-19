@@ -4,6 +4,12 @@ The visual and behavioural contract for every screen. Nothing in the product
 sets a colour, size, spacing, radius or animation that is not defined here.
 
 - **Branch:** `design/foundation` · **Date:** 2026-09-23
+- **Revised:** 2026-10-18 — re-skinned on the owner-approved design reference
+  (`churn-design-system.html`, mapped in `docs/ui-redesign/design-system-mapping.md`):
+  warm-neutral light surfaces, dark "instrument" chrome for the map, Geist /
+  Hanken Grotesk / Geist Mono, nested radii, flat elevation. Principles (§1),
+  the provenance rule (§10) and the motion bans (§7.2) are unchanged in
+  substance; §3-§7 record the new values and every deliberate amendment.
 - **Companion documents:** `DESIGN_AUDIT.md` (what was wrong), `IA.md` (structure)
 
 ---
@@ -49,57 +55,76 @@ tokens, not hex.
 
 ## 3. Colour
 
-### 3.1 Surfaces — near-neutral dark
+Values live in `frontend/src/app/tokens.css`; each is quoted from the design
+reference or is a documented extension (`design-system-mapping.md` §5). The
+token *names* are unchanged from the previous system, so components did not
+need new vocabulary.
 
-A four-step neutral ramp with a slight cool cast. **Elevation is value contrast,
-not shadow.** A raised element is a lighter surface, not a glowing one.
+### 3.1 Surfaces — warm-neutral light, plus dark chrome
 
-| Token | Hex | Use |
-|---|---|---|
-| `--surface-0` | `#0B0D10` | Page background |
-| `--surface-1` | `#121519` | Panels, app bar, rails |
-| `--surface-2` | `#181C21` | Cards, inputs, table headers |
-| `--surface-3` | `#1F242A` | Hover, active row, popover |
+**Elevation is a tone step, not a shadow** (reference rule 5).
 
-### 3.2 Text
+| Token | Light | Dark chrome | Use |
+|---|---|---|---|
+| `--surface-0` | `#FAFAFA` | `#0F0F0F` | Page (`--bg`) |
+| `--surface-1` | `#F7F7F7` | `#151515` | Cards, panels, card headers (`--bg-alt`) |
+| `--surface-2` | `#EDEDED` | `#1E1E1E` | Wells, inputs on cards, feature cards (`--surface`) |
+| `--surface-3` | `#E2E2E2` | `#2E2E2E` | Hover, active, chips (`--surface-2`) |
+| `--surface-black` | `#0F0F0F` | `#0A0909` | Dark media wells only |
 
-| Token | Hex | Use |
-|---|---|---|
-| `--text-primary` | `#E6E9EC` | Headings, values, body |
-| `--text-secondary` | `#A2AAB3` | Supporting prose, labels |
-| `--text-tertiary` | `#858D96` | Captions, metadata, units |
+**Dark chrome** (`.chrome-dark`) is the reference's editor chrome, "dark in both
+themes". It redefines every semantic token for its subtree and is used where the
+content needs a dark ground: the satellite map card (imagery, cividis, status
+markers) and the landing page's data media well. Nowhere else.
 
-There is no fourth, dimmer text token. If text is too unimportant to meet AA,
-it is too unimportant to render.
+### 3.2 Text — ink, by alpha
 
-### 3.3 Accent — exactly one
+| Token | Light | Dark chrome | Use |
+|---|---|---|---|
+| `--text-primary` | `#0F0F0F` | `#FAFAFA` | Headings, values, body |
+| `--text-secondary` | ink 70% | `#B6B6B6` | Supporting prose, labels, eyebrows |
+| `--text-tertiary` | ink 60% | paper 56% | Captions, metadata, units |
 
-| Token | Hex | Use |
-|---|---|---|
-| `--accent` | `#6AA5F0` | Links, selection, focus ring, the single primary action per view |
+Hierarchy by alpha, not new greys (reference rule 2). The reference's 50 / 40 /
+30% steps fail AA on light surfaces (3.36 / 2.53 / ~1.9:1 worst), so they are
+raised to the lowest alphas that pass on every surface. There is still no
+dimmer text token: text too unimportant to meet AA is too unimportant to render.
 
-One accent, used sparingly. It is not a decoration and never a border colour for
-ordinary containers. `#00FF88` and the other 118 hexes are gone.
+### 3.3 Accent — ink on light, mint in chrome; mint once per view
+
+| Token | Light | Dark chrome | Use |
+|---|---|---|---|
+| `--accent` | `#1E1E1E` | `#00FFD0` | Links, selection, focus ring, the single primary action |
+| `--accent-muted` | `#D7FBF4` | `#12362F` | Selected fills, text selection |
+| `--highlight` / `--highlight-fg` | `#00FFD0` / `#0F0F0F` | — | **The one mint accent per view**, as a fill with ink on it |
+| `--inverse-bg` / `--inverse-fg` / `--inverse-hover` | `#1E1E1E` / `#FAFAFA` / `#3C3C3C` | swapped | Primary buttons, toasts |
+
+Mint is 1.24:1 on `#FAFAFA` and can never be text there. On light, `accent` is
+the reference's inverse ink, so chrome stays monochrome (reference rule 3:
+"brights … never on chrome"). Mint appears once per view as a fill — the
+console's focal answer, the landing page's measured points — and as the accent
+inside dark chrome. Links in prose are underlined (`.prose-link`), because an
+ink link in ink text is distinguished by colour alone otherwise.
 
 ### 3.4 Status — data semantics only
 
-Status colour may **only** encode the state of a measured thing. It is never used
-for emphasis, branding or decoration.
+Status colour may **only** encode the state of a measured thing. It is never
+used for emphasis, branding or decoration — including as a series colour.
 
-| Token | Hex | Meaning |
-|---|---|---|
-| `--status-nominal` | `#3FB98F` | Within expected range |
-| `--status-caution` | `#E0A33E` | Approaching a threshold |
-| `--status-critical` | `#F0684F` | Threshold breached |
-| `--status-unknown` | `#858D96` | No data, stale, or degraded — **the default** |
+| Token | Light | Dark chrome | Meaning |
+|---|---|---|---|
+| `--status-nominal` | `#2F6B1C` | `#63AD45` | Within expected range |
+| `--status-caution` | `#735C00` | `#E9D352` | Approaching a threshold |
+| `--status-critical` | `#BD1A1A` | `#FF6B6B` | Threshold breached |
+| `--status-unknown` | `#5E5E5E` | `#9A9A9A` | No data, stale, or degraded — **the default** |
+
+Light values are the reference's green, yellow and red darkened along their own
+hue until they pass 4.5:1 as text on every surface; dark-chrome values are the
+reference's own, with red lifted (it measured 3.73:1 on `#2E2E2E`).
 
 **Colour is never the only channel.** Every status carries a text label and a
 distinct icon shape. This is what makes the palette safe for colour vision
-deficiency, and it is a hard rule, not a recommendation — hue alone fails for
-roughly 4% of users and fails entirely in greyscale print.
-
-`--status-unknown` being the default matters: a component with no data shows
-"unknown", never "nominal". Absence of evidence is not evidence of health.
+deficiency, and it is a hard rule, not a recommendation.
 
 ### 3.5 Sequential colormap — cividis
 
@@ -113,7 +138,8 @@ Sampled from `matplotlib 3.11.2`'s `cividis` at nine equal stops:
 
 Relative luminance is **strictly increasing** across the ramp
 (0.0169 → 0.0420 → 0.0772 → 0.1300 → 0.2013 → 0.2946 → 0.4205 → 0.5801 → 0.7907),
-so the map survives greyscale and reads monotonically for CVD viewers.
+so the map survives greyscale and reads monotonically for CVD viewers. It is
+drawn on dark chrome, which its pale end needs.
 
 **No rainbow, no jet, ever.** Per the PLOS paper, rainbow maps invent structure
 that is not in the data.
@@ -124,52 +150,52 @@ rule: a colormap is data, not theme, so its stops live as literals in one file
 
 ### 3.6 Borders
 
-| Token | Hex | Use | 3:1 required |
-|---|---|---|---|
-| `--border-subtle` | `#23282E` | Table rules, list dividers | no — decorative |
-| `--border-default` | `#2E343B` | Card and panel edges | no — decorative |
-| `--border-strong` | `#3D444C` | Section boundaries | no — decorative |
-| `--border-interactive` | `#6A727B` | **Input, select, checkbox and button boundaries** | **yes** |
+| Token | Light | Dark chrome | Use | 3:1 required |
+|---|---|---|---|---|
+| `--border-subtle` / `--border-default` | ink 8% | paper 8% | Rules, card edges (`--line`) | no — decorative |
+| `--border-strong` | ink 16% | paper 16% | Section boundaries, overlays (`--line-strong`) | no — decorative |
+| `--border-interactive` | ink 50% | paper 42% | **Input, select and checkbox boundaries** | **yes** |
 
-The split is deliberate. WCAG 2.2 §1.4.11 requires 3:1 for the visual boundary
-of a control a user must perceive — not for a decorative divider. Conflating the
-two either fails the audit or produces a grid of harsh lines. `--border-interactive`
-meets the gate; the decorative rules stay quiet.
-
-**All borders are 1px.** There are no 2px borders and no glows.
+WCAG 2.2 §1.4.11 requires 3:1 for the visual boundary of a control a user must
+perceive; the reference's `--line-strong` input border is 1.3:1, so controls use
+ink at 50% (the reference's own `--fg-2`). Buttons are identified by their
+label and fill and need no boundary. **All borders are 1px.**
 
 ### 3.7 Verified contrast
 
-Computed with the WCAG relative-luminance formula, not asserted:
+Computed with the WCAG relative-luminance formula, alpha tokens composited over
+each surface (`design-system-mapping.md` §4.3):
 
 ```
-token               surface-0  surface-1  surface-2  surface-3  gate   result
+light               surface-0  surface-1  surface-2  surface-3  gate   result
 --------------------------------------------------------------------------------
-text-primary        15.97      15.02      14.04      12.82      4.5    PASS
-text-secondary       8.28       7.79       7.28       6.65      4.5    PASS
-text-tertiary        5.79       5.45       5.09       4.65      4.5    PASS
-accent               7.65       7.20       6.73       6.14      4.5    PASS
-status-nominal       7.92       7.45       6.97       6.36      3.0    PASS
-status-caution       8.78       8.26       7.73       7.05      3.0    PASS
-status-critical      6.30       5.93       5.54       5.06      3.0    PASS
-border-interactive   3.99       3.75       3.51       3.20      3.0    PASS
-focus-ring           7.65       7.20       6.73       6.14      3.0    PASS
+text-primary        18.36      17.89      16.37      14.80      4.5    PASS
+text-secondary       7.03       6.96       6.67       6.42      4.5    PASS
+text-tertiary        4.96       4.90       4.76       4.64      4.5    PASS
+accent (ink)        15.97      15.56      14.24      12.87      4.5    PASS
+status-nominal       6.21       6.05       5.54       5.00      4.5    PASS
+status-caution       6.17       6.01       5.50       4.97      4.5    PASS
+status-critical      6.05       5.89       5.39       4.87      4.5    PASS
+status-unknown       6.21       6.05       5.54       5.01      4.5    PASS
+border-interactive   3.54       3.54       3.47       3.36      3.0    PASS
+
+dark chrome         #0F0F0F    #151515    #1E1E1E    #2E2E2E    gate   result
+--------------------------------------------------------------------------------
+text-secondary       9.45       9.01       8.22       6.70      4.5    PASS
+text-tertiary        6.24       6.10       5.85       5.19      4.5    PASS
+accent (mint)       14.80      14.10      12.87      10.49      4.5    PASS
+status (4)          ≥ 6.81     ≥ 6.49     ≥ 5.92     ≥ 4.83     4.5    PASS
+border-interactive   3.98       3.96       3.88       3.63      3.0    PASS
 ```
 
-Every foreground token clears its gate **against all four surfaces**, so no
-combination in the system can produce a failure. The status colours clear 4.5
-as well, so they are safe as text, not only as marks.
+`tools/status-labels.js` measures every rendered status label against both sets.
 
 ### 3.8 Elevation
 
-There are no glow shadows. Depth is surface value plus a 1px border. Exactly one
-shadow token exists, for true overlays that float above the page:
-
-```css
---shadow-overlay: 0 8px 24px rgb(0 0 0 / 0.40);
-```
-
-Used by modals and popovers only. Nothing else casts a shadow.
+**Deliberately flat.** No component casts a shadow: every Tailwind shadow step
+resolves to nothing in `tokens.css`. Separation is a surface step plus a 1px
+line; floating chrome (the app bar) uses an 18px backdrop blur over
+`--nav-bg`. `--shadow-overlay` survives only as a name, now a 1px line ring.
 
 ---
 
@@ -179,38 +205,40 @@ Used by modals and popovers only. Nothing else casts a shadow.
 
 | Role | Family | Loaded via |
 |---|---|---|
-| Sans (UI, prose) | **Inter** — neo-grotesque, excellent at small sizes, true tabular figures | `next/font/google`, `display: swap`, subset `latin` |
-| Mono (data, IDs, code) | **IBM Plex Mono** | `next/font/google` |
+| Primary (UI, prose, display) | **Geist** 400/500 | `next/font/google`, self-hosted, `display: swap` |
+| Secondary (eyebrows, chrome labels) | **Hanken Grotesk** 400/500 | `next/font/google` |
+| Mono (figures, IDs, code) | **Geist Mono** 400/500 | `next/font/google` |
 
-Two families. `font-3d-cyber`, `font-space` and the `font-sans`/`font-inter`
-duplication are removed. Both load through `next/font` so metrics are known at
-build time and there is no layout shift.
+The reference's primary and secondary faces, DieGrotesk and ABC Diatype, are
+licensed and are **not used or named**; these are the web fallbacks the
+reference itself declares (all SIL OFL). Inter, Sora and IBM Plex Mono are
+removed. `npm run test:fonts` asserts each face is loaded, applied, and served
+from this origin.
 
-### 4.2 Scale — 7 steps
+### 4.2 Scale
 
-| Token | Size / line-height | Use |
+| Token | Size / line-height | Reference role |
 |---|---|---|
-| `--text-xs` | 12 / 16 | Table metadata, units, footnotes |
-| `--text-sm` | 13 / 20 | Dense table cells, secondary body |
-| `--text-base` | 15 / 24 | **Body default** |
-| `--text-lg` | 18 / 28 | Lead paragraph, card title |
-| `--text-xl` | 22 / 30 | Section heading |
-| `--text-2xl` | 28 / 36 | Page title |
-| `--text-3xl` | 36 / 44 | Hero |
+| `--text-xs` | 12 / 16 | Eyebrow, code, table metadata |
+| `--text-sm` | 13 / 20 | Caption, dense table cells |
+| `--text-base` | 16 / 24 | **Interface and body default** |
+| `--text-lg` | 18 / 27 | Body on narrative pages |
+| `--text-xl` | 20 / 24 | Lead |
+| `--text-2xl` | 26 / 30 | Heading 2, small |
+| `--text-3xl` | 32 / 36 | Heading 2 / 3 |
+| `--text-4xl` | 40 / 44, −0.01em | Display, small |
+| `--text-5xl` | 56 / 61, −0.01em | Display |
 
-Plus one restricted step:
+Role utilities with the reference's exact values: `.t-display`, `.t-h2`
+(0.9 leading), `.t-h2-wrap` (1.05, for headings that wrap), `.t-h3`, `.t-lead`,
+`.t-caption`, `.t-code`. Tracking belongs to roles, not sizes: +0.044em on
+buttons, nav, tags, inputs and captions; +0.036em on eyebrows; none on body
+text and figures.
 
-| `--text-label` | 12 / 16, uppercase, `letter-spacing: 0.08em`, `font-weight: 500`, `--text-secondary` |
-
-`--text-label` is permitted **only** for short eyebrow labels of one to three
-words. It is never used for sentences. Nothing in the product renders below
-12px — the 10px and 11px body text found in the audit (T-2) is gone.
-
-*Amended 2026-10-11 (`POLISH_AUDIT.md` issue 4):* the label was 11 px in
-`--text-tertiary`. A label is what a presenter points at, and on a projector it
-measured 3.34:1 washed out; it is 12 px in `--text-secondary` now, the one
-eyebrow style on the demo path. The projector minimums (13 px for anything
-pointed at, key text at 7:1 in `--text-primary`) are in that audit.
+`.label` (the eyebrow) is Hanken Grotesk 12/16, +0.036em, **sentence case**, in
+`--text-secondary` — the reference's `.t-eyebrow`, kept at the secondary ink for
+projector legibility (`POLISH_AUDIT.md` issue 4) and at a 16px line so the
+console's reserved heights hold.
 
 ### 4.3 Numerals
 
@@ -219,53 +247,55 @@ pointed at, key text at 7:1 in `--text-primary`) are in that audit.
 ```
 
 **Every number in the product is set in tabular figures.** Columns align, and a
-value does not shift horizontally when it changes. For a forecasting product
-this is correctness of presentation, not polish.
+value does not shift horizontally when it changes.
 
 ### 4.4 Case and weight
 
-- Sentence case for all prose, headings and buttons.
-- `uppercase` only on `--text-label`.
-- Weights: 400 body, 500 labels and emphasis, 600 headings. No 700+, no
-  `font-black`.
-- No letter-spacing on body text. No `drop-shadow` on text, ever.
+- Sentence case for prose, headings, buttons and eyebrows.
+- `uppercase` survives only on provenance badges (`LIVE`, `SYNTHETIC`, …) and
+  status words, which are written that way in the source.
+- **One weight.** 400 everywhere; 500 is the ceiling (the wordmark, and the few
+  dense-table emphases that used `font-semibold`/`font-bold`, which resolve to
+  500). Nothing renders at 600 or 700. Emphasis is size or ink, not weight.
+- No `drop-shadow` on text, ever. Map labels get a 2px dark halo, not a glow.
 
 ---
 
 ## 5. Spacing, radii, layout
 
-### 5.1 Spacing — 8px base
+### 5.1 Spacing — 4px base
 
-| Token | px | | Token | px |
-|---|---|---|---|---|
-| `--space-1` | 4 | | `--space-5` | 24 |
-| `--space-2` | 8 | | `--space-6` | 32 |
-| `--space-3` | 12 | | `--space-7` | 48 |
-| `--space-4` | 16 | | `--space-8` | 64 |
+Tailwind's 4px scale, identical to the reference's `--s-1 … --s-32`
+(4, 8, 12, 16, 20, 24, 32, 40, 64, 96, 128). Narrative sections are spaced at
+96-112px; product sections at 24-32px.
 
-4px exists as a half-step for tight pairings (icon↔label). Every other value is
-a multiple of 8.
-
-### 5.2 Radii — minimal
+### 5.2 Radii — nested
 
 | Token | px | Use |
 |---|---|---|
-| `--radius-sm` | 2 | Badges, tags, inputs |
-| `--radius-md` | 4 | Cards, buttons, panels |
-| `--radius-lg` | 6 | Modals |
-| `--radius-full` | 9999 | **Only** genuinely circular objects — avatars, status dots |
+| `--radius-xs` | 4 | Small marks |
+| `--radius-sm` | 5 | Tags, badges, small buttons, segment chips |
+| `--radius-md` | 8 | Buttons, inputs, controls |
+| `--radius-tile` | 11 | Metric tiles, wells, popups |
+| `--radius-lg` | 16 | The floating app bar, menus |
+| `--radius-xl` | 20 | Cards |
+| `--radius-2xl` | 22 | The map card, dialogs |
+| `--radius-3xl` | 32 | Feature cards |
+| `--radius-pill` | 64 | Switches, pill tags |
 
-Pill-shaped buttons and capsules are gone. `--radius-full` on a text container
-is what made the old UI read as consumer-casual.
+Reference rule 6: bigger container, bigger radius; inner radius = outer −
+padding. `rounded-full` remains for genuinely circular objects.
 
 ### 5.3 Layout
 
-- Content max-width **1280px**; prose measure capped at **72ch**.
-- Gutters: 16px at 375, 24px at 768, 32px at ≥1280.
+- Content max-width **1280px** on product routes (their measured layouts and
+  layout-shift reservations were built against it); **1200px** on narrative
+  pages (the reference's column). Prose measure capped at **72ch**.
+- Gutters: 16px at 375, 24px at 768, 32px at ≥1024.
 - Breakpoints: `sm 640 · md 768 · lg 1024 · xl 1280`.
-- **Content wraps; it never clips.** No `whitespace-nowrap` on prose, and no
-  ancestor `overflow-hidden` that could hide content the user cannot scroll to
-  (audit R-1). Horizontal scroll is a bug at every width.
+- **Content wraps; it never clips.** Horizontal scroll is a bug at every width.
+- The app bar floats: 56px tall in total below `md` (the console's sticky
+  mobile rows are offset against it), 68px from `md`.
 
 ---
 
@@ -273,53 +303,74 @@ is what made the old UI read as consumer-casual.
 
 | State | Treatment |
 |---|---|
-| Hover | Surface steps up one level (`surface-2` → `surface-3`). No colour change, no scale, no glow. |
-| Focus | `outline: 2px solid var(--accent); outline-offset: 2px;` — **always visible, never removed**. |
-| Active / press | Surface steps down one level. No transform. |
-| Selected | 1px `--accent` left border + `surface-3`. |
-| Disabled | `opacity: 0.45`, `cursor: not-allowed`, and `aria-disabled`. |
-| Loading | Skeleton at `surface-2`, or a determinate bar. Never a spinner over existing content. |
-
-`:focus-visible` is styled for keyboard users; the ring is never suppressed for
-mouse users on controls where it aids orientation. The native cursor is restored
-— `CustomCursor.tsx` is removed.
+| Hover | One surface step (`surface-2` → `surface-3`), or ink → charcoal on a primary button. No glow. |
+| Focus | `outline: 2px solid var(--focus); outline-offset: 3px` — ink on light, mint in dark chrome. **Always visible, never removed.** Fields without their own outline (the prompt bar's input) draw it on their container. |
+| Active / press | Buttons scale to 0.97 over 180ms (reference `.btn:active`). Transform only; nothing around them moves. |
+| Selected | Segmented controls: a paper chip on the grey track with a 1px line. Layer rows in dark chrome: mint edge on `accent-muted`. Always carried by `aria-pressed` / `aria-current` too. |
+| Disabled | `opacity: 0.35`, `cursor: not-allowed`, and `disabled` / `aria-disabled`. |
+| Loading | Skeleton at `surface-3`, or a determinate bar. Never a spinner over existing content. |
 
 ---
 
 ## 7. Motion policy
 
 **Default state: nothing moves.** Motion is added only where it reports a change
-the user caused or needs to notice.
+the user caused or needs to notice — and, on the landing page alone, a short
+one-time settle that the owner approved on 2026-10-18 as a *selective* update,
+not a licence to animate.
+
+Curves and durations are the design reference's: `--ease-out`
+`cubic-bezier(.2,.715,.205,.99)` (default), `--ease-in-out`
+`cubic-bezier(.835,.12,.225,.77)`, and 180 / 360 / 700ms. GSAP uses the same
+curves through `CustomEase` (`frontend/src/lib/motion.ts`).
 
 ### 7.1 Permitted
 
-| Purpose | Duration | Easing |
-|---|---|---|
-| Hover / focus / press feedback | ≤ **150ms** | `ease-out` |
-| Disclosure — accordion, popover, drawer, tooltip | ≤ **200ms** | `ease-out`, **no bounce, no overshoot** |
-| Loading indication — skeleton shimmer, determinate progress | continuous while genuinely pending | linear |
-| Map pan / zoom | user-driven | native to the map library |
+| Purpose | Duration | Easing | Where |
+|---|---|---|---|
+| Hover / focus colour feedback | **180ms** | `ease-out` | everywhere |
+| Press feedback: scale 0.97 | 180ms | `ease-out` | buttons |
+| Disclosure — menu, drawer, accordion, panel arriving | **180ms** | `ease-out`, no bounce, no overshoot | everywhere |
+| Loading indication — skeleton shimmer, determinate progress | while genuinely pending | linear | everywhere |
+| Map pan / zoom | user-driven | native to the map library | map |
+| Hero settle: each line fades and rises 14px, once | 700ms, 60ms apart, all done < 0.9s | `ease-out` | **landing page only** (CSS) |
+| Section settle as it is reached: fade and rise 16px, once | 700ms, 60ms apart | `ease-out` | **landing page only** (GSAP, `<Reveal>`) |
+| Text roll on hover (label swaps for an identical copy) | 360ms | `ease-out` | **landing calls to action only** |
+| Arrow lift on hover (↗ moves 2px) | 180ms | `ease-out` | arrow links |
+| Layer-stack separation, scroll-linked | scrub | none | landing Track A figure (GSAP ScrollTrigger) |
 
-Only these four. Transitions name their properties explicitly —
-`transition: background-color 120ms ease-out` — never `transition-all`.
+Product routes (everything but `/`) are held to **≤ 300ms, no loops, no
+transition on a layout property** by `tools/e2e-motion.js`. Transitions name
+their properties — `transition-[background-color,color,scale]` — never
+`transition-all`.
+
+What the landing allowances may never do, each asserted by `test:motion`:
+- **hide content** — everything is server-rendered at full opacity; a section
+  already on screen when scripts run is not animated, and the start state is
+  applied only when its trigger fires (`immediateRender: false`);
+- **delay reading** — the hero is fully opaque within 1.2s of load;
+- **move layout** — opacity and transform only;
+- **repeat** — every one fires once;
+- **run under reduced motion** — all of it is off, and the page is complete.
 
 ### 7.2 Banned outright
 
 | Banned | Why |
 |---|---|
 | Parallax | decorative depth, motion-sickness trigger |
-| Scroll-jacking | takes control of the user's scroll |
+| Scroll-jacking, smooth-scroll shims | takes control of the user's scroll |
 | Scroll-scrubbed video | both of the above, at 145 MB |
-| Particle / dust fields | perpetual work, zero information, masks real change |
+| Particle / dust fields, generative canvases | perpetual work, zero information, masks real change |
 | Pulsing or breathing glows | spends the alarm channel on decoration |
 | Typewriter / scramble / decode text | delays legibility, disrupts screen readers |
 | **Count-up numbers** | displays values that were never measured — an integrity violation, not only a motion one |
-| Auto-rotation, auto-carousels | movement the user did not ask for |
+| Auto-rotation, auto-carousels, spinning decoration | movement the user did not ask for |
 | Marquees / tickers | decorative "liveness" |
 | Glitch effects | simulates malfunction in a tool whose job is trust |
-| Staggered entrance animation | delays content to choreograph it |
+| Any infinite decorative animation | the reference's own demo loops (easing track, wordmark sheen, wave canvas) included |
+| Staggered entrance on **product** routes | delays data to choreograph it *(amended: permitted on the landing page, §7.1)* |
 | `transition-all` | transitions layout properties; the source of the jitter |
-| Transform on hover (`scale`, `translate`) | reflow-adjacent jitter, no information |
+| Transform on hover (`scale`, `translate`) of a card, row or control | reflow-adjacent jitter, no information *(amended: the landing text roll and the 2px arrow lift, §7.1, move only a glyph inside a fixed box)* |
 
 ### 7.3 Reduced motion
 
@@ -334,11 +385,11 @@ Only these four. Transitions name their properties explicitly —
 }
 ```
 
-Global, in the base layer. Every non-essential animation stops. Determinate
-progress remains, because it reports real state rather than decorating.
-
-This fixes audit M-1: the current codebase honours `prefers-reduced-motion` in
-**zero** places across 105 animations and 7 rAF loops.
+Global, in the base layer, plus explicit `animation: none` for `.hero-enter`,
+`.panel-enter` and `.resolve-once` and no roll or arrow transforms. GSAP effects
+are registered inside `gsap.matchMedia('(prefers-reduced-motion: no-preference)')`
+and are reverted on unmount. Determinate progress remains, because it reports
+real state rather than decorating.
 
 ### 7.4 Motion inventory
 
@@ -346,15 +397,19 @@ Every animation that survives, enumerated. Anything not on this list is a defect
 
 | # | Where | What | Duration | Trigger | Reduced-motion |
 |---|---|---|---|---|---|
-| 1 | Buttons, links, rows, tabs | `background-color` / `border-color` | 120ms ease-out | hover / focus / active | disabled |
-| 2 | Accordion, drawer, popover, tooltip | `height` / `opacity` | 180ms ease-out | user disclosure | disabled |
-| 3 | Skeleton loader | opacity shimmer | 1.2s linear, loop | data pending | disabled — static skeleton |
-| 4 | Determinate progress | `width` | tracks real progress | export / long job | **kept** — reports real state |
-| 5 | Leaflet map | pan / zoom | library default | user drag / scroll | library default |
-| 6 | Focus ring | none — appears instantly | 0ms | keyboard focus | n/a |
-
-Six entries, down from 105 `animate-*` usages, 20 `@keyframes`, 161
-`transition-all` and 7 rAF loops.
+| 1 | Buttons, links, rows, tabs, chips | `background-color` / `color` / `border-color` | 180ms ease-out | hover / focus | disabled |
+| 2 | Buttons | `scale` 0.97 | 180ms ease-out | press | disabled |
+| 3 | Menus, drawers, accordions, arriving panels | `opacity` / `transform` | 180ms ease-out | user disclosure | disabled |
+| 4 | Skeleton loader | opacity shimmer | 1.2s linear, loop | data pending | static skeleton |
+| 5 | Determinate progress | `width` | tracks real progress | export / long job | **kept** — reports real state |
+| 6 | Leaflet map | pan / zoom | library default | user drag / scroll | library default |
+| 7 | Focus ring | none — appears instantly | 0ms | keyboard focus | n/a |
+| 8 | Landing hero | `opacity` + `transform`, once | 700ms, 60ms stagger | page load | none |
+| 9 | Landing sections | `opacity` + `transform`, once | 700ms, 60ms stagger | scrolled into view | none |
+| 10 | Landing calls to action | label roll, `transform` | 360ms | hover | none |
+| 11 | Arrow links | arrow `transform` 2px | 180ms | hover | none |
+| 12 | Landing Track A figure | layer `transform` / `opacity` | scroll-linked | scroll | static, separated |
+| 13 | Map point scored | one-shot `background-color` fade | 900ms | a click resolves | none |
 
 ---
 
@@ -364,16 +419,16 @@ Recharts stays (6 existing imports; no new charting dependency).
 
 | Element | Treatment |
 |---|---|
-| Grid | `--border-subtle`, horizontal lines only, 1px |
-| Axes | `--text-tertiary`, 12px, no axis line, ticks outside |
+| Grid | `--border-default`, horizontal lines only, 1px |
+| Axes | `--text-secondary`, 13px, no axis line, no tick marks |
 | Axis labels | `--text-secondary`, `--text-xs` |
-| Series (single) | `--accent` |
-| Series (categorical) | cividis at evenly spaced stops — never arbitrary hues |
-| Prediction interval | `--accent` at 16% opacity, no border |
-| Median / point forecast | `--accent`, 2px |
-| Baseline / comparison | `--text-tertiary`, 1px, dashed |
+| Series (single) | `--accent` (ink on light) |
+| Series (categorical) | cividis at evenly spaced stops — never arbitrary hues, never status colours |
+| Prediction interval | `--accent` at 14% fill, its p10 / p90 edges drawn as 1px lines at 70% |
+| Median / point forecast | `--accent`, 2.5px |
+| Baseline / comparison | `--text-secondary`, 1.5px, dashed |
 | Threshold line | `--status-caution` or `--status-critical`, 1px dashed, **always labelled in text** |
-| Tooltip | `surface-3`, 1px `--border-default`, `--radius-md`, tabular numerals |
+| Tooltip | `surface-0`, 1px `--border-strong`, `--radius-md`, tabular numerals |
 | Empty state | "No data" in `--text-tertiary` — never a zero-line implying a measured zero |
 | Animation | **off** (`isAnimationActive={false}`) — chart entrance animation is a count-up by another name |
 
@@ -385,17 +440,19 @@ a chart that cannot show its interval shows an explicit note instead.
 ## 9. Map styling
 
 Following the Worldview grammar: map as canvas, controls in a rail, time along
-the bottom.
+the bottom. The whole map card is dark chrome (`.chrome-dark`, §3.1), framed at
+`--radius-2xl`; token colours handed to Leaflet are resolved against the map's
+own element, so they are the dark-chrome values.
 
 | Element | Treatment |
 |---|---|
 | Base layer | Desaturated dark raster. No saturated overlay on imagery (audit C-6). |
 | Data surface | cividis, opacity user-adjustable, **legend always visible** with units and range |
-| Mine markers | 6px circle, `--text-primary` fill, 1px `--surface-0` outline |
-| Selected marker | `--accent` fill, 8px |
+| Mine markers | 10px circle (14px selected), 2px `--text-primary` ring, 1px `--surface-black` halo |
+| Selected layer / hotspot | mint `--accent` edge on `--accent-muted` (layers); the marker's own colour as fill (hotspots) |
 | Status markers | status token fill **plus** distinct shape — circle nominal, triangle caution, square critical |
-| Labels | `--text-xs`, `--text-primary`, 1px `--surface-0` halo — **halo, not drop-shadow stack** |
-| Controls | `surface-1`, `--border-default`, top-left rail |
+| Labels | 10.5px mono, weight 500, 2px `--surface-black` halo — **halo, not glow** |
+| Controls | `surface-2`, `--border-strong`, `--radius-md` |
 | Attribution | `--text-tertiary`, `--text-xs`, always present |
 
 Every data layer states its source, vintage and whether it is synthetic, drawn
@@ -429,38 +486,23 @@ redesign only removes false ones.
 
 ### 11.1 Tokens
 
-Single source of truth: `frontend/src/app/tokens.css`, CSS custom properties on
-`:root`, exposed to Tailwind 4 via `@theme`:
-
-```css
-@import "tailwindcss";
-
-:root {
-  --surface-0: #0B0D10;
-  /* … all tokens … */
-}
-
-@theme inline {
-  --color-surface-0: var(--surface-0);
-  --color-text-primary: var(--text-primary);
-  --color-accent: var(--accent);
-  --spacing-1: var(--space-1);
-  --radius-md: var(--radius-md);
-  /* … */
-}
-```
-
-Components then use `bg-surface-1`, `text-secondary`, `border-default` — never a
-hex, never an arbitrary value.
+Single source of truth: `frontend/src/app/tokens.css`. Tailwind 4 reads the
+`@theme` block and emits each token as a custom property on `:root`, used as
+`bg-surface-1`, `text-text-secondary`, `rounded-xl` or `var(--color-accent)`.
+`.chrome-dark` redefines the same properties for its subtree. Components use
+tokens — never a hex, never an arbitrary colour.
 
 ### 11.2 Primitives
 
-`frontend/src/components/ui/`, replacing the three parallel vocabularies:
+`frontend/src/components/ui/primitives.tsx` — each the reference component of
+the same job (`design-system-mapping.md` §4.6):
 
-`Button` · `Card` · `Badge` · `Field` (label + input + hint + error) ·
-`Select` · `Table` · `Tabs` · `Dialog` · `Tooltip` · `Skeleton` ·
-`EmptyState` · `StatusDot` (colour **+** shape **+** label) ·
-`Metric` (re-exported from `Evidence.tsx` — the provenance gate stays where it is)
+`Button` / `buttonClass` (primary, secondary, ghost, accent; sm, md, lg, icon) ·
+`RollLabel` · `Card` / `CardHeader` / `CardBody` · `Tag` · `Badge` ·
+`StatusDot` / `StatusLabel` (colour **+** shape **+** label) · `Segmented` ·
+`Switch` · `Field` / `INPUT_CLASS` · `Skeleton` · `EmptyState` · `PageHeader` ·
+`Section` · `MineSwitcher` · `PageNav` · `Metric` (in `console/Evidence.tsx` —
+the provenance gate stays where it is).
 
 ### 11.3 Enforced
 

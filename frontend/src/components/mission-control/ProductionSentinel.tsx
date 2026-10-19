@@ -96,13 +96,13 @@ export default function ProductionSentinel() {
           Mine
         </label>
         {!mines ? (
-          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-[46px] w-64" />
         ) : (
           <select
             id="production-mine"
             value={selected ?? ''}
             onChange={(e) => setSelected(Number(e.target.value))}
-            className="h-10 w-full max-w-sm rounded-md border border-border-interactive bg-surface-2 px-3 text-base text-text-primary transition-colors duration-[120ms] ease-out hover:bg-surface-3"
+            className="h-[46px] w-full max-w-sm rounded-md border border-border-interactive bg-surface-0 px-3.5 text-base tracking-[0.02em] text-text-primary transition-[border-color] duration-[180ms] ease-out hover:border-text-primary focus:border-text-primary"
           >
             {mines.map((m) => (
               <option key={m.id} value={m.id}>

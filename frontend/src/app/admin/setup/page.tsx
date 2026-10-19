@@ -111,12 +111,12 @@ export default function AdminSetupPage() {
 
   if (checking) {
     return (
-      <div className="min-h-screen bg-[var(--color-surface-0)] flex flex-col items-center justify-center p-4 font-mono text-text-primary">
+      <div className="min-h-[calc(100dvh-3.5rem)] bg-surface-0 flex flex-col items-center justify-center p-4 text-text-primary">
         <div className="relative">
           <div className="h-16 w-16 rounded-full border-2 border-accent/20 border-t-[var(--color-accent)] animate-spin" />
           <Radio className="absolute inset-0 m-auto h-6 w-6 text-accent " />
         </div>
-        <p className="mt-4 text-xs tracking-widest text-accent uppercase ">
+        <p className="mt-4 text-xs tracking-[0.044em] text-accent ">
           Scanning Commander Cryptographic Registry...
         </p>
       </div>
@@ -124,11 +124,11 @@ export default function AdminSetupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface-0)] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,233,0.15),rgba(255,255,255,0))] flex items-center justify-center p-4 font-mono">
+    <div className="min-h-[calc(100dvh-3.5rem)] bg-surface-0  flex items-center justify-center p-4">
       <div className="max-w-xl w-full">
         {/* Top Floating Badge */}
         <div className="flex items-center justify-center gap-2 mb-4">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase border bg-black/50 ">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-sm text-xs tracking-[0.044em] border bg-surface-2 ">
             {isSlotAvailable ? (
               <>
                 <span className="h-2 w-2 rounded-full bg-accent " />
@@ -148,11 +148,11 @@ export default function AdminSetupPage() {
           <div className="rounded-md bg-surface-1/90 border border-border-default p-6 sm:p-8 relative overflow-hidden ">
 
             <div className="flex items-center gap-3.5 mb-6 border-b border-border-default pb-5">
-              <div className="h-12 w-12 rounded-md bg-accent/10 border border-accent/40 flex items-center justify-center text-accent">
+              <div className="h-12 w-12 rounded-tile bg-surface-2 flex items-center justify-center text-text-primary">
                 <Sparkles size={24} />
               </div>
               <div>
-                <h1 className="text-xl font-bold tracking-wider text-text-primary">INITIALIZE PRIMARY COMMANDER</h1>
+                <h1 className="text-xl tracking-[0.044em] text-text-primary">Initialize primary commander</h1>
                 <p className="text-xs text-text-tertiary">
                   Claim the single administrator account for Nakshatra-X
                 </p>
@@ -163,7 +163,7 @@ export default function AdminSetupPage() {
             <div className="mb-6 p-3.5 rounded-md bg-status-caution/10 border border-status-caution/30 text-status-caution text-xs flex items-start gap-2.5">
               <AlertTriangle size={18} className="shrink-0 mt-0.5" />
               <div className="text-xs leading-relaxed">
-                <strong>SINGLE-SLOT PROTOCOL:</strong> Once you create this master account, the registration slot will be <strong>permanently locked</strong>. No other admin account will ever be permitted to register.
+                <strong>Single-slot protocol:</strong> Once you create this master account, the registration slot will be <strong>permanently locked</strong>. No other admin account will ever be permitted to register.
               </div>
             </div>
 
@@ -177,12 +177,12 @@ export default function AdminSetupPage() {
             <form onSubmit={handleSetup} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-text-tertiary mb-1.5 flex items-center gap-1">
+                  <label className="mb-1.5 flex text-sm tracking-[0.044em] text-text-secondary items-center gap-1">
                     <User size={12} className="text-accent" /> Full Name
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. Rupraj Datta"
+                    placeholder="Full name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
@@ -190,7 +190,7 @@ export default function AdminSetupPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-text-tertiary mb-1.5 flex items-center gap-1">
+                  <label className="mb-1.5 flex text-sm tracking-[0.044em] text-text-secondary items-center gap-1">
                     <Terminal size={12} className="text-accent" /> Call Sign / Username
                   </label>
                   <input
@@ -205,12 +205,12 @@ export default function AdminSetupPage() {
               </div>
 
               <div>
-                <label className="block text-xs uppercase tracking-wider text-text-tertiary mb-1.5 flex items-center gap-1">
+                <label className="mb-1.5 flex text-sm tracking-[0.044em] text-text-secondary items-center gap-1">
                   <Mail size={12} className="text-accent" /> Administrator Email
                 </label>
                 <input
                   type="email"
-                  placeholder="e.g. dattarupraj@gmail.com"
+                  placeholder="name@organisation.in"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -220,7 +220,7 @@ export default function AdminSetupPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-text-tertiary mb-1.5 flex items-center gap-1">
+                  <label className="mb-1.5 flex text-sm tracking-[0.044em] text-text-secondary items-center gap-1">
                     <KeyRound size={12} className="text-accent" /> Master Passphrase
                   </label>
                   <input
@@ -233,7 +233,7 @@ export default function AdminSetupPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-text-tertiary mb-1.5 flex items-center gap-1">
+                  <label className="mb-1.5 flex text-sm tracking-[0.044em] text-text-secondary items-center gap-1">
                     <Lock size={12} className="text-accent" /> Confirm Passphrase
                   </label>
                   <input
@@ -250,7 +250,7 @@ export default function AdminSetupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-4 py-3 px-4 rounded-md bg-gradient-to-r from-accent to-accent text-black font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full mt-4 py-3 px-4 rounded-md bg-inverse-bg text-inverse-fg text-base tracking-[0.044em] hover:bg-inverse-hover transition-[background-color] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {loading ? (
                   <>
@@ -283,7 +283,7 @@ export default function AdminSetupPage() {
             <div className="h-16 w-16 mx-auto rounded-md bg-accent/15 border border-accent flex items-center justify-center text-accent mb-4">
               <CheckCircle2 size={32} />
             </div>
-            <h2 className="text-xl font-bold text-text-primary tracking-widest mb-1">COMMANDER INITIALIZED</h2>
+            <h2 className="text-xl text-text-primary tracking-[0.044em] mb-1">Commander initialized</h2>
             <p className="text-xs text-accent mb-4">
               Single Administrator Slot Permanently Sealed [1/1 Occupied]
             </p>
@@ -302,13 +302,13 @@ export default function AdminSetupPage() {
             <div className="h-16 w-16 mx-auto rounded-md bg-status-critical/10 border border-status-critical/40 flex items-center justify-center text-status-critical mb-4">
               <Lock size={30} />
             </div>
-            <div className="text-xs uppercase font-bold tracking-[0.25em] text-status-critical mb-1">
-              REGISTRATION PERMANENTLY SEALED
+            <div className="label text-status-critical mb-1">
+              Registration permanently sealed
             </div>
-            <h2 className="text-xl font-bold text-text-primary mb-2">SINGLE ADMIN SLOT OCCUPIED</h2>
+            <h2 className="text-xl text-text-primary mb-2">Single admin slot occupied</h2>
             <p className="text-xs text-text-secondary max-w-sm mx-auto mb-6 leading-relaxed">
               The sole administrator account for this platform has already been claimed by Primary Commander{' '}
-              <span className="text-accent font-bold">
+              <span className="text-accent">
                 {adminUser?.email || adminUser?.username || 'System Administrator'}
               </span>
               . No additional admin accounts can be created.
@@ -317,7 +317,7 @@ export default function AdminSetupPage() {
             <div className="p-4 rounded-md bg-surface-0/80 border border-border-default mb-6 text-left text-xs space-y-2">
               <div className="flex justify-between items-center text-text-secondary text-xs">
                 <span>Status:</span>
-                <span className="text-status-critical font-bold uppercase">Locked (1/1)</span>
+                <span className="text-status-critical">Locked (1/1)</span>
               </div>
               <div className="flex justify-between items-center text-text-secondary text-xs">
                 <span>Registered Commander:</span>
@@ -332,7 +332,7 @@ export default function AdminSetupPage() {
             <button
               type="button"
               onClick={() => router.push('/admin/login')}
-              className="w-full py-3 px-4 rounded-md bg-accent hover:bg-accent/90 text-black font-bold text-xs uppercase tracking-widest transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3 px-4 rounded-md bg-inverse-bg hover:bg-inverse-hover text-inverse-fg text-base tracking-[0.044em] transition-[background-color] flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Enter Commander Login Console</span>
               <ArrowRight size={15} />

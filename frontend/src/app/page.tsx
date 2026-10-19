@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Card, CardBody } from '@/components/ui/primitives'
+import { Card, CardBody, RollLabel, buttonClass } from '@/components/ui/primitives'
+import { Reveal } from '@/components/landing/Reveal'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { loadLandingEvidence } from '@/lib/landing-evidence'
@@ -23,7 +24,44 @@ import { BeltImagery, loadImagery } from '@/components/landing/BeltImagery'
  * artifacts the console renders, so the two screens cannot disagree — and each
  * carries its model version and vintage. None is a literal in this file. If an
  * artifact cannot be read, the band says so and shows no figure.
+ *
+ * Composed on the design reference's narrative grammar (mapping §4.8): a
+ * centred hero, a statement line, numbered section heads, rule cards, and one
+ * feature card whose dark media well holds the Track A figure. Motion: the
+ * hero settles in once (CSS, from first paint), sections below the fold
+ * settle in once as they are reached (GSAP, <Reveal>), and the layer stack
+ * separates with scroll (GSAP ScrollTrigger). None of it delays or hides
+ * content, and none of it runs under reduced motion.
  */
+
+/** Section head: the reference's .sec-head, with its numbered eyebrow. */
+function SectionHead({ n, eyebrow, title, children }: { n: string; eyebrow: string; title: string; children?: React.ReactNode }) {
+  return (
+    <div className="mb-10 grid max-w-[720px] gap-3" data-reveal>
+      <p className="label flex items-center gap-2.5">
+        <span className="text-text-primary">{n}</span>
+        {eyebrow}
+      </p>
+      <h2 className="t-h2-wrap">{title}</h2>
+      {children}
+    </div>
+  )
+}
+
+/** The reference's arrow link: the arrow lifts toward where it goes. */
+function ArrowLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="mt-4 inline-flex items-center gap-1.5 text-sm tracking-[0.044em] text-text-primary underline decoration-border-interactive underline-offset-4 transition-[text-decoration-color] duration-[180ms] ease-out hover:decoration-current"
+    >
+      {children}
+      <span aria-hidden="true" className="link-arrow no-underline">
+        ↗
+      </span>
+    </Link>
+  )
+}
 
 export const metadata = {
   title: 'Nakshatra-X — decision support for MOIL',
@@ -77,70 +115,95 @@ export default async function HomePage() {
   ])
 
   return (
-    <main className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-      {/* Hero — typographic. No scroll-scrubbed video, no badges, no counters. */}
-      <section className="border-b border-border-subtle py-16 sm:py-24">
-        <p className="label">Ministry of Steel · MOIL Ltd · SIH26009</p>
-        <h1 className="measure mt-4 text-3xl font-semibold tracking-tight">
+    <main className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
+      {/* Hero — typographic, centred (reference hero). No scroll-scrubbed
+          video, no badges, no counters. Each line settles in once (.hero-enter). */}
+      <section className="pb-16 pt-14 text-center sm:pb-20 sm:pt-20">
+        <p className="label hero-enter" style={{ ['--i' as string]: 0 }}>
+          Ministry of Steel · MOIL Ltd · SIH26009
+        </p>
+        <h1
+          className="t-display hero-enter mx-auto mt-4 max-w-[22ch]"
+          style={{ ['--i' as string]: 1 }}
+        >
           Where to prospect, and what production will fall short.
         </h1>
-        <p className="measure mt-4 text-lg text-text-secondary">
+        <p
+          className="t-lead hero-enter mx-auto mt-6 max-w-[560px] text-text-secondary"
+          style={{ ['--i' as string]: 2 }}
+        >
           Nakshatra-X is a decision-support tool for manganese operations. It answers two questions
-          on two different clocks, and it shows the uncertainty and the source behind every number
-          it reports.
+          on two different clocks.
         </p>
 
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <Link
-            href="/console"
-            className="inline-flex h-10 items-center justify-center rounded-md bg-accent px-4 text-base font-medium text-surface-0 transition-colors duration-[120ms] ease-out hover:bg-accent/90"
-          >
-            Open the console
+        <div
+          className="hero-enter mt-9 flex flex-wrap items-center justify-center gap-2"
+          style={{ ['--i' as string]: 3 }}
+        >
+          <Link href="/console" className={buttonClass('primary', 'lg')}>
+            <RollLabel>Open the console</RollLabel>
           </Link>
-          <Link
-            href="/method"
-            className="inline-flex h-10 items-center justify-center rounded-md border border-border-interactive bg-surface-2 px-4 text-base font-medium text-text-primary transition-colors duration-[120ms] ease-out hover:bg-surface-3"
-          >
-            Method and evidence
+          <Link href="/method" className={buttonClass('secondary', 'lg')}>
+            <RollLabel>Method and evidence</RollLabel>
           </Link>
         </div>
       </section>
+
+      {/* The statement line (reference .statement). The sentence was the end of
+          the hero's paragraph; it is the product's one promise, so it stands
+          alone. */}
+      <p className="mx-auto max-w-[820px] text-balance text-center text-[clamp(24px,3.4vw,32px)] leading-[1.15] tracking-[0.006em] text-text-primary">
+        It shows the uncertainty and the source behind every number it reports.
+      </p>
 
       {/* Two tracks */}
-      <section className="py-12 sm:py-16">
-        <h2 className="label">Two tracks</h2>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          {TRACKS.map((t) => (
-            <Card key={t.name}>
-              <CardBody className="p-5">
-                <div className="flex items-baseline justify-between gap-4">
-                  <h3 className="text-lg font-semibold">{t.name}</h3>
+      <Reveal className="pt-24 sm:pt-28">
+        <section>
+          <SectionHead n="01" eyebrow="Two tracks" title="Two questions, on two different clocks.">
+            <p className="text-[15px] leading-[1.45] tracking-[0.044em] text-text-secondary">
+              The problem statement implies both but names neither. Keeping them separate matters:
+              they run on different horizons, use different methods, and fail in different ways.
+            </p>
+          </SectionHead>
+          <div className="grid gap-3 md:grid-cols-2">
+            {TRACKS.map((t) => (
+              <article
+                key={t.name}
+                data-reveal
+                className="grid content-start gap-3 rounded-xl border border-border-default bg-surface-1 p-6"
+              >
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                  <h3 className="text-xl text-text-primary">{t.name}</h3>
                   <span className="label shrink-0">{t.horizon}</span>
                 </div>
-                <p className="mt-3 text-sm text-text-secondary">{t.body}</p>
-              </CardBody>
-            </Card>
-          ))}
-        </div>
-        <p className="measure mt-4 text-sm text-text-tertiary">
-          The problem statement implies both but names neither. Keeping them separate matters:
-          they run on different horizons, use different methods, and fail in different ways.
-        </p>
-      </section>
+                <p className="text-base text-text-secondary">{t.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      </Reveal>
 
       {/* The anchor: three layers of real Track A output, separated by scroll */}
       {stack ? (
-        <section className="border-t border-border-subtle py-14 sm:py-20">
-          <h2 className="label">What Track A actually produces</h2>
-          <p className="measure mt-3 text-sm text-text-secondary">
-            Three layers over the Central India manganese belt: the points the model was fitted on,
-            the surface kriged from them, and the spread around that surface. Every mark below is
-            pipeline output, not illustration.
-          </p>
-          <div className="mt-10">
-            <ProspectivityStack data={stack} />
-          </div>
-          <p className="measure mt-8 text-xs text-text-tertiary">
+        <section className="pt-24 sm:pt-28">
+          <ProspectivityStack
+            data={stack}
+            header={
+              <div className="grid gap-3">
+                <p className="label flex items-center gap-2.5">
+                  <span className="text-text-primary">02</span>
+                  What Track A actually produces
+                </p>
+                <h2 className="t-h2-wrap">Three layers of pipeline output, not illustration.</h2>
+                <p className="measure text-base text-text-secondary">
+                  Over the Central India manganese belt: the points the model was fitted on, the
+                  surface kriged from them, and the spread around that surface. Every mark is
+                  pipeline output.
+                </p>
+              </div>
+            }
+          />
+          <p className="measure mt-5 text-xs text-text-tertiary">
             There is no satellite-imagery layer here. Producing one means mosaicking Sentinel-2 L2A
             scenes across the belt, which this pipeline does not do — and a drawn one would be the
             same fabrication this project spent three phases removing. Model{' '}
@@ -150,19 +213,21 @@ export default async function HomePage() {
       ) : null}
 
       {/* What the model actually scores — every figure read from an artifact */}
-      <section className="border-t border-border-subtle py-12 sm:py-16">
-        <h2 className="label">What it scores, measured</h2>
-        <p className="measure mt-3 text-sm text-text-secondary">
-          Held-out accuracy, not training accuracy. These are the figures the console shows for the
-          same artifacts; nothing on this page is typed in.
-        </p>
+      <Reveal className="pt-24 sm:pt-28">
+      <section>
+        <SectionHead n="03" eyebrow="What it scores, measured" title="Held-out accuracy, not training accuracy.">
+          <p className="text-[15px] leading-[1.45] tracking-[0.044em] text-text-secondary">
+            These are the figures the console shows for the same artifacts; nothing on this page is
+            typed in.
+          </p>
+        </SectionHead>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2">
           {/* Track B — the pilot mine's rolling-origin backtest */}
-          <Card>
-            <CardBody className="p-5">
+          <Card data-reveal>
+            <CardBody className="p-6">
               <div className="flex items-baseline justify-between gap-4">
-                <h3 className="text-base font-semibold">Track B · production shortfall</h3>
+                <h3 className="text-lg">Track B · production shortfall</h3>
                 <span className="label shrink-0">Held out</span>
               </div>
               {evidence.backtest.ok ? (
@@ -177,10 +242,10 @@ export default async function HomePage() {
                         verdict print it: a raw 11.5 beside a slide's 11.50%
                         reads as two figures (found when the frozen MAPE
                         ended in a zero). */}
-                    <span className="font-mono text-3xl tabular-nums text-text-primary">
+                    <span className="font-mono text-5xl tabular-nums tracking-[-0.02em] text-text-primary">
                       {evidence.backtest.mapePct.toFixed(2)}%
                     </span>
-                    <span className="text-sm text-text-secondary">
+                    <span className="text-base text-text-secondary">
                       MAPE, against{' '}
                       <span className="font-mono tabular-nums">
                         {evidence.backtest.baselineMapePct.toFixed(2)}%
@@ -188,7 +253,7 @@ export default async function HomePage() {
                       for the seasonal-naive baseline
                     </span>
                   </div>
-                  <p className="measure mt-3 text-sm text-text-secondary">
+                  <p className="measure mt-3 text-base text-text-secondary">
                     Daily interval coverage on the pilot{' '}
                     <span className="font-mono tabular-nums">{evidence.backtest.coverage80}</span>{' '}
                     against a nominal{' '}
@@ -211,7 +276,7 @@ export default async function HomePage() {
               */}
               {evidence.dailyCalibration.ok ? (
                 <p
-                  className="measure mt-3 text-sm text-text-secondary"
+                  className="measure mt-3 text-base text-text-secondary"
                   data-provenance="derived"
                   data-provenance-model={evidence.dailyCalibration.modelVersion}
                   data-provenance-vintage={evidence.dailyCalibration.generatedAt ?? undefined}
@@ -246,7 +311,7 @@ export default async function HomePage() {
                 >
                   <p className="measure mt-3 text-xs text-text-tertiary">
                     Rolling-origin backtest on the pilot mine,{' '}
-                    <strong className="font-medium text-text-secondary">
+                    <strong className="font-normal text-text-secondary">
                       {evidence.backtest.mineName}
                     </strong>{' '}
                     ({evidence.backtest.mineCode}) — the one mine whose backtest artifact is
@@ -255,22 +320,19 @@ export default async function HomePage() {
                     on synthetic operational data (PRD §8.2), so this describes the model&rsquo;s
                     behaviour on that dataset, not MOIL&rsquo;s operations.
                   </p>
-                  <Link
-                    href={`/console?mine=${evidence.backtest.mineId}&track=b`}
-                    className="mt-3 inline-block text-sm text-accent hover:underline"
-                  >
-                    See {evidence.backtest.mineName}&rsquo;s backtest in the console &rarr;
-                  </Link>
+                  <ArrowLink href={`/console?mine=${evidence.backtest.mineId}&track=b`}>
+                    See {evidence.backtest.mineName}&rsquo;s backtest in the console
+                  </ArrowLink>
                 </div>
               ) : null}
             </CardBody>
           </Card>
 
           {/* Track A — leave-one-mine-out */}
-          <Card>
-            <CardBody className="p-5">
+          <Card data-reveal>
+            <CardBody className="p-6">
               <div className="flex items-baseline justify-between gap-4">
-                <h3 className="text-base font-semibold">Track A · reserve prospectivity</h3>
+                <h3 className="text-lg">Track A · reserve prospectivity</h3>
                 <span className="label shrink-0">Leave-one-mine-out</span>
               </div>
               {evidence.trackA.ok ? (
@@ -280,10 +342,10 @@ export default async function HomePage() {
                   data-provenance-model={evidence.trackA.modelVersion}
                 >
                   <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-                    <span className="font-mono text-3xl tabular-nums text-text-primary">
+                    <span className="font-mono text-5xl tabular-nums tracking-[-0.02em] text-text-primary">
                       {evidence.trackA.auc.toFixed(2)}
                     </span>
-                    <span className="text-sm text-text-secondary">
+                    <span className="text-base text-text-secondary">
                       AUC, 95% CI{' '}
                       <span className="font-mono tabular-nums">
                         {evidence.trackA.ci[0]}&ndash;{evidence.trackA.ci[1]}
@@ -297,12 +359,7 @@ export default async function HomePage() {
                     Sentinel-2 band ratios and SRTM terrain. The interval is wide, and it is shown
                     because it is wide.
                   </p>
-                  <Link
-                    href="/method"
-                    className="mt-3 inline-block text-sm text-accent hover:underline"
-                  >
-                    How this was validated &rarr;
-                  </Link>
+                  <ArrowLink href="/method">How this was validated</ArrowLink>
                 </div>
               ) : (
                 <p className="mt-4 text-sm text-text-tertiary">
@@ -313,28 +370,32 @@ export default async function HomePage() {
           </Card>
         </div>
       </section>
+      </Reveal>
 
       {imagery && imagery.images.length ? <BeltImagery manifest={imagery} /> : null}
 
-      {/* Limits, stated up front */}
-      <section className="border-t border-border-subtle py-12 sm:py-16">
-        <h2 className="label">What this does not claim</h2>
-        <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-          {LIMITS.map((l) => (
-            <li
-              key={l}
-              className="border-l border-border-strong pl-4 text-sm text-text-secondary"
-            >
-              {l}
-            </li>
-          ))}
-        </ul>
-        <p className="measure mt-6 text-sm text-text-tertiary">
-          Operational data is synthetic, generated to the published ingestion contract, because
-          MOIL&rsquo;s records are proprietary. Synthetic values are labelled everywhere they appear
-          and are never presented as live.
-        </p>
-      </section>
+      {/* Limits, stated up front: the reference's rule cards. */}
+      <Reveal className="pt-24 sm:pt-28">
+        <section>
+          <SectionHead n="05" eyebrow="What this does not claim" title="Four limits, stated up front." />
+          <ul className="grid list-none gap-3 sm:grid-cols-2">
+            {LIMITS.map((l) => (
+              <li
+                key={l}
+                data-reveal
+                className="rounded-xl border border-border-default bg-surface-1 p-5 text-base text-text-primary"
+              >
+                {l}
+              </li>
+            ))}
+          </ul>
+          <p className="measure mt-6 text-base text-text-secondary">
+            Operational data is synthetic, generated to the published ingestion contract, because
+            MOIL&rsquo;s records are proprietary. Synthetic values are labelled everywhere they appear
+            and are never presented as live.
+          </p>
+        </section>
+      </Reveal>
     </main>
   )
 }

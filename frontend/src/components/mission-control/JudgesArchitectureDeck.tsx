@@ -67,22 +67,21 @@ export default function JudgesArchitectureDeck() {
     : []
 
   return (
-    <div className="rounded-md border border-border-default bg-surface-1 p-6 flex flex-col gap-6 relative overflow-hidden">
-      {/* Absolute background glows */}
-      <div className="absolute top-0 right-0 w-80 h-80 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-status-critical/5 rounded-full blur-[100px] pointer-events-none" />
+    // Flat, as the reference's surfaces: the two blurred colour glows that sat
+    // behind this card were decoration (reference rule 5).
+    <div className="relative flex flex-col gap-6 overflow-hidden rounded-xl border border-border-default bg-surface-1 p-5 md:p-6">
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border-default pb-4">
+      <div className="flex flex-col justify-between gap-4 border-b border-border-default pb-5 xl:flex-row xl:items-end">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1">
-              <Award className="w-3.5 h-3.5 text-status-caution" />
-              JUDGES INTERACTIVE EXECUTIVE SUMMARY
+            <span className="label flex items-center gap-1.5">
+              <Award className="h-3.5 w-3.5" aria-hidden="true" />
+              Executive summary
             </span>
-            <span className="text-xs font-mono text-text-tertiary">&bull; Smart India Hackathon 2026 Evaluation</span>
+            <span className="label">&bull; Smart India Hackathon 2026</span>
           </div>
-          <h2 className="text-2xl font-bold text-text-primary tracking-tight mt-1.5 flex items-center gap-2">
+          <h2 className="mt-2 flex items-center gap-2 font-display text-2xl text-text-primary md:text-3xl">
             Mineral Prospectivity Pipeline & Explainability
           </h2>
           <p
@@ -104,102 +103,106 @@ export default function JudgesArchitectureDeck() {
         </div>
 
         {/* Tab Controls */}
-        <div className="flex items-center gap-1.5 bg-surface-2 p-1 rounded-md border border-border-default">
+        <fieldset className="m-0 inline-flex min-w-0 flex-wrap items-center gap-0.5 self-start rounded-md border-0 bg-surface-2 p-[3px] xl:shrink-0">
+          <legend className="sr-only">Section</legend>
           <button type="button"
             onClick={() => setActiveTab('pipeline')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-colors cursor-pointer ${
+            aria-pressed={activeTab === 'pipeline'}
+            className={`h-[34px] rounded-sm px-3.5 text-[14px] tracking-[0.044em] transition-[background-color,color] duration-[180ms] ease-out ${
               activeTab === 'pipeline'
-                ? 'bg-gradient-to-r from-status-caution/20 to-status-caution/20 text-text-primary border border-status-caution/30 shadow-md'
-                : 'text-text-tertiary hover:text-text-primary'
+                ? 'bg-surface-0 text-text-primary ring-1 ring-border-default'
+                : 'text-text-secondary hover:text-text-primary'
             }`}
           >
             Pipeline Flow
           </button>
           <button type="button"
             onClick={() => setActiveTab('hyperparameters')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-colors cursor-pointer ${
+            aria-pressed={activeTab === 'hyperparameters'}
+            className={`h-[34px] rounded-sm px-3.5 text-[14px] tracking-[0.044em] transition-[background-color,color] duration-[180ms] ease-out ${
               activeTab === 'hyperparameters'
-                ? 'bg-gradient-to-r from-status-caution/20 to-status-caution/20 text-text-primary border border-status-caution/30 shadow-md'
-                : 'text-text-tertiary hover:text-text-primary'
+                ? 'bg-surface-0 text-text-primary ring-1 ring-border-default'
+                : 'text-text-secondary hover:text-text-primary'
             }`}
           >
             Model Specs
           </button>
           <button type="button"
             onClick={() => setActiveTab('shap')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-colors cursor-pointer ${
+            aria-pressed={activeTab === 'shap'}
+            className={`h-[34px] rounded-sm px-3.5 text-[14px] tracking-[0.044em] transition-[background-color,color] duration-[180ms] ease-out ${
               activeTab === 'shap'
-                ? 'bg-gradient-to-r from-status-caution/20 to-status-caution/20 text-text-primary border border-status-caution/30 shadow-md'
-                : 'text-text-tertiary hover:text-text-primary'
+                ? 'bg-surface-0 text-text-primary ring-1 ring-border-default'
+                : 'text-text-secondary hover:text-text-primary'
             }`}
           >
             Feature Importances
           </button>
-        </div>
+        </fieldset>
       </div>
 
       {/* Tab Contents */}
       {activeTab === 'pipeline' && (
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-stretch relative">
           {/* Step 1 */}
-          <div className="rounded-md border border-border-subtle bg-surface-2 p-4 flex flex-col justify-between border-t border-t-[var(--color-status-nominal)]/40">
+          <div className="rounded-tile bg-surface-2 p-4 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono text-accent font-bold">STEP 01</span>
-                <Layers className="w-4 h-4 text-accent" />
+                <span className="font-mono text-xs text-text-tertiary">STEP 01</span>
+                <Layers className="h-4 w-4 text-text-tertiary" aria-hidden="true" />
               </div>
-              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Dataset Prep</h3>
+              <h3 className="mb-1 text-sm text-text-primary">Dataset Prep</h3>
               <p className="text-xs text-text-tertiary leading-relaxed">
                 Aggregates 10 known GSI-verified manganese mine coordinates and synthesizes 400 regional background nodes.
               </p>
             </div>
-            <div className="mt-4 text-xs font-mono text-accent bg-accent/5 p-1.5 rounded border border-accent/20">
+            <div className="mt-4 rounded-sm bg-surface-0 px-2 py-1.5 font-mono text-xs text-text-secondary">
               CSV: 410 Points Generated
             </div>
           </div>
 
           {/* Step 2 */}
-          <div className="rounded-md border border-border-subtle bg-surface-2 p-4 flex flex-col justify-between border-t border-t-[var(--color-accent)]/40">
+          <div className="rounded-tile bg-surface-2 p-4 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono text-accent font-bold">STEP 02</span>
-                <Sparkles className="w-4 h-4 text-accent" />
+                <span className="font-mono text-xs text-text-tertiary">STEP 02</span>
+                <Sparkles className="h-4 w-4 text-text-tertiary" aria-hidden="true" />
               </div>
-              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Feature Extraction</h3>
+              <h3 className="mb-1 text-sm text-text-primary">Feature Extraction</h3>
               <p className="text-xs text-text-tertiary leading-relaxed">
                 Applies simulated Sentinel-2 SWIR band ratios, DEM topography formulas, and fault geodesic metrics offline.
               </p>
             </div>
-            <div className="mt-4 text-xs font-mono text-accent bg-accent/5 p-1.5 rounded border border-accent/20 font-semibold">
+            <div className="mt-4 rounded-sm bg-surface-0 px-2 py-1.5 font-mono text-xs text-text-secondary">
               6 Geological Features / Point
             </div>
           </div>
 
           {/* Step 3 */}
-          <div className="rounded-md border border-border-subtle bg-surface-2 p-4 flex flex-col justify-between border-t border-t-[var(--color-status-caution)]/40">
+          <div className="rounded-tile bg-surface-2 p-4 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono text-status-caution font-bold">STEP 03</span>
-                <Brain className="w-4 h-4 text-status-caution" />
+                <span className="font-mono text-xs text-text-tertiary">STEP 03</span>
+                <Brain className="h-4 w-4 text-text-tertiary" aria-hidden="true" />
               </div>
-              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Model Training</h3>
+              <h3 className="mb-1 text-sm text-text-primary">Model Training</h3>
               <p className="text-xs text-text-tertiary leading-relaxed">
                 Trains a Random Forest classifier. Imbalances resolved via balanced class weights to optimize recall.
               </p>
             </div>
-            <div className="mt-4 text-xs font-mono text-status-caution bg-status-caution/5 p-1.5 rounded border border-status-caution/20">
+            <div className="mt-4 rounded-sm bg-surface-0 px-2 py-1.5 font-mono text-xs text-text-secondary">
               Balanced RandomForest (n=100)
             </div>
           </div>
 
           {/* Step 4 */}
-          <div className="rounded-md border border-border-subtle bg-surface-2 p-4 flex flex-col justify-between border-t border-t-[var(--color-status-caution)]/40">
+          <div className="rounded-tile bg-surface-2 p-4 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono text-status-caution font-bold">STEP 04</span>
-                <GitBranch className="w-4 h-4 text-status-caution" />
+                <span className="font-mono text-xs text-text-tertiary">STEP 04</span>
+                <GitBranch className="h-4 w-4 text-text-tertiary" aria-hidden="true" />
               </div>
-              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Grid Inference</h3>
+              <h3 className="mb-1 text-sm text-text-primary">Grid Inference</h3>
               <p
                 className="text-xs text-text-tertiary leading-relaxed"
                 data-provenance={gridSize !== null ? 'derived' : 'unavailable'}
@@ -210,7 +213,7 @@ export default function JudgesArchitectureDeck() {
               </p>
             </div>
             <div
-              className="mt-4 text-xs font-mono text-status-caution bg-status-caution/5 p-1.5 rounded border border-status-caution/20"
+              className="mt-4 rounded-sm bg-surface-0 px-2 py-1.5 font-mono text-xs text-text-secondary"
               data-provenance={gridSize !== null ? 'derived' : 'unavailable'}
             >
               {gridSize !== null ? `${gridSize.toLocaleString()} cells scored` : 'grid size unavailable'}
@@ -218,18 +221,18 @@ export default function JudgesArchitectureDeck() {
           </div>
 
           {/* Step 5 */}
-          <div className="rounded-md border border-border-subtle bg-surface-2 p-4 flex flex-col justify-between border-t border-t-[var(--color-status-critical)]/40">
+          <div className="rounded-tile bg-surface-2 p-4 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono text-status-critical font-bold">STEP 05</span>
-                <Terminal className="w-4 h-4 text-status-critical" />
+                <span className="font-mono text-xs text-text-tertiary">STEP 05</span>
+                <Terminal className="h-4 w-4 text-text-tertiary" aria-hidden="true" />
               </div>
-              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-1">Export & Render</h3>
+              <h3 className="mb-1 text-sm text-text-primary">Export & Render</h3>
               <p className="text-xs text-text-tertiary leading-relaxed">
                 Saves to GeoJSON and serves dynamically to render color-coded prospectivity beacons onto the Leaflet map.
               </p>
             </div>
-            <div className="mt-4 text-xs font-mono text-status-critical bg-status-critical/5 p-1.5 rounded border border-status-critical/20 font-semibold">
+            <div className="mt-4 rounded-sm bg-surface-0 px-2 py-1.5 font-mono text-xs text-text-secondary">
               GeoJSON + FastAPI / Next.js API
             </div>
           </div>
@@ -238,10 +241,10 @@ export default function JudgesArchitectureDeck() {
 
       {activeTab === 'hyperparameters' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="rounded-md border border-border-subtle bg-surface-2 p-5 flex flex-col justify-between">
+          <div className="rounded-tile bg-surface-2 p-5 flex flex-col justify-between">
             <div>
-              <span className="text-xs font-mono text-text-tertiary uppercase block mb-1">Model Parameters</span>
-              <h3 className="text-2xl font-mono font-semibold text-accent">Random Forest</h3>
+              <span className="label mb-1 block">Model Parameters</span>
+              <h3 className="font-mono text-2xl text-text-primary">Random Forest</h3>
               <p className="text-xs text-text-tertiary mt-2 leading-relaxed">
                 Selected for non-linear feature handling, resilience to spatial collinearity, and zero risk of model gradient explosion.
               </p>
@@ -249,7 +252,7 @@ export default function JudgesArchitectureDeck() {
             <div className="space-y-1.5 mt-6 pt-3 border-t border-border-subtle text-xs font-mono">
               <div className="flex justify-between"><span className="text-text-tertiary">Estimators:</span> <span className="text-text-primary">100 Trees</span></div>
               <div className="flex justify-between"><span className="text-text-tertiary">Max Depth:</span> <span className="text-text-primary">6 levels</span></div>
-              <div className="flex justify-between"><span className="text-text-tertiary">Class Weights:</span> <span className="text-accent font-bold">Balanced</span></div>
+              <div className="flex justify-between"><span className="text-text-tertiary">Class Weights:</span> <span className="text-text-primary">Balanced</span></div>
               <div className="flex justify-between"><span className="text-text-tertiary">Train-Test Split:</span> <span className="text-text-primary">80 / 20 Stratified</span></div>
             </div>
           </div>
@@ -261,7 +264,7 @@ export default function JudgesArchitectureDeck() {
             interval of 0.723-0.95. Accuracy was the wrong headline in any case
             at a 20% base rate, where predicting "no ore" everywhere scores 80%.
           */}
-          <div className="rounded-md border border-border-default bg-surface-2 p-5">
+          <div className="rounded-xl border border-border-default bg-surface-1 p-5">
             <p className="label">Model evaluation</p>
             {metricsErr ? (
               <EmptyState
@@ -319,12 +322,12 @@ export default function JudgesArchitectureDeck() {
             )}
           </div>
 
-          <div className="rounded-md border border-border-subtle bg-surface-2 p-5 flex flex-col justify-between">
+          <div className="rounded-tile bg-surface-2 p-5 flex flex-col justify-between">
             <div>
-              <span className="text-xs font-mono text-text-tertiary uppercase block mb-1">
+              <span className="label mb-1 block">
                 Model inputs
               </span>
-              <h3 className="text-2xl font-mono font-semibold text-text-primary">
+              <h3 className="font-mono text-2xl text-text-primary">
                 Measured, not proxied
               </h3>
               {/*

@@ -12,6 +12,11 @@
  * Capabilities carried over unchanged: the account menu (UserNav) and the AI-X
  * copilot trigger, which dispatches the same `open-aix-copilot` event that
  * GlobalCopilotWrapper already listens for.
+ *
+ * Drawn as the design reference's floating nav (.nav): a translucent bar over
+ * an 18px blur, 1px line, 16px radius, sticky with the page visible around it.
+ * Its total height is 56px below md — the sticky mobile summary and section
+ * tabs on the console are offset against exactly that — and 68px from md.
  */
 
 import { useEffect, useId, useRef, useState } from 'react'
@@ -58,9 +63,14 @@ function isActive(pathname: string, search: string, item: NavItem) {
   })
 }
 
+/** Interface role: 14px in the bar until lg, where the reference's 16px fits. */
 const LINK_BASE =
-  'rounded-md px-3 py-2 text-sm transition-colors duration-[120ms] ease-out ' +
+  'rounded-md px-2.5 py-1.5 text-[14px] tracking-[0.044em] lg:px-3 lg:text-base ' +
+  'transition-[background-color,color] duration-[180ms] ease-out ' +
   'hover:bg-surface-2 hover:text-text-primary'
+
+const LINK_ACTIVE = 'bg-surface-2 text-text-primary'
+const LINK_IDLE = 'text-text-secondary'
 
 function OperationsMenu({ item, pathname, search }: { item: NavItem; pathname: string; search: string }) {
   const [open, setOpen] = useState(false)
@@ -94,7 +104,7 @@ function OperationsMenu({ item, pathname, search }: { item: NavItem; pathname: s
         className={clsx(
           LINK_BASE,
           'inline-flex items-center gap-1',
-          isActive(pathname, search, item) ? 'text-text-primary' : 'text-text-secondary'
+          isActive(pathname, search, item) ? LINK_ACTIVE : LINK_IDLE
         )}
       >
         {item.label}
@@ -104,16 +114,17 @@ function OperationsMenu({ item, pathname, search }: { item: NavItem; pathname: s
       {open ? (
         <div
           id={menuId}
-          className="absolute left-0 top-full z-50 mt-1 min-w-48 rounded-md border border-border-default bg-surface-3 py-1 shadow-[var(--shadow-overlay)]"
+          className="absolute left-0 top-full z-50 mt-2 min-w-52 rounded-lg border border-border-strong bg-surface-0 p-1.5"
         >
           {item.children?.map((child) => (
             <Link
               key={child.href}
               href={child.href}
               onClick={() => setOpen(false)}
+              aria-current={pathname === child.href ? 'page' : undefined}
               className={clsx(
-                'block px-3 py-2 text-sm transition-colors duration-[120ms] ease-out hover:bg-surface-2',
-                pathname === child.href ? 'text-text-primary' : 'text-text-secondary'
+                'block rounded-md px-3 py-2 text-[14px] tracking-[0.044em] transition-[background-color,color] duration-[180ms] ease-out hover:bg-surface-2 hover:text-text-primary',
+                pathname === child.href ? LINK_ACTIVE : LINK_IDLE
               )}
             >
               {child.label}
@@ -155,17 +166,18 @@ export default function AppBar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border-default bg-surface-1">
-      <div className="mx-auto flex h-14 max-w-[1280px] items-center gap-2 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 px-2 py-1.5 sm:px-4 md:py-2 lg:px-6">
+      <div className="mx-auto flex h-11 max-w-[1264px] items-center gap-2 rounded-lg border border-border-default bg-nav-bg pl-4 pr-1.5 backdrop-blur-[18px] backdrop-saturate-[1.4] md:h-[52px] md:pl-[18px] md:pr-2">
+        {/* Wordmark: the reference's one use of weight 500, italic, tight. */}
         <Link
           href="/"
-          className="shrink-0 text-sm font-semibold tracking-tight text-text-primary"
+          className="shrink-0 text-[20px] italic leading-none tracking-[-0.04em] text-text-primary [font-weight:500]"
         >
           Nakshatra&#8209;X
         </Link>
 
         {/* Desktop navigation. No overflow-hidden anywhere on this row. */}
-        <nav aria-label="Primary" className="ml-4 hidden items-center gap-1 md:flex">
+        <nav aria-label="Primary" className="ml-3 hidden items-center gap-0.5 md:flex lg:ml-5 lg:gap-1">
           {NAV.map((item) =>
             item.children ? (
               <OperationsMenu key={item.label} item={item} pathname={pathname} search={search} />
@@ -174,10 +186,7 @@ export default function AppBar() {
                 key={item.href}
                 href={item.href}
                 aria-current={isActive(pathname, search, item) ? 'page' : undefined}
-                className={clsx(
-                  LINK_BASE,
-                  isActive(pathname, search, item) ? 'text-text-primary' : 'text-text-secondary'
-                )}
+                className={clsx(LINK_BASE, isActive(pathname, search, item) ? LINK_ACTIVE : LINK_IDLE)}
               >
                 {item.label}
               </Link>
@@ -185,7 +194,7 @@ export default function AppBar() {
           )}
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-1.5">
           <button
             type="button"
             onClick={openCopilot}
@@ -194,10 +203,7 @@ export default function AppBar() {
             // all. The project's axe run only visits desktop widths, which is
             // why it passed there and Lighthouse's mobile emulation did not.
             aria-label="Open the AI-X assistant"
-            className={clsx(
-              LINK_BASE,
-              'inline-flex items-center gap-1.5 border border-border-interactive text-text-secondary'
-            )}
+            className="inline-flex h-8 items-center gap-1.5 rounded-sm bg-surface-2 px-2.5 text-[14px] tracking-[0.044em] text-text-primary transition-[background-color] duration-[180ms] ease-out hover:bg-surface-3 md:h-9 md:px-3"
           >
             <Bot className="h-4 w-4" aria-hidden="true" />
             <span className="hidden sm:inline">AI&#8209;X</span>
@@ -211,7 +217,7 @@ export default function AppBar() {
             aria-controls={drawerId}
             aria-label={drawerOpen ? 'Close menu' : 'Open menu'}
             onClick={() => setDrawerOpen((v) => !v)}
-            className={clsx(LINK_BASE, 'text-text-secondary md:hidden')}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-sm text-text-primary transition-[background-color] duration-[180ms] ease-out hover:bg-surface-2 md:hidden"
           >
             {drawerOpen ? (
               <X className="h-5 w-5" aria-hidden="true" />
@@ -227,20 +233,21 @@ export default function AppBar() {
         <nav
           id={drawerId}
           aria-label="Primary"
-          className="border-t border-border-subtle bg-surface-1 px-4 pb-4 pt-2 md:hidden"
+          className="mx-auto mt-1.5 max-w-[1264px] rounded-lg border border-border-default bg-surface-0 p-2 md:hidden"
         >
           {NAV.map((item) => (
             <div key={item.label} className="py-1">
               {item.children ? (
                 <>
-                  <p className="label px-3 py-2">{item.label}</p>
+                  <p className="label px-3 pb-1 pt-2">{item.label}</p>
                   {item.children.map((child) => (
                     <Link
                       key={child.href}
                       href={child.href}
+                      aria-current={pathname === child.href ? 'page' : undefined}
                       className={clsx(
-                        'block rounded-md px-3 py-2 text-base transition-colors duration-[120ms] ease-out hover:bg-surface-2',
-                        pathname === child.href ? 'text-text-primary' : 'text-text-secondary'
+                        'block rounded-md px-3 py-2.5 text-base tracking-[0.044em] transition-[background-color,color] duration-[180ms] ease-out hover:bg-surface-2',
+                        pathname === child.href ? LINK_ACTIVE : LINK_IDLE
                       )}
                     >
                       {child.label}
@@ -252,8 +259,8 @@ export default function AppBar() {
                   href={item.href}
                   aria-current={isActive(pathname, search, item) ? 'page' : undefined}
                   className={clsx(
-                    'block rounded-md px-3 py-2 text-base transition-colors duration-[120ms] ease-out hover:bg-surface-2',
-                    isActive(pathname, search, item) ? 'text-text-primary' : 'text-text-secondary'
+                    'block rounded-md px-3 py-2.5 text-base tracking-[0.044em] transition-[background-color,color] duration-[180ms] ease-out hover:bg-surface-2',
+                    isActive(pathname, search, item) ? LINK_ACTIVE : LINK_IDLE
                   )}
                 >
                   {item.label}

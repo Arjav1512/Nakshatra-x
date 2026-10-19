@@ -323,7 +323,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             type="button"
             onClick={() => setMobileSection(sec.id)}
             aria-current={mobileSection === sec.id ? 'true' : undefined}
-            className={`shrink-0 rounded-md px-3 py-1.5 text-xs transition-colors duration-[120ms] ease-out ${
+            className={`shrink-0 rounded-md px-3 py-1.5 text-xs transition-colors duration-[180ms] ease-out ${
               mobileSection === sec.id
                 ? 'bg-accent-muted text-text-primary'
                 : 'text-text-secondary hover:bg-surface-2'
@@ -444,7 +444,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             own they cost a border, padding and a gap — part of what put the
             chart's top at y = 901 on a 1280x800 screen.
           */}
-          <div className={`rounded-md border border-border-default bg-surface-2 p-3 md:p-4 ${sectionCls('drivers')}`}>
+          <div className={`rounded-xl border border-border-default bg-surface-1 p-3 md:p-4 ${sectionCls('drivers')}`}>
             {/* --- grade-aware breakdown: PRD B-5 is per-grade at P0 --- */}
             <p className="label">By grade</p>
             <p className="mt-1 text-sm text-text-secondary">
@@ -465,7 +465,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                     aria-pressed={on}
                     data-provenance="derived"
                     data-provenance-model={forecast.model_version}
-                    className={`rounded-md border px-3 py-2 text-left text-sm transition-colors duration-[120ms] ease-out ${
+                    className={`rounded-md border px-3 py-2 text-left text-sm transition-colors duration-[180ms] ease-out ${
                       on ? 'border-accent bg-accent-muted' : 'border-border-interactive bg-surface-2 hover:bg-surface-3'
                     }`}
                   >
@@ -557,9 +557,9 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                     />
                     <Tooltip
                       contentStyle={{
-                        background: 'var(--color-surface-3)',
-                        border: '1px solid var(--color-border-default)',
-                        borderRadius: 4,
+                        background: 'var(--color-surface-0)',
+                        border: '1px solid var(--color-border-strong)',
+                        borderRadius: 8,
                         fontSize: 13,
                         fontVariantNumeric: 'tabular-nums',
                         color: 'var(--color-text-primary)',
@@ -579,7 +579,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                     <Area
                       type="monotone"
                       dataKey={(d: any) => [d.p10_tonnes, d.p90_tonnes]}
-                      stroke="none" fill="var(--color-accent)" fillOpacity={0.28}
+                      stroke="none" fill="var(--color-accent)" fillOpacity={0.14}
                       name="80% interval" isAnimationActive={false} className="forecast-band"
                       activeDot={false}
                     />
@@ -655,7 +655,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
       </div>
 
       {/* --- N-8: backtest visible in the UI --- */}
-      <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('evidence')}`}>
+      <div className={`rounded-xl border border-border-default bg-surface-1 p-3 ${sectionCls('evidence')}`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="label">Backtest — held-out accuracy (PRD B-10, N-8)</p>
           {!backtest && !btLoading && !noBacktest ? (
@@ -681,7 +681,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
            * there is no control here that could start a computation.
            */
           <div
-            className="mt-2 rounded-md border border-border-default bg-surface-1 p-3"
+            className="mt-2 rounded-xl border border-border-default bg-surface-1 p-3"
             data-testid="backtest-pilot"
             data-provenance="derived"
           >
@@ -795,7 +795,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
       </div>
 
       {/* --- D-4 + C-5: recommendations, and what the engine rejected --- */}
-      <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('actions')}`}>
+      <div className={`rounded-xl border border-border-default bg-surface-1 p-3 ${sectionCls('actions')}`}>
         <p className="label mb-2">Corrective actions (PRD C-1..C-5)</p>
         {rWarm ? (
           <WarmingState what="Recommendations" warming={rWarm} attempt={attempt} />

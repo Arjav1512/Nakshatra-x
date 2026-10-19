@@ -29,7 +29,7 @@ const IndiaSatelliteMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-[420px] w-full rounded-md border border-border-default bg-surface-2">
+      <div className="h-[420px] w-full bg-surface-1">
         <span className="sr-only">Loading map</span>
       </div>
     ),
@@ -66,7 +66,7 @@ const OPENCAST_PILOT = { name: 'Dongri Buzurg', lat: 20.99, lng: 79.34 }
 
 function Unavailable({ what, reason }: { what: string; reason: string }) {
   return (
-    <div className="rounded-md border border-status-critical/30 bg-status-critical/5 p-3 text-xs">
+    <div className="rounded-tile border border-status-critical/30 bg-status-critical/5 p-3 text-xs">
       <p className="font-semibold text-status-critical">{what} unavailable</p>
       <p className="mt-1 leading-snug text-text-secondary">{reason}</p>
     </div>
@@ -147,7 +147,11 @@ export function TrackAPanel() {
             Click any cell to score it against the model
           </p>
         </div>
-        <div className="overflow-hidden rounded-md border border-border-default">
+        {/* The design reference's editor chrome, "dark in both themes": the
+            imagery, the cividis surface and the status markers all read
+            against dark, so the whole map card is a .chrome-dark scope
+            (docs/ui-redesign/design-system-mapping.md §4.2). */}
+        <div className="chrome-dark overflow-hidden rounded-2xl border border-border-strong bg-surface-1">
           <IndiaSatelliteMap
             selectedMine={mapMine}
             onSelectMine={setMapMine}
@@ -201,7 +205,7 @@ export function TrackAPanel() {
           </div>
 
           <div
-            className="rounded-md border border-status-caution/30 bg-status-caution/[0.07] p-3 text-xs leading-relaxed text-status-caution"
+            className="rounded-tile border border-status-caution/30 bg-status-caution/[0.07] p-3 text-xs leading-relaxed text-status-caution"
             // Every figure in this block, including the ones inside the prose,
             // comes from /api/v1/prospectivity/metrics — the ablation note and
             // the contrast AUC are fields, not copy. B-6 reads this.
@@ -211,7 +215,7 @@ export function TrackAPanel() {
             <p className="font-semibold">What this number does and does not support</p>
             <p className="mt-1">{metrics.ablation_note}</p>
             <p className="mt-1">{metrics.lithology_note}</p>
-            <p className="mt-1 opacity-80">
+            <p className="mt-1">
               For contrast, a random 5-fold split scores{' '}
               <span className="font-mono">{metrics.random_split_auc_for_contrast}</span> — shown so the
               optimistic protocol is visible, not quoted.
@@ -221,7 +225,7 @@ export function TrackAPanel() {
       )}
 
       {/* --- A-5 ranked drill targets with evidence --- */}
-      <div className="rounded-md border border-border-default bg-surface-2 p-3">
+      <div className="rounded-xl border border-border-default bg-surface-1 p-3">
         <p className="label mb-2">Ranked drill targets (PRD A-5)</p>
         <p className="mb-2 text-sm text-text-secondary">Ranked by score, each with its evidence.</p>
         {tErr ? (
@@ -302,36 +306,38 @@ export function TrackAPanel() {
       </div>
 
       {/* --- map-click equivalent: the real model, with uncertainty --- */}
-      <div className="rounded-md border border-border-default bg-surface-2 p-3">
-        <p className="label mb-2">Score a location (PRD A-3, A-4, A-7)</p>
+      <div className="rounded-xl border border-border-default bg-surface-1 p-4">
+        <p className="label mb-3">Score a location (PRD A-3, A-4, A-7)</p>
+        {/* The reference's fields and buttons at the dense size: labelled
+            inputs with a 3:1 boundary, the primary action in ink. */}
         <div className="flex flex-wrap items-end gap-2">
-          <label className="text-xs">
-            <span className="label mb-1 block">Latitude</span>
+          <label className="grid gap-1">
+            <span className="text-sm tracking-[0.044em] text-text-secondary">Latitude</span>
             <input
               value={lat} onChange={(e) => setLat(e.target.value)} inputMode="decimal"
-              className="w-28 rounded-md border border-border-interactive bg-surface-1 px-2 py-1 font-mono text-sm text-text-primary"
+              className="h-9 w-28 rounded-md border border-border-interactive bg-surface-0 px-3 font-mono text-sm text-text-primary transition-[border-color] duration-[180ms] ease-out focus:border-text-primary"
             />
           </label>
-          <label className="text-xs">
-            <span className="label mb-1 block">Longitude</span>
+          <label className="grid gap-1">
+            <span className="text-sm tracking-[0.044em] text-text-secondary">Longitude</span>
             <input
               value={lng} onChange={(e) => setLng(e.target.value)} inputMode="decimal"
-              className="w-28 rounded-md border border-border-interactive bg-surface-1 px-2 py-1 font-mono text-sm text-text-primary"
+              className="h-9 w-28 rounded-md border border-border-interactive bg-surface-0 px-3 font-mono text-sm text-text-primary transition-[border-color] duration-[180ms] ease-out focus:border-text-primary"
             />
           </label>
-          <label className="flex items-center gap-1.5 pb-1 text-xs text-text-secondary">
-            <input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} className="accent-accent" />
+          <label className="flex h-9 items-center gap-1.5 text-sm text-text-secondary">
+            <input type="checkbox" checked={live} onChange={(e) => setLive(e.target.checked)} className="h-4 w-4 accent-accent" />
             fetch live Sentinel-2 (slower)
           </label>
           <button type="button"
             onClick={runProbe} disabled={pLoading}
-            className="rounded-md border border-border-interactive bg-surface-2 px-3 py-1.5 text-xs text-text-primary transition-colors duration-[120ms] ease-out hover:bg-surface-3 disabled:opacity-45"
+            className="h-9 rounded-md bg-inverse-bg px-4 text-[14px] tracking-[0.044em] text-inverse-fg transition-[background-color,scale] duration-[180ms] ease-out hover:bg-inverse-hover active:scale-[.97] disabled:opacity-35"
           >
             {pLoading ? 'Scoring…' : 'Score'}
           </button>
           <button type="button"
             onClick={() => { setLat(String(OPENCAST_PILOT.lat)); setLng(String(OPENCAST_PILOT.lng)) }}
-            className="rounded-md border border-border-default px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-border-interactive"
+            className="h-9 rounded-md bg-surface-2 px-3 text-[14px] tracking-[0.044em] text-text-primary transition-[background-color] duration-[180ms] ease-out hover:bg-surface-3"
           >
             {OPENCAST_PILOT.name} (opencast pilot)
           </button>
