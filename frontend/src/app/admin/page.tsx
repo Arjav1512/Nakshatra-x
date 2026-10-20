@@ -157,26 +157,26 @@ export default function AdminDashboard() {
 
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface-0)] text-text-primary p-4 sm:p-8 font-mono bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,165,233,0.1),rgba(255,255,255,0))]">
+    <div className="min-h-[calc(100dvh-3.5rem)] bg-surface-0 text-text-primary p-4 sm:p-8 ">
       <div className="max-w-7xl mx-auto">
         {/* ================= TOP COMMANDER HEADER ================= */}
         <header className="border-b border-border-default pb-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-md bg-accent/10 border border-accent/40 flex items-center justify-center text-accent">
+            <div className="h-12 w-12 rounded-tile bg-surface-2 flex items-center justify-center text-text-primary">
               <Orbit size={26} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-semibold tracking-widest text-text-primary">
+                <h1 className="text-xl sm:text-2xl tracking-[0.044em] text-text-primary">
                   GLOBAL COMMAND CENTER
                 </h1>
-                <span className="px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider bg-status-critical/15 border border-status-critical/40 text-status-critical">
+                <span className="px-2 py-0.5 rounded text-xs tracking-[0.044em] bg-status-critical/15 border border-status-critical/40 text-status-critical">
                   LEVEL-5 OMEGA
                 </span>
               </div>
               <p className="text-xs text-text-tertiary mt-0.5 flex items-center gap-2">
                 <span>Primary Commander:</span>
-                <span className="text-accent font-bold">
+                <span className="text-accent">
                   {adminInfo?.full_name || 'Commander Rupraj Datta'}
                 </span>
                 <span className="text-text-tertiary">&bull;</span>
@@ -208,7 +208,7 @@ export default function AdminDashboard() {
 
             <button type="button"
               onClick={handleLogout}
-              className="flex items-center gap-1.5 bg-status-critical/10 hover:bg-status-critical/20 text-status-critical px-4 py-2 rounded-md border border-status-critical/30 hover:border-status-critical text-xs transition-colors cursor-pointer shadow-sm"
+              className="flex items-center gap-1.5 bg-status-critical/10 hover:bg-status-critical/20 text-status-critical px-4 py-2 rounded-md border border-status-critical/30 hover:border-status-critical text-xs transition-colors cursor-pointer"
             >
               <LogOut size={14} />
               <span>Terminate Session</span>
@@ -221,10 +221,10 @@ export default function AdminDashboard() {
           {/* Card 1: Total Registered */}
           <div className="p-5 rounded-md bg-surface-1/90 border border-border-default relative overflow-hidden ">
             <div className="flex items-center justify-between text-text-secondary mb-2">
-              <span className="text-xs uppercase tracking-wider font-bold">Total Users</span>
+              <span className="label">Total Users</span>
               <Users size={16} className="text-accent" />
             </div>
-            <div className="text-3xl font-semibold text-text-primary">{users.length}</div>
+            <div className="text-3xl text-text-primary">{users.length}</div>
             <div className="text-xs text-accent mt-1 flex items-center gap-1">
               <Activity size={10} /> Live Supabase Registry Sync
             </div>
@@ -233,7 +233,7 @@ export default function AdminDashboard() {
           {/* Card 2: Google OAuth Users */}
           <div className="p-5 rounded-md bg-surface-1/90 border border-border-default relative overflow-hidden ">
             <div className="flex items-center justify-between text-text-secondary mb-2">
-              <span className="text-xs uppercase tracking-wider font-bold">Google Sign-Ins</span>
+              <span className="label">Google Sign-Ins</span>
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
@@ -253,27 +253,27 @@ export default function AdminDashboard() {
                 />
               </svg>
             </div>
-            <div className="text-3xl font-semibold text-accent">{googleCount}</div>
+            <div className="text-3xl text-accent">{googleCount}</div>
             <div className="text-xs text-text-secondary mt-1">Verified Google OAuth Accounts</div>
           </div>
 
           {/* Card 3: Email OTP Logins */}
           <div className="p-5 rounded-md bg-surface-1/90 border border-border-default relative overflow-hidden ">
             <div className="flex items-center justify-between text-text-secondary mb-2">
-              <span className="text-xs uppercase tracking-wider font-bold">Email Logins</span>
+              <span className="label">Email Logins</span>
               <Mail size={16} className="text-accent" />
             </div>
-            <div className="text-3xl font-semibold text-accent">{emailCount}</div>
+            <div className="text-3xl text-accent">{emailCount}</div>
             <div className="text-xs text-text-secondary mt-1">OTP Verified Inboxes</div>
           </div>
 
           {/* Card 4: Single Admin Lock Status */}
           <div className="p-5 rounded-md bg-surface-1/90 border border-accent/30 relative overflow-hidden ">
             <div className="flex items-center justify-between text-text-secondary mb-2">
-              <span className="text-xs uppercase tracking-wider font-bold">Admin Slot</span>
+              <span className="label">Admin Slot</span>
               <Lock size={16} className="text-accent" />
             </div>
-            <div className="text-2xl font-semibold text-accent">LOCKED 1/1</div>
+            <div className="text-2xl text-accent">LOCKED 1/1</div>
             <div className="text-xs text-text-tertiary mt-1">Single Administrator Sealed</div>
           </div>
         </div>
@@ -282,7 +282,7 @@ export default function AdminDashboard() {
         <div className="flex items-center gap-2 border-b border-border-default pb-4 mb-6">
           <button type="button"
             onClick={() => setActiveTab('users')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs tracking-[0.044em] transition-colors cursor-pointer ${
               activeTab === 'users'
                 ? 'bg-accent/20 border border-accent text-accent'
                 : 'bg-surface-2 border border-border-default text-text-secondary hover:text-text-primary'
@@ -294,7 +294,7 @@ export default function AdminDashboard() {
 
           <button type="button"
             onClick={() => setActiveTab('operations')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs tracking-[0.044em] transition-colors cursor-pointer ${
               activeTab === 'operations'
                 ? 'bg-accent/20 border border-accent text-accent'
                 : 'bg-surface-2 border border-border-default text-text-secondary hover:text-text-primary'
@@ -324,7 +324,7 @@ export default function AdminDashboard() {
 
               {/* Provider Filter Buttons */}
               <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto">
-                <span className="text-xs uppercase text-text-tertiary mr-1 flex items-center gap-1">
+                <span className="text-xs text-text-tertiary mr-1 flex items-center gap-1">
                   <Filter size={11} /> Filter:
                 </span>
                 {[
@@ -336,9 +336,9 @@ export default function AdminDashboard() {
                   <button type="button"
                     key={f.id}
                     onClick={() => setSelectedProvider(f.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-colors cursor-pointer whitespace-nowrap ${
+                    className={`px-3 py-1.5 rounded-md text-xs transition-colors cursor-pointer whitespace-nowrap ${
                       selectedProvider === f.id
-                        ? 'bg-accent text-black'
+                        ? 'bg-inverse-bg text-inverse-fg'
                         : 'bg-surface-2 hover:bg-surface-3 text-text-secondary border border-border-default'
                     }`}
                   >
@@ -351,7 +351,7 @@ export default function AdminDashboard() {
               {/* Export Button */}
               <button type="button"
                 onClick={exportUsersCSV}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-accent/15 hover:bg-accent/25 border border-accent/40 text-accent text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer whitespace-nowrap"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-accent/15 hover:bg-accent/25 border border-accent/40 text-accent text-xs tracking-[0.044em] transition-colors cursor-pointer whitespace-nowrap"
               >
                 <Download size={13} />
                 <span>Export CSV</span>
@@ -368,13 +368,13 @@ export default function AdminDashboard() {
               ) : filteredUsers.length === 0 ? (
                 <div className="p-16 text-center text-text-tertiary">
                   <Users className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                  <p className="text-xs font-bold uppercase tracking-widest">No matching users found</p>
+                  <p className="text-xs tracking-[0.044em]">No matching users found</p>
                   <p className="text-xs text-text-tertiary mt-1">Users will appear here once they log in.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs text-left">
-                    <thead className="bg-surface-2 text-text-secondary uppercase text-xs tracking-wider border-b border-border-default">
+                    <thead className="bg-surface-2 text-text-secondary text-xs tracking-[0.044em] border-b border-border-default">
                       <tr>
                         <th className="px-5 py-3.5">Operator</th>
                         <th className="px-5 py-3.5">Email Address</th>
@@ -400,7 +400,7 @@ export default function AdminDashboard() {
                                   className="h-8 w-8 shrink-0 border border-accent"
                                 />
                                 <div>
-                                  <div className="font-bold text-text-primary text-xs">{u.full_name || 'Anonymous User'}</div>
+                                  <div className="text-text-primary text-xs">{u.full_name || 'Anonymous User'}</div>
                                   <div className="text-xs text-text-tertiary">Active Operator</div>
                                 </div>
                               </div>
@@ -419,7 +419,7 @@ export default function AdminDashboard() {
                             {/* Provider */}
                             <td className="px-5 py-3.5">
                               <span
-                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-xs tracking-[0.044em] border ${
                                   isGoogle
                                     ? 'bg-accent/10 border-accent/30 text-accent'
                                     : isEmail
@@ -433,7 +433,7 @@ export default function AdminDashboard() {
 
                             {/* Role */}
                             <td className="px-5 py-3.5">
-                              <span className="px-2 py-0.5 rounded bg-surface-2 border border-border-default text-text-secondary text-xs font-bold uppercase">
+                              <span className="px-2 py-0.5 rounded bg-surface-2 border border-border-default text-text-secondary text-xs">
                                 {u.role || 'Operator'}
                               </span>
                             </td>
@@ -490,8 +490,8 @@ export default function AdminDashboard() {
         {/* ================= TAB 2: MINING OPERATIONS ================= */}
         {activeTab === 'operations' && (
           <section className="space-y-4">
-            <h2 className="text-lg font-semibold text-text-primary">Mining operations</h2>
-            <div className="rounded-md border border-border-default bg-surface-2 p-5">
+            <h2 className="text-lg text-text-primary">Mining operations</h2>
+            <div className="rounded-xl border border-border-default bg-surface-1 p-5">
               <p className="measure text-sm text-text-secondary">
                 The plan-target editor that stood here has been removed. It read and wrote
                 <code className="mx-1 font-mono text-xs">src/data/mines.json</code>, a file that

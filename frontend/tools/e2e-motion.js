@@ -13,6 +13,13 @@
  *   * native scroll — no hijacking;
  *   * reduced motion gets a legible static composition, not a frozen half-state;
  *   * no count-ups, no looping "live" pulses.
+ *
+ * Amended 2026-10-18 (DESIGN_SYSTEM.md §7.1): the landing page may settle in
+ * once — the hero on load, sections as they are reached. The checks below the
+ * existing ones hold that allowance to its terms: the hero is fully legible
+ * within 1.2s, nothing already on screen is held back, and under reduced
+ * motion none of it runs. Product routes are unchanged: <= 300ms, no loops,
+ * no layout-property transitions.
  */
 const puppeteer = require('puppeteer-core')
 
@@ -107,6 +114,35 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
     await page.close()
   }
 
+  // ---- the landing settle: once, short, never hiding what is on screen ----
+  {
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1280, height: 1000 })
+    await page.goto(`${BASE}/`, { waitUntil: 'load', timeout: 60000 })
+    await sleep(1200)
+    const settle = await page.evaluate(() => {
+      const op = (e) => Number(getComputedStyle(e).opacity)
+      const hero = [...document.querySelectorAll('.hero-enter')].map(op)
+      const onScreen = [...document.querySelectorAll('[data-reveal]')]
+        .filter((e) => { const r = e.getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0 })
+        .map(op)
+      return { hero, onScreen }
+    })
+    check('the hero is fully legible within 1.2 s of load',
+      settle.hero.length >= 3 && settle.hero.every((o) => o === 1), JSON.stringify(settle.hero))
+    check('nothing already on screen is held back by a reveal',
+      settle.onScreen.every((o) => o === 1), JSON.stringify(settle.onScreen))
+
+    // Sections below the fold arrive, and end fully visible.
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await sleep(2000)
+    const after = await page.evaluate(() =>
+      [...document.querySelectorAll('[data-reveal]')].map((e) => Number(getComputedStyle(e).opacity)))
+    check('every revealed section ends fully visible',
+      after.length > 0 && after.every((o) => o === 1), `${after.filter((o) => o !== 1).length} of ${after.length} not at 1`)
+    await page.close()
+  }
+
   // ---- reduced motion -----------------------------------------------------
   {
     const page = await browser.newPage()
@@ -127,6 +163,15 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
       JSON.stringify(state.opacities))
     check('reduced motion: every annotation is visible',
       state.notes.every((o) => o === 1), JSON.stringify(state.notes))
+
+    const still = await page.evaluate(() => ({
+      hero: [...document.querySelectorAll('.hero-enter')].map((e) => getComputedStyle(e).animationName),
+      reveal: [...document.querySelectorAll('[data-reveal]')].map((e) => Number(getComputedStyle(e).opacity)),
+    }))
+    check('reduced motion: the hero does not animate',
+      still.hero.length >= 3 && still.hero.every((n) => n === 'none'), JSON.stringify(still.hero))
+    check('reduced motion: no section waits to be revealed',
+      still.reveal.every((o) => o === 1), JSON.stringify(still.reveal))
 
     const before = await page.evaluate(() =>
       getComputedStyle(document.querySelector('[data-stack-layer]:last-of-type')).transform)

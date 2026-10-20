@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
+import { Reveal } from './Reveal'
 
 export interface ImageryRecord {
   file: string
@@ -48,20 +49,24 @@ export async function loadImagery(): Promise<ImageryManifest | null> {
  */
 export function BeltImagery({ manifest }: { manifest: ImageryManifest }) {
   return (
-    <section
-      className="border-t border-border-subtle py-14 sm:py-20"
-      data-provenance="measured"
-    >
-      <h2 className="label">The ground this is about</h2>
-      <p className="measure mt-3 text-sm text-text-secondary">
-        Sentinel-2 L2A over the Central India manganese belt — the same bounds the
-        prospectivity surface scores. Real scenes, named below, not illustration.
-      </p>
+    <Reveal className="pt-24 sm:pt-28">
+    <section data-provenance="measured">
+      <div className="mb-10 grid max-w-[720px] gap-3" data-reveal>
+        <p className="label flex items-center gap-2.5">
+          <span className="text-text-primary">04</span>
+          The ground this is about
+        </p>
+        <h2 className="t-h2-wrap">Real scenes, named below, not illustration.</h2>
+        <p className="text-[15px] leading-[1.45] tracking-[0.044em] text-text-secondary">
+          Sentinel-2 L2A over the Central India manganese belt — the same bounds the prospectivity
+          surface scores.
+        </p>
+      </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-3">
         {manifest.images.map((img) => (
-          <figure key={img.scene_id} className="min-w-0">
-            <div className="overflow-hidden rounded-md border border-border-default bg-surface-1">
+          <figure key={img.scene_id} className="min-w-0" data-reveal>
+            <div className="overflow-hidden rounded-xl bg-surface-black">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={img.file}
@@ -93,5 +98,6 @@ export function BeltImagery({ manifest }: { manifest: ImageryManifest }) {
         <code className="font-mono">python -m app.ml.fetch_identity_imagery</code>.
       </p>
     </section>
+    </Reveal>
   )
 }

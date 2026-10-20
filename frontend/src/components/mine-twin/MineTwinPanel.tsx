@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { fetchForecast } from '@/lib/console-api'
 import { ASSUMPTION_GROUPS, ASSUMPTION_NOTE } from '@/lib/scenario-assumptions'
 import { Metric } from '@/components/console/Evidence'
-import { StatusDot } from '@/components/ui/primitives'
+import { DATA_WELL, StatusDot } from '@/components/ui/primitives'
+import { GRID_STROKE } from '@/lib/chart-theme'
 import { assumption, measuredValue, reference } from '@/lib/provenance'
 import type { MineInfo } from '@/components/mission-control/types'
 import {
@@ -374,9 +375,9 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
   return (
     // overflow-x-clip so the sticky controls column can stick to the page; no
     // shadow — only overlays cast one (DESIGN_SYSTEM §3.8).
-    <div className="relative space-y-6 overflow-x-clip rounded-md border border-border-default bg-surface-1 p-6">
-      {/* Background Cyber Ambient Glow */}
-
+    // Not a card itself: its parts are cards on the page, so nothing nests a
+    // card inside a card (reference rule 6).
+    <div className="relative space-y-6 overflow-x-clip">
 
       {/*
         Header. What this screen actually is.
@@ -395,14 +396,14 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
         been corrected to say "synthetic 50-year series"; the badges above it
         still said the opposite, which is worse than either alone.
       */}
-      <div className="flex flex-col gap-4 border-b border-border-default pb-5 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 border-b border-border-default pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <span className="label">Scenario calculator</span>
-          <h2 className="mt-1 flex items-center gap-2 font-display text-2xl font-medium tracking-tight text-text-primary">
+          <h2 className="mt-2 flex items-center gap-2.5 font-display text-3xl text-text-primary">
             <Box className="h-6 w-6 text-text-tertiary" aria-hidden="true" />
             {selectedMine.name}
           </h2>
-          <p className="measure mt-2 text-sm text-text-secondary">
+          <p className="measure mt-3 text-base text-text-secondary">
             A what-if calculator over a synthetic 50-year series generated to the published
             ingestion contract, with an illustrative forward trajectory. Not a fitted trajectory
             model, not a statutory disclosure, and not a live feed from the mine.
@@ -428,114 +429,58 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
             kind: the person's choice, not a claim (tools/provenance-rules.js).
             The estimate those choices produce carries the assumption kind. */}
         <div
-          className="space-y-5 rounded-md border border-border-default bg-surface-2 p-5 lg:sticky lg:top-20 lg:col-span-5"
+          className="space-y-5 rounded-xl border border-border-default bg-surface-1 p-5 lg:sticky lg:top-20 lg:col-span-5"
           data-provenance="input"
         >
-          <div className="flex items-center justify-between border-b border-border-default pb-2">
+          <div className="flex items-center justify-between border-b border-border-default pb-3">
             <div className="flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-accent" />
-              <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">
-                What-If Parameter Controls
-              </h3>
+              <Sliders className="h-4 w-4 text-text-tertiary" aria-hidden="true" />
+              <h3 className="text-base text-text-primary">What-if controls</h3>
             </div>
-            <span className="text-xs font-mono text-text-tertiary">4 Variable Vectors</span>
+            <span className="t-caption">4 choices</span>
           </div>
 
-          {/* 1. Haulage Shift Window */}
-          <div>
-            <label className="text-xs font-mono text-text-secondary font-bold uppercase tracking-wider flex items-center justify-between mb-2">
-              <span>1. Haulage Shift Window:</span>
-              <span className="text-accent">{shift}</span>
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {(['04-10', '06-14', '22-06'] as const).map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => setShift(opt)}
-                  className={`py-2 rounded-md text-xs font-mono font-bold transition-colors cursor-pointer border ${
-                    shift === opt
-                      ? 'bg-accent/20 border-accent text-accent'
-                      : 'bg-surface-2 border-border-default text-text-secondary hover:bg-white/15'
-                  }`}
-                  type="button"
-                >
-                  {opt === '04-10' ? '04:00-10:00' : opt === '06-14' ? '06:00-14:00' : '22:00-06:00'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 2. Pit Blasting Delay */}
-          <div>
-            <label className="text-xs font-mono text-text-secondary font-bold uppercase tracking-wider flex items-center justify-between mb-2">
-              <span>2. Pit Blasting Delay:</span>
-              <span className="text-status-caution">{blastDelay === 0 ? 'ON TIME' : `+${blastDelay} Hours`}</span>
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {([0, 6, 12] as const).map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => setBlastDelay(opt)}
-                  className={`py-2 rounded-md text-xs font-mono font-bold transition-colors cursor-pointer border ${
-                    blastDelay === opt
-                      ? 'bg-status-caution/20 border-status-caution text-status-caution'
-                      : 'bg-surface-2 border-border-default text-text-secondary hover:bg-white/15'
-                  }`}
-                  type="button"
-                >
-                  {opt === 0 ? 'ON TIME (0h)' : `+${opt}H DELAY`}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 3. Equipment Redeployment */}
-          <div>
-            <label className="text-xs font-mono text-text-secondary font-bold uppercase tracking-wider flex items-center justify-between mb-2">
-              <span>3. Equipment Redeploy:</span>
-              <span className="text-accent">{redeploy.toUpperCase()}</span>
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {(['none', '1-crusher', '1-shovel-1-dumper'] as const).map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => setRedeploy(opt)}
-                  className={`py-2 px-1 rounded-md text-xs font-mono font-bold transition-colors cursor-pointer border text-center ${
-                    redeploy === opt
-                      ? 'bg-accent/20 border-accent text-accent'
-                      : 'bg-surface-2 border-border-default text-text-secondary hover:bg-white/15'
-                  }`}
-                  type="button"
-                >
-                  {opt === 'none' ? 'NONE' : opt === '1-crusher' ? '1 CRUSHER' : '1 SHOVEL+DUMPER'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 4. Dry Blast Tolerance */}
-          <div>
-            <label className="text-xs font-mono text-text-secondary font-bold uppercase tracking-wider flex items-center justify-between mb-2">
-              <span>4. Dry Blast Tolerance:</span>
-              <span className="text-text-primary">{tolerance}%</span>
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {([10, 20, 30] as const).map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => setTolerance(opt)}
-                  className={`py-2 rounded-md text-xs font-mono font-bold transition-colors cursor-pointer border ${
-                    tolerance === opt
-                      ? 'bg-white/20 border-white text-text-primary'
-                      : 'bg-surface-2 border-border-default text-text-secondary hover:bg-white/15'
-                  }`}
-                  type="button"
-                >
-                  {opt}% TOL
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* The four choices, as the reference's segmented control: one
+              exclusive option each, with its state in aria-pressed. The
+              labels keep their characters (tools/e2e-scenario.js presses
+              "+6h delay" by text); only their case changed. */}
+          <OptionGroup
+            label="Haulage shift window"
+            value={shift}
+            current={shift}
+            options={(['04-10', '06-14', '22-06'] as const).map((opt) => ({
+              value: opt,
+              label: opt === '04-10' ? '04:00-10:00' : opt === '06-14' ? '06:00-14:00' : '22:00-06:00',
+            }))}
+            onChange={setShift}
+          />
+          <OptionGroup
+            label="Pit blasting delay"
+            value={blastDelay === 0 ? 'on time' : `+${blastDelay} hours`}
+            current={blastDelay}
+            options={([0, 6, 12] as const).map((opt) => ({
+              value: opt,
+              label: opt === 0 ? 'On time (0h)' : `+${opt}h delay`,
+            }))}
+            onChange={setBlastDelay}
+          />
+          <OptionGroup
+            label="Equipment redeployment"
+            value={redeploy === 'none' ? 'none' : redeploy.replace(/-/g, ' ')}
+            current={redeploy}
+            options={(['none', '1-crusher', '1-shovel-1-dumper'] as const).map((opt) => ({
+              value: opt,
+              label: opt === 'none' ? 'None' : opt === '1-crusher' ? '1 crusher' : '1 shovel + dumper',
+            }))}
+            onChange={setRedeploy}
+          />
+          <OptionGroup
+            label="Dry-blast tolerance"
+            value={`${tolerance}%`}
+            current={tolerance}
+            options={([10, 20, 30] as const).map((opt) => ({ value: opt, label: `${opt}% tol` }))}
+            onChange={setTolerance}
+          />
 
           {/* Action Simulation Trigger Button */}
           <button
@@ -545,7 +490,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
             // scale on hover and no spinning icon (DESIGN_SYSTEM §7.2), and
             // the label says what runs — arithmetic and a constraint check,
             // not a "digital twin simulation".
-            className="flex w-full items-center justify-center gap-2 rounded-md bg-accent py-3 text-sm font-medium text-surface-0 transition-colors duration-[120ms] ease-out hover:bg-accent/90 disabled:opacity-45"
+            className="flex h-[50px] w-full items-center justify-center gap-2 rounded-md bg-inverse-bg text-base tracking-[0.044em] text-inverse-fg transition-[background-color,scale] duration-[180ms] ease-out hover:bg-inverse-hover active:scale-[.97] disabled:opacity-35"
             type="button"
           >
             <Play className="h-4 w-4" aria-hidden="true" />
@@ -617,10 +562,10 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
           </div>
 
           {/* The assumptions, on screen and editable (PRD C-4). */}
-          <div className="rounded-md border border-border-default bg-surface-1 p-4">
+          <div className="rounded-xl border border-border-default bg-surface-1 p-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h3 className="text-sm font-semibold text-text-primary">Planner assumptions</h3>
-              <span className="font-mono text-xs uppercase tracking-wider text-text-tertiary">
+              <h3 className="text-base text-text-primary">Planner assumptions</h3>
+              <span className="inline-flex h-[22px] items-center rounded-sm border border-dashed border-border-interactive px-2 font-mono text-xs text-text-secondary">
                 not fitted &middot; no data derived
               </span>
             </div>
@@ -630,7 +575,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               {ASSUMPTION_GROUPS.map((g) => (
                 <li key={g.id} className="border-l border-border-strong pl-3">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <span className="text-xs font-medium text-text-primary">{g.label}</span>
+                    <span className="text-sm text-text-primary">{g.label}</span>
                     <label className="flex items-center gap-2 text-xs text-text-tertiary">
                       <span className="font-mono">x</span>
                       <input
@@ -644,7 +589,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                             setFactors((f) => ({ ...f, [g.id]: v }))
                           }
                         }}
-                        className="w-20 rounded-sm border border-border-default bg-surface-2 px-2 py-1 text-right font-mono text-xs text-text-primary tabular-nums"
+                        className="h-8 w-20 rounded-sm border border-border-interactive bg-surface-0 px-2 text-right font-mono text-xs text-text-primary tabular-nums transition-[border-color] duration-[180ms] ease-out focus:border-text-primary"
                         aria-label={`${g.label} multiplier`}
                       />
                     </label>
@@ -663,7 +608,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               about a fixed-multiplier calculator supports a confidence, so it
               reports none — and says what it is instead.
             */}
-            <div className="rounded-md border border-border-default bg-surface-1 p-4">
+            <div className="rounded-xl border border-border-default bg-surface-1 p-4">
               <span className="label">What this is</span>
               <p className="measure mt-2 text-xs text-text-secondary">
                 A deterministic what-if over fixed multipliers that are stated assumptions, not
@@ -677,16 +622,16 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               data ships with the page (historical-database.ts), labelled
               synthetic — which is how the offline provenance rule recognises
               an asset rather than a client-side copy of service data. */}
-          <figure className="rounded-md border border-border-subtle bg-surface-2 p-5 rounded-md border border-border-default space-y-3 relative overflow-hidden bg-[var(--color-surface-1)]/90">
+          <figure className={`relative space-y-3 overflow-hidden rounded-xl p-5 ${DATA_WELL}`}>
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-default pb-2">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-accent" />
+                <TrendingUp className="h-4 w-4 text-text-tertiary" aria-hidden="true" />
                 {/* It said "50-Year Historical Mining Baseline • 1975–2040 AI
                     Forecast", in status amber. The series is synthetic and the
                     forward part illustrative — this panel's own header says
                     "not a fitted trajectory model" — so the title says that
                     (POLISH_AUDIT.md issue 6). */}
-                <h3 className="text-sm font-medium text-text-primary">
+                <h3 className="text-sm text-text-primary">
                   50-year synthetic series · <span className="text-text-secondary">to 2040 illustrative, not a forecast</span>
                 </h3>
               </div>
@@ -696,16 +641,29 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               <span className="text-xs text-text-secondary">ROM output, tonnes per year</span>
             </div>
 
+            {/* Two marks, two meanings: the generated series (synthetic data
+                role, solid) and its illustrative continuation (dashed). */}
+            <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary" aria-label="Chart key">
+              <li className="flex items-center gap-1.5">
+                <span aria-hidden="true" className="inline-block h-0.5 w-4 rounded-full bg-data-synthetic" />
+                synthetic series
+              </li>
+              <li className="flex items-center gap-1.5">
+                <span aria-hidden="true" className="inline-block w-4 border-t-2 border-dashed border-data-illustrative" />
+                illustrative, not a forecast
+              </li>
+            </ul>
+
             {/* SVG Minimalistic Trend Line */}
             <div className="relative h-36 w-full pt-2">
               <svg className="w-full h-full overflow-visible" viewBox="0 0 1000 150" preserveAspectRatio="none">
                 {/* Horizontal guide lines */}
                 {[0, 37.5, 75, 112.5, 150].map((yVal, i) => (
-                  <line key={i} x1="0" y1={yVal} x2="1000" y2={yVal} stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                  <line key={i} x1="0" y1={yVal} x2="1000" y2={yVal} stroke={GRID_STROKE} strokeDasharray="3 3" vectorEffect="non-scaling-stroke" />
                 ))}
 
                 {/* 2026 Boundary vertical line */}
-                <line x1="770" y1="0" x2="770" y2="150" stroke="var(--color-status-caution)" strokeOpacity="0.4" strokeDasharray="4 4" strokeWidth="1.5" />
+                <line x1="770" y1="0" x2="770" y2="150" stroke="var(--color-border-interactive)" strokeDasharray="4 4" strokeWidth="1" vectorEffect="non-scaling-stroke" />
 
                 {(() => {
                   const points = fullTimeline.map((item, index) => {
@@ -732,8 +690,8 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                     <>
                       <defs>
                         <linearGradient id="miniHistArea" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="var(--color-status-nominal)" stopOpacity="0.2" />
-                          <stop offset="100%" stopColor="var(--color-status-nominal)" stopOpacity="0.0" />
+                          <stop offset="0%" stopColor="var(--color-data-synthetic)" stopOpacity="0.18" />
+                          <stop offset="100%" stopColor="var(--color-data-synthetic)" stopOpacity="0.0" />
                         </linearGradient>
                       </defs>
 
@@ -743,11 +701,11 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                         <path
                           d={historyPath}
                           fill="none"
-                          stroke="var(--color-status-nominal)"
-                          strokeWidth="2.5"
+                          stroke="var(--color-data-synthetic)"
+                          strokeWidth="2"
+                          vectorEffect="non-scaling-stroke"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          style={{ filter: 'drop-shadow(0 0 6px rgba(0,255,136,0.6))' }}
                         />
                       )}
 
@@ -755,12 +713,12 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                         <path
                           d={forecastPath}
                           fill="none"
-                          stroke="var(--color-status-caution)"
-                          strokeWidth="2.5"
+                          stroke="var(--color-data-illustrative)"
+                          strokeWidth="2"
+                          vectorEffect="non-scaling-stroke"
                           strokeDasharray="5 3"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          style={{ filter: 'drop-shadow(0 0 6px rgba(250,204,21,0.6))' }}
                         />
                       )}
 
@@ -776,22 +734,10 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                               cx={p.x}
                               cy={p.y}
                               r={isHovered ? 6 : p.item.year % 5 === 0 ? 3.5 : 2}
-                              fill={isHovered ? 'var(--color-text-primary)' : p.item.isForecast ? 'var(--color-status-caution)' : 'var(--color-status-nominal)'}
-                              stroke={isHovered ? (p.item.isForecast ? 'var(--color-status-caution)' : 'var(--color-status-nominal)') : 'none'}
+                              fill={isHovered ? 'var(--color-surface-1)' : p.item.isForecast ? 'var(--color-data-illustrative)' : 'var(--color-data-synthetic)'}
+                              stroke={isHovered ? 'var(--color-text-primary)' : 'none'}
                               strokeWidth={2}
                             />
-                            {(p.item.year % 10 === 0 || p.item.year === 2040) && (
-                              <text
-                                x={p.x}
-                                y="148"
-                                fill="var(--color-text-tertiary)"
-                                fontSize="8"
-                                fontFamily="monospace"
-                                textAnchor="middle"
-                              >
-                                {p.item.year}
-                              </text>
-                            )}
                           </g>
                         )
                       })}
@@ -801,6 +747,23 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               </svg>
             </div>
 
+            {/* Year ticks in HTML. The SVG stretches to the panel
+                (preserveAspectRatio "none"), which squashed its 8-unit text to
+                a sliver a few pixels wide; these stay at the type scale. */}
+            <div className="relative h-4 font-mono text-xs tabular-nums text-text-tertiary">
+              {fullTimeline.map((item, index) =>
+                item.year % 10 === 0 || item.year === 2040 ? (
+                  <span
+                    key={item.year}
+                    className="absolute top-0 -translate-x-1/2"
+                    style={{ left: `${(index / Math.max(fullTimeline.length - 1, 1)) * 100}%` }}
+                  >
+                    {item.year}
+                  </span>
+                ) : null,
+              )}
+            </div>
+
             {/* Minimal Active Year Inspection Badge */}
             {activeHoverRecord && (
               <div
@@ -808,8 +771,8 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 data-provenance="synthetic"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-text-primary font-bold">Year {activeHoverRecord.year}:</span>
-                  <span className="text-accent font-bold">
+                  <span className="text-text-primary">Year {activeHoverRecord.year}:</span>
+                  <span className="text-text-primary">
                     {activeHoverRecord.productionTonnes.toLocaleString()} T ROM
                   </span>
                   <span className="text-text-secondary">({activeHoverRecord.grade})</span>
@@ -823,23 +786,23 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
 
           {/* Daily forecast trajectory — the real Track B artifact, not a shape */}
           <div
-            className="rounded-md border border-border-subtle bg-surface-2 p-5 rounded-md border border-border-default space-y-3"
+            className={`space-y-3 rounded-xl p-5 ${DATA_WELL}`}
             data-provenance={trajectoryState === 'ready' ? 'synthetic' : 'unavailable'}
             data-provenance-model={forecastMeta?.model}
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-accent" />
-                <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">
+                <BarChart3 className="h-4 w-4 text-text-tertiary" aria-hidden="true" />
+                <h3 className="text-sm text-text-primary">
                   Daily forecast · {selectedMine.name}
                 </h3>
               </div>
               <div className="flex items-center gap-3 text-xs font-mono">
-                <span className="flex items-center gap-1 text-accent font-bold">
-                  <span className="w-2.5 h-2.5 rounded bg-accent inline-block" /> forecast median
+                <span className="flex items-center gap-1 text-text-primary">
+                  <span aria-hidden="true" className="inline-block h-2.5 w-2.5 rounded-xs bg-data-model" /> forecast median
                 </span>
                 <span className="flex items-center gap-1 text-text-secondary">
-                  <span className="w-2.5 h-2.5 rounded bg-text-tertiary inline-block" /> seasonal-naive
+                  <span aria-hidden="true" className="inline-block h-2.5 w-2.5 rounded-xs bg-data-comparison" /> seasonal-naive
                 </span>
               </div>
             </div>
@@ -866,12 +829,12 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                         <div className="w-full flex items-end justify-center gap-0.5 h-24">
                           <div
                             style={{ height: `${medianH}%` }}
-                            className="w-1.5 bg-accent rounded-t-sm"
+                            className="w-1.5 bg-data-model rounded-t-sm"
                             title={`${d.date} · forecast median ${Math.round(d.median).toLocaleString()} t`}
                           />
                           <div
                             style={{ height: `${baseH}%` }}
-                            className="w-1.5 bg-text-tertiary rounded-t-sm"
+                            className="w-1.5 bg-data-comparison rounded-t-sm"
                             title={`${d.date} · seasonal-naive ${Math.round(d.baseline).toLocaleString()} t`}
                           />
                         </div>
@@ -884,7 +847,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                 </div>
               </>
             ) : trajectoryState === 'warming' ? (
-              <p className="py-8 text-center text-xs text-accent" role="status">
+              <p className="py-8 text-center text-xs text-text-secondary" role="status">
                 Computing this mine&rsquo;s forecast in the background — the chart appears when it
                 finishes.
               </p>
@@ -900,10 +863,10 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
 
           {/* Simulation summary — only after a simulation has produced one */}
           {simError ? (
-            <div className="p-4 rounded-md border border-status-critical/30 bg-status-critical/5 flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-status-critical shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 rounded-xl border border-status-critical/30 bg-status-critical/5 p-4" role="status">
+              <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-status-critical" aria-hidden="true" />
               <div>
-                <div className="text-xs font-mono text-status-critical font-bold uppercase tracking-wider">
+                <div className="text-sm text-status-critical">
                   Simulation unavailable
                 </div>
                 <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">
@@ -914,31 +877,31 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
             </div>
           ) : inputsChanged ? (
             <div
-              className="p-4 rounded-md border border-status-caution/40 bg-surface-2 flex items-start gap-3"
+              className="flex items-start gap-3 rounded-xl border border-status-caution/40 bg-status-caution/[0.06] p-4"
               data-mine-twin-state="inputs-changed"
               role="status"
             >
-              <Sparkles className="w-5 h-5 text-status-caution shrink-0 mt-0.5" />
-              <p className="measure text-xs text-text-secondary leading-relaxed">
-                <span className="font-medium text-text-primary">{runAgain}</span> The previous result
+              <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-status-caution" aria-hidden="true" />
+              <p className="measure text-sm leading-relaxed text-text-secondary">
+                <span className="text-text-primary">{runAgain}</span> The previous result
                 and its constraint check described different settings, so they are no longer shown.
               </p>
             </div>
           ) : differenceVal === null ? (
-            <div className="p-4 rounded-md border border-border-default bg-surface-2 flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-text-tertiary shrink-0 mt-0.5" />
-              <p className="measure text-xs text-text-secondary leading-relaxed">
+            <div className="flex items-start gap-3 rounded-xl border border-dashed border-border-strong bg-surface-1 p-4">
+              <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-text-tertiary" aria-hidden="true" />
+              <p className="measure text-sm leading-relaxed text-text-secondary">
                 Choose the options above, adjust the assumptions if you disagree with them, then run
                 the scenario. Nothing is shown here until you do.
               </p>
             </div>
           ) : (
           <div
-            className="rounded-md border border-dashed border-text-tertiary/60 bg-surface-1 p-4"
+            className="rounded-xl border border-dashed border-border-interactive bg-surface-1 p-5"
             data-provenance="assumption"
           >
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <span className="font-mono text-xs uppercase tracking-wider text-text-tertiary">
+              <span className="label">
                 Assumption-based estimate &mdash; not a forecast
               </span>
               <span className="font-mono text-xs text-text-tertiary tabular-nums">
@@ -968,7 +931,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               */
               <div className="mt-3 border-t border-border-default pt-3" data-testid="constraint-verdict">
                 <p
-                  className={`flex items-center gap-2 text-xl font-medium ${
+                  className={`flex items-center gap-2 text-xl ${
                     verdict.feasible ? 'text-status-nominal' : 'text-status-critical'
                   }`}
                 >
@@ -1006,54 +969,112 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
 
       {/* Saved Scenarios History & Comparison Drawer */}
       {history.length > 0 && (
-        <div className="pt-4 border-t border-border-default space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
-              <Database className="w-4 h-4 text-status-caution" />
+        <div className="space-y-3 border-t border-border-default pt-6">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {/* Still uppercase in CSS. tools/e2e-scenario.js's "no scenario
+                listed before a run" regex is case-sensitive and has only ever
+                read this heading uppercased; sentence case would turn it into
+                a live check that fails on the shared server-side history
+                (docs/bug-reports/2026-10-18-…, BUG-3), not on this design. */}
+            <h3 className="label flex items-center gap-2 uppercase">
+              <Database className="h-4 w-4" aria-hidden="true" />
               <span>Scenarios you have run ({history.length})</span>
             </h3>
-            <span className="font-mono text-xs uppercase tracking-wider text-text-tertiary">assumption-based &middot; this session only</span>
+            <span className="label uppercase">assumption-based &middot; this session only</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {history.slice(0, 6).map((s) => (
-              <div
+              // A button, not a clickable div: it was unreachable by keyboard.
+              <button
+                type="button"
                 key={s.id}
                 onClick={() => setComparedScenario(s)}
+                aria-pressed={comparedScenario?.id === s.id}
                 data-provenance="assumption"
-                className={`rounded-md border border-border-subtle bg-surface-2 p-3.5 rounded-md border transition-colors cursor-pointer hover:border-accent/50 ${
+                className={`rounded-tile border p-3.5 text-left transition-[background-color,border-color] duration-[180ms] ease-out hover:border-border-interactive ${
                   comparedScenario?.id === s.id
-                    ? 'border-accent bg-accent/10'
-                    : 'border-border-default bg-surface-2'
+                    ? 'border-accent bg-accent-muted'
+                    : 'border-border-default bg-surface-1'
                 }`}
               >
-                <div className="flex items-center justify-between text-xs font-mono font-bold text-text-primary mb-1">
+                <div className="mb-1 flex items-center justify-between font-mono text-xs text-text-primary">
                   <span>{s.mine_name}</span>
                   <span className="text-xs text-text-secondary">
                     {new Date(s.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
-                <div className="text-xs font-mono text-text-secondary space-x-1">
+                <div className="space-x-1 font-mono text-xs text-text-secondary">
                   {Object.entries(s.selections ?? {}).map(([k, v]) => (
                     <span key={k}>&bull; {String(v)}</span>
                   ))}
                 </div>
-                <div className="mt-2 flex items-center justify-between text-xs font-mono">
-                  <span className="text-text-secondary tabular-nums">
+                <div className="mt-2 flex items-center justify-between font-mono text-xs">
+                  <span className="tabular-nums text-text-secondary">
                     {s.baseline_production_t?.toLocaleString()} t &rarr;
                   </span>
-                  <span className="text-text-primary font-bold tabular-nums">
+                  <span className="tabular-nums text-text-primary">
                     {s.estimated_production_t?.toLocaleString()} t
                   </span>
-                  <span className="text-text-tertiary tabular-nums">
+                  <span className="tabular-nums text-text-tertiary">
                     ({s.difference_t >= 0 ? '+' : ''}{s.difference_t?.toLocaleString()} t)
                   </span>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+/**
+ * One exclusive choice in the what-if controls: a label with its current
+ * value, and the options as the design reference's segmented control.
+ */
+function OptionGroup<T extends string | number>({
+  label,
+  value,
+  current,
+  options,
+  onChange,
+}: {
+  label: string
+  value: string
+  current: T
+  options: readonly { value: T; label: string }[]
+  onChange: (v: T) => void
+}) {
+  return (
+    <div>
+      <div className="mb-2 flex items-baseline justify-between gap-2 text-sm">
+        <span aria-hidden="true" className="tracking-[0.044em] text-text-secondary">
+          {label}
+        </span>
+        <span className="font-mono text-xs text-text-primary">{value}</span>
+      </div>
+      <fieldset className="m-0 grid min-w-0 grid-cols-3 gap-0.5 rounded-md border-0 bg-surface-2 p-[3px]">
+        <legend className="sr-only">{label}</legend>
+        {options.map((o) => {
+          const on = o.value === current
+          return (
+            <button
+              key={String(o.value)}
+              type="button"
+              aria-pressed={on}
+              onClick={() => onChange(o.value)}
+              className={`min-h-9 rounded-sm px-1 py-1.5 text-center font-mono text-xs transition-[background-color,color] duration-[180ms] ease-out ${
+                on
+                  ? 'bg-surface-0 text-text-primary ring-1 ring-border-default'
+                  : 'text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              {o.label}
+            </button>
+          )
+        })}
+      </fieldset>
     </div>
   )
 }

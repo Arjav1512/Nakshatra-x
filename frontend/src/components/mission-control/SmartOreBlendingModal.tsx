@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { FILL } from '@/components/ui/primitives'
 import type { MineInfo } from './types'
 import { Sparkles, Scale, } from 'lucide-react'
 
@@ -72,36 +73,31 @@ export default function SmartOreBlendingModal({ mine }: Props) {
   }
 
   return (
-    <div className="rounded-md border border-border-default bg-surface-1 p-6 flex flex-col justify-between space-y-6 h-full">
+    <div className="flex h-full flex-col justify-between space-y-6 rounded-xl border border-border-default bg-surface-1 p-5 md:p-6">
       {/* Header */}
       <div>
-        <div className="flex items-center justify-between gap-4 mb-2">
-          <div className="flex items-center gap-2">
-            <span className="">
-              REAL CASE OPTIMIZER
-            </span>
-            <span className="text-xs font-mono text-text-tertiary">SciPy Simplex Linear Programming</span>
-          </div>
-          <span className="">
-            <Scale className="w-3 h-3 text-accent" />
-            Shortfall Mitigator
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <span className="label">Optimiser · SciPy simplex linear program</span>
+          <span className="inline-flex h-[26px] items-center gap-1.5 rounded-sm bg-surface-2 px-2.5 text-sm tracking-[0.044em] text-text-secondary">
+            <Scale className="h-3 w-3" aria-hidden="true" />
+            Shortfall mitigation
           </span>
         </div>
 
-        <h2 className="text-2xl font-bold text-text-primary tracking-tight">
-          Smart Ore Blending & Grade Optimizer
+        <h2 className="font-display text-2xl text-text-primary md:text-3xl">
+          Ore blending and grade optimiser
         </h2>
-        <p className="text-xs text-text-tertiary mt-1 leading-relaxed">
+        <p className="mt-2 text-sm leading-relaxed text-text-secondary">
           When primary mining face suffers shortfall, dynamically solves multi-stockpile blending ratios to guarantee customer contract grade specifications ({targetMnMin}% Mn) with lowest cost.
         </p>
       </div>
 
       {/* Target Controls (Light Liquid Glass Inset) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-md border border-border-subtle bg-surface-2 p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-tile bg-surface-2 p-4">
         <div>
-          <div className="flex justify-between text-xs font-mono mb-1.5">
-            <label htmlFor="blend-volume" className="text-text-tertiary">Required dispatch volume:</label>
-            <span className="font-bold text-text-primary" data-provenance="reference">
+          <div className="mb-2 flex justify-between gap-2 text-sm">
+            <label htmlFor="blend-volume" className="tracking-[0.044em] text-text-secondary">Required dispatch volume</label>
+            <span className="font-mono text-text-primary" data-provenance="reference">
               {targetTonnes.toLocaleString()} Tonnes
             </span>
           </div>
@@ -113,15 +109,15 @@ export default function SmartOreBlendingModal({ mine }: Props) {
             step="500"
             value={targetTonnes}
             onChange={(e) => setTargetTonnes(Number(e.target.value))}
-            className="w-full accent-accent cursor-pointer"
+            className="w-full cursor-pointer accent-accent"
           />
         </div>
 
         <div>
-          <div className="flex justify-between text-xs font-mono mb-1.5">
-            <label htmlFor="blend-grade" className="text-text-tertiary">Contract minimum Mn grade:</label>
+          <div className="mb-2 flex justify-between gap-2 text-sm">
+            <label htmlFor="blend-grade" className="tracking-[0.044em] text-text-secondary">Contract minimum Mn grade</label>
             {/* The slider's own value: the planner's chosen contract minimum. */}
-            <span className="font-bold text-status-caution" data-provenance="input">{targetMnMin}% Mn</span>
+            <span className="font-mono text-text-primary" data-provenance="input">{targetMnMin}% Mn</span>
           </div>
           <input
             id="blend-grade"
@@ -131,7 +127,7 @@ export default function SmartOreBlendingModal({ mine }: Props) {
             step="0.5"
             value={targetMnMin}
             onChange={(e) => setTargetMnMin(Number(e.target.value))}
-            className="w-full accent-status-caution cursor-pointer"
+            className="w-full cursor-pointer accent-accent"
           />
         </div>
       </div>
@@ -140,15 +136,17 @@ export default function SmartOreBlendingModal({ mine }: Props) {
       <button type="button"
         onClick={handleRunOptimizer}
         disabled={isSolving}
-        className="rounded-md border border-border-interactive bg-surface-2 w-full py-3 rounded-md text-xs font-mono font-bold text-accent flex items-center justify-center gap-2 cursor-pointer"
+        // The view's primary action: the reference's inverse button. The
+        // spinning icon is gone; the label says it is solving.
+        className="flex h-[50px] w-full items-center justify-center gap-2 rounded-md bg-inverse-bg text-base tracking-[0.044em] text-inverse-fg transition-[background-color,scale] duration-[180ms] ease-out hover:bg-inverse-hover active:scale-[.97] disabled:opacity-35"
       >
-        <Sparkles className={`w-4 h-4 ${isSolving ? 'animate-spin' : ''}`} />
-        <span>{isSolving ? 'Solving Simplex Mathematical Model...' : 'Calculate Optimal Stockpile Blending Plan'}</span>
+        <Sparkles className="h-4 w-4" aria-hidden="true" />
+        <span>{isSolving ? 'Solving the linear program…' : 'Calculate optimal stockpile blending plan'}</span>
       </button>
 
       {/* Solver Output Results */}
       {blendError ? (
-        <div className="rounded-md border border-status-critical/30 bg-status-critical/5 p-3 text-xs">
+        <div className="rounded-tile border border-status-critical/30 bg-status-critical/5 p-3 text-xs" role="status">
           <p className="font-semibold text-status-critical">Optimiser unavailable</p>
           <p className="mt-1 leading-snug text-text-secondary">
             {blendError} No blend plan is shown, because a plan this screen invented would be
@@ -156,7 +154,7 @@ export default function SmartOreBlendingModal({ mine }: Props) {
           </p>
         </div>
       ) : !blendResult ? (
-        <div className="rounded-md border border-border-default bg-surface-2 p-3 text-xs text-text-secondary">
+        <div className="rounded-tile border border-dashed border-border-strong p-3 text-xs text-text-secondary">
           Set the target tonnage and minimum grade above, then run the optimiser. Nothing is shown
           here until it returns a plan. The stockpiles it solves against are illustrative inputs,
           not a MOIL inventory — no stockpile register exists in this system.
@@ -166,29 +164,29 @@ export default function SmartOreBlendingModal({ mine }: Props) {
       {blendResult && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="rounded-md border border-border-subtle bg-surface-2 p-3.5" data-provenance="derived">
-              <span className="text-xs font-mono uppercase text-text-tertiary">Blended Mn Grade</span>
-              <div className="text-xl font-mono font-bold text-accent my-1">
+            <div className="rounded-tile bg-surface-2 p-3.5" data-provenance="derived">
+              <span className="label">Blended Mn grade</span>
+              <div className="my-1 font-mono text-xl text-text-primary">
                 {blendResult.blended_mn_grade_pct}% Mn
               </div>
               <span className="text-xs font-mono text-text-tertiary">Meets customer spec</span>
             </div>
 
-            <div className="rounded-md border border-border-subtle bg-surface-2 p-3.5" data-provenance="derived">
-              <span className="text-xs font-mono uppercase text-text-tertiary">Avg Blended Cost</span>
-              <div className="text-xl font-mono font-bold text-status-caution my-1">
+            <div className="rounded-tile bg-surface-2 p-3.5" data-provenance="derived">
+              <span className="label">Average blended cost</span>
+              <div className="my-1 font-mono text-xl text-text-primary">
                 {/* `|| 6240` stood here: a missing cost became a plausible one. */}
                 {blendResult.avg_cost_per_tonne_inr != null
                   ? `₹${blendResult.avg_cost_per_tonne_inr.toLocaleString()}`
                   : '—'}{' '}
                 <span className="text-xs font-normal text-text-tertiary">/ T</span>
               </div>
-              <span className="text-xs font-mono text-accent">&bull; Cost Minimized</span>
+              <span className="font-mono text-xs text-text-tertiary">&bull; cost minimised</span>
             </div>
 
-            <div className="rounded-md border border-border-subtle bg-surface-2 p-3.5" data-provenance="derived">
-              <span className="text-xs font-mono uppercase text-text-tertiary">Shortfall Recovered</span>
-              <div className="text-xl font-mono font-bold text-accent my-1">
+            <div className="rounded-tile bg-surface-2 p-3.5" data-provenance="derived">
+              <span className="label">Shortfall recovered</span>
+              <div className="my-1 font-mono text-xl text-text-primary">
                 +{blendResult.target_tonnes?.toLocaleString()} T
               </div>
               {/*
@@ -206,10 +204,10 @@ export default function SmartOreBlendingModal({ mine }: Props) {
           </div>
 
           {/* Allocation Breakdown Table */}
-          <div className="rounded-md border border-border-default bg-surface-2 p-4">
+          <div className="rounded-xl border border-border-default bg-surface-1 p-4">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <span className="label">Blend allocation</span>
-              <span className="inline-flex items-center gap-1 rounded-sm border border-status-caution/40 bg-status-caution/10 px-1.5 py-0.5 font-mono text-xs text-status-caution">
+              <span className={`inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 font-mono text-xs ${FILL.yellow}`}>
                 SYNTHETIC INPUTS
               </span>
             </div>
@@ -222,7 +220,7 @@ export default function SmartOreBlendingModal({ mine }: Props) {
               <div key={idx} data-provenance="derived" className="flex items-center justify-between text-xs font-mono py-1.5 border-b border-border-subtle last:border-0">
                 <span className="text-text-tertiary">{item.stockpile_name}</span>
                 <div className="flex items-center gap-3">
-                  <span className="text-accent font-bold">{item.tonnes_allocated} T ({item.allocation_pct}%)</span>
+                  <span className="text-text-primary">{item.tonnes_allocated} T ({item.allocation_pct}%)</span>
                   <span className="text-text-tertiary">₹{(item.cost_inr / 100000).toFixed(1)}L</span>
                 </div>
               </div>

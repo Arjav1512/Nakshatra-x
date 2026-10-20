@@ -372,53 +372,63 @@ export function LoginForm() {
 
   const codeFilled = digits.join('').length === 6
 
+  // The design reference's form grammar: a flat card, labelled 46px fields,
+  // the inverse button as the one primary action, quiet secondary buttons.
+  // Every handler and state is unchanged.
+  const BTN =
+    'flex h-[42px] w-full items-center justify-center gap-2.5 rounded-md px-3.5 text-[14px] tracking-[0.044em] ' +
+    'transition-[background-color,color,scale] duration-[180ms] ease-out active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-35'
+  const DIVIDER = (label: string) => (
+    <div className="relative flex items-center justify-center py-1">
+      <div className="absolute inset-0 flex items-center">
+        <div className="w-full border-t border-border-default" />
+      </div>
+      <span className="label relative bg-surface-1 px-3">{label}</span>
+    </div>
+  )
+
   return (
-    <GlassCard className="w-full max-w-[500px] p-6 sm:p-8 text-center relative border border-border-default">
-      {/* Brand Header */}
-      <div className="mb-6 flex flex-col items-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-md bg-accent/10 border border-accent/40 text-accent mb-3">
-          <ShieldCheck size={26} />
-        </div>
-        <div className="font-mono text-xs font-bold uppercase tracking-[0.25em] text-accent">
-          NAKSHATRA-X MISSION SECURITY
-        </div>
-        <h1 className="mt-1.5 text-2xl sm:text-3xl font-semibold tracking-tight text-text-primary drop-">
-          Orbital Console Login
-        </h1>
-        <p className="mt-1 text-xs text-text-secondary max-w-xs">
+    <GlassCard className="w-full max-w-[480px] p-6 text-left sm:p-8">
+      {/* Header */}
+      <div className="mb-7">
+        <p className="label flex items-center gap-2">
+          <ShieldCheck size={14} aria-hidden="true" />
+          Nakshatra&#8209;X
+        </p>
+        <h1 className="mt-3 font-display text-3xl text-text-primary sm:text-4xl">Sign in</h1>
+        <p className="mt-2 text-sm text-text-secondary">
           Enter your email to receive a 6-digit code in your inbox, or sign in via Google / GitHub.
         </p>
       </div>
 
       {/* Dynamic Alerts */}
       {error && (
-        <div className="mb-4 p-3 text-xs font-mono rounded-md bg-status-critical/15 border border-status-critical/50 text-status-critical flex items-start gap-2 text-left animate-in fade-in">
-          <AlertCircle size={16} className="shrink-0 mt-0.5" />
+        <div role="alert" className="mb-4 flex items-start gap-2 rounded-tile border border-status-critical/40 bg-status-critical/[0.06] p-3 text-left text-sm text-status-critical">
+          <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
           <span>{error}</span>
         </div>
       )}
 
       {successNotice && (
-        <div className="mb-4 p-3 text-xs font-mono rounded-md bg-accent/15 border border-accent/50 text-accent flex items-start gap-2 text-left animate-in fade-in">
-          <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
+        <div role="status" className="mb-4 flex items-start gap-2 rounded-tile border border-status-nominal/40 bg-status-nominal/[0.06] p-3 text-left text-sm text-status-nominal">
+          <CheckCircle2 size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
           <span>{successNotice}</span>
         </div>
       )}
 
       <div className="space-y-5">
-        {/* ================= OAUTH SIGN-IN BUTTONS (GOOGLE & GITHUB) ================= */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* Google Login */}
+        {/* OAuth sign-in (Google, GitHub) */}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <button
             type="button"
             onClick={handleGoogleLogin}
             disabled={loading !== null}
-            className="w-full flex items-center justify-center gap-2.5 py-3 px-3.5 rounded-md bg-white hover:bg-text-primary text-slate-900 font-sans font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50 group"
+            className={`${BTN} bg-surface-0 text-text-primary ring-1 ring-inset ring-border-interactive hover:bg-surface-2`}
           >
             {loading === 'google' ? (
-              <Loader2 size={15} className="animate-spin text-slate-900" />
+              <Loader2 size={15} className="animate-spin" aria-hidden="true" />
             ) : (
-              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+              <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                 <path
                   fill="#4285F4"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -447,12 +457,12 @@ export function LoginForm() {
             type="button"
             onClick={handleGithubLogin}
             disabled={loading !== null}
-            className="w-full flex items-center justify-center gap-2.5 py-3 px-3.5 rounded-md bg-surface-3 hover:bg-[#1B1F23] border border-border-interactive text-text-primary font-sans font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50 group"
+            className={`${BTN} bg-inverse-bg text-inverse-fg hover:bg-inverse-hover`}
           >
             {loading === 'github' ? (
-              <Loader2 size={15} className="animate-spin text-text-primary" />
+              <Loader2 size={15} className="animate-spin" aria-hidden="true" />
             ) : (
-              <svg className="w-4 h-4 shrink-0 fill-current text-text-primary" viewBox="0 0 24 24">
+              <svg className="h-4 w-4 shrink-0 fill-current" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
               </svg>
             )}
@@ -462,97 +472,84 @@ export function LoginForm() {
           </button>
         </div>
 
-        {/* Divider */}
-        <div className="relative py-1 flex items-center justify-center">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border-default" />
-          </div>
-          <span className="relative bg-surface-1 px-3 font-mono text-xs text-text-tertiary uppercase tracking-widest">
-            or sign in with email OTP
-          </span>
-        </div>
+        {DIVIDER('or sign in with an e-mail code')}
 
-        {/* ================= SECTION 1: ENTER EMAIL ================= */}
-        <div className="p-4 rounded-md bg-black/40 border border-border-default text-left space-y-3">
+        {/* Step 1: e-mail */}
+        <div className="space-y-3 rounded-xl bg-surface-2 p-4 text-left">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-accent flex items-center gap-1.5">
-              <Mail size={13} /> 1. Enter Your Email
-            </span>
+            <label htmlFor="login-email" className="flex items-center gap-1.5 text-sm tracking-[0.044em] text-text-primary">
+              <Mail size={14} aria-hidden="true" /> 1. Your e-mail
+            </label>
             {codeSent && (
-              <span className="text-xs font-mono text-accent flex items-center gap-1">
-                <CheckCircle2 size={11} /> Code Sent
+              <span className="flex items-center gap-1 text-xs text-status-nominal">
+                <CheckCircle2 size={12} aria-hidden="true" /> Code sent
               </span>
             )}
           </div>
 
           <form onSubmit={handleSendOtp} className="space-y-2.5">
-            <div className="relative">
-              <input
-                type="email"
-                placeholder="e.g. dattarupraj@gmail.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full pl-9 pr-3 py-2.5 text-xs font-mono bg-black/70 border border-border-default rounded-md text-text-primary outline-none focus:border-accent transition-colors"
-              />
-              <Mail size={14} className="absolute left-3 top-3 text-text-tertiary" />
-            </div>
+            <input
+              id="login-email"
+              type="email"
+              placeholder="name@organisation.in"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="h-[46px] w-full rounded-md border border-border-interactive bg-surface-0 px-3.5 text-base tracking-[0.02em] text-text-primary transition-[border-color] duration-[180ms] ease-out focus:border-text-primary"
+            />
 
-            <div className="flex items-center gap-2">
-              <button
-                type="submit"
-                disabled={loading === 'send_otp' || resendCooldown > 0}
-                className="flex-1 py-2.5 px-3 rounded-md bg-accent/15 hover:bg-accent/25 border border-accent/50 hover:border-accent text-accent font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading === 'send_otp' ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <Send size={13} />
-                )}
-                <span>
-                  {loading === 'send_otp'
-                    ? 'Sending Code...'
-                    : codeSent
-                    ? resendCooldown > 0
-                      ? `Resend in ${resendCooldown}s`
-                      : 'Resend Code to Inbox'
-                    : 'Send Code to My Email'}
-                </span>
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={loading === 'send_otp' || resendCooldown > 0}
+              className={`${BTN} bg-surface-0 text-text-primary hover:bg-surface-3`}
+            >
+              {loading === 'send_otp' ? (
+                <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Send size={14} aria-hidden="true" />
+              )}
+              <span>
+                {loading === 'send_otp'
+                  ? 'Sending Code...'
+                  : codeSent
+                  ? resendCooldown > 0
+                    ? `Resend in ${resendCooldown}s`
+                    : 'Resend Code to Inbox'
+                  : 'Send Code to My Email'}
+              </span>
+            </button>
           </form>
         </div>
 
-        {/* ================= SECTION 2: SUBMIT CODE SECTION ================= */}
+        {/* Step 2: the code */}
         <div
-          className={`p-4 sm:p-5 rounded-md text-left space-y-3.5 transition-colors ${
-            codeSent
-              ? 'bg-accent/5 border-2 border-accent/60'
-              : 'bg-black/40 border border-border-default'
+          className={`space-y-3.5 rounded-xl p-4 text-left transition-[background-color,border-color] duration-[180ms] ease-out sm:p-5 ${
+            codeSent ? 'border border-border-interactive bg-surface-0' : 'bg-surface-2'
           }`}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5">
-              <KeyRound size={14} className={codeSent ? 'text-accent' : 'text-text-secondary'} />
-              <span className={`text-xs font-mono font-bold uppercase tracking-wider ${codeSent ? 'text-accent' : 'text-text-secondary'}`}>
-                2. Submit 6-Digit Code
+              <KeyRound size={14} className="text-text-secondary" aria-hidden="true" />
+              <span id="otp-label" className="text-sm tracking-[0.044em] text-text-primary">
+                2. 6-digit code
               </span>
             </div>
-            <span className="text-xs font-mono text-text-secondary">
+            <span className="text-xs text-text-tertiary">
               {codeSent ? 'Auto-verifies on 6th digit' : 'Enter code from inbox'}
             </span>
           </div>
 
-          <p className="text-xs font-mono text-text-secondary leading-snug">
+          <p className="text-sm text-text-secondary">
             {codeSent ? (
-              <>Check <strong className="text-text-primary">{email}</strong> inbox for the 6-digit code and enter below:</>
+              <>Check <strong className="font-normal text-text-primary">{email}</strong> inbox for the 6-digit code and enter below:</>
             ) : (
               <>Enter your email above and click Send Code, or input your 6-digit verification code below:</>
             )}
           </p>
 
-          {/* 6 Segmented Digit Boxes */}
-          <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+          {/* Six digit boxes */}
+          <fieldset className="m-0 flex min-w-0 items-center justify-between gap-1.5 border-0 p-0 sm:gap-2">
+            <legend className="sr-only">6-digit code</legend>
             {digits.map((digit, idx) => (
               <input
                 key={idx}
@@ -563,92 +560,72 @@ export function LoginForm() {
                 maxLength={6}
                 value={digit}
                 placeholder="-"
+                aria-label={`Digit ${idx + 1} of 6`}
                 onChange={(e) => handleDigitChange(idx, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(idx, e)}
                 onPaste={handlePaste}
-                className={`h-12 sm:h-14 w-full text-center font-mono font-semibold text-xl sm:text-2xl rounded-md bg-black/90 border outline-none transition-colors ${
-                  digit
-                    ? 'border-accent text-accent'
-                    : 'border-border-interactive text-text-primary focus:border-accent focus: placeholder-text-tertiary'
+                className={`h-12 w-full rounded-md border bg-surface-0 text-center font-mono text-xl text-text-primary transition-[border-color] duration-[180ms] ease-out focus:border-text-primary sm:h-14 sm:text-2xl ${
+                  digit ? 'border-text-primary' : 'border-border-interactive'
                 }`}
               />
             ))}
-          </div>
+          </fieldset>
 
-          {/* Dedicated Submit Code & Login Button */}
           <button
             type="button"
             onClick={() => executeVerification()}
             disabled={loading === 'verify_otp' || !codeFilled}
-            className="w-full py-3.5 rounded-md bg-accent/20 hover:bg-accent/30 border border-accent text-accent hover:text-text-primary font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            className={`${BTN} h-[50px] bg-inverse-bg text-base text-inverse-fg hover:bg-inverse-hover`}
           >
             {loading === 'verify_otp' ? (
-              <Loader2 size={16} className="animate-spin text-accent" />
+              <Loader2 size={16} className="animate-spin" aria-hidden="true" />
             ) : (
-              <CheckCircle2 size={16} className="text-accent" />
+              <CheckCircle2 size={16} aria-hidden="true" />
             )}
             <span>
               {loading === 'verify_otp' ? 'Verifying Code...' : 'Submit Code & Log In'}
             </span>
           </button>
-
         </div>
 
-        {/* Divider */}
-        <div className="relative py-1 flex items-center justify-center">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border-default" />
-          </div>
-          <span className="relative bg-surface-1 px-3 font-mono text-xs text-text-tertiary uppercase tracking-widest">
-            or try instant demo
-          </span>
-        </div>
+        {DIVIDER('or try the demo')}
 
         {/* Guest Mode Trigger */}
         <button
           type="button"
           onClick={handleGuestLogin}
           disabled={loading !== null}
-          className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-md bg-surface-2 hover:bg-surface-3 border border-border-default hover:border-accent/50 text-text-primary hover:text-text-primary transition-colors cursor-pointer shadow-sm group"
+          className={`${BTN} bg-surface-2 text-text-primary hover:bg-surface-3`}
         >
           {loading === 'guest' ? (
-            <Loader2 size={16} className="animate-spin text-accent" />
+            <Loader2 size={16} className="animate-spin" aria-hidden="true" />
           ) : (
-            <Compass size={16} className="text-accent group- transition-transform" />
+            <Compass size={16} aria-hidden="true" />
           )}
-          <span className="font-mono text-xs font-bold uppercase tracking-wider">
+          <span>
             {loading === 'guest' ? 'Launching Guest Console...' : 'Try Website as Guest'}
           </span>
         </button>
-        <p className="text-xs font-mono text-text-tertiary -mt-2">
-          Explore complete platform &bull; No email or code needed
+        <p className="-mt-2 text-center text-xs text-text-tertiary">
+          Explore the complete platform &bull; no e-mail or code needed
         </p>
       </div>
 
-      {/* Footer Security Badges */}
-      <div className="mt-6 pt-4 border-t border-border-default flex items-center justify-between text-xs font-mono text-text-secondary">
-        <span className="flex items-center gap-1 text-accent">
-          <ShieldCheck size={12} /> Real Inbox Verification
-        </span>
-        <span className="text-accent">Resend Secured</span>
-      </div>
-
-      <div className="mt-3 flex items-center justify-between text-xs font-mono">
+      <div className="mt-7 flex items-center justify-between border-t border-border-default pt-4 text-sm">
         <Link
           href="/"
-          className="text-text-secondary hover:text-text-primary transition-colors"
+          className="tracking-[0.044em] text-text-secondary transition-[color] duration-[180ms] ease-out hover:text-text-primary"
         >
-          &larr; Return to 3D Space Platform
+          &larr; Back to home
         </Link>
         <Link
           href="/admin/login"
-          className="text-text-tertiary hover:text-accent transition-colors flex items-center gap-1 text-xs"
+          className="flex items-center gap-1.5 tracking-[0.044em] text-text-secondary transition-[color] duration-[180ms] ease-out hover:text-text-primary"
         >
-          <Lock size={10} />
-          <span>Admin Portal</span>
+          <Lock size={12} aria-hidden="true" />
+          <span>Admin portal</span>
         </Link>
       </div>
-
     </GlassCard>
   )
 }

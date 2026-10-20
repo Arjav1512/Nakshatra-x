@@ -10,6 +10,8 @@ import {
   type RecommendationsResponse, type WarmingInfo,
   fetchBacktest, fetchForecast, fetchRecommendations,
 } from '@/lib/console-api'
+import { DATA_WELL } from '@/components/ui/primitives'
+import { AXIS_TICK, GRID_STROKE, LINE_CURSOR, TOOLTIP_LABEL_STYLE, TOOLTIP_STYLE } from '@/lib/chart-theme'
 import { Metric } from './Evidence'
 import { IntervalCalibration } from './IntervalCalibration'
 import { ProbabilityWithdrawn } from './ProbabilityWithdrawn'
@@ -323,7 +325,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             type="button"
             onClick={() => setMobileSection(sec.id)}
             aria-current={mobileSection === sec.id ? 'true' : undefined}
-            className={`shrink-0 rounded-md px-3 py-1.5 text-xs transition-colors duration-[120ms] ease-out ${
+            className={`shrink-0 rounded-md px-3 py-1.5 text-xs transition-colors duration-[180ms] ease-out ${
               mobileSection === sec.id
                 ? 'bg-accent-muted text-text-primary'
                 : 'text-text-secondary hover:bg-surface-2'
@@ -444,7 +446,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             own they cost a border, padding and a gap — part of what put the
             chart's top at y = 901 on a 1280x800 screen.
           */}
-          <div className={`rounded-md border border-border-default bg-surface-2 p-3 md:p-4 ${sectionCls('drivers')}`}>
+          <div className={`rounded-xl border border-border-default bg-surface-1 p-3 md:p-4 ${sectionCls('drivers')}`}>
             {/* --- grade-aware breakdown: PRD B-5 is per-grade at P0 --- */}
             <p className="label">By grade</p>
             <p className="mt-1 text-sm text-text-secondary">
@@ -465,7 +467,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                     aria-pressed={on}
                     data-provenance="derived"
                     data-provenance-model={forecast.model_version}
-                    className={`rounded-md border px-3 py-2 text-left text-sm transition-colors duration-[120ms] ease-out ${
+                    className={`rounded-md border px-3 py-2 text-left text-sm transition-colors duration-[180ms] ease-out ${
                       on ? 'border-accent bg-accent-muted' : 'border-border-interactive bg-surface-2 hover:bg-surface-3'
                     }`}
                   >
@@ -486,7 +488,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
             // over synthetic data; the envelope is on the block so the tooltip,
             // which Recharts draws inside it, is covered too.
             <div
-              className="mt-4 border-t border-border-default pt-3"
+              className={`mt-4 rounded-tile p-3 md:p-4 ${DATA_WELL}`}
               data-provenance="synthetic"
               data-provenance-model={forecast.model_version}
             >
@@ -502,15 +504,15 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 */}
                 <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-secondary" aria-label="Chart key">
                   <li className="flex items-center gap-1.5">
-                    <span aria-hidden="true" className="inline-block h-3 w-4 rounded-sm border border-accent/70 bg-accent/30" />
+                    <span aria-hidden="true" className="inline-block h-3 w-4 rounded-sm border border-data-model/70 bg-data-model/25" />
                     {Math.round(forecast.interval.nominal_coverage * 100)}% prediction interval
                   </li>
                   <li className="flex items-center gap-1.5">
-                    <span aria-hidden="true" className="inline-block h-0.5 w-4 rounded-full bg-accent" />
+                    <span aria-hidden="true" className="inline-block h-0.5 w-4 rounded-full bg-data-model" />
                     median
                   </li>
                   <li className="flex items-center gap-1.5">
-                    <span aria-hidden="true" className="inline-block w-4 border-t-2 border-dashed border-text-secondary" />
+                    <span aria-hidden="true" className="inline-block w-4 border-t-2 border-dashed border-data-comparison" />
                     seasonal-naive baseline
                   </li>
                 </ul>
@@ -519,16 +521,14 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={selected.trajectory} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
                     {/* Recharts theme — docs/design/DESIGN_SYSTEM.md section 8.
-                        Colours reference the design tokens through var(); no hex
-                        literal appears outside tokens.css. Entrance animation is
-                        off: an animating chart is a count-up by another name. */}
-                    <CartesianGrid
-                      vertical={false}
-                      stroke="var(--color-border-default)"
-                    />
+                        Colours are the data roles in tokens.css, through var();
+                        the well is dark, so the forecaster's output is mint and
+                        the baseline a neutral dash. Entrance animation is off:
+                        an animating chart is a count-up by another name. */}
+                    <CartesianGrid vertical={false} stroke={GRID_STROKE} />
                     <XAxis
                       dataKey="horizon_days"
-                      tick={{ fontSize: 13, fill: 'var(--color-text-secondary)' }}
+                      tick={{ ...AXIS_TICK, fontSize: 13 }}
                       tickFormatter={(h) => dayOf(forecast.window.start, h)}
                       tickLine={false}
                       axisLine={false}
@@ -545,7 +545,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                       drawn.
                     */}
                     <YAxis
-                      tick={{ fontSize: 13, fill: 'var(--color-text-secondary)' }}
+                      tick={{ ...AXIS_TICK, fontSize: 13 }}
                       tickLine={false}
                       axisLine={false}
                       width={44}
@@ -556,14 +556,9 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                       allowDecimals={false}
                     />
                     <Tooltip
-                      contentStyle={{
-                        background: 'var(--color-surface-3)',
-                        border: '1px solid var(--color-border-default)',
-                        borderRadius: 4,
-                        fontSize: 13,
-                        fontVariantNumeric: 'tabular-nums',
-                        color: 'var(--color-text-primary)',
-                      }}
+                      contentStyle={TOOLTIP_STYLE}
+                      labelStyle={TOOLTIP_LABEL_STYLE}
+                      cursor={LINE_CURSOR}
                       labelFormatter={(v) => dayOf(forecast.window.start, Number(v))}
                     />
                     {/*
@@ -579,28 +574,28 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
                     <Area
                       type="monotone"
                       dataKey={(d: any) => [d.p10_tonnes, d.p90_tonnes]}
-                      stroke="none" fill="var(--color-accent)" fillOpacity={0.28}
+                      stroke="none" fill="var(--color-data-model)" fillOpacity={0.16}
                       name="80% interval" isAnimationActive={false} className="forecast-band"
                       activeDot={false}
                     />
                     <Line
-                      type="monotone" dataKey="p90_tonnes" stroke="var(--color-accent)"
-                      strokeOpacity={0.7} strokeWidth={1} dot={false} activeDot={false}
+                      type="monotone" dataKey="p90_tonnes" stroke="var(--color-data-model)"
+                      strokeOpacity={0.6} strokeWidth={1} dot={false} activeDot={false}
                       name="p90" isAnimationActive={false} className="forecast-p90"
                     />
                     <Line
-                      type="monotone" dataKey="p10_tonnes" stroke="var(--color-accent)"
-                      strokeOpacity={0.7} strokeWidth={1} dot={false} activeDot={false}
+                      type="monotone" dataKey="p10_tonnes" stroke="var(--color-data-model)"
+                      strokeOpacity={0.6} strokeWidth={1} dot={false} activeDot={false}
                       name="p10" isAnimationActive={false} className="forecast-p10"
                     />
                     <Line
-                      type="monotone" dataKey="median_tonnes" stroke="var(--color-accent)"
+                      type="monotone" dataKey="median_tonnes" stroke="var(--color-data-model)"
                       strokeWidth={2.5} dot={false} name="median" isAnimationActive={false}
                       className="forecast-median"
                     />
                     <Line
                       type="monotone" dataKey="baseline_tonnes"
-                      stroke="var(--color-text-secondary)"
+                      stroke="var(--color-data-comparison)"
                       strokeWidth={1.5} strokeDasharray="5 4" dot={false}
                       name="seasonal-naive" isAnimationActive={false}
                     />
@@ -655,7 +650,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
       </div>
 
       {/* --- N-8: backtest visible in the UI --- */}
-      <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('evidence')}`}>
+      <div className={`rounded-xl border border-border-default bg-surface-1 p-3 ${sectionCls('evidence')}`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="label">Backtest — held-out accuracy (PRD B-10, N-8)</p>
           {!backtest && !btLoading && !noBacktest ? (
@@ -681,7 +676,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
            * there is no control here that could start a computation.
            */
           <div
-            className="mt-2 rounded-md border border-border-default bg-surface-1 p-3"
+            className="mt-2 rounded-xl border border-border-default bg-surface-1 p-3"
             data-testid="backtest-pilot"
             data-provenance="derived"
           >
@@ -795,7 +790,7 @@ export function TrackBPanel({ mineId, mineName }: { mineId: number; mineName: st
       </div>
 
       {/* --- D-4 + C-5: recommendations, and what the engine rejected --- */}
-      <div className={`rounded-md border border-border-default bg-surface-2 p-3 ${sectionCls('actions')}`}>
+      <div className={`rounded-xl border border-border-default bg-surface-1 p-3 ${sectionCls('actions')}`}>
         <p className="label mb-2">Corrective actions (PRD C-1..C-5)</p>
         {rWarm ? (
           <WarmingState what="Recommendations" warming={rWarm} attempt={attempt} />

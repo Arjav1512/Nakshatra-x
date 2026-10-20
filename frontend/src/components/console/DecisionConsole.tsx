@@ -274,7 +274,7 @@ export function DecisionConsole() {
 
       {/* Breadcrumb: portfolio -> mine -> track (D-6). Not sticky — the app bar
           already is, and two stacked sticky rows eat the viewport on a laptop. */}
-      <div className="no-print flex flex-wrap items-center gap-x-2 gap-y-2 border-b border-border-subtle pb-3 text-sm">
+      <div className="no-print flex flex-wrap items-center gap-x-2 gap-y-2 border-b border-border-default pb-3 text-[14px] tracking-[0.044em]">
         {/*
           ONE NAVIGATION MODEL (B-1 confusion 5).
 
@@ -299,7 +299,7 @@ export function DecisionConsole() {
               <button
                 type="button"
                 onClick={() => { setSelected(null); setPosition(null, track) }}
-                className="rounded-md px-1.5 py-0.5 text-text-secondary transition-colors duration-[120ms] ease-out hover:bg-surface-2 hover:text-text-primary"
+                className="rounded-sm px-1.5 py-0.5 text-text-secondary transition-[background-color,color] duration-[180ms] ease-out hover:bg-surface-2 hover:text-text-primary"
               >
                 Portfolio
               </button>
@@ -315,24 +315,25 @@ export function DecisionConsole() {
               {/* No role="group": the buttons' aria-current already says which
                   track is the location, and the semantic element Biome would
                   substitute — a form <fieldset> — is wrong inside a breadcrumb. */}
-              <span className="flex items-center gap-1">
-                {(['B', 'A'] as const).map((t, i) => (
-                  <span key={t} className="flex items-center gap-1">
-                    {i > 0 ? <span aria-hidden="true" className="text-text-tertiary">·</span> : null}
-                    <button
-                      type="button"
-                      data-track-link={t}
-                      onClick={() => setTrack(t)}
-                      aria-current={track === t ? 'page' : undefined}
-                      className={`rounded-md px-1.5 py-0.5 transition-colors duration-[120ms] ease-out ${
-                        track === t
-                          ? 'font-medium text-text-primary underline decoration-accent decoration-2 underline-offset-4'
-                          : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'
-                      }`}
-                    >
-                      {t === 'B' ? 'production risk' : 'prospectivity'}
-                    </button>
-                  </span>
+              {/* Drawn as the reference's segmented control: the two tracks
+                  are one exclusive choice, and the current one is the paper
+                  chip on the grey track. */}
+              <span className="inline-flex items-center gap-0.5 rounded-md bg-surface-2 p-[3px]">
+                {(['B', 'A'] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    data-track-link={t}
+                    onClick={() => setTrack(t)}
+                    aria-current={track === t ? 'page' : undefined}
+                    className={`h-7 rounded-sm px-3 transition-[background-color,color] duration-[180ms] ease-out ${
+                      track === t
+                        ? 'bg-surface-0 text-text-primary ring-1 ring-border-default'
+                        : 'text-text-secondary hover:text-text-primary'
+                    }`}
+                  >
+                    {t === 'B' ? 'production risk' : 'prospectivity'}
+                  </button>
                 ))}
               </span>
             </li>
@@ -361,7 +362,7 @@ export function DecisionConsole() {
         <div className="print-plain">
           {selected ? (
             <>
-              <h1 className="font-display text-3xl font-medium tracking-tight md:text-4xl">
+              <h1 className="font-display text-3xl md:text-4xl lg:text-5xl">
                 {selected.name}
               </h1>
               <p className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-text-secondary">
@@ -381,7 +382,7 @@ export function DecisionConsole() {
               where the demo opens on it.
             */
             <>
-              <h1 className="font-display text-3xl font-medium tracking-tight md:text-4xl">
+              <h1 className="font-display text-3xl md:text-4xl lg:text-5xl">
                 Where to prospect
               </h1>
               <p className="measure mt-2 text-base text-text-secondary">
@@ -391,14 +392,14 @@ export function DecisionConsole() {
             </>
           ) : (
             <>
-              <h1 className="font-display text-3xl font-medium tracking-tight md:text-4xl">
+              <h1 className="font-display text-3xl md:text-4xl lg:text-5xl">
                 Decision support for MOIL
               </h1>
               <p className="measure mt-3 text-base text-text-secondary">
                 Two tracks, as the problem statement implies but does not say:{' '}
-                <strong className="font-medium text-text-primary">Track B</strong> predicts
+                <strong className="font-normal text-text-primary">Track B</strong> predicts
                 production shortfall over days to months,{' '}
-                <strong className="font-medium text-text-primary">Track A</strong> ranks where to
+                <strong className="font-normal text-text-primary">Track A</strong> ranks where to
                 prospect over years. Satellite data is used for what it can measure — weather and
                 surface geology. Nothing here claims to see ore underground.
               </p>
@@ -422,12 +423,12 @@ export function DecisionConsole() {
             (POLISH_AUDIT.md issue 8).
           */
           <div
-            className="sticky top-14 z-20 -mx-4 flex h-12 items-center justify-between gap-3 border-y border-border-default bg-surface-1 px-4 md:hidden"
+            className="sticky top-14 z-20 -mx-4 flex h-12 items-center justify-between gap-3 border-y border-border-default bg-surface-0/95 px-4 backdrop-blur-[18px] md:hidden"
             data-testid="mine-sticky-summary"
             data-provenance="derived"
             data-provenance-model={PORTFOLIO_ENV.model_version ?? undefined}
           >
-            <span className="min-w-0 truncate text-sm font-medium text-text-primary">
+            <span className="min-w-0 truncate text-sm text-text-primary">
               {selected.name}
             </span>
             <span className="flex shrink-0 items-baseline gap-2">
@@ -456,14 +457,14 @@ export function DecisionConsole() {
         {selected && telemetryState === 'loading' ? (
           <div
             role="status"
-            className="flex h-[97px] items-center rounded-md border border-border-default bg-surface-1 px-3 py-2 text-xs text-text-tertiary sm:h-[77px] lg:h-[58px]"
+            className="flex h-[97px] items-center rounded-tile border border-border-default bg-surface-1 px-3 py-2 text-xs text-text-tertiary sm:h-[77px] lg:h-[58px]"
           >
             Checking which of {selected.name}&rsquo;s sources are live…
           </div>
         ) : selected && telemetryState === 'failed' ? (
           <div
             role="status"
-            className="min-h-[97px] rounded-md border border-status-caution/40 bg-status-caution/10 px-3 py-2 text-xs leading-relaxed text-text-primary sm:min-h-[77px] lg:min-h-[58px]"
+            className="min-h-[97px] rounded-tile border border-status-caution/40 bg-status-caution/10 px-3 py-2 text-xs leading-relaxed text-text-primary sm:min-h-[77px] lg:min-h-[58px]"
           >
             Could not check which sources are live
             {telemetryError ? <span className="text-text-secondary"> ({telemetryError})</span> : null}. No
@@ -511,7 +512,7 @@ export function DecisionConsole() {
               */
               <>
                 <div className="mt-4 min-h-[10.625rem] md:min-h-[9.125rem]">
-                  <div className="h-full rounded-md border border-border-subtle bg-surface-1/50 p-5">
+                  <div className="h-full rounded-xl border border-border-default bg-surface-1 p-5">
                     <span className="label">Largest expected shortfall</span>
                     <p className="mt-2 text-sm text-text-secondary">Loading the mine register&hellip;</p>
                   </div>
@@ -563,13 +564,18 @@ export function DecisionConsole() {
                 <button
                   type="button"
                   onClick={() => openMine(worst)}
-                  className="block h-full w-full rounded-md border border-accent/40 bg-accent-muted/30 p-5 text-left transition-colors duration-[120ms] ease-out hover:bg-accent-muted/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                  className="block h-full w-full rounded-xl border border-border-strong bg-surface-1 p-5 text-left transition-[background-color] duration-[180ms] ease-out hover:bg-surface-2"
                   data-provenance="derived"
                   data-provenance-model={PORTFOLIO_ENV.model_version ?? undefined}
                 >
-                  <span className="label text-accent">Largest expected shortfall</span>
+                  {/* The view's one mint accent (reference rule 3): the
+                      answer the portfolio exists to give. A 16px-high tag, so
+                      the band keeps its reserved height. */}
+                  <span className="label inline-flex h-4 items-center rounded-xs bg-highlight px-1.5 text-highlight-fg">
+                    Largest expected shortfall
+                  </span>
                   <span className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                    <span className="font-display text-3xl font-medium tracking-tight text-text-primary">
+                    <span className="font-display text-3xl text-text-primary">
                       {worst.name}
                     </span>
                     {/* The answer at the name's size: it was 24 px beside a
@@ -592,13 +598,13 @@ export function DecisionConsole() {
                       summed over grades, from the stored forecast
                     </span>
                   </span>
-                  <span className="mt-2 block text-sm text-accent">
-                    Open {worst.name} &rarr;
+                  <span className="mt-2 block text-sm tracking-[0.044em] text-text-primary">
+                    Open {worst.name} <span aria-hidden="true">&rarr;</span>
                   </span>
                 </button>
               ) : (
-                <div className="h-full rounded-md border border-border-subtle bg-surface-1/50 p-5">
-                  <span className="label text-text-tertiary">Largest expected shortfall</span>
+                <div className="h-full rounded-xl border border-border-default bg-surface-1 p-5">
+                  <span className="label">Largest expected shortfall</span>
                   <p className="mt-2 text-sm text-text-tertiary">
                     Ranking the portfolio&hellip;
                   </p>
@@ -626,7 +632,7 @@ export function DecisionConsole() {
                       // biome-ignore lint/suspicious/noArrayIndexKey: the slot is the identity on purpose; a key per mine moves the DOM node when the ranking lands, which is the layout shift this fixes.
                       <li key={`slot-${i}`} aria-hidden="true">
                         <Card className="h-full min-h-[10.625rem]">
-                          <div className="h-full w-full animate-pulse rounded-md bg-surface-2/40" />
+                          <div className="h-full w-full animate-pulse rounded-xl bg-surface-2/60" />
                         </Card>
                       </li>
                     ))
@@ -643,7 +649,7 @@ export function DecisionConsole() {
                         // and rows would resize at settle; 170 is the measured
                         // maximum (168 content + 2 border) at all four widths.
                         className={`h-full min-h-[10.625rem] ${
-                          worst && m.id === worst.id ? 'border-accent/50 bg-accent-muted/20' : ''
+                          worst && m.id === worst.id ? 'border-border-strong' : ''
                         }`}
                       >
                         <button
@@ -656,7 +662,7 @@ export function DecisionConsole() {
                               <span className="font-mono text-xs tabular-nums text-text-tertiary">
                                 {String(rank + 1).padStart(2, '0')}
                               </span>
-                              <span className="font-medium text-text-primary">{m.name}</span>
+                              <span className="text-base text-text-primary">{m.name}</span>
                             </span>
                             <span className="font-mono text-xs text-text-tertiary">
                               {m.mine_code}

@@ -32,8 +32,8 @@ export default function GlobalErrorBoundary({
     <main className="mx-auto flex min-h-[60vh] max-w-[1280px] items-center px-4 sm:px-6 lg:px-8">
       <div className="measure">
         <p className="label">Error</p>
-        <h1 className="mt-3 text-2xl">This screen failed to render</h1>
-        <p className="mt-3 text-base text-text-secondary">
+        <h1 className="mt-3 font-display text-4xl md:text-5xl">This screen failed to render</h1>
+        <p className="mt-4 text-lg text-text-secondary">
           Something in the page threw while rendering. Nothing was saved or sent, and no data has
           been changed. Reloading may work; if it does not, the problem is not on your side.
         </p>
@@ -48,14 +48,14 @@ export default function GlobalErrorBoundary({
           <button
             type="button"
             onClick={() => reset()}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-accent px-4 text-base font-medium text-surface-0 transition-colors duration-[120ms] ease-out hover:bg-accent/90"
+            className="inline-flex h-[42px] items-center justify-center gap-2 rounded-md bg-inverse-bg px-4 text-base tracking-[0.044em] text-inverse-fg transition-[background-color,scale] duration-[180ms] ease-out hover:bg-inverse-hover active:scale-[.97]"
           >
             <RefreshCw className="h-4 w-4" aria-hidden="true" />
             Try again
           </button>
           <a
             href="/console"
-            className="inline-flex h-10 items-center justify-center rounded-md border border-border-interactive bg-surface-2 px-4 text-base font-medium text-text-primary transition-colors duration-[120ms] ease-out hover:bg-surface-3"
+            className="inline-flex h-[42px] items-center justify-center rounded-md bg-surface-2 px-4 text-base tracking-[0.044em] text-text-primary transition-[background-color,scale] duration-[180ms] ease-out hover:bg-surface-3 active:scale-[.97]"
           >
             Back to the console
           </a>

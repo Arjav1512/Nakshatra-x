@@ -114,7 +114,7 @@ export function UserNav() {
         onClick={() => setMenuOpen(!menuOpen)}
         aria-expanded={menuOpen}
         aria-haspopup="true"
-        className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border-interactive bg-surface-2 text-text-secondary transition-colors duration-[120ms] ease-out hover:bg-surface-3 hover:text-text-primary"
+        className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-2 text-text-primary transition-[background-color] duration-[180ms] ease-out hover:bg-surface-3 md:h-9 md:w-9"
         type="button"
         title={user ? `Signed in as ${user.full_name || user.email}` : 'Sign in'}
       >
@@ -124,24 +124,24 @@ export function UserNav() {
 
       {/* Floating Interactive Popover Menu */}
       {menuOpen && (
-        <div className="absolute right-0 z-50 mt-2 w-72 space-y-3 rounded-md border border-border-default bg-surface-3 p-4  sm:w-80">
+        <div className="absolute right-0 z-50 mt-3 w-72 space-y-3 rounded-lg border border-border-strong bg-surface-0 p-4 sm:w-80">
           {/* Header Status */}
           <div className="flex items-center justify-between pb-2 border-b border-border-subtle">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-accent" />
-              <span className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">
-                {user ? 'Authenticated Session' : 'Access Console'}
+              <ShieldCheck className="h-4 w-4 text-text-secondary" aria-hidden="true" />
+              <span className="text-sm tracking-[0.044em] text-text-primary">
+                {user ? 'Signed in' : 'Sign in'}
               </span>
             </div>
-            <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-accent/20 text-accent border border-accent/40">
-              {user ? 'OPERATOR' : 'SELECT MODE'}
+            <span className="inline-flex h-[22px] items-center rounded-sm bg-surface-2 px-2 text-xs tracking-[0.044em] text-text-secondary">
+              {user ? 'Operator' : 'Choose a method'}
             </span>
           </div>
 
           {/* User Info (If Authenticated) */}
           {user ? (
-            <div className="p-3 rounded-md bg-surface-2 border border-border-subtle space-y-2">
-              <div className="text-xs font-bold text-text-primary truncate font-sans">
+            <div className="space-y-2 rounded-tile bg-surface-2 p-3">
+              <div className="truncate text-sm text-text-primary">
                 {user.full_name || user.email}
               </div>
               <div className="text-xs font-mono text-text-secondary truncate">
@@ -154,7 +154,7 @@ export function UserNav() {
                     setMenuOpen(false)
                     router.push('/dashboard')
                   }}
-                  className="flex-1 py-2 px-3 rounded-md bg-accent/20 border border-accent text-accent hover:text-text-primary font-mono text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  className="flex h-8 flex-1 items-center justify-center gap-1.5 rounded-sm bg-inverse-bg px-3 text-[14px] tracking-[0.044em] text-inverse-fg transition-[background-color] duration-[180ms] ease-out hover:bg-inverse-hover"
                 >
                   <LayoutDashboard size={14} />
                   <span>Dashboard</span>
@@ -162,8 +162,9 @@ export function UserNav() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="py-2 px-3 rounded-md bg-status-critical/20 border border-status-critical/60 text-status-critical hover:text-text-primary font-mono text-xs font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
-                  title="Sign Out"
+                  className="flex h-8 items-center justify-center gap-1 rounded-sm bg-surface-0 px-3 text-status-critical transition-[background-color] duration-[180ms] ease-out hover:bg-surface-3"
+                  title="Sign out"
+                  aria-label="Sign out"
                 >
                   <LogOut size={14} />
                 </button>
@@ -172,15 +173,15 @@ export function UserNav() {
           ) : (
             /* Sign In Options (Google, GitHub, Guest, Email) */
             <div className="space-y-2.5">
-              <p className="text-xs font-mono text-text-secondary leading-snug">
-                Select your authentication method or launch Guest Mode:
+              <p className="text-sm text-text-secondary">
+                Sign in, or continue as a guest.
               </p>
 
               {/* Google Sign-in */}
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 rounded-md bg-white hover:bg-text-primary text-slate-900 font-sans font-semibold text-xs transition-colors shadow-md cursor-pointer group"
+                className="flex h-[42px] w-full items-center justify-center gap-2.5 rounded-md bg-surface-0 px-3.5 text-[14px] tracking-[0.044em] text-text-primary ring-1 ring-inset ring-border-interactive transition-[background-color] duration-[180ms] ease-out hover:bg-surface-2"
               >
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                   <path
@@ -208,12 +209,12 @@ export function UserNav() {
                 type="button"
                 onClick={handleGithubLogin}
                 disabled={actionLoading === 'github'}
-                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 rounded-md bg-surface-3 hover:bg-[#1B1F23] border border-border-interactive text-text-primary font-sans font-semibold text-xs transition-colors shadow-md cursor-pointer group disabled:opacity-50"
+                className="flex h-[42px] w-full items-center justify-center gap-2.5 rounded-md bg-inverse-bg px-3.5 text-[14px] tracking-[0.044em] text-inverse-fg transition-[background-color] duration-[180ms] ease-out hover:bg-inverse-hover disabled:opacity-35"
               >
                 {actionLoading === 'github' ? (
-                  <Loader2 size={15} className="animate-spin text-text-primary" />
+                  <Loader2 size={15} className="animate-spin" />
                 ) : (
-                  <svg className="w-4 h-4 shrink-0 fill-current text-text-primary" viewBox="0 0 24 24">
+                  <svg className="h-4 w-4 shrink-0 fill-current" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
                   </svg>
                 )}
@@ -225,14 +226,14 @@ export function UserNav() {
                 type="button"
                 onClick={handleGuestLogin}
                 disabled={actionLoading === 'guest'}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-3.5 rounded-md bg-accent/15 hover:bg-accent/25 border border-accent/60 text-accent font-mono text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer  disabled:opacity-50"
+                className="flex h-[42px] w-full items-center justify-center gap-2 rounded-md bg-surface-2 px-3.5 text-[14px] tracking-[0.044em] text-text-primary transition-[background-color] duration-[180ms] ease-out hover:bg-surface-3 disabled:opacity-35"
               >
                 {actionLoading === 'guest' ? (
-                  <Loader2 size={15} className="animate-spin text-accent" />
+                  <Loader2 size={15} className="animate-spin" />
                 ) : (
-                  <Compass size={15} className="text-accent" />
+                  <Compass size={15} aria-hidden="true" />
                 )}
-                <span>{actionLoading === 'guest' ? 'Entering Guest Mode...' : 'Enter Guest Mode'}</span>
+                <span>{actionLoading === 'guest' ? 'Entering guest mode…' : 'Continue as guest'}</span>
               </button>
 
               {/* Email OTP Link */}
@@ -242,18 +243,17 @@ export function UserNav() {
                   setMenuOpen(false)
                   router.push('/login')
                 }}
-                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-md bg-surface-2 hover:bg-surface-3 text-text-secondary text-xs font-mono transition-colors cursor-pointer border border-border-subtle"
+                className="flex h-9 w-full items-center justify-center gap-2 rounded-md px-3 text-[14px] tracking-[0.044em] text-text-secondary transition-[background-color,color] duration-[180ms] ease-out hover:bg-surface-2 hover:text-text-primary"
               >
-                <Mail size={13} className="text-accent" />
-                <span>Or Sign in with Email OTP &rarr;</span>
+                <Mail size={14} aria-hidden="true" />
+                <span>Sign in with an e-mail code &rarr;</span>
               </button>
             </div>
           )}
 
           {/* Footer Badge */}
-          <div className="pt-2 border-t border-border-subtle flex items-center justify-between text-xs font-mono text-text-secondary">
-            <span>MOIL &bull; NAKSHATRA-X</span>
-            <span className="text-accent">SECURED ACCESS</span>
+          <div className="flex items-center justify-between border-t border-border-subtle pt-2 text-xs tracking-[0.036em] text-text-tertiary">
+            <span>MOIL · Nakshatra-X</span>
           </div>
         </div>
       )}

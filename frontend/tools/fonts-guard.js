@@ -6,10 +6,15 @@
  *
  * Needs this app on :3000 (production build). FastAPI is not required.
  *
+ * The faces are the design reference's declared web fallbacks (its licensed
+ * DieGrotesk and ABC Diatype are not used): Geist for body and display, Hanken
+ * Grotesk for eyebrows (.label), Geist Mono for figures —
+ * docs/ui-redesign/design-system-mapping.md §5.7.
+ *
  * WHY THIS EXISTS
  * ---------------
- * Inter, Sora and IBM Plex Mono were declared through next/font, downloaded at
- * build time — and never applied. next/font defined its variables on <body>,
+ * The previous faces (Inter, Sora and IBM Plex Mono) were declared through
+ * next/font, downloaded at build time — and never applied. next/font defined its variables on <body>,
  * while the tokens that use them (--font-sans, --font-mono, --font-display) are
  * emitted by Tailwind's @theme on :root, i.e. <html>, where those variables did
  * not exist. So --font-sans resolved to nothing and every page rendered in the
@@ -31,12 +36,13 @@ const CHROME =
 const BASE = process.env.E2E_BASE || 'http://localhost:3000'
 const SETTLE = Number(process.env.E2E_SETTLE || 4000)
 
-// What each route must show, by role. Sora is display-only (one heading a
-// page), so it is checked where that heading is.
+// What each route must show, by role. The display role is the primary face at
+// display size, checked where the page's one display heading is; the secondary
+// face is checked on an eyebrow.
 const ROUTES = [
-  { path: '/console', checks: { body: 'Inter', display: 'Sora', mono: 'IBM Plex Mono' } },
-  { path: '/', checks: { body: 'Inter' } },
-  { path: '/mine-twin', checks: { body: 'Inter', mono: 'IBM Plex Mono' } },
+  { path: '/console', checks: { body: 'Geist', display: 'Geist', mono: 'Geist Mono', secondary: 'Hanken Grotesk' } },
+  { path: '/', checks: { body: 'Geist', secondary: 'Hanken Grotesk' } },
+  { path: '/mine-twin', checks: { body: 'Geist', mono: 'Geist Mono', secondary: 'Hanken Grotesk' } },
 ]
 
 let failed = 0
@@ -75,6 +81,7 @@ const first = (stack) => (stack || '').split(',')[0].trim().replace(/^["']|["']$
         body: fam(document.body),
         display: fam(document.querySelector('.font-display')),
         mono: fam(document.querySelector('.font-mono')),
+        secondary: fam(document.querySelector('.label')),
       }
     })
 

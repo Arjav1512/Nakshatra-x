@@ -19,6 +19,7 @@ export default function FloodAlertPage() {
   return (
     <main className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 lg:px-8">
       <PageHeader
+        eyebrow="Operations · Rainfall"
         title="Rainfall context"
         description="Accumulated rainfall for a location over the past 14 days, measured. Rain is one of the drivers the Track B forecaster uses, so this is the raw signal behind part of a shortfall estimate — not a flood warning, and not a control system."
       />

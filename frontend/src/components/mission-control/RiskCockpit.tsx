@@ -80,7 +80,7 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
   const score = risk?.composite_risk_score
 
   return (
-    <div className="rounded-md border border-border-default bg-surface-2 p-5">
+    <div className="rounded-xl border border-border-default bg-surface-1 p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
           <p className="label">Risk context</p>

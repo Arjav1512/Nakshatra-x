@@ -6,6 +6,7 @@
 /* ============================================================================
    BASE LAYER
    Specification: docs/design/DESIGN_SYSTEM.md
+   Reference mapping: docs/ui-redesign/design-system-mapping.md
    ============================================================================ */
 
 @layer base {
@@ -16,6 +17,7 @@
   }
 
   html {
+    color-scheme: light;
     background: var(--color-surface-0);
     /* No scroll-behavior: smooth. Smooth scrolling fights the user on long
        pages and is a motion-sickness trigger; where a jump genuinely needs
@@ -28,6 +30,7 @@
     background: var(--color-surface-0);
     color: var(--color-text-primary);
     font-family: var(--font-sans);
+    font-weight: 400;
     font-size: var(--text-base);
     line-height: var(--text-base--line-height);
     -webkit-font-smoothing: antialiased;
@@ -44,27 +47,32 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Focus is always visible and is never removed. Against a system with no
-     glow shadows, a 2px accent ring at 2px offset reads clearly on every
-     surface. */
+  /* Focus is always visible and is never removed: 2px ink at a 3px offset
+     (reference :focus-visible). Inside .chrome-dark --color-focus is mint. */
   :focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
     border-radius: var(--radius-sm);
   }
 
-  /* Headings inherit the scale; they do not introduce their own sizes. */
+  /* One weight: hierarchy comes from size and tracking (reference rule 1). */
   h1,
   h2,
   h3,
   h4 {
-    font-weight: 600;
+    font-weight: 400;
     color: var(--color-text-primary);
     text-wrap: balance;
   }
 
   p {
     text-wrap: pretty;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-text-placeholder);
+    opacity: 1;
   }
 
   ::selection {
@@ -78,12 +86,12 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: var(--color-surface-0);
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
     background: var(--color-border-strong);
-    border: 2px solid var(--color-surface-0);
+    border: 2px solid transparent;
     border-radius: 999px;
     background-clip: content-box;
   }
@@ -124,19 +132,20 @@
    ============================================================================ */
 
 @layer components {
-  /* Short eyebrow labels of one to three words. Never a sentence.
+  /* Eyebrow: the reference's .t-eyebrow — secondary face, 12px, +0.036em,
+     sentence case. One to three words, never a sentence.
 
-     12 px secondary, not 11 px tertiary (POLISH_AUDIT.md issue 4). A label is
-     what a presenter points at — "EXPECTED SHORTFALL" over the figure — and
-     at 11 px tertiary it measured 5.09:1 on a card and 3.34:1 on a washed-out
-     projector. Secondary is 7.28:1 or better on surfaces 0-2. Every eyebrow on the
-     demo path uses this one class; the three variants it had are gone. */
+     Secondary ink rather than the reference's --fg-3: an eyebrow is what a
+     presenter points at, and POLISH_AUDIT.md issue 4 measured the dimmer step
+     unreadable on a washed-out projector. 16px line height rather than 2.0,
+     because the console reserves the measured height of the blocks these sit
+     in (mapping §5.4). */
   .label {
+    font-family: var(--font-secondary);
     font-size: 0.75rem; /* 12 */
     line-height: 1rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-weight: 400;
+    letter-spacing: 0.036em;
     color: var(--color-text-secondary);
   }
 
@@ -144,17 +153,103 @@
   .measure {
     max-width: 72ch;
   }
+
+  /* --- Type roles, from the reference (mapping §1.5) ------------------- */
+  .t-display {
+    font-size: clamp(40px, 6.2vw, 56px);
+    line-height: 1.09;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .t-h2 {
+    font-size: clamp(26px, 3.4vw, 32px);
+    line-height: 0.9;
+    letter-spacing: 0.006em;
+    text-wrap: balance;
+  }
+  /* Wrapped H2s on narrative pages: the reference's 0.9 leading collides
+     descenders with ascenders once a heading wraps to three lines at 375px. */
+  .t-h2-wrap {
+    font-size: clamp(26px, 3.4vw, 32px);
+    line-height: 1.05;
+    letter-spacing: 0.006em;
+    text-wrap: balance;
+  }
+  .t-h3 {
+    font-size: clamp(24px, 3vw, 32px);
+    line-height: 1;
+    letter-spacing: 0.008em;
+    text-wrap: balance;
+  }
+  .t-lead {
+    font-size: 20px;
+    line-height: 1.35;
+    letter-spacing: 0.033em;
+  }
+  .t-ui {
+    letter-spacing: 0.044em;
+  }
+  .t-caption {
+    font-size: 13px;
+    line-height: 1.45;
+    letter-spacing: 0.044em;
+    color: var(--color-text-tertiary);
+  }
+  .t-code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+
+  /* Links inside prose are underlined: an ink link in ink text would be told
+     apart by colour alone (WCAG 1.4.1). */
+  .prose-link {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--color-border-interactive);
+    transition: text-decoration-color var(--duration-feedback) var(--ease-out);
+  }
+  .prose-link:hover {
+    text-decoration-color: currentColor;
+  }
+
+  /* Text roll (reference .slide, "labels duplicate and roll up on hover").
+     Landing-page calls to action only (mapping §4.7). The duplicate is
+     aria-hidden, so the label is announced once. */
+  .slide {
+    display: inline-block;
+    overflow: hidden;
+    height: 1.3em;
+    line-height: 1.3em;
+    vertical-align: middle;
+  }
+  .slide > span {
+    display: block;
+    transition: transform var(--duration-standard) var(--ease-out);
+  }
+  a:hover .slide > span,
+  button:hover .slide > span {
+    transform: translateY(-100%);
+  }
+
+  /* Arrow link (reference .link): the arrow lifts toward where it goes. */
+  .link-arrow {
+    display: inline-block;
+    transition: transform var(--duration-feedback) var(--ease-out);
+  }
+  a:hover .link-arrow {
+    transform: translate(2px, -2px);
+  }
 }
 
 /* ============================================================================
    PRINT
 
    Exports are a first-class capability (the console offers CSV and PDF), so
-   print is a supported medium rather than an afterthought.
-
-   These are the only literal colours outside tokens.css, and they are theme
-   values, not component decisions: the token palette is a dark theme, and a
-   dark theme cannot be printed. Black-on-white is the correct print surface.
+   print is a supported medium rather than an afterthought. The screen palette
+   is already ink on near-white; these force pure black on white so a printed
+   page carries no grey wash, and open the dark chrome.
    ============================================================================ */
 
 @media print {
@@ -173,6 +268,13 @@
     border-color: #ccc !important;
   }
 
+  /* A dark scope's text is light. Browsers drop backgrounds when printing, so
+     without this a chart or the map panel prints light text on white paper. */
+  .chrome-dark {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
   /* Evidence disclosures are collapsed on screen; on paper they must all be
      open, because a printed figure without its provenance is exactly what the
      provenance rule exists to prevent. */
@@ -186,18 +288,18 @@
 }
 
 
-/* Display face (B-2). Utility rather than a token override, because it applies
+/* Display face. Utility rather than a token override, because it applies
    only to the one heading per page that names what you are looking at. */
 .font-display {
   font-family: var(--font-display);
-  font-feature-settings: 'ss01' on;
+  font-weight: 400;
+  letter-spacing: -0.01em;
 }
 
 
 /* ---------------------------------------------------------------------------
-   Product-surface motion (B-4, product half).
-   Calm and functional: it tells you something changed and then stops. The
-   landing page keeps its narrative; nothing here scrubs, pins or loops.
+   Product-surface motion.
+   Calm and functional: it tells you something changed and then stops.
    Everything respects the global prefers-reduced-motion rule above.
    --------------------------------------------------------------------------- */
 
@@ -223,9 +325,32 @@
   animation: resolve-once 900ms var(--ease-out) 1 both;
 }
 
+/* The landing hero's one-time entrance (DESIGN_SYSTEM.md §7.1): each line
+   rises 14px and fades in over the reference's 700ms "long settle", 60ms
+   apart, once. CSS rather than GSAP on purpose: it runs from the first paint,
+   so text the server already drew never blinks out while scripts load and
+   then fades back in. Landing page only; the whole hero is legible within
+   0.9s, and it never repeats. */
+@keyframes hero-in {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+.hero-enter {
+  animation: hero-in var(--duration-slow) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .panel-enter,
-  .resolve-once {
+  .resolve-once,
+  .hero-enter {
     animation: none;
+  }
+
+  .slide > span,
+  .link-arrow {
+    transition: none;
+    transform: none !important;
   }
 }

@@ -1,9 +1,10 @@
 'use client'
 
-import { useRef } from 'react'
+import { Fragment, type ReactNode, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
+import { DUR, EASE_OUT } from '@/lib/motion'
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
 
@@ -53,8 +54,15 @@ export interface StackData {
  * No count-ups: a number that spins up to its value is theatre applied to a
  * measurement. No looping pulses: a pulsing dot reads as a live feed, and none
  * of this is live.
+ *
+ * LAYOUT
+ * ------
+ * The design reference's feature card (.feature): a grey r32 card with the
+ * copy on one side and an inset dark media well (r20) holding the figure. The
+ * well is .chrome-dark, so the cividis surface and the measured points — the
+ * page's one mint accent — sit on the dark ground they were drawn for.
  */
-export function ProspectivityStack({ data }: { data: StackData }) {
+export function ProspectivityStack({ data, header }: { data: StackData; header?: ReactNode }) {
   const root = useRef<HTMLDivElement>(null)
 
   useGSAP(
@@ -114,8 +122,8 @@ export function ProspectivityStack({ data }: { data: StackData }) {
             gsap.from(note, {
               opacity: 0,
               y: 12,
-              duration: 0.5,
-              ease: 'power2.out',
+              duration: DUR.slow,
+              ease: EASE_OUT,
               immediateRender: false,
               scrollTrigger: { trigger: note, start: 'top 90%', once: true },
             })
@@ -149,12 +157,37 @@ export function ProspectivityStack({ data }: { data: StackData }) {
   const maxSd = Math.max(...data.cells.map((c) => c.sd), 0.0001)
 
   return (
-    <div ref={root} className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-16">
-      {/* The anchor. One object, three layers. */}
-      <div className="relative mx-auto w-full max-w-[560px]">
+    <div
+      ref={root}
+      className="grid overflow-hidden rounded-3xl bg-surface-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]"
+    >
+      {/* Copy: the heading, then the annotation for each layer. */}
+      <div className="flex flex-col gap-10 p-6 md:p-10">
+        {/* A single child of its own: the server page's element arrives lazily
+            and unkeyed, so as a sibling in this list React flags it. */}
+        <Fragment>{header}</Fragment>
+        {/* Annotation, not prose. */}
+        <ol className="space-y-7">
+          {data.layers.map((l, i) => (
+            <li key={l.id} data-stack-note className="border-l border-border-strong pl-4">
+              <div className="flex items-baseline gap-3">
+                <span className="font-mono text-xs tabular-nums text-text-tertiary">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <h3 className="text-lg text-text-primary">{l.name}</h3>
+              </div>
+              <p className="measure mt-2 text-base text-text-secondary">{l.note}</p>
+              <p className="mt-2 font-mono text-xs text-text-tertiary">{l.source}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      {/* The anchor. One object, three layers, in a dark media well. */}
+      <div className="chrome-dark relative m-3 flex items-center overflow-hidden rounded-xl bg-surface-black px-4 py-8 md:px-8">
         <svg
-          viewBox={`0 0 ${W} ${H + 90}`}
-          className="w-full"
+          viewBox={`0 -100 ${W} ${H + 190}`}
+          className="mx-auto w-full max-w-[560px]"
           role="img"
           aria-label={`Three layers of Track A output over the Madhya Pradesh and Maharashtra manganese belt: ${data.points.length} measured points, a kriged prospectivity surface of ${data.cells.length} cells, and the kriging uncertainty for the same cells.`}
         >
@@ -162,7 +195,7 @@ export function ProspectivityStack({ data }: { data: StackData }) {
 
           {/* Layer 3 (back): kriging uncertainty */}
           <g data-stack-layer="spread" style={{ transformOrigin: '50% 50%' }}>
-            <rect x="0" y="0" width={W} height={H} fill="var(--color-surface-1)" opacity="0.5" rx="6" />
+            <rect x="0" y="0" width={W} height={H} fill="var(--color-surface-3)" opacity="0.5" rx="11" />
             {data.cells.map((c, i) => (
               <rect
                 key={`u${i}`}
@@ -178,7 +211,7 @@ export function ProspectivityStack({ data }: { data: StackData }) {
 
           {/* Layer 2 (middle): the kriged prospectivity surface */}
           <g data-stack-layer="surface" style={{ transformOrigin: '50% 50%' }}>
-            <rect x="0" y="0" width={W} height={H} fill="var(--color-surface-1)" opacity="0.5" rx="6" />
+            <rect x="0" y="0" width={W} height={H} fill="var(--color-surface-3)" opacity="0.5" rx="11" />
             {data.cells.map((c, i) => (
               <rect
                 key={`p${i}`}
@@ -208,22 +241,6 @@ export function ProspectivityStack({ data }: { data: StackData }) {
           </g>
         </svg>
       </div>
-
-      {/* Annotation, not prose. */}
-      <ol className="space-y-8 lg:pt-6">
-        {data.layers.map((l, i) => (
-          <li key={l.id} data-stack-note className="border-l border-border-strong pl-4">
-            <div className="flex items-baseline gap-3">
-              <span className="font-mono text-xs tabular-nums text-text-tertiary">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <h3 className="text-base font-semibold text-text-primary">{l.name}</h3>
-            </div>
-            <p className="measure mt-2 text-sm text-text-secondary">{l.note}</p>
-            <p className="mt-2 font-mono text-xs text-text-tertiary">{l.source}</p>
-          </li>
-        ))}
-      </ol>
     </div>
   )
 }

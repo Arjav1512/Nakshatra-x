@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { IBM_Plex_Mono, Inter, Sora } from 'next/font/google'
+import { Geist, Geist_Mono, Hanken_Grotesk } from 'next/font/google'
 import './globals.css'
 import AppBar from '@/components/shell/AppBar'
 import IntegrityFooter from '@/components/shell/IntegrityFooter'
@@ -8,40 +8,37 @@ import PWARegistry from '@/components/offline/PWARegistry'
 import GlobalCopilotWrapper from '@/components/mission-control/GlobalCopilotWrapper'
 
 /**
- * Two families, per docs/design/DESIGN_SYSTEM.md section 4.1. Space Grotesk was
- * removed: its only job was the gradient-clipped display text in .font-3d-cyber
- * (audit T-6, T-7), and gradient-filled text has no single contrast ratio, so
- * it can neither pass an audit nor be measured by one.
- */
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-})
-
-/**
- * Display family (B-2).
+ * The design reference's three faces (docs/ui-redesign/design-system-mapping.md
+ * §1.5, §5.7). Its primary and secondary faces, DieGrotesk and ABC Diatype, are
+ * licensed and are not used; these are the web fallbacks the reference itself
+ * declares, all SIL Open Font License. next/font downloads them at build time
+ * and serves them from this origin, so no request reaches Google at runtime and
+ * the type survives a venue with no network (`npm run test:fonts` asserts it).
  *
- * Sora is geometric where Inter is neo-grotesque: rounder bowls, a single-storey
- * 'a', wider apertures. At 36px and above that difference is what separates a
- * heading from large body text, which the audit found this product did not do —
- * everything was Inter at slightly different sizes.
- *
- * Display only. It is never used below --text-2xl, and never for data: figures
- * stay in IBM Plex Mono, which ships true tabular figures.
+ * One weight is the rule (reference: "one regular weight"); 500 is the ceiling,
+ * for the wordmark.
  */
-const sora = Sora({
-  subsets: ['latin'],
-  weight: ['500', '600'],
-  variable: '--font-sora',
-  display: 'swap',
-})
-
-const plexMono = IBM_Plex_Mono({
+const geist = Geist({
   subsets: ['latin'],
   weight: ['400', '500'],
   display: 'swap',
-  variable: '--font-plex-mono',
+  variable: '--font-geist',
+})
+
+/** Secondary face: eyebrows and the dark chrome's small labels. */
+const hanken = Hanken_Grotesk({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  display: 'swap',
+  variable: '--font-hanken',
+})
+
+/** Figures, identifiers, coordinates and code. Tabular figures throughout. */
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  display: 'swap',
+  variable: '--font-geist-mono',
 })
 
 export const viewport: Viewport = {
@@ -49,7 +46,7 @@ export const viewport: Viewport = {
   // at build time, so it has to be a literal — a CSS custom property cannot be
   // resolved here. It is the only colour literal outside tokens.css and the
   // print block, and it must be updated with the token.
-  themeColor: '#0b0d10',
+  themeColor: '#FAFAFA',
 }
 
 export const metadata: Metadata = {
@@ -69,11 +66,11 @@ export default function RootLayout({
     // (--font-sans, --font-mono, --font-display, tokens.css) are emitted by
     // @theme on :root — which is <html> — so a variable defined only on <body>
     // does not exist where they are resolved. That is what happened: every page
-    // rendered in the system font, with Inter, Sora and IBM Plex Mono declared,
-    // downloaded at build time and never used. `npm run test:fonts` asserts it.
+    // rendered in the system font, with its faces declared, downloaded at
+    // build time and never used. `npm run test:fonts` asserts it.
     <html
       lang="en"
-      className={`dark ${inter.variable} ${plexMono.variable} ${sora.variable}`}
+      className={`${geist.variable} ${hanken.variable} ${geistMono.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -85,7 +82,7 @@ export default function RootLayout({
       >
         <a
           href="#main"
-          className="sr-only rounded-md bg-surface-2 px-4 py-2 text-sm text-text-primary focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60]"
+          className="sr-only rounded-md bg-inverse-bg px-4 py-2 text-sm text-inverse-fg focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60]"
         >
           Skip to content
         </a>

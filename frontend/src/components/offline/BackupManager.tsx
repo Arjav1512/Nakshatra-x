@@ -37,9 +37,9 @@ export default function BackupManager({ role }: BackupManagerProps) {
 
   if (role !== 'judge') {
     return (
-      <div className="p-4 bg-gray-900 border border-gray-700 rounded-lg shadow-md text-text-primary text-sm">
+      <div className="rounded-xl border border-border-default bg-surface-1 p-4 text-sm text-text-primary">
         <h3 className="font-bold mb-2">Emergency Sync Status</h3>
-        <p className="text-gray-400">Your offline data is automatically queued and will sync when a connection is restored.</p>
+        <p className="text-text-secondary">Your offline data is automatically queued and will sync when a connection is restored.</p>
         {/* Normal users get a simple status, not manual export controls to prevent data tampering */}
       </div>
     );
@@ -47,7 +47,7 @@ export default function BackupManager({ role }: BackupManagerProps) {
 
   // Judge/Admin view gets full export capabilities for evaluation
   return (
-    <div className="p-4 bg-accent border border-accent rounded-lg shadow-md text-text-primary">
+    <div className="p-4 bg-accent border border-accent rounded-lg text-text-primary">
       <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
         Judge Panel: Emergency Data Tools
@@ -59,7 +59,7 @@ export default function BackupManager({ role }: BackupManagerProps) {
       <button type="button" 
         onClick={handleExport}
         disabled={exporting}
-        className="px-4 py-2 bg-accent hover:bg-accent rounded-md font-semibold transition-colors disabled:opacity-50"
+        className="px-4 py-2 rounded-md bg-inverse-bg text-inverse-fg hover:bg-inverse-hover transition-[background-color] disabled:opacity-35"
       >
         {exporting ? 'Exporting...' : 'Export Offline Data Backup (.json)'}
       </button>

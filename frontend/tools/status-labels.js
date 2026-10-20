@@ -31,14 +31,23 @@ const path = require('node:path')
 
 const STATUS_TOKENS = ['accent', 'status-nominal', 'status-caution', 'status-critical', 'status-unknown']
 
-/** The status and accent colours, read from the token file, so they cannot drift. */
+/**
+ * The status and accent colours, read from the token file, so they cannot drift.
+ *
+ * Every definition counts, not only the first: tokens.css defines each one for
+ * the light surfaces and again inside .chrome-dark (the map's dark chrome), and
+ * a label drawn in either value is a status label. The first is named as the
+ * token; later ones as "<token> (<n>)", e.g. "accent (2)".
+ */
 function statusTokens() {
   const css = fs.readFileSync(path.join(__dirname, '..', 'src', 'app', 'tokens.css'), 'utf8')
   const out = {}
   for (const name of STATUS_TOKENS) {
-    const m = css.match(new RegExp(`--color-${name}:\\s*#([0-9a-fA-F]{6})`))
-    if (!m) throw new Error(`token --color-${name} not found in tokens.css`)
-    out[name] = [0, 2, 4].map((i) => Number.parseInt(m[1].slice(i, i + 2), 16))
+    const all = [...css.matchAll(new RegExp(`--color-${name}:\\s*#([0-9a-fA-F]{6})`, 'g'))]
+    if (!all.length) throw new Error(`token --color-${name} not found in tokens.css`)
+    all.forEach((m, i) => {
+      out[i === 0 ? name : `${name} (${i + 1})`] = [0, 2, 4].map((j) => Number.parseInt(m[1].slice(j, j + 2), 16))
+    })
   }
   // status-unknown shares its value with text-tertiary, so tertiary text is
   // measured too and named for both.
@@ -121,17 +130,28 @@ function measureInPage(tokens) {
       rect = firstRect()
     }
     // Text an ancestor clips away entirely (a map label outside the map's
-    // frame) is seen by no one, so there is nothing to measure.
-    let clipped = false
-    for (let e = el.parentElement; e && !clipped; e = e.parentElement) {
+    // frame) is seen by no one, so there is nothing to measure. Text an
+    // ancestor clips partly — a map label straddling the map's edge — is
+    // measured where it is visible: the centre of its box intersected with
+    // every clipping ancestor. Sampling the centre of the whole box measured
+    // the half that is not drawn, against whatever lay outside the frame
+    // (found when the page around the dark map became light: a 5 px sliver of
+    // "Tirodi" over the map, sampled 15 px outside it on the page).
+    // Only ancestors clip here, not the viewport, so text pushed off-screen
+    // is still sampled where it is laid out and still fails as before.
+    let vis = { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom }
+    for (let e = el.parentElement; e; e = e.parentElement) {
       const ecs = getComputedStyle(e)
       if (ecs.overflowX === 'visible' && ecs.overflowY === 'visible') continue
       const c = e.getBoundingClientRect()
-      clipped = rect.right <= c.left || rect.left >= c.right || rect.bottom <= c.top || rect.top >= c.bottom
+      vis = {
+        left: Math.max(vis.left, c.left), right: Math.min(vis.right, c.right),
+        top: Math.max(vis.top, c.top), bottom: Math.min(vis.bottom, c.bottom),
+      }
     }
-    if (clipped) continue
-    const cx = rect.left + rect.width / 2
-    const cy = rect.top + rect.height / 2
+    if (vis.right - vis.left < 1 || vis.bottom - vis.top < 1) continue
+    const cx = (vis.left + vis.right) / 2
+    const cy = (vis.top + vis.bottom) / 2
     const stack = document.elementsFromPoint(cx, cy)
     let i = stack.indexOf(el)
     // pointer-events: none keeps an element out of elementsFromPoint; its
