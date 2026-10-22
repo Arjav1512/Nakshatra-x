@@ -28,7 +28,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from app.api.response_provenance import header
-from app.core.provenance import data_integrity, derived, measured, reference, synthetic
+from app.core.provenance import data_integrity, measured, reference, synthetic
 from app.core.ttl_cache import cached
 from app.core.synthetic import SYNTHETIC_CALIBRATION, SYNTHETIC_OPS_VERSION, mine_stream, operating_day, rnd
 from app.services.nasa_power import fetch_weather_signal
@@ -318,17 +318,26 @@ async def build_mine_telemetry(mine) -> dict:
             blasts_this_week, "count", SYNTHETIC_CALIBRATION["note"],
             model_version=SYNTHETIC_OPS_VERSION,
         ),
-        "forecast.shortfall_percentage": derived(
-            shortfall_pct, "%", "Nakshatra-X drag model",
+        # These three were labelled `derived` and `reference`, i.e. not
+        # synthetic: the plan target as the MOIL register's, and the drag
+        # outputs as computed from measured inputs. The plan target is an
+        # invented seed value, and two of the drag model's three inputs
+        # (downtime, blasts) are synthetic draws; is_synthetic follows the kind.
+        # The drag model is also not the Track B forecaster, whose expected
+        # shortfall the console shows; the method says so.
+        "forecast.shortfall_percentage": synthetic(
+            shortfall_pct, "%", "Nakshatra-X drag model over synthetic operations and measured weather",
             model_version=MODEL_VERSION,
-            method="min(0.55, weather_drag + downtime_drag + blasting_drag) x 100.",
+            method="min(0.55, weather_drag + downtime_drag + blasting_drag) x 100. A conditions "
+                   "index, not the Track B forecaster's expected shortfall.",
         ),
-        "forecast.total_planned_tonnes": reference(
-            planned, "tonnes", MINE_SOURCE,
-            method="Monthly lease target / 30 x 14-day horizon.",
+        "forecast.total_planned_tonnes": synthetic(
+            planned, "tonnes", "Synthetic plan target (seeded; not MOIL's plan)",
+            method="Seeded monthly target / 30 x 14-day horizon. Plan targets are synthetic "
+                   "stretch plans, not MOIL's.",
         ),
-        "risk.composite_risk_score": derived(
-            risk_score, "score 0-100", "Nakshatra-X drag model",
+        "risk.composite_risk_score": synthetic(
+            risk_score, "score 0-100", "Nakshatra-X drag model over synthetic operations and measured weather",
             model_version=MODEL_VERSION,
             method="min(98, total_drag x 160 + 8).",
         ),

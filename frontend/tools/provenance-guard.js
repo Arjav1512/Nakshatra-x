@@ -56,6 +56,9 @@ const { allowed, collectTextNodes, looksLikeData, violationsIn } = require('./pr
 
 const results = []
 let failed = 0
+/** Routes that never loaded. They used to count toward nothing in the exit
+ *  code, so with the server down every route errored and the guard PASSED (BUG-1). */
+let unscanned = 0
 
 /**
  * Some values only exist after an interaction.
@@ -75,7 +78,19 @@ async function collect(page) {
 }
 
 async function scan(page, route) {
-  await page.goto(`${BASE}${route}`, { waitUntil: 'networkidle2', timeout: 60000 })
+  // A networkidle2 timeout on a page that keeps loading map tiles is still the
+  // route's content, so it is scanned, as a11y.js does. A page that did not
+  // load, an HTTP error, or a document that is not the app is not scanned, and
+  // counts against the run (BUG-1).
+  let res = null
+  try {
+    res = await page.goto(`${BASE}${route}`, { waitUntil: 'networkidle2', timeout: 60000 })
+  } catch (e) {
+    if (!(e && e.name === 'TimeoutError')) throw e
+  }
+  if (res && res.status() >= 400) throw new Error(`HTTP ${res.status()}`)
+  if (page.url().startsWith('chrome-error://')) throw new Error('browser error page')
+  if (!(await page.$('#main'))) throw new Error('not an app document (no #main)')
   await new Promise((r) => setTimeout(r, SETTLE))
 
   const nodes = await collect(page)
@@ -196,6 +211,7 @@ async function scan(page, route) {
     } catch (e) {
       console.log(`  ERROR ${route}: ${e.message}`)
       failed++
+      unscanned++
       continue
     }
     const violations = violationsIn(nodes, { offline: OFFLINE })
@@ -220,6 +236,10 @@ async function scan(page, route) {
     JSON.stringify({ base: BASE, routes: results }, null, 2)
   )
   const label = OFFLINE ? 'data-shaped value(s) rendered with the backend down' : 'unattributed data-shaped value(s)'
-  console.log(`\n${total === 0 ? 'PASS' : 'FAIL'} — ${total} ${label} across ${ROUTES.length} routes\n`)
-  process.exit(REPORT ? 0 : total === 0 ? 0 : 1)
+  const ok = total === 0 && unscanned === 0
+  console.log(
+    `\n${ok ? 'PASS' : 'FAIL'} — ${total} ${label} across ${ROUTES.length} routes` +
+      (unscanned ? `; ${unscanned} route(s) NOT SCANNED` : '') + '\n'
+  )
+  process.exit(REPORT ? 0 : ok ? 0 : 1)
 })().catch((e) => { console.error(e); process.exit(1) })

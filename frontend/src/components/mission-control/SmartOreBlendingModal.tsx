@@ -161,7 +161,27 @@ export default function SmartOreBlendingModal({ mine }: Props) {
         </div>
       ) : null}
 
-      {blendResult && (
+      {/* The optimiser answers 200 with success: false when no blend meets the
+          target. This rendered the success cards anyway — "Meets customer
+          spec" over blank figures — and dropped the solver's own reason. */}
+      {blendResult && blendResult.success === false ? (
+        <div
+          role="status"
+          data-provenance="derived"
+          className="rounded-tile border border-status-caution/40 bg-status-caution/[0.06] p-3 text-sm"
+        >
+          <p className="font-medium text-status-caution">
+            No feasible blend{blendResult.solver_status ? ` (${blendResult.solver_status})` : ''}
+          </p>
+          <p className="mt-1 leading-snug text-text-secondary">
+            {blendResult.message ||
+              'The solver could not meet the requested tonnage and specification with these stockpiles.'}
+          </p>
+          {blendResult.best_effort_blend?.warning ? (
+            <p className="mt-1 text-xs leading-snug text-text-tertiary">{blendResult.best_effort_blend.warning}</p>
+          ) : null}
+        </div>
+      ) : blendResult && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="rounded-tile bg-surface-2 p-3.5" data-provenance="derived">

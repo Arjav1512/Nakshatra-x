@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { supabase, supabaseAdmin } from '@/lib/supabase'
+import { serverAuthClient } from '@/lib/supabase'
+import { findSuperadmin, isSuperadmin } from '@/lib/admin-slot'
+import { currentAdmin } from '@/lib/auth'
 import {
   ADMIN_COOKIE,
   buildAdmin,
@@ -23,14 +25,19 @@ export async function POST(request: Request) {
 
     let targetEmail = identifier.trim().toLowerCase()
 
-    // If identifier is a username, look up the email
+    // If identifier is a username, it can only be the superadmin's.
     if (!targetEmail.includes('@')) {
-      const { data: usersData } = await supabaseAdmin.auth.admin.listUsers()
-      const matched = usersData?.users?.find(
-        (u) =>
-          u.user_metadata?.username?.toLowerCase() === targetEmail &&
-          (u.app_metadata?.role === 'superadmin' || u.user_metadata?.is_primary_admin === true)
-      )
+      const lookup = await findSuperadmin()
+      if (!lookup.ok) {
+        return NextResponse.json(
+          { error: 'The administrator lookup is unavailable. Sign in with the e-mail address.' },
+          { status: 503 }
+        )
+      }
+      const matched =
+        lookup.admin && lookup.admin.user_metadata?.username?.toLowerCase() === targetEmail
+          ? lookup.admin
+          : null
 
       if (matched && matched.email) {
         targetEmail = matched.email
@@ -43,7 +50,7 @@ export async function POST(request: Request) {
     }
 
     // 1. Sign in with Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    const { data: authData, error: authError } = await serverAuthClient().auth.signInWithPassword({
       email: targetEmail,
       password: password,
     })
@@ -58,26 +65,25 @@ export async function POST(request: Request) {
       )
     }
 
+    // app_metadata only: user_metadata is writable by the user themself, so
+    // `user_metadata.is_primary_admin` let any account make itself admin.
     const user = authData.user
-    const isSuperAdmin =
-      user.app_metadata?.role === 'superadmin' ||
-      user.user_metadata?.is_primary_admin === true
-
-    if (!isSuperAdmin) {
+    if (!isSuperadmin(user)) {
       return NextResponse.json(
         { error: 'ACCESS_DENIED: This account does not possess Commander clearance.' },
         { status: 403 }
       )
     }
 
-    // 2. Issue a signed administrator token. The `admin_session` cookie is a
-    // non-authoritative UI hint only — authorisation is decided solely by the
-    // signed token below (see lib/auth.ts).
+    // 2. Issue a signed administrator token. Authorisation is decided solely
+    // by it (lib/auth.ts). The `admin_session` "UI hint" it used to set was
+    // HttpOnly, so the admin pages, which read it through document.cookie,
+    // never saw it and sent every signed-in admin back to the login form; they
+    // now ask GET below.
     const maxAge = 60 * 60 * 24 * 7
     const cookieStore = await cookies()
     const isHttps = requestIsHttps(request)
 
-    cookieStore.set('admin_session', 'true', sessionCookieOptions(isHttps, maxAge))
     cookieStore.set(
       ADMIN_COOKIE,
       encodeAdmin(
@@ -108,6 +114,17 @@ export async function POST(request: Request) {
       { status: 500 }
     )
   }
+}
+
+// GET: who the signed administrator token says is signed in, or 401.
+export async function GET() {
+  const admin = await currentAdmin()
+  if (!admin) {
+    return NextResponse.json({ error: 'Not signed in as administrator.' }, { status: 401 })
+  }
+  return NextResponse.json({
+    admin: { id: admin.id, email: admin.email, username: admin.username, full_name: admin.full_name },
+  })
 }
 
 // DELETE: Terminate Admin Session

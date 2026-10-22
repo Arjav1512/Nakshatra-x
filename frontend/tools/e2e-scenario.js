@@ -33,13 +33,44 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const SEEDED = ['16,620', '2,420', '13,850', '1,650', '14,200', '12,200']
 
 ;(async () => {
-  // ---- the store is empty until someone runs something --------------------
-  const store = await (await fetch(`${BASE}/api/v1/mine-twin`)).json()
-  check('no scenario exists before one is run',
-    Array.isArray(store.scenarios) && store.scenarios.length === 0,
-    `${store.scenarios?.length} scenario(s)`)
-  check('the store states what kind of numbers it holds',
-    /assumption/i.test(store.model_note || ''), store.model_note)
+  // ---- the server keeps no scenario history (BUG-3) ------------------------
+  //
+  // It kept one list for every visitor: one planner's runs, and any text a
+  // direct caller sent, showed on everyone's "Scenarios you have run · this
+  // session only". The history is now the browser tab's (sessionStorage).
+  const listing = await fetch(`${BASE}/api/v1/mine-twin`)
+  check('the server exposes no scenario list', listing.status === 405, `GET status ${listing.status}`)
+
+  const post = (payload) => fetch(`${BASE}/api/v1/mine-twin`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+  })
+  const VALID = {
+    mineId: 'balaghat', factors: { shiftWindow: 1.06, blastingDelayHours: 1 },
+    selections: { shiftWindow: '06-14', blastingDelayHours: 0 },
+    baselineProduction: 13000, baselineSource: 'e2e-scenario',
+  }
+  {
+    const res = await post(VALID)
+    const json = await res.json().catch(() => ({}))
+    check('a valid scenario is computed and returned alone',
+      res.status === 200 && json.scenario && !('scenarios' in json) && /assumption/i.test(json.model_note || ''),
+      `status ${res.status}, keys ${Object.keys(json).join(',')}`)
+    check('the mine name comes from the server, not the caller',
+      json.scenario?.mine_name === 'Balaghat', json.scenario?.mine_name)
+  }
+  for (const [name, payload] of [
+    ['an unknown mine is refused', { ...VALID, mineId: 'not-a-mine' }],
+    ['an unknown selection is refused', { ...VALID, selections: { shiftWindow: 'VISITOR-TEXT' } }],
+    ['an unknown factor is refused', { ...VALID, factors: { anything: 1.1 } }],
+    ['an implausible factor is refused', { ...VALID, factors: { shiftWindow: 1e6 } }],
+  ]) {
+    const res = await post(payload)
+    check(name, res.status === 400, `status ${res.status}`)
+  }
+  {
+    const res = await post({ ...VALID, baselineSource: 'x'.repeat(200000) })
+    check('an oversized body is refused', res.status === 413, `status ${res.status}`)
+  }
 
   // ---- the endpoint refuses to invent a baseline --------------------------
   const noBase = await fetch(`${BASE}/api/v1/mine-twin`, {
@@ -76,8 +107,10 @@ const SEEDED = ['16,620', '2,420', '13,850', '1,650', '14,200', '12,200']
     const text = await body()
     const seeded = SEEDED.filter((n) => text.includes(n))
     check('none of the seeded demo figures appear', seeded.length === 0, seeded.join(', '))
-    check('no scenario is listed before one is run', !/Scenarios you have run \(\d/.test(text) ||
-      /Scenarios you have run \(0\)/.test(text))
+    // Case-insensitive: the heading is uppercased in CSS, which made the
+    // case-sensitive version of this check pass whatever was listed.
+    check('no scenario is listed before one is run', !/Scenarios you have run \(\d/i.test(text) ||
+      /Scenarios you have run \(0\)/i.test(text))
     check('the estimate is not shown before a run',
       /Set the assumptions below and run|Run the scenario/i.test(text))
   }
@@ -141,6 +174,8 @@ const SEEDED = ['16,620', '2,420', '13,850', '1,650', '14,200', '12,200']
     let text = await body()
     check('the default plan passes the constraint check', /Constraint check passed/i.test(text),
       (text.match(/Constraint check[^.]{0,60}/i) || ['no verdict'])[0])
+    const estimateOf = (t) => (t.match(/this arithmetic gives\s*([+−-]?[\d,]+)\s*t/i) || [])[1] || null
+    const defaultEstimate = estimateOf(text)
 
     const moved = await clickButton(/^\+6H DELAY$/)
     await sleep(300)
@@ -159,6 +194,33 @@ const SEEDED = ['16,620', '2,420', '13,850', '1,650', '14,200', '12,200']
     check('run again: rejected, with its reason',
       ranAgain && /Constraint check failed/i.test(text) && /outside the underground inter-shift blasting windows/i.test(text),
       (text.match(/outside the underground[^.]{0,60}/i) || [(text.match(/Constraint check[^.]{0,60}/i) || ['no verdict'])[0]])[0])
+
+    // A control has to change the arithmetic, not only its label. Every run
+    // used to return the default estimate whatever was selected (E2E-1).
+    const delayedEstimate = estimateOf(text)
+    check('+6 h: the estimate changes with the control',
+      defaultEstimate !== null && delayedEstimate !== null && delayedEstimate !== defaultEstimate,
+      `default ${defaultEstimate}, +6 h ${delayedEstimate}`)
+    const blastFactor = await page.$$eval('input[type="number"]', (els) =>
+      els.map((e) => e.value))
+    check('+6 h: the blasting factor shown is that option\'s (0.93)',
+      blastFactor.includes('0.93'), JSON.stringify(blastFactor))
+  }
+
+  // ---- the history is this tab's, not everyone's (BUG-3) ------------------
+  {
+    const mine = await body()
+    check('this tab lists the scenarios it ran', /Scenarios you have run \([1-9]/i.test(mine),
+      (mine.match(/Scenarios you have run[^\n]{0,20}/i) || ['no list'])[0])
+    const other = await browser.createBrowserContext()
+    const page2 = await other.newPage()
+    await page2.setViewport({ width: 1440, height: 1400 })
+    await page2.goto(`${BASE}/mine-twin`, { waitUntil: 'networkidle2', timeout: 60000 })
+    await sleep(4000)
+    const theirs = await page2.evaluate(() => document.body.innerText)
+    check('another visitor sees none of them', !/Scenarios you have run \(\d/i.test(theirs),
+      (theirs.match(/Scenarios you have run[^\n]{0,20}/i) || ['none listed'])[0])
+    await other.close()
   }
 
   await browser.close()

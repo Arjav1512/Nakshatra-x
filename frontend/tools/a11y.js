@@ -50,6 +50,7 @@ function arg(name, fallback) {
   const report = []
   let totalSerious = 0
   let totalStatus = 0
+  let unaudited = 0
 
   /**
    * Both widths, every route.
@@ -69,10 +70,26 @@ function arg(name, fallback) {
   for (const route of routes) {
     const page = await browser.newPage()
     await page.setViewport({ width, height })
+    // A networkidle2 timeout on a page that keeps loading map tiles is still a
+    // page worth auditing. Anything else is not: this used to swallow every
+    // navigation error, so with the server down axe audited Chrome's own error
+    // page, found no status labels (no minimum), and the run PASSED (BUG-2).
+    let response = null
+    let notAudited = null
     try {
-      await page.goto(base + route, { waitUntil: 'networkidle2', timeout: 45000 })
-    } catch {
-      /* fall through — audit whatever rendered */
+      response = await page.goto(base + route, { waitUntil: 'networkidle2', timeout: 45000 })
+    } catch (e) {
+      if (!(e && e.name === 'TimeoutError')) notAudited = e.message
+    }
+    if (!notAudited && page.url().startsWith('chrome-error://')) notAudited = 'browser error page'
+    if (!notAudited && response && response.status() >= 500) notAudited = `HTTP ${response.status()}`
+    if (!notAudited && !(await page.$('#main'))) notAudited = 'not an app document (no #main)'
+    if (notAudited) {
+      unaudited++
+      report.push({ route, viewport: vp, width, notAudited })
+      console.log(`${vp.padEnd(8)} ${route.padEnd(18)} NOT AUDITED — ${notAudited}`)
+      await page.close()
+      continue
     }
     await new Promise((r) => setTimeout(r, settle))
 
@@ -119,9 +136,10 @@ function arg(name, fallback) {
     fs.writeFileSync(out, JSON.stringify(report, null, 2))
   }
 
-  const ok = totalSerious === 0 && totalStatus === 0
+  const ok = totalSerious === 0 && totalStatus === 0 && unaudited === 0
   console.log(
-    `\n${ok ? 'PASS' : 'FAIL'} — ${totalSerious} serious/critical violations and ${totalStatus} status label(s) below threshold or unverifiable across ${routes.length} route(s) x 2 viewports (1280, 375)`
+    `\n${ok ? 'PASS' : 'FAIL'} — ${totalSerious} serious/critical violations and ${totalStatus} status label(s) below threshold or unverifiable across ${routes.length} route(s) x 2 viewports (1280, 375)` +
+      (unaudited ? `; ${unaudited} route/viewport(s) NOT AUDITED` : '')
   )
   process.exit(ok ? 0 : 1)
 })()

@@ -29,6 +29,10 @@ import {
  * in risk. `predicted_` became `estimated_`, because a prediction is what the
  * forecaster makes and this is arithmetic over stated assumptions.
  */
+/** sessionStorage key and length for this tab's scenario history. */
+const HISTORY_KEY = 'nx-mine-twin-history'
+const HISTORY_LIMIT = 20
+
 export type Scenario = {
   id: string
   mine_name: string
@@ -111,8 +115,10 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
       ])
     )
   })
-  // When a control moves, adopt that option's documented default factor —
-  // unless the planner has already overridden it.
+  // When a control moves, adopt that option's documented factor; the planner
+  // can still edit it afterwards. This was defined but never called — every
+  // control only changed its label, so `factors` kept its opening values and
+  // every run returned the same estimate (a 12 h blast delay showed +2,285 t).
   const chooseOption = (groupId: string, optionValue: string | number) => {
     const group = ASSUMPTION_GROUPS.find((g) => g.id === groupId)
     const opt = group?.options.find((o) => o.value === optionValue)
@@ -255,7 +261,17 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
         })
         setSimError(null)
         setRanWith(ranKey)
-        setHistory(data.scenarios || [])
+        if (data.scenario) {
+          setHistory((h) => {
+            const next = [data.scenario as Scenario, ...h].slice(0, HISTORY_LIMIT)
+            try {
+              sessionStorage.setItem(HISTORY_KEY, JSON.stringify(next))
+            } catch {
+              // Storage full or disabled: the list still holds for this page.
+            }
+            return next
+          })
+        }
 
         // Check the controls against the operating rules, in parallel with
         // showing the arithmetic — never instead of it.
@@ -337,18 +353,19 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
     return () => { alive = false }
   }, [selectedMine.numericId])
 
-  const loadHistory = async () => {
-    try {
-      const res = await fetch('/api/v1/mine-twin')
-      if (res.ok) {
-        const data = await res.json()
-        setHistory(data.scenarios || [])
-      }
-    } catch {}
-  }
-
+  // "Scenarios you have run · this session only": this browser tab's runs,
+  // from sessionStorage. It was a list the server kept for every visitor, so
+  // one planner's runs showed on everyone's screen (BUG-3).
   useEffect(() => {
-    loadHistory()
+    try {
+      const raw = sessionStorage.getItem(HISTORY_KEY)
+      const parsed = raw ? JSON.parse(raw) : []
+      if (Array.isArray(parsed)) {
+        setHistory(parsed.filter((s) => s && typeof s.id === 'string').slice(0, HISTORY_LIMIT))
+      }
+    } catch {
+      // Unreadable or disabled storage: start with no history.
+    }
   }, [])
 
   // `|| 14200`, `|| 16620` and `|| 2420` used to stand here. Each one turned a
@@ -452,7 +469,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               value: opt,
               label: opt === '04-10' ? '04:00-10:00' : opt === '06-14' ? '06:00-14:00' : '22:00-06:00',
             }))}
-            onChange={setShift}
+            onChange={(v) => { setShift(v); chooseOption('shiftWindow', v) }}
           />
           <OptionGroup
             label="Pit blasting delay"
@@ -462,7 +479,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               value: opt,
               label: opt === 0 ? 'On time (0h)' : `+${opt}h delay`,
             }))}
-            onChange={setBlastDelay}
+            onChange={(v) => { setBlastDelay(v); chooseOption('blastingDelayHours', v) }}
           />
           <OptionGroup
             label="Equipment redeployment"
@@ -472,14 +489,14 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
               value: opt,
               label: opt === 'none' ? 'None' : opt === '1-crusher' ? '1 crusher' : '1 shovel + dumper',
             }))}
-            onChange={setRedeploy}
+            onChange={(v) => { setRedeploy(v); chooseOption('redeploy', v) }}
           />
           <OptionGroup
             label="Dry-blast tolerance"
             value={`${tolerance}%`}
             current={tolerance}
             options={([10, 20, 30] as const).map((opt) => ({ value: opt, label: `${opt}% tol` }))}
-            onChange={setTolerance}
+            onChange={(v) => { setTolerance(v); chooseOption('dryBlastTolerance', v) }}
           />
 
           {/* Action Simulation Trigger Button */}
@@ -582,10 +599,11 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
                         type="number"
                         step="0.01"
                         min="0.01"
+                        max="10"
                         value={factors[g.id] ?? 1}
                         onChange={(e) => {
                           const v = Number(e.target.value)
-                          if (Number.isFinite(v) && v > 0) {
+                          if (Number.isFinite(v) && v >= 0.01 && v <= 10) {
                             setFactors((f) => ({ ...f, [g.id]: v }))
                           }
                         }}
@@ -971,11 +989,8 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
       {history.length > 0 && (
         <div className="space-y-3 border-t border-border-default pt-6">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            {/* Still uppercase in CSS. tools/e2e-scenario.js's "no scenario
-                listed before a run" regex is case-sensitive and has only ever
-                read this heading uppercased; sentence case would turn it into
-                a live check that fails on the shared server-side history
-                (docs/bug-reports/2026-10-18-…, BUG-3), not on this design. */}
+            {/* Uppercase in CSS, a leftover documented in the mapping's §5.9.
+                The history under it is this tab's own (sessionStorage). */}
             <h3 className="label flex items-center gap-2 uppercase">
               <Database className="h-4 w-4" aria-hidden="true" />
               <span>Scenarios you have run ({history.length})</span>
