@@ -16,7 +16,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { signInWithGooglePopup } from '@/firebase'
 
 export function LoginForm() {
   // Form State
@@ -27,7 +26,7 @@ export function LoginForm() {
   const [showBackup, setShowBackup] = useState(false)
 
   // UI State
-  const [loading, setLoading] = useState<'send_otp' | 'verify_otp' | 'guest' | 'google' | 'github' | null>(null)
+  const [loading, setLoading] = useState<'send_otp' | 'verify_otp' | 'guest' | 'github' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [successNotice, setSuccessNotice] = useState<string | null>(null)
   const [resendCooldown, setResendCooldown] = useState(0)
@@ -143,7 +142,7 @@ export function LoginForm() {
 
       setSuccessNotice('Identity verified! Redirecting to Command Dashboard...')
       setTimeout(() => {
-        window.location.replace('/dashboard')
+        window.location.replace('/console')
       }, 250)
     } catch (err: any) {
       setError(err?.message || 'Verification failed. Please check the 6-digit code.')
@@ -253,7 +252,7 @@ export function LoginForm() {
 
       setSuccessNotice('Guest clearance granted! Entering console...')
       setTimeout(() => {
-        window.location.replace('/dashboard')
+        window.location.replace('/console')
       }, 250)
     } catch (err: any) {
       setError(err?.message || 'Guest login failed. Please try again.')
@@ -262,105 +261,14 @@ export function LoginForm() {
     }
   }
 
-  // 4. Guaranteed Real Google Sign-in Handler with Supabase Profile Sync
-  const handleGoogleLogin = async () => {
-    try {
-      setLoading('google')
-      setError(null)
-      setSuccessNotice('Connecting with Google Authentication...')
-
-      let googleUser: {
-        id: string
-        email: string
-        full_name: string
-        avatar_url: string
-        provider: string
-        email_verified: boolean
-      } | null = null
-
-      // Attempt 1: Real Firebase Google Popup (accounts.google.com)
-      try {
-        const { user } = await signInWithGooglePopup()
-        if (user) {
-          googleUser = {
-            id: user.uid,
-            email: user.email || email.trim() || 'operator@nakshatra-x.space',
-            full_name: user.displayName || fullName.trim() || user.email?.split('@')[0] || 'Google Mission Specialist',
-            avatar_url: user.photoURL || '',
-            provider: 'Google Authentication (Supabase Linked)',
-            email_verified: user.emailVerified ?? true,
-          }
-        }
-      } catch (fbErr: any) {
-        console.warn('[AUTH] Firebase popup notice:', fbErr)
-
-        // Fallback: Immediate verified Google Operator Clearance
-        const targetEmail = email.trim().toLowerCase() || 'dattarupraj@gmail.com'
-        const targetName = fullName.trim() || targetEmail.split('@')[0].replace('.', ' ') || 'Orbital Mission Specialist'
-        
-        googleUser = {
-          id: `goog_${Date.now()}`,
-          email: targetEmail,
-          full_name: targetName.charAt(0).toUpperCase() + targetName.slice(1),
-          avatar_url: 'https://lh3.googleusercontent.com/a/ACg8ocL89example',
-          provider: 'Google Authentication (Verified Clearance)',
-          email_verified: true,
-        }
-      }
-
-      // Synchronize with Supabase PostgreSQL profiles & Server Session
-      if (googleUser) {
-        setSuccessNotice('Synchronizing Google profile with Supabase...')
-
-        // 1. Sync into Supabase PostgreSQL profiles table
-        try {
-          await supabase.from('profiles').upsert(
-            {
-              id: googleUser.id,
-              email: googleUser.email,
-              full_name: googleUser.full_name,
-              avatar_url: googleUser.avatar_url,
-              role: 'operator',
-              provider: googleUser.provider,
-              last_sign_in_at: new Date().toISOString(),
-            },
-            { onConflict: 'id' }
-          )
-        } catch (dbErr) {
-          console.warn('[AUTH] Supabase profiles sync skipped:', dbErr)
-        }
-
-        // 2. Establish server cookie session
-        const sessionRes = await fetch('/api/auth/session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(googleUser),
-        })
-
-        const sessionData = await sessionRes.json().catch(() => ({}))
-
-        // 3. Fallback client cookie
-        try {
-          const clientData = sessionData.user || googleUser
-          document.cookie = `nx-operator-session=${encodeURIComponent(
-            JSON.stringify(clientData)
-          )}; path=/; max-age=604800; SameSite=Lax`
-        } catch {
-          // Ignore
-        }
-
-        setSuccessNotice('Google authentication successful! Entering Orbital Console...')
-        setTimeout(() => {
-          window.location.replace('/dashboard')
-        }, 250)
-      }
-    } catch (err: any) {
-      console.error('Google Sign-in error:', err)
-      setError(err?.message || 'Google sign-in could not be completed. Please try again or use Email OTP / Guest Mode.')
-      setLoading(null)
-      setSuccessNotice(null)
-    }
-  }
+  // Google sign-in is not offered (BUG-4). Its handler could never create a
+  // session: it POSTed the user to /api/auth/session, which has no POST (the
+  // route that minted sessions from a request body was removed as an auth
+  // bypass), and nothing on the server verifies a Google ID token. A
+  // successful popup therefore ended in "Google authentication successful!"
+  // with no session, and a failed one fabricated a user marked
+  // email_verified: true with a hardcoded personal Gmail address. Offering it
+  // again needs a server route that verifies the Firebase ID token.
 
   // 5. Real GitHub OAuth 2.0 Authorization Flow Handler
   const handleGithubLogin = () => {
@@ -397,7 +305,7 @@ export function LoginForm() {
         </p>
         <h1 className="mt-3 font-display text-3xl text-text-primary sm:text-4xl">Sign in</h1>
         <p className="mt-2 text-sm text-text-secondary">
-          Enter your email to receive a 6-digit code in your inbox, or sign in via Google / GitHub.
+          Enter your email to receive a 6-digit code in your inbox, or sign in with GitHub.
         </p>
       </div>
 
@@ -417,41 +325,8 @@ export function LoginForm() {
       )}
 
       <div className="space-y-5">
-        {/* OAuth sign-in (Google, GitHub) */}
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            disabled={loading !== null}
-            className={`${BTN} bg-surface-0 text-text-primary ring-1 ring-inset ring-border-interactive hover:bg-surface-2`}
-          >
-            {loading === 'google' ? (
-              <Loader2 size={15} className="animate-spin" aria-hidden="true" />
-            ) : (
-              <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                />
-              </svg>
-            )}
-            <span className="truncate">
-              {loading === 'google' ? 'Google...' : 'Sign in Google'}
-            </span>
-          </button>
-
+        {/* OAuth sign-in (GitHub) */}
+        <div className="grid grid-cols-1 gap-2">
           {/* Real GitHub OAuth 2.0 Login */}
           <button
             type="button"

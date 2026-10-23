@@ -22,12 +22,21 @@ export default function AdminProfilePage() {
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
+  // Ask the server; `admin_session` is HttpOnly and invisible to document.cookie.
   useEffect(() => {
-    if (!document.cookie.includes('admin_session=true')) {
-      router.push('/admin/login')
-      return
+    let alive = true
+    fetch('/api/admin/auth')
+      .then((res) => {
+        if (!alive) return
+        if (!res.ok) router.push('/admin/login')
+        else fetchUsers()
+      })
+      .catch(() => {
+        if (alive) router.push('/admin/login')
+      })
+    return () => {
+      alive = false
     }
-    fetchUsers()
   }, [router])
 
   const fetchUsers = async () => {
@@ -52,8 +61,13 @@ export default function AdminProfilePage() {
     }
   }
 
-  const handleLogout = () => {
-    document.cookie = 'admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+  // The admin token is HttpOnly: only the server can clear it.
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/auth', { method: 'DELETE' })
+    } catch {
+      // Fall through to the login screen either way.
+    }
     router.push('/admin/login')
   }
 

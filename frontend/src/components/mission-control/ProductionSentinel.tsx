@@ -30,7 +30,10 @@ import { EmptyState, Skeleton, StatusDot, type Status } from '@/components/ui/pr
  */
 
 const TILES: { key: string; label: string }[] = [
-  { key: 'forecast.shortfall_percentage', label: 'Shortfall against plan' },
+  // Not the forecaster's shortfall: the console's figure comes from the
+  // validated per-grade model, this from a conditions heuristic. Labelled
+  // alike, they gave one mine 0.7% and 43% for the same question.
+  { key: 'forecast.shortfall_percentage', label: 'Conditions drag, % of plan' },
   { key: 'forecast.total_planned_tonnes', label: 'Planned output' },
   { key: 'risk.composite_risk_score', label: 'Composite risk' },
   { key: 'operations.equipment_availability_pct', label: 'Equipment availability' },
@@ -153,8 +156,10 @@ export default function ProductionSentinel() {
           <p className="measure text-xs text-text-tertiary">
             Every tile above is rendered from the telemetry envelope, so each carries its own
             source and kind — weather is measured, operational figures are synthetic, and the
-            badge on each value says which. Open the console for the per-grade forecast, the
-            backtest and constraint-checked actions for this mine.
+            badge on each value says which. The drag and composite-risk figures are a heuristic
+            over this week&apos;s conditions, not the forecaster&apos;s expected shortfall: that,
+            with its per-grade intervals, backtest and constraint-checked actions, is on the
+            console for this mine.
           </p>
         </>
       )}

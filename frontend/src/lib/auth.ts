@@ -75,6 +75,16 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
 }
 
 /** True only for a verified administrator token. */
+/** The signed administrator token's profile, or null. */
+export async function currentAdmin() {
+  try {
+    const cookieStore = await cookies()
+    return decodeAdmin(cookieStore.get(ADMIN_COOKIE)?.value)
+  } catch {
+    return null
+  }
+}
+
 export async function requireAdmin(): Promise<boolean> {
   try {
     const cookieStore = await cookies()

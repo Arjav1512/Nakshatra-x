@@ -1,52 +1,35 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { supabaseAdmin } from '@/lib/supabase'
+import { findSuperadmin } from '@/lib/admin-slot'
+import { ADMIN_COOKIE, buildAdmin, encodeAdmin, requestIsHttps, sessionCookieOptions } from '@/lib/session'
 
-/**
- * Checks if the single primary admin slot is occupied.
+/*
+ * The single primary-admin slot.
+ *
+ * The slot check reported the slot free whenever the user lookup failed, read
+ * only the first page of users, and counted `user_metadata.is_primary_admin`
+ * (writable by any user) as an admin — any of which let an anonymous POST here
+ * create a second superadmin. GET also returned the admin's id, e-mail,
+ * username and full name to anyone, i.e. both login identifiers. Now the
+ * lookup reads every page, only `app_metadata.role` counts, an unknown status
+ * refuses rather than assumes, and GET says only whether the slot is free.
  */
-async function checkAdminSlotStatus() {
-  try {
-    const { data, error } = await supabaseAdmin.auth.admin.listUsers()
-    if (error) {
-      console.error('[ADMIN/SETUP] listUsers error:', error)
-      return { isSlotAvailable: true, adminCount: 0, adminUser: null }
-    }
-
-    const admin = data?.users?.find(
-      (u) =>
-        u.app_metadata?.role === 'superadmin' ||
-        u.user_metadata?.is_primary_admin === true
-    )
-
-    if (admin) {
-      return {
-        isSlotAvailable: false,
-        adminCount: 1,
-        adminUser: {
-          id: admin.id,
-          email: admin.email,
-          username: admin.user_metadata?.username || 'Commander',
-          full_name: admin.user_metadata?.full_name || 'Primary Commander',
-          created_at: admin.created_at,
-        },
-      }
-    }
-
-    return { isSlotAvailable: true, adminCount: 0, adminUser: null }
-  } catch (err: any) {
-    console.error('[ADMIN/SETUP] checkAdminSlotStatus exception:', err)
-    return { isSlotAvailable: true, adminCount: 0, adminUser: null }
-  }
+const UNAVAILABLE = {
+  error: 'The administrator slot status could not be determined. Setup is refused until it can be.',
 }
 
-// GET: Check slot availability
+// GET: Check slot availability. "Unknown" is an answer, not a server error:
+// isSlotAvailable is null and clients must not treat it as free. Setup itself
+// (POST) is refused with 503 while the status is unknown.
 export async function GET() {
-  const status = await checkAdminSlotStatus()
+  const lookup = await findSuperadmin()
+  if (!lookup.ok) {
+    console.error('[ADMIN/SETUP] slot lookup failed:', lookup.reason)
+    return NextResponse.json({ isSlotAvailable: null, ...UNAVAILABLE, policy: 'SINGLE_PRIMARY_ADMIN_LOCK' })
+  }
   return NextResponse.json({
-    isSlotAvailable: status.isSlotAvailable,
-    adminCount: status.adminCount,
-    adminUser: status.adminUser,
+    isSlotAvailable: lookup.admin === null,
     policy: 'SINGLE_PRIMARY_ADMIN_LOCK',
   })
 }
@@ -54,9 +37,13 @@ export async function GET() {
 // POST: Register the single primary administrator
 export async function POST(request: Request) {
   try {
-    // 1. Enforce strict single-slot lock
-    const status = await checkAdminSlotStatus()
-    if (!status.isSlotAvailable) {
+    // 1. Enforce strict single-slot lock — and refuse when it cannot be checked.
+    const lookup = await findSuperadmin()
+    if (!lookup.ok) {
+      console.error('[ADMIN/SETUP] slot lookup failed:', lookup.reason)
+      return NextResponse.json(UNAVAILABLE, { status: 503 })
+    }
+    if (lookup.admin !== null) {
       return NextResponse.json(
         {
           error:
@@ -89,8 +76,8 @@ export async function POST(request: Request) {
       email: email.trim().toLowerCase(),
       password: password,
       email_confirm: true,
+      // The role lives in app_metadata, which only the service role can set.
       user_metadata: {
-        is_primary_admin: true,
         username: adminUsername,
         full_name: adminFullName,
         role: 'Chief Orbital Commander',
@@ -126,37 +113,23 @@ export async function POST(request: Request) {
       // Ignored if profiles table has specific policy
     }
 
-    // 4. Automatically establish authenticated admin session
+    // 4. Sign the new administrator in with the same signed token as login.
+    // This set an unsigned JSON `nx_admin_token` that decodeAdmin() rejects, so
+    // a freshly created admin was not signed in at all.
+    const maxAge = 60 * 60 * 24 * 7
     const cookieStore = await cookies()
-    const isHttps =
-      request.headers.get('x-forwarded-proto') === 'https' ||
-      process.env.NODE_ENV === 'production'
-
-    cookieStore.set('admin_session', 'true', {
-      httpOnly: false,
-      secure: isHttps,
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7,
-    })
-
     cookieStore.set(
-      'nx_admin_token',
-      JSON.stringify({
-        id: created.user.id,
-        email: created.user.email,
-        username: adminUsername,
-        full_name: adminFullName,
-        role: 'superadmin',
-        loginTime: Date.now(),
-      }),
-      {
-        httpOnly: true,
-        secure: isHttps,
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7,
-      }
+      ADMIN_COOKIE,
+      encodeAdmin(
+        buildAdmin({
+          id: created.user.id,
+          email: created.user.email || email.trim().toLowerCase(),
+          username: adminUsername,
+          full_name: adminFullName,
+          ttlSeconds: maxAge,
+        })
+      ),
+      sessionCookieOptions(requestIsHttps(request), maxAge)
     )
 
     console.log(`[ADMIN/SETUP] Single admin slot claimed by: ${created.user.email}`)

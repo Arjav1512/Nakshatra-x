@@ -9,7 +9,8 @@ import {
 } from '@/lib/session'
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
-import { supabase, supabaseAdmin } from '@/lib/supabase'
+import { serverAuthClient, supabaseAdmin } from '@/lib/supabase'
+import { clientIp, hit } from '@/lib/rate-limit'
 
 // In-memory store for OTPs (with timestamp fallback)
 interface OtpRecord {
@@ -27,8 +28,57 @@ declare global {
 const otpStore: Map<string, OtpRecord> =
   global.__NAKSHATRA_OTP_STORE || (global.__NAKSHATRA_OTP_STORE = new Map())
 
+/*
+ * Bounds on the code flow. Before these, the 6-digit code could be guessed
+ * without limit (`attempts` was set to 0 and never read), codes could be
+ * requested for any address as often as anyone liked, `fullName` of any size
+ * was stored in this process-global map (a 1 MB body was accepted) and pasted
+ * unescaped into the HTML of the e-mail, and expired entries were never
+ * removed.
+ */
+const MAX_BODY_BYTES = 4 * 1024
+const MAX_EMAIL_LENGTH = 254
+const MAX_NAME_LENGTH = 64
+/** Wrong codes allowed per issued code; then the code is withdrawn. */
+const MAX_VERIFY_ATTEMPTS = 5
+/** Verify attempts per address in 10 minutes, whichever provider sent the code:
+ *  the Supabase path is checked first and the per-code count above cannot see it. */
+const VERIFIES_PER_ADDRESS_PER_10_MIN = 10
+/** Codes per address: one a minute, five an hour. */
+const SEND_COOLDOWN_MS = 60 * 1000
+const SENDS_PER_HOUR = 5
+/** Per client address, behind the per-address limits. */
+const SENDS_PER_IP_PER_HOUR = 20
+const VERIFIES_PER_IP_PER_10_MIN = 30
+const MAX_STORED_CODES = 10_000
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string)
+}
+
+function codesMatch(expected: string, given: string): boolean {
+  const a = Buffer.from(expected)
+  const b = Buffer.from(given)
+  return a.length === b.length && crypto.timingSafeEqual(a, b)
+}
+
+function sweepExpired(now: number) {
+  for (const [key, record] of otpStore) {
+    if (record.expiresAt < now) otpStore.delete(key)
+  }
+}
+
+function tooMany(message: string, retryAfterSeconds: number) {
+  return NextResponse.json(
+    { error: message },
+    { status: 429, headers: { 'Retry-After': String(retryAfterSeconds) } }
+  )
+}
+
 // 1. Send verification email via free SMTP (e.g. Gmail / Brevo / Custom)
-async function sendSmtpEmail(to: string, code: string, name: string): Promise<boolean> {
+async function sendSmtpEmail(to: string, code: string, rawName: string): Promise<boolean> {
+  const name = escapeHtml(rawName.slice(0, MAX_NAME_LENGTH))
   const host = process.env.SMTP_HOST || 'smtp.gmail.com'
   const user = process.env.SMTP_USER
   const pass = process.env.SMTP_PASS
@@ -88,7 +138,8 @@ async function sendSmtpEmail(to: string, code: string, name: string): Promise<bo
 }
 
 // 2. Send verification email via Resend API (secondary fallback)
-async function sendVerificationEmail(to: string, code: string, name: string): Promise<boolean> {
+async function sendVerificationEmail(to: string, code: string, rawName: string): Promise<boolean> {
+  const name = escapeHtml(rawName.slice(0, MAX_NAME_LENGTH))
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) {
     return false
@@ -150,17 +201,52 @@ async function sendVerificationEmail(to: string, code: string, name: string): Pr
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const { action, email, code, fullName } = body
-
-    if (!email || !email.includes('@')) {
-      return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 })
+    if (Number(request.headers.get('content-length') ?? 0) > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: 'Request body too large.' }, { status: 413 })
     }
+    const raw = await request.text()
+    if (raw.length > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: 'Request body too large.' }, { status: 413 })
+    }
+    let body: Record<string, unknown>
+    try {
+      body = JSON.parse(raw)
+    } catch {
+      return NextResponse.json({ error: 'Malformed request.' }, { status: 400 })
+    }
+    const action = body?.action
+    const email = typeof body?.email === 'string' ? body.email : ''
+    const code = typeof body?.code === 'string' ? body.code.slice(0, 12) : ''
+    const fullName =
+      typeof body?.fullName === 'string' ? body.fullName.trim().slice(0, MAX_NAME_LENGTH) : ''
 
     const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail || normalizedEmail.length > MAX_EMAIL_LENGTH || !EMAIL_PATTERN.test(normalizedEmail)) {
+      return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 })
+    }
+    const ip = clientIp(request)
 
     // 1. ACTION: SEND VERIFICATION CODE
     if (action === 'send') {
+      // Per client first, so a refused request spends none of the address's budget.
+      const perIp = hit(`otp-send-ip:${ip}`, SENDS_PER_IP_PER_HOUR, 60 * 60 * 1000)
+      if (!perIp.ok) {
+        return tooMany('Too many codes requested. Please try again later.', perIp.retryAfterSeconds)
+      }
+      const cooldown = hit(`otp-send-cooldown:${normalizedEmail}`, 1, SEND_COOLDOWN_MS)
+      if (!cooldown.ok) {
+        return tooMany('A code was sent to this address in the last minute. Please wait before asking again.', cooldown.retryAfterSeconds)
+      }
+      const hourly = hit(`otp-send:${normalizedEmail}`, SENDS_PER_HOUR, 60 * 60 * 1000)
+      if (!hourly.ok) {
+        return tooMany('Too many codes requested. Please try again later.', hourly.retryAfterSeconds)
+      }
+      const now = Date.now()
+      sweepExpired(now)
+      if (!otpStore.has(normalizedEmail) && otpStore.size >= MAX_STORED_CODES) {
+        return NextResponse.json({ error: 'Sign-in by code is busy. Please try again shortly.' }, { status: 503 })
+      }
+
       // Cryptographically secure: Math.random is predictable and must never
       // generate an authentication credential.
       const generatedCode = crypto.randomInt(100000, 1000000).toString()
@@ -168,7 +254,7 @@ export async function POST(request: Request) {
 
       otpStore.set(normalizedEmail, {
         code: generatedCode,
-        fullName: fullName || normalizedEmail.split('@')[0],
+        fullName: fullName || normalizedEmail.split('@')[0].slice(0, MAX_NAME_LENGTH),
         expiresAt,
         attempts: 0,
       })
@@ -191,7 +277,7 @@ export async function POST(request: Request) {
       // B. Priority 2: Supabase Free Mailer
       if (!emailSent) {
         try {
-          const { error: supErr } = await supabase.auth.signInWithOtp({
+          const { error: supErr } = await serverAuthClient().auth.signInWithOtp({
             email: normalizedEmail,
             options: {
               shouldCreateUser: true,
@@ -249,13 +335,21 @@ export async function POST(request: Request) {
 
     // 2. ACTION: VERIFY CODE
     if (action === 'verify') {
-      const cleanCode = (code || '').replace(/[^0-9]/g, '').trim()
+      const perIp = hit(`otp-verify-ip:${ip}`, VERIFIES_PER_IP_PER_10_MIN, 10 * 60 * 1000)
+      if (!perIp.ok) {
+        return tooMany('Too many attempts. Please try again later.', perIp.retryAfterSeconds)
+      }
+      const perAddress = hit(`otp-verify:${normalizedEmail}`, VERIFIES_PER_ADDRESS_PER_10_MIN, 10 * 60 * 1000)
+      if (!perAddress.ok) {
+        return tooMany('Too many attempts for this address. Please wait and request a new code.', perAddress.retryAfterSeconds)
+      }
+      const cleanCode = code.replace(/[^0-9]/g, '').trim()
       let isVerified = false
       let verifiedName = fullName || normalizedEmail.split('@')[0]
 
       // A. Check with Supabase Auth OTP verification (verifies code sent by Supabase to user's inbox)
       try {
-        const { data: supAuthData, error: supVerifyError } = await supabase.auth.verifyOtp({
+        const { data: supAuthData, error: supVerifyError } = await serverAuthClient().auth.verifyOtp({
           email: normalizedEmail,
           token: cleanCode,
           type: 'email',
@@ -276,11 +370,21 @@ export async function POST(request: Request) {
       if (!isVerified) {
         const record = otpStore.get(normalizedEmail)
         if (record) {
-          if (Date.now() <= record.expiresAt && record.code === cleanCode) {
+          if (Date.now() > record.expiresAt) {
+            otpStore.delete(normalizedEmail)
+          } else if (codesMatch(record.code, cleanCode)) {
             isVerified = true
             verifiedName = record.fullName || verifiedName
             otpStore.delete(normalizedEmail)
             console.log(`[AUTH] Verified via internal OTP store for ${normalizedEmail}`)
+          } else {
+            record.attempts += 1
+            if (record.attempts >= MAX_VERIFY_ATTEMPTS) {
+              // Withdrawn: a sixth guess needs a new code, and new codes are
+              // rate-limited per address.
+              otpStore.delete(normalizedEmail)
+              return tooMany('Too many incorrect codes. Please request a new code.', 60)
+            }
           }
         }
       }

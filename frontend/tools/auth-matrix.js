@@ -63,7 +63,7 @@ const PUBLIC = {
   'POST /api/v1/historical-forecasts':
     'Stateless computation over a seeded synthetic series. Persists nothing.',
   'POST /api/v1/mine-twin':
-    'Stateless what-if calculation. It does append to an in-memory scenario buffer capped at 20 entries, which holds no user or operational data and is read by no decision path — an accepted, documented residual rather than a guarded endpoint.',
+    'Stateless what-if calculation. Validates its inputs against the known mines and assumption options, keeps nothing, and returns one scenario; the history is the browser tab\'s (sessionStorage).',
 }
 
 /** Probes. All three must be rejected. */

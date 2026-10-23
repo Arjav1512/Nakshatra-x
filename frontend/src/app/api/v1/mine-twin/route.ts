@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { ASSUMPTION_NOTE } from '@/lib/scenario-assumptions'
+import { randomUUID } from 'crypto'
+import { ASSUMPTION_GROUPS, ASSUMPTION_NOTE } from '@/lib/scenario-assumptions'
+import { FALLBACK_MINES } from '@/components/mission-control/data'
 
 /**
  * What-if scenario calculator (PRD C-6 scenario comparison, C-4 assumptions).
@@ -33,7 +35,8 @@ import { ASSUMPTION_NOTE } from '@/lib/scenario-assumptions'
 
 type SimInput = {
   mineId: string
-  mineName: string
+  /** Ignored: the mine's name is taken from the server's own mine list. */
+  mineName?: string
   /** The factor actually used per assumption group, as shown in the UI. */
   factors: Record<string, number>
   /** Human-readable selection per group, for the record. */
@@ -45,81 +48,132 @@ type SimInput = {
   baselineModelVersion?: string | null
 }
 
-/** Scenarios this process has been asked to compute. Empty until then. */
-let SCENARIOS: any[] = []
+/**
+ * 4. The history is the browser's, not this process's.
+ *
+ * Scenarios used to be appended to a module-level array and returned to every
+ * caller, so a planner's runs — under a heading reading "Scenarios you have run
+ * · this session only" — appeared on every other visitor's screen, along with
+ * any text a direct API caller chose to send (a 2 MB mine name was stored and
+ * served back). This endpoint now keeps nothing: it validates, computes and
+ * returns one scenario, and MineTwinPanel keeps the history in sessionStorage,
+ * which is what "this session only" says.
+ */
+
+/** Bounds on one request. The panel sends well under 1 KB. */
+const MAX_BODY_BYTES = 8 * 1024
+/** A multiplier outside this range is not a plausible planner assumption. */
+const FACTOR_MIN = 0.01
+const FACTOR_MAX = 10
+const MAX_BASELINE_T = 1e9
+const MAX_TEXT = 300
+
+const GROUPS = new Map(ASSUMPTION_GROUPS.map((g) => [g.id as string, g]))
 
 function badRequest(error: string, note: string) {
   return NextResponse.json({ success: false, error, note }, { status: 400 })
 }
 
-export async function POST(req: NextRequest) {
-  try {
-    const body = (await req.json()) as SimInput
-
-    const baseProd = body.baselineProduction
-    if (typeof baseProd !== 'number' || !Number.isFinite(baseProd) || baseProd <= 0) {
-      return badRequest(
-        'baselineProduction is required and must be a positive number.',
-        'Every figure this endpoint returns is derived from the baseline, so it is not defaulted. ' +
-          'Read it from the mine forecast artifact.'
-      )
-    }
-    if (!body.baselineSource) {
-      return badRequest(
-        'baselineSource is required.',
-        'The baseline carries its own provenance onto the scenario; a figure without it cannot be attributed.'
-      )
-    }
-
-    const factors = body.factors ?? {}
-    const values = Object.values(factors)
-    if (!values.length || values.some((f) => typeof f !== 'number' || !Number.isFinite(f) || f <= 0)) {
-      return badRequest(
-        'factors must be a non-empty map of positive numbers.',
-        'The multipliers are planner assumptions supplied by the caller and shown on screen; ' +
-          'this endpoint does not hold a private copy.'
-      )
-    }
-
-    const multiplier = values.reduce((a, f) => a * f, 1)
-    const predicted = Math.round(baseProd * multiplier)
-
-    const scenario = {
-      id: `scen-${Date.now()}`,
-      mine_id: body.mineId,
-      mine_name: body.mineName,
-      selections: body.selections ?? {},
-      factors,
-      combined_multiplier: Number(multiplier.toFixed(4)),
-      baseline_production_t: baseProd,
-      baseline_source: body.baselineSource,
-      baseline_model_version: body.baselineModelVersion ?? null,
-      estimated_production_t: predicted,
-      difference_t: predicted - baseProd,
-      kind: 'assumption' as const,
-      created_at: new Date().toISOString(),
-    }
-
-    SCENARIOS = [scenario, ...SCENARIOS.slice(0, 19)]
-
-    return NextResponse.json({
-      success: true,
-      model_note: ASSUMPTION_NOTE,
-      kind: 'assumption',
-      estimated: predicted,
-      difference: predicted - baseProd,
-      combined_multiplier: scenario.combined_multiplier,
-      scenario,
-      scenarios: SCENARIOS,
-    })
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err?.message || 'Scenario calculation failed' },
-      { status: 400 }
-    )
-  }
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v)
 }
 
-export async function GET() {
-  return NextResponse.json({ scenarios: SCENARIOS, model_note: ASSUMPTION_NOTE })
+export async function POST(req: NextRequest) {
+  const declared = Number(req.headers.get('content-length') ?? 0)
+  if (declared > MAX_BODY_BYTES) {
+    return NextResponse.json({ success: false, error: 'Request body too large.' }, { status: 413 })
+  }
+  const raw = await req.text()
+  if (raw.length > MAX_BODY_BYTES) {
+    return NextResponse.json({ success: false, error: 'Request body too large.' }, { status: 413 })
+  }
+
+  let body: SimInput
+  try {
+    body = JSON.parse(raw) as SimInput
+  } catch {
+    return badRequest('Malformed JSON body.', 'Send the scenario as a JSON object.')
+  }
+  if (!isRecord(body)) {
+    return badRequest('Malformed JSON body.', 'Send the scenario as a JSON object.')
+  }
+
+  const baseProd = body.baselineProduction
+  if (typeof baseProd !== 'number' || !Number.isFinite(baseProd) || baseProd <= 0 || baseProd > MAX_BASELINE_T) {
+    return badRequest(
+      'baselineProduction is required and must be a positive number.',
+      'Every figure this endpoint returns is derived from the baseline, so it is not defaulted. ' +
+        'Read it from the mine forecast artifact.'
+    )
+  }
+  if (typeof body.baselineSource !== 'string' || !body.baselineSource.trim() || body.baselineSource.length > MAX_TEXT) {
+    return badRequest(
+      'baselineSource is required.',
+      'The baseline carries its own provenance onto the scenario; a figure without it cannot be attributed.'
+    )
+  }
+  const modelVersion = body.baselineModelVersion ?? null
+  if (modelVersion !== null && (typeof modelVersion !== 'string' || modelVersion.length > 80)) {
+    return badRequest('baselineModelVersion must be a short string or null.', 'It names the forecaster that produced the baseline.')
+  }
+
+  // The mine and its name come from this server's mine list, not the caller.
+  const mine = FALLBACK_MINES.find((m) => m.id === body.mineId)
+  if (!mine) {
+    return badRequest('Unknown mineId.', 'Scenarios run against a mine this system knows.')
+  }
+
+  const factors = isRecord(body.factors) ? body.factors : {}
+  const entries = Object.entries(factors)
+  if (
+    !entries.length ||
+    entries.some(
+      ([k, f]) =>
+        !GROUPS.has(k) || typeof f !== 'number' || !Number.isFinite(f) || f < FACTOR_MIN || f > FACTOR_MAX
+    )
+  ) {
+    return badRequest(
+      `factors must map assumption groups to numbers between ${FACTOR_MIN} and ${FACTOR_MAX}.`,
+      'The multipliers are planner assumptions supplied by the caller and shown on screen; ' +
+        'this endpoint does not hold a private copy.'
+    )
+  }
+
+  const selections = isRecord(body.selections) ? body.selections : {}
+  for (const [k, v] of Object.entries(selections)) {
+    const group = GROUPS.get(k)
+    if (!group || !group.options.some((o) => o.value === v)) {
+      return badRequest('Unknown selection.', `Each selection must be one of the options shown for ${k}.`)
+    }
+  }
+
+  const values = entries.map(([, f]) => f as number)
+  const multiplier = values.reduce((a, f) => a * f, 1)
+  const predicted = Math.round(baseProd * multiplier)
+
+  const scenario = {
+    id: randomUUID(),
+    mine_id: mine.id,
+    mine_name: mine.name,
+    selections,
+    factors,
+    combined_multiplier: Number(multiplier.toFixed(4)),
+    baseline_production_t: baseProd,
+    baseline_source: body.baselineSource,
+    baseline_model_version: modelVersion,
+    estimated_production_t: predicted,
+    difference_t: predicted - baseProd,
+    kind: 'assumption' as const,
+    created_at: new Date().toISOString(),
+  }
+
+  return NextResponse.json({
+    success: true,
+    model_note: ASSUMPTION_NOTE,
+    kind: 'assumption',
+    estimated: predicted,
+    difference: predicted - baseProd,
+    combined_multiplier: scenario.combined_multiplier,
+    scenario,
+  })
 }

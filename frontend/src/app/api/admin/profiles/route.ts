@@ -1,4 +1,3 @@
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { requireAdmin } from '@/lib/auth'
@@ -15,7 +14,6 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const cookieStore = await cookies()
 
   const usersList: any[] = []
   const seenIds = new Set<string>()
@@ -85,41 +83,11 @@ export async function GET() {
     console.warn('[ADMIN] Profiles table not yet queried:', err)
   }
 
-  // 3. Fallback: Retrieve current active operator session if available
-  const operatorSession = cookieStore.get('nx-operator-session')?.value
-  if (operatorSession) {
-    try {
-      const parsed = JSON.parse(operatorSession)
-      if (parsed.id && !seenIds.has(parsed.id)) {
-        seenIds.add(parsed.id)
-        usersList.push({
-          id: parsed.id,
-          email: parsed.email,
-          full_name: parsed.full_name,
-          avatar_url: parsed.avatar_url || null,
-          role: parsed.role || 'operator',
-          provider: parsed.provider || 'Session Active',
-          created_at: new Date().toISOString(),
-        })
-      }
-    } catch {
-      // Fall through
-    }
-  }
-
-  // 4. Also include default demo operators if list is empty
-  if (usersList.length === 0) {
-    usersList.push({
-      id: 'op-commander-01',
-      email: 'commander@nakshatra-x.space',
-      full_name: 'Commander Rupraj Datta',
-      avatar_url: null,
-      role: 'Chief Orbital Commander',
-      provider: 'Mission Specialist Access',
-      created_at: new Date(Date.now() - 86400000).toISOString(),
-    })
-  }
-
+  // Two fallbacks stood here. One parsed the requester's `nx-operator-session`
+  // cookie as unverified JSON and listed it as a registered user, role and all;
+  // the other, when the list was empty, inserted an invented "Commander" with a
+  // real person's name, dated yesterday. An admin's user list holds only users
+  // the auth provider returned; when it returns none, the list is empty.
   return NextResponse.json({ users: usersList })
 }
 

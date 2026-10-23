@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import sys
+import threading
 from pathlib import Path
 from typing import Sequence
 
@@ -25,6 +26,15 @@ AI_DIR = Path(__file__).resolve().parents[3] / "AI"
 sys.path.insert(0, str(AI_DIR / "scripts"))
 
 MODEL_VERSION = "track-a-gbt-lomo-v1"
+
+#: Concurrent live satellite reads. A live read makes three outbound requests
+#: with 45 s timeouts and holds a server worker throughout (one probe took 29 s).
+#: Unbounded, and reachable anonymously through the site's /prospectivity/
+#: predict proxy for any coordinate, ~40 concurrent requests exhausted the
+#: threadpool and stalled every endpoint. Over the limit, a request gets the
+#: kriged surface and says why, as it already does when a live read fails.
+MAX_LIVE_READS = 2
+_LIVE_READS = threading.BoundedSemaphore(MAX_LIVE_READS)
 _STATE: dict = {}
 
 
@@ -107,6 +117,17 @@ def predict_point(lat: float, lng: float, fetch_live: bool = True) -> dict:
         )
         return result
 
+    if not _LIVE_READS.acquire(blocking=False):
+        result["direct_model_score"] = None
+        result["features"] = None
+        result["error"] = "busy"
+        result["note"] = (
+            f"{MAX_LIVE_READS} live satellite reads are already running, so only the kriged "
+            "surface is returned. No feature values are reported because none were measured. "
+            "Retry shortly for a live read."
+        )
+        return result
+
     try:
         import httpx
         from sentinel_features import build_point_features, fetch_terrain
@@ -149,6 +170,8 @@ def predict_point(lat: float, lng: float, fetch_live: bool = True) -> dict:
             "Live satellite read failed; only the kriged surface is returned. "
             "No feature values are reported because none were measured."
         )
+    finally:
+        _LIVE_READS.release()
     return result
 
 

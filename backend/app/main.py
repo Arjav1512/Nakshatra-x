@@ -15,6 +15,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.body_limit import BodySizeLimit
 from app.core.config import settings
 from app.db.session import Base, engine
 from app.api.routes import router
@@ -96,5 +97,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# Outermost: an oversized body is refused before anything reads it.
+app.add_middleware(BodySizeLimit, max_bytes=settings.max_request_body_bytes)
 
 app.include_router(router)

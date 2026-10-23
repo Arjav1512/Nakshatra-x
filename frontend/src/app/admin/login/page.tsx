@@ -31,7 +31,8 @@ export default function AdminLoginPage() {
       try {
         const res = await fetch('/api/admin/setup')
         const data = await res.json()
-        setSlotAvailable(data.isSlotAvailable)
+        // Unknown when the server cannot tell; never assume the slot is free.
+        setSlotAvailable(res.ok ? data.isSlotAvailable === true : null)
       } catch {
         // Fall through
       }

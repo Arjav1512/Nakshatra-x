@@ -1,6 +1,12 @@
 """
-Real Operational Alert Dispatch & Incident Management System
-Generates automated SMS/Email/Radio dispatch orders with escalation routing.
+Operational alert log.
+
+It said it generated "automated SMS/Email/Radio dispatch orders", and each record
+claimed `DISPATCHED_TO_OPERATIONS` over "SMS + Radio + Automated Scada
+Interlock". Nothing here sends anything: no SMS gateway, mail server, radio or
+SCADA link exists in this system. An alert is recorded in this process's
+in-memory log and returned; the record now says exactly that, and the escalation
+tier is a suggestion for a person, not an action taken.
 """
 
 from typing import Dict, Any, List
@@ -22,9 +28,8 @@ def dispatch_operational_alert(
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S IST")
     alert_id = f"ALT-MOIL-{mine_id}-{int(datetime.now().timestamp())}"
 
-    # Escalation routing
+    # A suggested escalation for whoever reads the log. Nothing is routed.
     escalation_tier = "Tier-1 (Immediate Pit Shift Action)" if severity == "CRITICAL" else "Tier-2 (Daily Plan Adjustment)"
-    channel = "SMS + Radio + Automated Scada Interlock" if severity == "CRITICAL" else "Dashboard + Email Memo"
 
     alert_record = {
         "alert_id": alert_id,
@@ -36,10 +41,9 @@ def dispatch_operational_alert(
         "action_directive": action_directive,
         "recipient_role": recipient_role,
         "escalation_tier": escalation_tier,
-        "dispatch_channel": channel,
+        "dispatch_channel": "none: recorded in this service's in-memory log only",
         "dispatch_timestamp": timestamp,
-        "acknowledgement_status": "DISPATCHED_TO_OPERATIONS",
-        "mock_sms_payload": f"[MOIL NAKSHATRA-X ALERT] {severity}: {mine_name} {alert_type}. Metric: {trigger_metric}. Directive: {action_directive}",
+        "acknowledgement_status": "RECORDED_ONLY",
     }
 
     ALERT_LOGS.insert(0, alert_record)

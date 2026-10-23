@@ -24,7 +24,7 @@ export default function AdminSetupPage() {
   const router = useRouter()
   const [checking, setChecking] = useState(true)
   const [isSlotAvailable, setIsSlotAvailable] = useState<boolean | null>(null)
-  const [adminUser, setAdminUser] = useState<any>(null)
+  const [statusUnknown, setStatusUnknown] = useState(false)
 
   // Form State
   const [fullName, setFullName] = useState('')
@@ -44,9 +44,15 @@ export default function AdminSetupPage() {
       try {
         setChecking(true)
         const res = await fetch('/api/admin/setup')
-        const data = await res.json()
-        setIsSlotAvailable(data.isSlotAvailable)
-        setAdminUser(data.adminUser || null)
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok || typeof data.isSlotAvailable !== 'boolean') {
+          // The server refuses setup when it cannot tell whether the slot is
+          // taken; saying "occupied" or "available" here would be a guess.
+          setStatusUnknown(true)
+          setError(data.error || 'The administrator slot status could not be determined.')
+          return
+        }
+        setIsSlotAvailable(data.isSlotAvailable === true)
       } catch {
         setError('Failed to query admin registration gateway.')
       } finally {
@@ -119,6 +125,17 @@ export default function AdminSetupPage() {
         <p className="mt-4 text-xs tracking-[0.044em] text-accent ">
           Scanning Commander Cryptographic Registry...
         </p>
+      </div>
+    )
+  }
+
+  if (statusUnknown) {
+    return (
+      <div className="min-h-[calc(100dvh-3.5rem)] bg-surface-0 flex items-center justify-center p-4">
+        <div role="alert" className="max-w-xl w-full rounded-xl border border-border-default bg-surface-1 p-6 text-center">
+          <h1 className="text-xl text-text-primary">Setup is unavailable</h1>
+          <p className="mt-2 text-sm text-text-secondary">{error}</p>
+        </div>
       </div>
     )
   }
@@ -307,21 +324,14 @@ export default function AdminSetupPage() {
             </div>
             <h2 className="text-xl text-text-primary mb-2">Single admin slot occupied</h2>
             <p className="text-xs text-text-secondary max-w-sm mx-auto mb-6 leading-relaxed">
-              The sole administrator account for this platform has already been claimed by Primary Commander{' '}
-              <span className="text-accent">
-                {adminUser?.email || adminUser?.username || 'System Administrator'}
-              </span>
-              . No additional admin accounts can be created.
+              The sole administrator account for this platform has already been claimed. No
+              additional admin accounts can be created.
             </p>
 
             <div className="p-4 rounded-md bg-surface-0/80 border border-border-default mb-6 text-left text-xs space-y-2">
               <div className="flex justify-between items-center text-text-secondary text-xs">
                 <span>Status:</span>
                 <span className="text-status-critical">Locked (1/1)</span>
-              </div>
-              <div className="flex justify-between items-center text-text-secondary text-xs">
-                <span>Registered Commander:</span>
-                <span className="text-text-primary font-mono">{adminUser?.full_name || 'Primary Commander'}</span>
               </div>
               <div className="flex justify-between items-center text-text-secondary text-xs">
                 <span>Security Level:</span>

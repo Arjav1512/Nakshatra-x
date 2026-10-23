@@ -20,6 +20,13 @@ class Settings(BaseSettings):
     open_meteo_base_url: str = "https://api.open-meteo.com"
     offline: bool = False
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+    # Neither uvicorn nor FastAPI caps a request body; this does (app.core.
+    # body_limit). The largest legitimate body is a 5 MB CSV upload.
+    max_request_body_bytes: int = 6 * 1024 * 1024
+    # `/mines/{id}/backtest?compute=true` refits inside the request (26-216 s)
+    # and writes an artifact. Off unless an operator turns it on; the nightly
+    # batch (`python -m app.api.batch backtest`) is the normal path (PRD N-2).
+    allow_ondemand_backtest: bool = False
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore",
                                       env_prefix="", case_sensitive=False)

@@ -26,7 +26,6 @@ function AuthCallbackContent() {
         }
 
         const code = searchParams.get('code')
-        const next = searchParams.get('next') || '/dashboard'
 
         let session = null
 
@@ -54,70 +53,21 @@ function AuthCallbackContent() {
           session = sessionData.session
         }
 
-        // 3. If session found, extract real user profile data
+        // 3. A provider session exists, but this site cannot turn it into one.
+        //
+        // This posted a profile it built itself to /api/auth/session — which
+        // has no POST (minting a session from a request body was removed as an
+        // auth bypass) — wrote that profile into an unsigned cookie the server
+        // rejects, and said "Signed in. Opening the console…", then followed
+        // `?next=` (an open redirect). Nothing on the server verifies a
+        // Supabase token yet, so the honest outcome is to say so. Offering this
+        // route again needs a server step that verifies the access token.
         if (session?.user) {
-          const user = session.user
-          const meta = user.user_metadata || {}
-
-          const profile = {
-            id: user.id,
-            email: user.email || '',
-            full_name:
-              meta.full_name || meta.name || user.email?.split('@')[0] || 'Orbital Specialist',
-            avatar_url: meta.avatar_url || meta.picture || '',
-            role: 'operator',
-            designation: 'Mission Specialist',
-            provider: 'Supabase Google',
-            email_verified: !!user.email_confirmed_at,
-          }
-
-          if (isMounted) setStatus('Loading your profile…')
-
-          // 4. Upsert into Supabase profiles table
-          try {
-            await supabase.from('profiles').upsert(
-              {
-                id: profile.id,
-                email: profile.email,
-                full_name: profile.full_name,
-                avatar_url: profile.avatar_url,
-                role: profile.role,
-                provider: profile.provider,
-                last_sign_in_at: new Date().toISOString(),
-              },
-              { onConflict: 'id' }
-            )
-          } catch (dbErr) {
-            console.warn('[AUTH CALLBACK] Profile table upsert skipped:', dbErr)
-          }
-
-          // 5. Establish secure server session cookie for Next.js
-          const sessionRes = await fetch('/api/auth/session', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(profile),
-          })
-
-          if (!sessionRes.ok) {
-            console.warn('[AUTH CALLBACK] Session API response not OK, setting client cookie')
-          }
-
-          // Also set client cookie as immediate sync
-          try {
-            document.cookie = `nx-operator-session=${encodeURIComponent(
-              JSON.stringify(profile)
-            )}; path=/; max-age=604800; SameSite=Lax`
-          } catch {
-            // Ignore
-          }
-
-          if (isMounted) {
-            setStatus('Signed in. Opening the console…')
-            setTimeout(() => {
-              window.location.href = next
-            }, 300)
-          }
-          return
+          await supabase.auth.signOut().catch(() => {})
+          throw new Error(
+            'Your account was confirmed, but this site cannot start a session from this link yet. ' +
+              'Sign in with the e-mail code or GitHub instead.'
+          )
         }
 
         // If no user/session found after checking

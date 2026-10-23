@@ -22,6 +22,8 @@ from app.api.response_provenance import header
 from app.api.telemetry import MINE_SOURCE, build_mine_telemetry
 import csv
 import io
+from typing import Literal
+from app.core.config import settings
 
 router = APIRouter(prefix="/api/v1")
 
@@ -221,6 +223,28 @@ async def mine_telemetry(mine_id: int, db: Session = Depends(get_db)):
     return await build_mine_telemetry(mine)
 
 
+#: Horizons whose forecasts are precomputed by `batch all` and committed. Any
+#: other horizon (the parameter accepts 1..60) used to start a ~45 s model fit
+#: on request, queue without limit behind two warm workers, and write a new file
+#: into backend/artifacts/forecasts — anonymously, through the site's proxy —
+#: leaving files that later fail dataset_consistency and /readyz. The console
+#: and every other caller ask for 14 days, so other horizons are refused before
+#: anything is scheduled. (The check lives here, not in forecast_store/track_b:
+#: those modules are fingerprinted into every committed artifact's identity.)
+SERVED_HORIZONS = frozenset({14})
+
+
+def _served_horizon_or_400(horizon_days: int) -> None:
+    if horizon_days not in SERVED_HORIZONS:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Only the {', '.join(f'{h}-day' for h in sorted(SERVED_HORIZONS))} forecast is "
+                "served; other horizons are not precomputed and are not fitted on request."
+            ),
+        )
+
+
 @router.get("/mines/{mine_id}/forecast")
 def track_b_forecast(mine_id: int, horizon_days: int = Query(14, ge=1, le=60),
                      grade: str | None = None):
@@ -231,6 +255,7 @@ def track_b_forecast(mine_id: int, horizon_days: int = Query(14, ge=1, le=60),
     Serves a persisted artifact. It never fits a model — see
     app/api/forecast_store.py for why.
     """
+    _served_horizon_or_400(horizon_days)
     mine_code, _ = _mine_code_or_404(mine_id)
     try:
         return forecast_mine(mine_code, horizon_days=horizon_days, grade=grade)
@@ -254,6 +279,17 @@ def track_b_backtest(mine_id: int, span_days: int = Query(150, ge=60, le=400),
     `?compute=true` to force an on-demand re-run, which N-2 also calls for.
     """
     mine_code, _ = _mine_code_or_404(mine_id)
+    # A re-run refits inside this request for 26-216 s, holds one of the
+    # threadpool's workers throughout, and writes an artifact for whatever
+    # span/step it was given. Unauthenticated, that let anyone exhaust the pool
+    # and add files to the committed set. It is an operator action: off unless
+    # ALLOW_ONDEMAND_BACKTEST is set, with the nightly batch as the normal path.
+    if compute and not settings.allow_ondemand_backtest:
+        raise HTTPException(
+            status_code=403,
+            detail="On-demand backtest re-runs are disabled on this server. "
+                   "Run `python -m app.api.batch backtest`, or set ALLOW_ONDEMAND_BACKTEST=1.",
+        )
     try:
         result = backtest_mine(mine_code, span_days=span_days,
                                step_days=step_days, allow_compute=compute)
@@ -307,6 +343,7 @@ def track_b_backtest(mine_id: int, span_days: int = Query(150, ge=60, le=400),
 @router.get("/mines/{mine_id}/recommendations")
 def track_b_recommendations(mine_id: int, horizon_days: int = Query(14, ge=1, le=60)):
     """Constraint-gated corrective actions. PRD C-1..C-5."""
+    _served_horizon_or_400(horizon_days)
     mine_code, _ = _mine_code_or_404(mine_id)
     try:
         result = recommend_actions(mine_code, horizon_days=horizon_days)
@@ -637,11 +674,19 @@ async def mine_satellite_imagery(mine_id: int, db: Session = Depends(get_db)):
                                               vintage=stac.get("queried_at"))}
     return stac
 
+#: The CSV upload parses and previews; it stores nothing. These bound what one
+#: request can cost: the file is read at most MAX_SIZE + 1 bytes (the body cap in
+#: app.core.body_limit already refuses anything much larger), and rows are
+#: counted while iterating instead of being materialised as a list of dicts,
+#: which turned a 5 MB file into ~500 MiB of Python objects.
+CSV_MAX_BYTES = 5 * 1024 * 1024
+CSV_MAX_ROWS = 100_000
+
+
 @router.post("/upload-operational-csv")
 async def upload_operational_csv(file: UploadFile = File(...)):
-    MAX_SIZE = 5 * 1024 * 1024
-    contents = await file.read()
-    if len(contents) > MAX_SIZE:
+    contents = await file.read(CSV_MAX_BYTES + 1)
+    if len(contents) > CSV_MAX_BYTES:
         raise HTTPException(status_code=400, detail="File payload exceeds 5MB size limit.")
     
     try:
@@ -652,22 +697,39 @@ async def upload_operational_csv(file: UploadFile = File(...)):
             detail="Malformed file encoding. Please upload a valid UTF-8 formatted CSV file."
         )
 
+    preview: list[dict] = []
+    columns: list[str] = []
+    row_count = 0
     try:
         reader = csv.DictReader(io.StringIO(decoded))
-        rows = list(reader)
+        columns = list(reader.fieldnames or [])
+        for row in reader:
+            row_count += 1
+            if row_count > CSV_MAX_ROWS:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"File has more than {CSV_MAX_ROWS:,} rows.",
+                )
+            if len(preview) < 5:
+                preview.append(row)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=400,
             detail=f"Failed to parse CSV structures: {str(e)}"
         )
 
+    # It said "Successfully ingested N operational records into NAKSHATRA-X
+    # decision pipeline". Nothing is stored and nothing downstream reads it.
     return {
         "status": "success",
         "filename": file.filename,
-        "rows_processed": len(rows),
-        "columns_detected": list(rows[0].keys()) if rows else [],
-        "message": f"Successfully ingested {len(rows)} operational records into NAKSHATRA-X decision pipeline.",
-        "preview": rows[:5]
+        "rows_processed": row_count,
+        "columns_detected": columns,
+        "message": f"Parsed {row_count} rows. Nothing was stored: this endpoint validates and previews a file only.",
+        "stored": False,
+        "preview": preview,
     }
 
 # ============================================================
@@ -798,13 +860,16 @@ async def analyze_borehole_drill_endpoint(req: BoreholeAnalysisRequest):
 # ============================================================
 
 class AlertDispatchRequest(BaseModel):
+    # Bounded: these strings are kept in a process-global list and returned to
+    # every caller of /alerts, so an unbounded field was a memory and payload
+    # amplifier (a 20 MiB trigger_metric was accepted and served back).
     mine_id: int
-    mine_name: str
-    alert_type: str
-    severity: str = "HIGH"
-    trigger_metric: str
-    action_directive: str
-    recipient_role: str = "Mine Manager & Pit Superintendent"
+    mine_name: str = Field(..., min_length=1, max_length=80)
+    alert_type: str = Field(..., min_length=1, max_length=80)
+    severity: Literal["LOW", "MEDIUM", "HIGH", "CRITICAL"] = "HIGH"
+    trigger_metric: str = Field(..., min_length=1, max_length=300)
+    action_directive: str = Field(..., min_length=1, max_length=300)
+    recipient_role: str = Field("Mine Manager & Pit Superintendent", max_length=80)
 
 @router.post("/dispatch-operational-alert")
 async def dispatch_alert_endpoint(req: AlertDispatchRequest):

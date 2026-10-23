@@ -54,25 +54,29 @@ export default function AdminDashboard() {
   // Auth / Admin Status
   const [adminInfo, setAdminInfo] = useState<any>(null)
 
-  // 1. Enforce Client-Side Authentication
+  // 1. Ask the server who is signed in. This read `admin_session` through
+  // document.cookie, but the server sets that cookie HttpOnly, so every
+  // signed-in admin was sent straight back to the login form.
   useEffect(() => {
-    if (!document.cookie.includes('admin_session=true')) {
-      router.push('/admin/login')
-      return
+    let alive = true
+    fetch('/api/admin/auth')
+      .then(async (res) => {
+        if (!alive) return
+        if (!res.ok) {
+          router.push('/admin/login')
+          return
+        }
+        const data = await res.json().catch(() => null)
+        setAdminInfo(data?.admin ?? null)
+        fetchUserData()
+      })
+      .catch(() => {
+        if (alive) router.push('/admin/login')
+      })
+    return () => {
+      alive = false
     }
-    fetchUserData()
-    fetchAdminStatus()
   }, [router])
-
-  const fetchAdminStatus = async () => {
-    try {
-      const res = await fetch('/api/admin/setup')
-      const data = await res.json()
-      setAdminInfo(data.adminUser || null)
-    } catch {
-      // Ignored
-    }
-  }
 
   const fetchUserData = async () => {
     setLoadingUsers(true)
@@ -96,7 +100,6 @@ export default function AdminDashboard() {
     } catch {
       // Fall through
     }
-    document.cookie = 'admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
     router.push('/admin/login')
   }
 
@@ -177,7 +180,7 @@ export default function AdminDashboard() {
               <p className="text-xs text-text-tertiary mt-0.5 flex items-center gap-2">
                 <span>Primary Commander:</span>
                 <span className="text-accent">
-                  {adminInfo?.full_name || 'Commander Rupraj Datta'}
+                  {adminInfo?.full_name || 'Administrator'}
                 </span>
                 <span className="text-text-tertiary">&bull;</span>
                 <span className="text-accent flex items-center gap-1">

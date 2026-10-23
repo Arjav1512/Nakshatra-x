@@ -163,8 +163,9 @@ export async function GET(request: Request) {
       sessionCookieOptions(requestIsHttps(request), maxAge)
     )
 
-    // Redirect to Dashboard upon successful login
-    return NextResponse.redirect(new URL('/dashboard', origin))
+    // /dashboard permanently redirects to /login, so a successful sign-in
+    // landed back on the sign-in form. The console is where work starts.
+    return NextResponse.redirect(new URL('/console', origin))
   } catch (err: any) {
     console.error('[AUTH/GITHUB/CALLBACK] Callback Exception:', err)
     const loginUrl = new URL('/login', origin)

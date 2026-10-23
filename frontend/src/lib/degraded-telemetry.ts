@@ -78,8 +78,8 @@ export function degradedTelemetry(mineId: number, backendError: string) {
     forecast: {
       model: 'unavailable',
       horizon_days: 14,
-      // `total_planned_tonnes` is the register's own plan target pro-rated over
-      // the horizon — a stated intention, not a reading, so it survives. Every
+      // `total_planned_tonnes` is the seeded plan target pro-rated over the
+      // horizon — synthetic (PLAN_TARGET_NOTE), not a reading, so it survives. Every
       // prediction below it came from the generated drag model and is gone.
       total_planned_tonnes: planned,
       total_predicted_tonnes: null,

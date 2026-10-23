@@ -139,7 +139,9 @@ const ROUTES = [
   },
   {
     path: '/production',
-    mustRender: ['Production', 'Shortfall against plan', 'Rainfall'],
+    // The drag tile was "Shortfall against plan": a conditions heuristic
+    // labelled like the forecaster's shortfall (E2E-5).
+    mustRender: ['Production', 'Conditions drag', 'Rainfall'],
     mustNotRender: ['trucksDispatched', 'SCADA', 'STREAMING'],
     custom: async (page) => {
       const r = await page.evaluate(() => {
