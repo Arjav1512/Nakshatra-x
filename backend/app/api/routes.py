@@ -2,10 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, 
 from sqlalchemy.orm import Session
 from app.db.session import get_db, resolve_mine_code
 from app.models.mine import MineSite
-from app.schemas.mine import MineCreate, MineResponse
 from app.services.nasa_power import fetch_weather_signal
 from app.services.satellite import query_sentinel_stac
-from app.api.track_b import NoBacktest, backtest_mine, forecast_mine, forecast_status, recommend_actions, warm_forecast
+from app.api.track_b import NoBacktest, backtest_mine, forecast_mine, forecast_status, recommend_actions
 from app.api.forecast_store import Warming
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -739,7 +738,7 @@ async def upload_operational_csv(file: UploadFile = File(...)):
 from app.ml.blending_optimizer import optimize_ore_blend
 from app.ml.geostat_kriging import compute_borehole_spatial_model
 from app.services.alert_dispatch import dispatch_operational_alert, get_active_dispatched_alerts
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict
 
 
 class StockpileItem(BaseModel):

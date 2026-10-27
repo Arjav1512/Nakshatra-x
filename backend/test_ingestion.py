@@ -7,7 +7,7 @@ flagged synthetic.
 """
 import sys
 from collections import defaultdict
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -15,7 +15,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import pydantic
 
 from app.ingestion.generator import (
-    ANNUAL_TOTAL_TONNES,
     DEFAULT_SEED,
     MINES,
     SyntheticDataset,

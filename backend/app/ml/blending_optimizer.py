@@ -5,26 +5,7 @@ grade specifications (Mn, P, SiO2, Fe) with minimum cost during shortfall period
 """
 
 from typing import List, Dict, Any
-import numpy as np
 from scipy.optimize import linprog
-
-
-class StockpileSource:
-    def __init__(
-        self,
-        name: str,
-        available_tonnes: float,
-        mn_grade_pct: float,
-        p_pct: float,
-        sio2_pct: float,
-        cost_per_tonne_inr: float,
-    ):
-        self.name = name
-        self.available_tonnes = available_tonnes
-        self.mn_grade_pct = mn_grade_pct
-        self.p_pct = p_pct
-        self.sio2_pct = sio2_pct
-        self.cost_per_tonne_inr = cost_per_tonne_inr
 
 
 def optimize_ore_blend(
