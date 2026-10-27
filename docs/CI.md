@@ -34,7 +34,7 @@ Node 22 and `npm ci` (`.github/actions/frontend-env`).
 
 **Required checks are a repository setting**, not something this file can set.
 To make the gating jobs required, add them under *Settings → Branches → Branch
-protection → Require status checks*: the nine "gates the PR" rows above. Leave
+protection → Require status checks*: the ten "gates the PR" rows above. Leave
 "Network — live services" out. (As of this writing `main` has no branch
 protection, so "gates the PR" means a red check, not a blocked merge.)
 

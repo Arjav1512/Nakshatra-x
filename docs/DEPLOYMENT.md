@@ -58,10 +58,13 @@ API serves that artifact and reports `served_from` (`memory` / `artifact` /
 `computed`) plus `artifact_age_hours`, so the UI can state how old the figure is
 instead of implying it was just calculated.
 
-On-demand re-run: `GET /api/v1/mines/{id}/backtest?compute=true`.
+On-demand re-run, on the FastAPI service: `GET /api/v1/mines/{id}/backtest?compute=true`.
+It returns **403** unless the server sets `ALLOW_ONDEMAND_BACKTEST=1`. The
+Next.js proxy at the same path does not forward `compute`.
 
-**If no artifact exists**, the endpoint returns **503 with instructions** rather
-than blocking for minutes behind a spinner. A miss is reported, not hidden.
+**If no artifact exists**, the endpoint returns **404** and names the mines that
+do have one, rather than blocking for minutes behind a spinner. A miss is
+reported, not hidden.
 
 ---
 
@@ -136,28 +139,6 @@ satellites — and every one degrades with the reason stated.
 > Secrets previously committed to this repository's history (a Supabase anon key
 > and a Firebase web config) were removed from the working tree in Phase 1.
 > History rewriting is out of scope here — **rotate those keys** at the provider.
-
----
-
-## Static assets — the hero animation
-
-`public/frames` holds 788 JPEGs (~145 MB) driving the landing scroll animation.
-Both `.vercelignore` files previously excluded it, so the animation 404'd in
-production while working locally. The exclusions are gone and both files carry a
-comment explaining why they must not come back.
-
-Verified against a production build (`next start`), not dev:
-
-```
-/frames/frame_0001.jpg -> HTTP 200  195809 bytes  image/jpeg
-/frames/frame_0394.jpg -> HTTP 200  208488 bytes  image/jpeg
-/frames/frame_0788.jpg -> HTTP 200  213047 bytes  image/jpeg
-/frames/frame_9999.jpg -> HTTP 404            (control: 404s still work)
-landing page: <link rel="preload" href="/frames/frame_0001.jpg" as="image" …>
-```
-
-If deployment size becomes a constraint, host the sequence externally or encode
-it as a video — do not silently re-add the ignore rule.
 
 ---
 

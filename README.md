@@ -59,7 +59,7 @@ Legend: ✅ real · ⚠️ real but limited · 🧪 placeholder pending real imp
 
 ```
 frontend/  Next.js 16 (App Router) + React 19 + TypeScript + Tailwind 4
-           ├─ Leaflet map, Recharts, react-globe.gl
+           ├─ Leaflet map, Recharts
            ├─ /api/v1/*  route handlers  (product API today)
            └─ Supabase (optional real auth/DB)
 
@@ -69,7 +69,7 @@ backend/   FastAPI service  — blending LP, borehole model, NASA POWER/STAC cli
 AI/        RandomForest prospectivity pipeline (dataset → features → train → grid → GeoJSON)
            + NASA POWER data client
 
-database/  SQL schemas (Postgres/PostGIS target) + SQLite for local dev
+database/  SQL schemas (Postgres/PostGIS target)
 ```
 
 > Note: the frontend currently serves most data from its own `/api/v1/*` routes; the FastAPI service in `backend/` holds the real optimiser and data clients and is being folded in as the single source of truth.
@@ -82,7 +82,7 @@ database/  SQL schemas (Postgres/PostGIS target) + SQLite for local dev
 frontend/          Next.js app (pages, components, API routes, libs)
 backend/           FastAPI app (app/ml, app/services, app/api, tests)
 AI/                ML pipeline scripts + trained model + outputs
-database/          schema.sql, flood_alert_schema.sql, dev SQLite
+database/          schema.sql, flood_alert_schema.sql
 ```
 
 ---
