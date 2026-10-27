@@ -16,7 +16,6 @@ import {
   Sparkles,
   TrendingUp,
   Play,
-  Activity,
   Sliders,
   BarChart3,
   Box,

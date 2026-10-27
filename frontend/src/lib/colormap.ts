@@ -32,9 +32,6 @@ export const CIVIDIS = [
   '#FEE838',
 ] as const
 
-/** Relative luminance of each stop, for the contrast decision below. */
-const LUMINANCE = [0.0169, 0.042, 0.0772, 0.13, 0.2013, 0.2946, 0.4205, 0.5801, 0.7907]
-
 function clamp01(t: number): number {
   if (Number.isNaN(t)) return 0
   return Math.min(1, Math.max(0, t))
@@ -48,13 +45,4 @@ function clamp01(t: number): number {
 export function cividis(t: number): string {
   const i = Math.round(clamp01(t) * (CIVIDIS.length - 1))
   return CIVIDIS[i]
-}
-
-/**
- * Text colour that meets contrast against `cividis(t)` as a background.
- * The ramp crosses from dark to light, so the readable foreground flips.
- */
-export function cividisContrastText(t: number): string {
-  const i = Math.round(clamp01(t) * (CIVIDIS.length - 1))
-  return LUMINANCE[i] > 0.23 ? 'var(--color-surface-0)' : 'var(--color-text-primary)'
 }

@@ -5,6 +5,8 @@
  * The URL comes from the environment; there is no hardcoded production host.
  */
 
+import { OFFLINE_SINK } from '@/lib/upstreams'
+
 const DEFAULT_BACKEND = 'http://127.0.0.1:8000'
 
 export function backendUrl(): string {
@@ -12,7 +14,7 @@ export function backendUrl(): string {
   // switch: NAKSHATRA_OFFLINE=1 sends it to the discard port. Without this the
   // offline guard could only stop the browser's requests, not the ones a route
   // handler makes from Node.
-  if (process.env.NAKSHATRA_OFFLINE === '1') return 'http://127.0.0.1:9'
+  if (process.env.NAKSHATRA_OFFLINE === '1') return OFFLINE_SINK
   return (process.env.BACKEND_URL || DEFAULT_BACKEND).replace(/\/+$/, '')
 }
 

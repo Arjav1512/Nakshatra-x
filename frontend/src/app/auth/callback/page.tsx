@@ -1,14 +1,13 @@
 'use client'
 
 import { useEffect, useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { GlassCard } from '@/components/nakshatra/ui'
 import { ShieldCheck, Loader2, AlertCircle, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 function AuthCallbackContent() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<string>('Authenticating with Supabase & Google...')
   const [error, setError] = useState<string | null>(null)
@@ -86,7 +85,7 @@ function AuthCallbackContent() {
     return () => {
       isMounted = false
     }
-  }, [searchParams, router])
+  }, [searchParams])
 
   // The design reference's flat card on the page ground; the pure-black full
   // screen and the "orbital clearance" copy are gone. The status line is

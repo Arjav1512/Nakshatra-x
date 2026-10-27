@@ -1,4 +1,4 @@
-import { backendUrl } from '@/lib/backend'
+import { fetchFromBackend } from '@/lib/backend'
 
 /**
  * Figures for the landing page, read from the same artifacts the console reads.
@@ -65,19 +65,11 @@ export interface LandingEvidence {
 }
 
 /** The pilot mine: the one with a committed rolling-origin backtest. */
-export const PILOT_MINE = { id: 1, name: 'Balaghat', code: 'MOIL-BAL-01' }
+const PILOT_MINE = { id: 1, name: 'Balaghat', code: 'MOIL-BAL-01' }
 
 async function get(path: string): Promise<any | null> {
-  try {
-    const res = await fetch(`${backendUrl()}${path}`, {
-      cache: 'no-store',
-      signal: AbortSignal.timeout(8000),
-    })
-    if (!res.ok) return null
-    return await res.json()
-  } catch {
-    return null
-  }
+  const r = await fetchFromBackend(path, { timeoutMs: 8000 })
+  return r.ok ? r.data : null
 }
 
 export async function loadLandingEvidence(): Promise<LandingEvidence> {

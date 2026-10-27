@@ -3,11 +3,8 @@
  * answers in ./chatbot/knowledge. It runs in the browser and calls no model.
  */
 
-import { knowledgeBase, type KnowledgeChunk } from './chatbot/knowledge'
+import { knowledgeBase } from './chatbot/knowledge'
 import { askNakshatra, type ChatResult } from './chatbot/engine'
-
-export { knowledgeBase, askNakshatra }
-export type { KnowledgeChunk, ChatResult }
 
 /*
  * REMOVED: LOCATION_GEOLOGY_MAP and the branch that answered from it.
@@ -23,7 +20,7 @@ export type { KnowledgeChunk, ChatResult }
  * score for a place is on the Track A map, from the model, with provenance.
  */
 
-export function queryAIXKnowledgeBase(query: string, mineName: string, mineCode: string, state: string): ChatResult {
+export function queryAIXKnowledgeBase(query: string): ChatResult {
   // 1. The written answers
   const res = askNakshatra(query)
   if (res.matched && res.answer) {

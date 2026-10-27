@@ -12,8 +12,6 @@ gsap.registerPlugin(CustomEase)
 
 /** --ease-out: hovers, reveals. The default. */
 export const EASE_OUT = CustomEase.create('nx-ease-out', '0.2,0.715,0.205,0.99')
-/** --ease-in-out: large panels. */
-export const EASE_IN_OUT = CustomEase.create('nx-ease-in-out', '0.835,0.12,0.225,0.77')
 
 /** Seconds, for GSAP: --dur-fast, --dur, --dur-slow. */
 export const DUR = { fast: 0.18, standard: 0.36, slow: 0.7 } as const

@@ -143,3 +143,32 @@ export type AuditRecord = {
   geologist_review_status: string
   last_evaluated: string
 }
+
+/**
+ * The six layers the Track A map (IndiaSatelliteMap) has, each backed by a
+ * service that says where it came from.
+ *
+ * It once declared eight, and six of those ('ndvi', 'moisture', 'thermal',
+ * 'isro-bhuvan', 'isro-risat', 'isro-cartosat') read no data and drew a
+ * sin()/cos() grid captioned as ISRO Resourcesat, EOS-04 and Cartosat
+ * measurements. They are gone; see the comment at the removal site. Then it
+ * declared two. These six replace them:
+ *
+ *   probability     the kriged prospectivity score       derived
+ *   uncertainty     its kriging standard deviation        derived
+ *   measured        the 50 points the model was fitted on measured
+ *   s2-true-colour  Sentinel-2 L2A mosaic                 measured, tiles
+ *   iron-oxide      Sentinel-2 B04/B02 ratio              measured, tiles
+ *   dem             Copernicus DEM GLO-30                 measured, tiles
+ *
+ * The ESRI basemap sits under all of them and is not a selectable layer.
+ */
+export type LayerType =
+  | 'probability'
+  | 'uncertainty'
+  | 'measured'
+  | 's2-true-colour'
+  | 'iron-oxide'
+  | 'dem'
+
+export const DEFAULT_LAYER: LayerType = 'probability'

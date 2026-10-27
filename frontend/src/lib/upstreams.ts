@@ -18,7 +18,7 @@
  * path is exercised at speed instead of timing out.
  */
 
-const OFFLINE_SINK = 'http://127.0.0.1:9'
+export const OFFLINE_SINK = 'http://127.0.0.1:9'
 
 function upstream(envVar: string, fallback: string): string {
   if (process.env.NAKSHATRA_OFFLINE === '1') return OFFLINE_SINK
@@ -47,9 +47,6 @@ export const UPSTREAMS = {
     return upstream('NAKSHATRA_ESRI_TILES_URL', 'https://server.arcgisonline.com')
   },
 }
-
-/** True when the app has been started with every upstream pointed at the sink. */
-export const IS_OFFLINE = process.env.NAKSHATRA_OFFLINE === '1'
 
 /**
  * The ESRI World Imagery basemap's required attribution.

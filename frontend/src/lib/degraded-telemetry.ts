@@ -1,5 +1,4 @@
 import { dataIntegrity } from '@/lib/provenance'
-import { operatingDay } from '@/lib/synthetic'
 
 /**
  * Degraded telemetry payload, used when the FastAPI service layer is

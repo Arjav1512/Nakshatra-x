@@ -28,12 +28,12 @@ type ButtonSize = 'sm' | 'md' | 'lg' | 'icon'
  * the scale is a press response, not a hover effect, and transforms nothing
  * around the button.
  */
-export const BUTTON_BASE =
+const BUTTON_BASE =
   'inline-flex items-center justify-center gap-2 whitespace-nowrap font-normal tracking-[0.044em] ' +
   'transition-[background-color,color,scale] duration-[180ms] ease-out active:scale-[.97] ' +
   'disabled:opacity-35 disabled:cursor-not-allowed disabled:pointer-events-none'
 
-export const BUTTON_VARIANT: Record<ButtonVariant, string> = {
+const BUTTON_VARIANT: Record<ButtonVariant, string> = {
   // The reference's primary is the inverse pair: ink fill, paper label.
   primary: 'bg-inverse-bg text-inverse-fg hover:bg-inverse-hover',
   secondary: 'bg-surface-2 text-text-primary hover:bg-surface-3',
@@ -44,7 +44,7 @@ export const BUTTON_VARIANT: Record<ButtonVariant, string> = {
   accent: 'bg-highlight text-highlight-fg hover:bg-highlight/80',
 }
 
-export const BUTTON_SIZE: Record<ButtonSize, string> = {
+const BUTTON_SIZE: Record<ButtonSize, string> = {
   sm: 'h-8 rounded-sm px-3 text-[14px]',
   md: 'h-[42px] rounded-md px-4 text-base',
   lg: 'h-[50px] rounded-md px-[22px] text-base',
@@ -185,6 +185,13 @@ export function StatusLabel({
       {children}
     </span>
   )
+}
+
+/** A 0-100 composite risk score as a status and its label. */
+export function riskBand(score: number): { status: Status; label: string } {
+  if (score >= 70) return { status: 'critical', label: 'high' }
+  if (score >= 40) return { status: 'caution', label: 'elevated' }
+  return { status: 'nominal', label: 'low' }
 }
 
 /* -------------------------------------------------------------------------- */

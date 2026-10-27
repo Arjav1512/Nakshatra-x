@@ -78,10 +78,3 @@ export const ASSUMPTION_NOTE =
   'Assumption-based estimate, not a forecast. Each coefficient is a planner ' +
   'assumption shown above — none is fitted and no data was used to derive it. ' +
   'The validated forecaster is nakshatra-gbt-cqr-v1.'
-
-/** Default factors, by group id, as shipped. */
-export function defaultFactors(): Record<string, number> {
-  return Object.fromEntries(
-    ASSUMPTION_GROUPS.map((g) => [g.id, g.options[0]?.factor ?? 1])
-  )
-}

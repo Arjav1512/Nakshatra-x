@@ -68,11 +68,7 @@ function band(mm: number): { status: Status; label: string } {
   return { status: 'nominal', label: `at or below ${ELEVATED_MM} mm` }
 }
 
-interface Props {
-  onSelectMine?: (mine: unknown) => void
-}
-
-export default function LocationFloodAlertFinder(_props: Props) {
+export default function LocationFloodAlertFinder() {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

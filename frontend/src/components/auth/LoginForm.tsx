@@ -15,15 +15,12 @@ import {
   Lock,
 } from 'lucide-react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
 
 export function LoginForm() {
   // Form State
   const [email, setEmail] = useState('')
-  const [fullName, setFullName] = useState('')
   const [digits, setDigits] = useState<string[]>(['', '', '', '', '', ''])
   const [codeSent, setCodeSent] = useState(false)
-  const [showBackup, setShowBackup] = useState(false)
 
   // UI State
   const [loading, setLoading] = useState<'send_otp' | 'verify_otp' | 'guest' | 'github' | null>(null)
@@ -63,7 +60,7 @@ export function LoginForm() {
         body: JSON.stringify({
           action: 'send',
           email: targetEmail,
-          fullName: fullName.trim(),
+          fullName: '',
         }),
       })
 
@@ -119,7 +116,7 @@ export function LoginForm() {
         body: JSON.stringify({
           action: 'verify',
           email: email.trim().toLowerCase(),
-          fullName: fullName.trim(),
+          fullName: '',
           code: cleanCode,
         }),
       })

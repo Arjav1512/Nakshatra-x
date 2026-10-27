@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { type MineRow, fetchMines, fetchTelemetry } from '@/lib/console-api'
 import { Metric, IntegrityBanner } from '@/components/console/Evidence'
 import { measuredOrNull } from '@/lib/provenance'
-import { EmptyState, Skeleton, StatusDot, type Status } from '@/components/ui/primitives'
+import { EmptyState, Skeleton, StatusDot, riskBand } from '@/components/ui/primitives'
 
 /**
  * Track B operational detail for one mine.
@@ -42,12 +42,6 @@ const TILES: { key: string; label: string }[] = [
   { key: 'weather.rainfall_14d_mm', label: 'Rainfall, 14 days' },
   { key: 'weather.land_surface_temp_c', label: 'Land surface temperature' },
 ]
-
-function riskBand(score: number): { status: Status; label: string } {
-  if (score >= 70) return { status: 'critical', label: 'high' }
-  if (score >= 40) return { status: 'caution', label: 'elevated' }
-  return { status: 'nominal', label: 'low' }
-}
 
 export default function ProductionSentinel() {
   const [mines, setMines] = useState<MineRow[] | null>(null)

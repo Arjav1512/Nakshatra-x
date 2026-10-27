@@ -2,14 +2,9 @@
 
 import { useState } from 'react'
 import { FILL } from '@/components/ui/primitives'
-import type { MineInfo } from './types'
 import { Sparkles, Scale, } from 'lucide-react'
 
-interface Props {
-  mine: MineInfo
-}
-
-export default function SmartOreBlendingModal({ mine }: Props) {
+export default function SmartOreBlendingModal() {
   const [targetTonnes, setTargetTonnes] = useState(5000)
   const [targetMnMin, setTargetMnMin] = useState(41.0)
   const [isSolving, setIsSolving] = useState(false)

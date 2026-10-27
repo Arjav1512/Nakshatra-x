@@ -72,9 +72,6 @@ export interface DataSourceCitation {
  * here has been verified against these publications. Renamed to
  * `parametersAvailable`, which is what the list actually is.
  */
-export const INGESTION_TARGET_SOURCES_NOTICE =
-  'Planned ingestion sources (PRD §8.3). Not currently ingested — the displayed series is synthetic.'
-
 export const OFFICIAL_DATA_SOURCES: DataSourceCitation[] = [
   {
     id: 'src-moil-annual-reports',
@@ -154,13 +151,8 @@ import syntheticHistory from '@/data/synthetic-history.json'
  * Generated series. `synthetic-history.json` is produced by
  * `python -m app.ingestion.export` and carries its own provenance notice.
  */
-export const SYNTHETIC_HISTORY_NOTICE: string = syntheticHistory.notice
-export const SYNTHETIC_HISTORY_GENERATOR: string = syntheticHistory.generator
-
 export const HISTORICAL_DATABASE_1977_2026: HistoricalYearRecord[] =
   syntheticHistory.records as HistoricalYearRecord[]
-
-export const HISTORICAL_DATABASE_1980_2026 = HISTORICAL_DATABASE_1977_2026
 
 // =========================================================================================
 // 2. Illustrative forward trajectory (2026 - 2040) — SYNTHETIC
