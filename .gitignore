@@ -17,11 +17,7 @@ build/
 dist/
 
 # Environment files & secrets (NEVER commit live secrets)
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env*
 *.env
 !.env.example
 
@@ -48,20 +44,13 @@ env/
 venv/
 .venv/
 ENV/
-build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
-# Python env directories (anchored or env-scoped)
-env/lib/
-venv/lib/
-.venv/lib/
+# Python build directories at the repo root
 /lib/
 /lib64/
-!frontend/src/lib/
-!frontend/src/app/lib/
 parts/
 sdist/
 var/
@@ -88,7 +77,6 @@ yarn-error.log*
 *.sln
 *.sw?
 .vercel
-.env*
 
 # Runtime lock + test-fixture artifacts; only the ten real mines are committed.
 backend/artifacts/forecasts/.warm.lock

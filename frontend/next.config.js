@@ -3,11 +3,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  experimental: {
-    serverActions: {
-      allowedOrigins: ['localhost:3000', '*.vercel.app'],
-    },
-  },
 
   /**
    * Route consolidation — docs/design/IA.md section 5.3.
