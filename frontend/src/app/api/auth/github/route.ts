@@ -17,7 +17,7 @@ export async function GET(request: Request) {
       return NextResponse.redirect(url)
     }
 
-    const { searchParams, origin } = new URL(request.url)
+    const { origin } = new URL(request.url)
     const redirectUri = `${origin}/api/auth/github/callback`
     // Cryptographically secure CSRF token (Math.random is predictable).
     const state = crypto.randomBytes(32).toString('base64url')

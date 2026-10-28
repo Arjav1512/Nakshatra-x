@@ -10,8 +10,7 @@ import {
 import { cividis } from '@/lib/colormap'
 import { Metric } from './Evidence'
 import { PointScore } from './PointScore'
-import { DEFAULT_LAYER, type LayerType } from '@/components/mission-control/IndiaSatelliteMap'
-import type { MineInfo } from '@/components/mission-control/types'
+import { DEFAULT_LAYER, type LayerType, type MineInfo } from '@/components/mission-control/types'
 
 /**
  * The prospectivity map.

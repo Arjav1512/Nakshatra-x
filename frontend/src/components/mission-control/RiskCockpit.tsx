@@ -2,7 +2,7 @@
 
 import type { MineInfo, RiskAnalysis, WeatherSignal } from './types'
 import { Metric } from '@/components/console/Evidence'
-import { EmptyState, StatusDot, type Status } from '@/components/ui/primitives'
+import { EmptyState, StatusDot, riskBand } from '@/components/ui/primitives'
 import { derived, measured, measuredOrNull, synthetic } from '@/lib/provenance'
 
 /**
@@ -27,12 +27,6 @@ interface Props {
   mine: MineInfo
   weather: WeatherSignal | null
   risk: RiskAnalysis | null
-}
-
-function band(score: number): { status: Status; label: string } {
-  if (score >= 70) return { status: 'critical', label: 'high' }
-  if (score >= 40) return { status: 'caution', label: 'elevated' }
-  return { status: 'nominal', label: 'low' }
 }
 
 const WEATHER_SOURCE = 'NASA POWER daily meteorology'
@@ -88,8 +82,8 @@ export default function RiskCockpit({ mine, weather, risk }: Props) {
         </div>
         {typeof score === 'number' ? (
           <span className="inline-flex items-center gap-1.5 text-sm text-text-secondary">
-            <StatusDot status={band(score).status} />
-            {band(score).label}
+            <StatusDot status={riskBand(score).status} />
+            {riskBand(score).label}
           </span>
         ) : null}
       </div>

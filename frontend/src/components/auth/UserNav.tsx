@@ -22,7 +22,6 @@ interface UserData {
 export function UserNav() {
   const router = useRouter()
   const [user, setUser] = useState<UserData | null>(null)
-  const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
   const [actionLoading, setActionLoading] = useState<'github' | 'guest' | 'logout' | null>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
@@ -39,8 +38,6 @@ export function UserNav() {
         }
       } catch {
         setUser(null)
-      } finally {
-        setLoading(false)
       }
     }
 

@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       sources: OFFICIAL_DATA_SOURCES,
       generated_at: new Date().toISOString(),
     })
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to compute dynamic future predictions' },
       { status: 500 }

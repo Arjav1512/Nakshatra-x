@@ -74,7 +74,6 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
   return null
 }
 
-/** True only for a verified administrator token. */
 /** The signed administrator token's profile, or null. */
 export async function currentAdmin() {
   try {

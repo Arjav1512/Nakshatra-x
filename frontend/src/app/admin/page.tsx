@@ -18,10 +18,8 @@ import {
   Copy,
   Check,
   Filter,
-  Save,
   Pickaxe,
 } from 'lucide-react'
-import type { MineInfo } from '@/components/mission-control/types'
 import { CyberRobotAvatar } from '@/components/auth/CyberRobotAvatar'
 
 
@@ -48,8 +46,6 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedProvider, setSelectedProvider] = useState<string>('all')
   const [copiedId, setCopiedId] = useState<string | null>(null)
-
-  // Mining Operations State
 
   // Auth / Admin Status
   const [adminInfo, setAdminInfo] = useState<any>(null)

@@ -194,7 +194,7 @@ async function sendVerificationEmail(to: string, code: string, rawName: string):
     const data = await res.json()
     console.log(`[AUTH] Resend verification sent to ${to} (id: ${data.id})`)
     return true
-  } catch (err: any) {
+  } catch {
     return false
   }
 }

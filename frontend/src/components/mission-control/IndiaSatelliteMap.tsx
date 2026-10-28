@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import type { MineInfo } from './types'
+import type { LayerType, MineInfo } from './types'
 import { MOIL_MINES } from './data'
 import { cividis } from '@/lib/colormap'
 import { type MineRow, fetchMines, predictPoint } from '@/lib/console-api'
@@ -26,35 +26,6 @@ import {
   X,
   AlertCircle,
 } from 'lucide-react'
-
-/**
- * The six layers this map has, each backed by a service that says where it
- * came from.
- *
- * It once declared eight, and six of those ('ndvi', 'moisture', 'thermal',
- * 'isro-bhuvan', 'isro-risat', 'isro-cartosat') read no data and drew a
- * sin()/cos() grid captioned as ISRO Resourcesat, EOS-04 and Cartosat
- * measurements. They are gone; see the comment at the removal site. Then it
- * declared two. These six replace them:
- *
- *   probability     the kriged prospectivity score       derived
- *   uncertainty     its kriging standard deviation        derived
- *   measured        the 50 points the model was fitted on measured
- *   s2-true-colour  Sentinel-2 L2A mosaic                 measured, tiles
- *   iron-oxide      Sentinel-2 B04/B02 ratio              measured, tiles
- *   dem             Copernicus DEM GLO-30                 measured, tiles
- *
- * The ESRI basemap sits under all of them and is not a selectable layer.
- */
-export type LayerType =
-  | 'probability'
-  | 'uncertainty'
-  | 'measured'
-  | 's2-true-colour'
-  | 'iron-oxide'
-  | 'dem'
-
-export const DEFAULT_LAYER: LayerType = 'probability'
 
 const TILE_LAYER_IDS = new Set<LayerType>(['s2-true-colour', 'iron-oxide', 'dem'])
 
@@ -243,13 +214,6 @@ export default function IndiaSatelliteMap({
   const mapInstanceRef = useRef<any>(null)
   const resizeObserverRef = useRef<ResizeObserver | null>(null)
   /**
-   * What the drawn surface actually is.
-   *
-   * The legend used to describe the layer in fixed copy while the layer itself
-   * came from a file nobody checked. It now reports the model version and cell
-   * count the service returned, or the reason nothing is drawn.
-   */
-  /**
    * The register, fetched. Empty until it arrives, and empty if it cannot be
    * fetched — the map draws no mine it cannot name from the service layer.
    */
@@ -266,6 +230,13 @@ export default function IndiaSatelliteMap({
     return () => { alive = false }
   }, [])
 
+  /**
+   * What the drawn surface actually is.
+   *
+   * The legend used to describe the layer in fixed copy while the layer itself
+   * came from a file nobody checked. It now reports the model version and cell
+   * count the service returned, or the reason nothing is drawn.
+   */
   const [surfaceMeta, setSurfaceMeta] = useState<{
     modelVersion: string | null
     nCells: number | null

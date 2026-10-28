@@ -85,7 +85,7 @@ export function SourceBadge({ env }: { env: Envelope<any> }) {
   )
 }
 
-export function EvidenceDetail({ env }: { env: Envelope<any> }) {
+function EvidenceDetail({ env }: { env: Envelope<any> }) {
   return (
     <dl className="mt-2 space-y-1 border-t border-border-subtle pt-2 text-xs leading-relaxed">
       <div className="flex gap-2">

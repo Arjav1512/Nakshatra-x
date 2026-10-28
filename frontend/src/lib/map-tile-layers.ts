@@ -101,7 +101,7 @@ const BREAKER_COOLDOWN_MS = 60_000
  */
 let reregisterInFlight: Promise<TileLayersResponse | null> | null = null
 
-export function reregisterTileLayers(): Promise<TileLayersResponse | null> {
+function reregisterTileLayers(): Promise<TileLayersResponse | null> {
   if (!reregisterInFlight) {
     reregisterInFlight = fetch('/api/v1/map/tile-layers?force=1', { cache: 'no-store' })
       .then((r) => (r.ok ? (r.json() as Promise<TileLayersResponse>) : null))
@@ -116,7 +116,7 @@ export function reregisterTileLayers(): Promise<TileLayersResponse | null> {
   return reregisterInFlight
 }
 
-export function cachedTileUrl(layerId: string, z: number, x: number, y: number): string {
+function cachedTileUrl(layerId: string, z: number, x: number, y: number): string {
   return `/api/v1/map/cached-tiles/${encodeURIComponent(layerId)}/${z}/${x}/${y}`
 }
 
@@ -133,7 +133,7 @@ export function fetchDate(iso: string | null | undefined): string | null {
  * The licensor's notice is present in every state, live or cached — a local
  * copy does not change what the licence asks for.
  */
-export function sourceLabel(state: TileSourceState): string {
+function sourceLabel(state: TileSourceState): string {
   const date = fetchDate(state.cacheFetchedAt)
   switch (state.mode) {
     case 'live':

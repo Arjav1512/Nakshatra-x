@@ -45,7 +45,7 @@ export default function BlendingPage() {
         {/* The page had a second H1 here repeating "Ore blending". */}
         <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
           <div className="h-full">
-            <SmartOreBlendingModal mine={selectedMine} />
+            <SmartOreBlendingModal />
           </div>
           <div className="h-full">
             <RiskCockpit mine={selectedMine} weather={weather} risk={risk} />

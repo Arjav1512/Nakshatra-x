@@ -28,7 +28,6 @@ from app.ml.forecaster import (
     ProductionForecaster,
     build_covariates,
     build_series,
-    seasonal_naive,
     shortfall_probability,
 )
 

@@ -5,7 +5,6 @@ in-situ tonnage and a metallurgical grade band (not a statutory reserve class).
 """
 
 from typing import List, Dict, Any
-import numpy as np
 
 
 def compute_borehole_spatial_model(

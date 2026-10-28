@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import type { MineInfo } from './types'
 import {
   getAIXAutoSuggestions,
   queryAIXKnowledgeBase
@@ -31,26 +30,6 @@ interface Message {
   }
 }
 
-interface Props {
-  mine?: MineInfo
-  onOpenBlending?: () => void
-  onOpenBorehole?: () => void
-}
-
-
-const DEFAULT_MINE: MineInfo = {
-  id: 'balaghat',
-  numericId: 1,
-  name: 'Balaghat Mine',
-  code: 'BLG-01',
-  state: 'MP',
-  lat: 21.8045,
-  lng: 80.1852,
-  zone: 'Central Pit Alpha',
-  targetTonnes: 1200,
-  currentProduction: 1140,
-}
-
 // Each matches a written answer (src/lib/chatbot/knowledge.ts) by keyword;
 // kept short enough to fit the panel on one line.
 const STARTER_QUESTIONS = [
@@ -62,7 +41,7 @@ const STARTER_QUESTIONS = [
   'Who built NAKSHATRA-X and what is SIH Problem Statement 26009?',
 ]
 
-export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }: Props) {
+export default function AICopilotModal() {
 
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState('')
@@ -141,10 +120,7 @@ export default function AICopilotModal({ mine, onOpenBlending, onOpenBorehole }:
 
     // Execute On-Device RAG Answer Engine
     setTimeout(() => {
-      const targetMineName = mine?.name || 'MOIL Central Mining Belt'
-      const targetMineCode = mine?.code || 'MOIL-PSU'
-      const targetState = mine?.state || 'India'
-      const result = queryAIXKnowledgeBase(query, targetMineName, targetMineCode, targetState)
+      const result = queryAIXKnowledgeBase(query)
 
       let replyText = ''
       let suggs: string[] = []

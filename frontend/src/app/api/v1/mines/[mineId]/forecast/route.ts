@@ -28,7 +28,7 @@ export async function GET(
   if (r.ok) return NextResponse.json({ ...r.data, served_by: 'fastapi', proxied_from: backendUrl() })
   // A warming backend is answering, not failing. Pass its own answer through
   // so the console can show "computing, about Ns" instead of a red error.
-  const warming = r.ok ? null : warmingPassthrough(r)
+  const warming = warmingPassthrough(r)
   if (warming) {
     return NextResponse.json(warming.body, { status: 503, headers: warming.headers })
   }

@@ -29,7 +29,7 @@ export async function GET(
   // pilot's artifact is committed because a full run is 216 s. Pass the
   // backend's own answer through, with the pilots it names, so the console can
   // offer a link instead of rendering an error.
-  if (!r.ok && r.status === 404 && r.body?.status === 'no_backtest') {
+  if (r.status === 404 && r.body?.status === 'no_backtest') {
     return NextResponse.json(r.body, { status: 404 })
   }
 
