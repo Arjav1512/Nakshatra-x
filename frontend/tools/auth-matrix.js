@@ -60,8 +60,6 @@ const PUBLIC = {
   'POST /api/v1/scenario/constraint-check':
     'Stateless computation. Runs a set of scenario controls through the constraint engine and ' +
     'returns a verdict; reads no record, writes none, and reveals nothing a mine register does not.',
-  'POST /api/v1/historical-forecasts':
-    'Stateless computation over a seeded synthetic series. Persists nothing.',
   'POST /api/v1/mine-twin':
     'Stateless what-if calculation. Validates its inputs against the known mines and assumption options, keeps nothing, and returns one scenario; the history is the browser tab\'s (sessionStorage).',
 }
