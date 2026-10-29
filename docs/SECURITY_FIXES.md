@@ -4,6 +4,11 @@ Seven authentication and authorisation defects, each independently sufficient
 to compromise the application. All are fixed on this branch; each entry names
 the file and gives the check that demonstrates the fix.
 
+All eight fixes below landed in `7c95ca3` (2026-09-20). Three of the helpers the
+entries name — `parseSessionCookie`, `getCurrentUser` and
+`generateSecurityNonce` — were later deleted because nothing called them any
+more (#39). The affected entries say where the check lives now.
+
 ## 1. Hardcoded password backdoor (critical)
 
 `frontend/src/app/api/admin/auth/route.ts` accepted two literal passwords —
@@ -37,10 +42,14 @@ is deliberately not in `ISSUABLE_ROLES`, so the operator path cannot mint it.
 The session cookie was plain JSON. `parseSessionCookie` JSON-parsed whatever
 the browser sent and trusted the `role` inside it.
 
-Fixed: cookies are HMAC-SHA256 signed (`frontend/src/lib/session.ts`), verified
-with a constant-time comparison, and carry an expiry. Without `SESSION_SECRET`
-(min 32 chars) the app **refuses to issue sessions in production** rather than
-signing with a guessable default.
+Fixed in `7c95ca3`: cookies are HMAC-SHA256 signed
+(`frontend/src/lib/session.ts`), verified with a constant-time comparison, and
+carry an expiry. Without `SESSION_SECRET` (min 32 chars) the app **refuses to
+issue sessions in production** rather than signing with a guessable default.
+
+`parseSessionCookie` lost its last caller in `25e986c` and was deleted in #39.
+The signed-cookie check is `decodeSession` in `lib/session.ts`, which
+`/api/auth/session` calls.
 
 Verified:
 
@@ -58,8 +67,13 @@ same cookie, role flipped to superadmin-> {"user":null}
 a cookie but not *writing* one, so this was satisfiable from the browser
 console even after the cookie was hardened.
 
-Fixed: admin identity now requires `nx_admin_token`, a separately signed token
-(`decodeAdmin`). `admin_session` remains only as a non-authoritative UI hint.
+Fixed in `7c95ca3`: admin identity now requires `nx_admin_token`, a separately
+signed token (`decodeAdmin`). `admin_session` remains only as a
+non-authoritative UI hint.
+
+`getCurrentUser()` lost its last caller in `25e986c` and was deleted in #39.
+The admin routes check the signed token through `currentAdmin()` and
+`requireAdmin()` in `lib/auth.ts`, both of which call `decodeAdmin`.
 
 ## 5. OTP returned in the HTTP response (critical)
 
@@ -77,9 +91,13 @@ compared it to the `github_oauth_state` cookie, so a forged callback could log
 a victim into an attacker-controlled GitHub account. The token was also
 generated with `Math.random()`, which is predictable.
 
-Fixed: the callback requires `state` to equal the cookie value and deletes the
-cookie after a single use; the token is now `crypto.randomBytes(32)`. The same
-`Math.random` weakness in the replay nonce (`lib/security.ts`) is fixed.
+Fixed in `7c95ca3`: the callback requires `state` to equal the cookie value and
+deletes the cookie after a single use; the token is now `crypto.randomBytes(32)`.
+The same `Math.random` weakness in the replay nonce (`lib/security.ts`) is fixed.
+
+The nonce generator, `generateSecurityNonce`, had no caller and was deleted in
+#39. The routes still call `validateReplayNonce` on the `x-security-nonce`
+header.
 
 ## 7. Row Level Security allowed reading every user (data exposure)
 
