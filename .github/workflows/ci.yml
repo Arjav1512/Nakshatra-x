@@ -43,6 +43,10 @@ jobs:
         if: ${{ !cancelled() }}
         working-directory: frontend
         run: npm run lint:literals
+      - name: lint:api-routes — every API route is a FastAPI proxy or justified
+        if: ${{ !cancelled() }}
+        working-directory: frontend
+        run: npm run lint:api-routes
       - name: Biome — no worse than the base commit
         if: ${{ !cancelled() }}
         env:
