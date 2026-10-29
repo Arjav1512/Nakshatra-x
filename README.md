@@ -69,7 +69,7 @@ backend/   FastAPI service  — blending LP, borehole model, NASA POWER/STAC cli
 AI/        RandomForest prospectivity pipeline (dataset → features → train → grid → GeoJSON)
            + NASA POWER data client
 
-database/  SQL schemas (Postgres/PostGIS target)
+database/  SQL schemas (Postgres; PostGIS planned, not installed)
 ```
 
 > Note: the frontend currently serves most data from its own `/api/v1/*` routes; the FastAPI service in `backend/` holds the real optimiser and data clients and is being folded in as the single source of truth.
@@ -172,7 +172,7 @@ This is a prototype. Authentication is **demo-grade** and intended only for loca
 
 ## Tech stack
 
-Next.js 16 · React 19 · TypeScript · Tailwind CSS 4 · Leaflet · Recharts · FastAPI · SQLAlchemy · SciPy · scikit-learn · Supabase · PostgreSQL/PostGIS (target).
+Next.js 16 · React 19 · TypeScript · Tailwind CSS 4 · Leaflet · Recharts · FastAPI · SQLAlchemy · SciPy · scikit-learn · Supabase · PostgreSQL (PostGIS planned, not installed).
 
 ## Team & credits
 
