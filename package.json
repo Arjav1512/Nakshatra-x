@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "dev": "npm --prefix frontend run dev",
-    "build": "npm --prefix frontend run build",
-    "vercel-build": "cd frontend && npm install && npm run build"
+    "build": "npm --prefix frontend run build"
   }
 }

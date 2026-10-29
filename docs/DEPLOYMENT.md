@@ -34,6 +34,44 @@ cd frontend && BACKEND_URL=http://127.0.0.1:8000 \
   npm run start
 ```
 
+### Hosting
+
+**Nothing is hosted.** The product runs locally, set up and checked by the
+pre-flight in `docs/DEMO.md` ("Pre-flight — run this before every demo"). The
+repository carries no deploy configuration: the Vercel and Netlify files were
+removed in #39 because neither platform had deployed `main`, and neither hosts
+what the FastAPI service needs: a long-running process with a writable disk. A
+frontend-only deploy is not a working product. Every
+`/api/v1/*` route proxies FastAPI, so without it every panel reports
+unavailable.
+
+A hosted deployment has to run both processes together, with `BACKEND_URL`
+pointing the Next.js server at FastAPI.
+
+**FastAPI service (`backend/`)**
+
+- **Python 3.12 or newer.** `rasterio` 1.5 requires 3.12. CI,
+  `backend/scripts/setup_dev.sh` and the demo all use 3.13.
+- **The committed artifacts.** `backend/artifacts/` must have been produced by
+  the code being deployed: `python -m app.api.batch check` passes. At start-up
+  the service recomputes any forecast artifact that is missing or stale, and
+  takes a warm lock in the same directory, so the directory must be writable.
+- **A writable database.** Either SQLite (the default `DATABASE_URL`,
+  `sqlite:///./moil.db`, resolved from `backend/`) or Postgres through a
+  `postgresql+psycopg://` `DATABASE_URL`.
+- **`JWT_SECRET`** when `ENVIRONMENT=production`. The settings refuse to load
+  with the placeholder value.
+- **A long-running process, not a serverless function.** A cold forecast fit
+  takes more than a minute (N-1 below).
+
+**Next.js app (`frontend/`)**
+
+- **`SESSION_SECRET`** of at least 32 characters. In production the app
+  refuses to issue sessions without it (see Secrets below). It is read by the
+  Next.js server, not by FastAPI.
+- **`BACKEND_URL`**, the address of the FastAPI service.
+- `npm ci && npm run build && npm run start`.
+
 ---
 
 ## N-2 — nightly batch, on-demand re-run
