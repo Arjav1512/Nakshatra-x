@@ -1,172 +1,196 @@
 # NAKSHATRA-X
 
-**AI + satellite decision-support for manganese reserve prospectivity and production-shortfall planning.**
-Built for **Smart India Hackathon 2026 — Problem Statement SIH26009** (Ministry of Steel / MOIL Limited).
+**Decision support for MOIL's manganese mines: where to prospect, and whether
+production will meet plan.**
+
+Built for Smart India Hackathon 2026, Problem Statement SIH26009 (Ministry of
+Steel / MOIL Limited).
+
+> **Status: a working demonstrator that runs locally.** Nothing is hosted.
+> MOIL's operational data is proprietary, so all of it here is synthetic and
+> labelled as such. The outputs are decision support, not statutory reserve
+> figures.
 
 ---
 
-## Project status
+## Two tracks
 
-> **Hackathon prototype.** This is a working demonstrator, not a production system.
-> - **Live external data:** weather/climatology (NASA POWER, Open-Meteo) and satellite scene *metadata* (Sentinel-2 STAC) are fetched from real public APIs.
-> - **Synthetic data:** MOIL operational data (borehole assays, production, equipment downtime, blasting logs) is **not public**, so it is **synthetic** in this build. Treat every operational number as illustrative.
-> - **Not for statutory use:** outputs are prospectivity/decision-support only. They are **not** UNFC-classified reserve figures and must not be used for statutory reporting.
-> - **Auth is demo-grade** and must be replaced before any non-local deployment (see *Security*).
+The problem statement bundles two questions with different data, methods and
+users. They are kept apart.
 
-A candid engineering audit of the current state lives alongside this repo; the **Roadmap** below is drawn from it.
+### Track A: where to prospect (horizon: years)
 
----
+The model is a gradient-boosted classifier, `track-a-gbt-lomo-v1`. It scores
+surface indicators measured from Sentinel-2 L2A reflectance (band ratios for
+iron oxide, ferrous iron, clay alteration and vegetation) and from SRTM terrain
+(elevation, and slope computed in metres). It is trained on MOIL's known mine
+locations against sampled background points.
 
-## The problem (SIH26009)
+Ordinary kriging turns the point scores into a surface with a **per-cell
+uncertainty**. Drill targets are ranked by kriged prospectivity, and each one
+carries the evidence behind its rank.
 
-MOIL, India's largest manganese producer, plans reserves and production mostly from manual surveys, drilling, and production records — slow, and prone to expected-vs-actual mismatches. The challenge: use geological, historical, equipment, and satellite inputs (rainfall, soil moisture, NDVI, land-surface temperature) to (1) map reserves more accurately, (2) predict production shortfalls, and (3) recommend corrective actions — all through one dashboard.
+Two rules are enforced by test, because breaking them is how the first version
+of this model failed:
+- no feature may be a function of distance to a known mine;
+- latitude and longitude are not features.
 
-## Our approach: two products, one shell
+That first version is archived in `archive/track-a-leaky/`, with a README
+explaining why. Full detail is in `docs/TRACK_A.md`.
 
-The statement bundles two problems with different data, methods, and users. We keep them separate:
+### Track B: will production meet plan (horizon: days to weeks)
 
-- **Track A — Reserve prospectivity (horizon: years).** Where is the ore likely to be? Surface geology + structure inform *where to prospect*. Satellite data is used only for what it can measure at the surface; **we do not claim to detect ore underground**, because no optical/thermal/SAR sensor can.
-- **Track B — Production shortfall (horizon: days–months).** Will we hit target, and what do we do if not? Weather, equipment, and blasting constraints drive a forecast and corrective recommendations. This is the half MOIL can act on next month.
+The forecaster is `nakshatra-gbt-cqr-v1`: gradient-boosted quantile regression
+with a conformal width correction. It gives a daily median and an 80% interval
+for every mine and grade, and an expected shortfall in tonnes against plan. It
+is always reported next to a seasonal-naive baseline that it has to beat.
 
-### Non-negotiable guardrails
+Corrective actions pass through a **hard-constraint engine** (blasting windows,
+shift windows, equipment relocation), so the system never recommends something
+physically impossible. Around the forecast sit:
+- an ore-blending linear program;
+- a what-if scenario panel, "Mine twin", which uses the same constraint engine;
+- a rainfall-context view.
 
-1. **No subsurface ore detection from satellite** — the named inputs are surface/atmospheric only.
-2. **No statutory UNFC reserve figures** — outputs are decision-support for a qualified person.
-3. **Constraints are enforced, not learned** — the recommender must never propose the physically impossible.
-4. **Every number carries provenance** — source, vintage, model version, uncertainty, and a synthetic/live flag.
+### What is real and what is synthetic
 
-> These are project principles. Parts of the current codebase do not yet meet them (see *Roadmap*); closing that gap is the priority.
-
----
-
-## What works today
-
-| Capability | Status | Notes |
+| Data | Status | Source |
 |---|---|---|
-| Interactive India / mine map with prospectivity overlay | ✅ Working | Leaflet; click any point for an indicative prospectivity score |
-| Prospectivity classifier | ⚠️ Indicative | RandomForest over **structural (fault/lineament proximity) + terrain + NASA POWER climatology** proxies. Direct Sentinel-2 spectral ingestion is planned; treat scores as decision-support, not validated predictions |
-| Live weather / climatology | ✅ Live data | NASA POWER + Open-Meteo, with caching, retries, and honest fallback |
-| Satellite scene metadata | ✅ Live data | Sentinel-2 L2A via Earth Search STAC (metadata only, not pixel processing) |
-| Ore-blending optimiser | ✅ Working | Correct cost-minimising linear program (SciPy HiGHS) meeting Mn/P/SiO₂ specs |
-| Production-shortfall forecast, risk score, recommendations | 🧪 Heuristic placeholder | Currently rule-based over live weather; the **modelled** forecaster + backtest is on the roadmap |
-| Dashboard, auth, PWA shell | ✅ Working (demo-grade auth) | Next.js 16 + React 19 |
+| Track A inputs: surface reflectance, elevation, slope | **Measured** | Sentinel-2 L2A (Planetary Computer), SRTM |
+| Track A labels | **Real** | MOIL mine locations |
+| GSI lithology | **Missing**: the source was unreachable, so it is omitted, not substituted | — |
+| Production, equipment events, blasting, plan targets | **Synthetic**, every row flagged `is_synthetic` and badged in the UI | Generator behind the published ingestion contract, `docs/INGESTION_CONTRACT.md` |
+| Weather the forecaster was trained and backtested on | **Synthetic**, a covariate from the same generator | as above |
+| Rainfall and temperature on the conditions tiles | **Live**, with a labelled synthetic fallback when the service is down | NASA POWER, Open-Meteo |
+| Sentinel-2 scene metadata | **Live** | Earth Search STAC |
+| Map imagery layers | **Live or cached**, labelled with the fetch date | Planetary Computer |
 
-Legend: ✅ real · ⚠️ real but limited · 🧪 placeholder pending real implementation.
+---
+
+## How it is validated
+
+- **Track A: leave-one-mine-out.** Each fold holds out an entire deposit, so
+  the model is always scored on a mine it has never seen. That is the question
+  a geologist asks: would this have found the next deposit? A random split is
+  reported only for contrast, along with ablations by feature group. See
+  `docs/TRACK_A.md`.
+- **Track B: rolling-origin backtest.** The model is refit at every forecast
+  origin and scored only on days it did not see. It is compared with the
+  seasonal-naive baseline on error, and on whether its 80% intervals contain
+  80% of outcomes. Calibration is measured across all mines and many origin
+  dates, with cluster-bootstrap intervals. See `docs/BACKTEST.md` and
+  `docs/CALIBRATION.md`.
+- **Provenance.** Every number the API serves carries its source, vintage,
+  model version and a live or synthetic flag. A backend test and two browser
+  guards fail the build if one does not.
+- **Artifacts match the code.** Each committed artifact records the
+  fingerprint of the code that produced it, and CI fails if code and artifacts
+  drift apart (`python -m app.api.batch check`).
+
+## The figures
+
+Every figure the project quotes is in **`docs/PITCH_FIGURES.md`**. That file is
+written from what the API actually serves (`python -m app.api.batch pitch`),
+and CI checks it against the served artifacts (`batch pitch-check`). This
+README quotes no figure on purpose: take them from there, together with the
+dataset window they belong to.
 
 ---
 
-## Architecture (as built)
+## Honest limits
 
-```
-frontend/  Next.js 16 (App Router) + React 19 + TypeScript + Tailwind 4
-           ├─ Leaflet map, Recharts
-           ├─ /api/v1/*  route handlers  (product API today)
-           └─ Supabase (optional real auth/DB)
+- **P(shortfall) is withdrawn.** It is computed from the 14-day aggregate of
+  the daily forecasts, and that aggregate was measured unsound on every dataset
+  tried (D-043, `docs/QUANTILE_CROSSING.md`). Its band covers fewer outcomes
+  than it claims, and the error has no consistent direction a reader could
+  correct for. Two replacement estimators were pre-registered, and neither
+  passed its rule (D-045, `docs/SHORTFALL_PROBABILITY.md`). So the console does
+  not show it, and the pitch does not quote it. The API still computes it, so a
+  future fix can be measured against exactly what is served. It comes back
+  only when a fix passes a pre-registered test (D-044, `docs/DECISIONS.md`).
+- **The daily intervals are close to calibrated, not calibrated.** How close
+  depends on the dataset window (`docs/CALIBRATION.md`).
+- **Track A is softer than its headline.** There are few positives, part of
+  what the model learns is the terrain mines are built on, several deposits
+  score low, and lithology is missing (`docs/TRACK_A.md`, `docs/READINESS.md`
+  §5).
+- **The operational data is synthetic.** The forecaster's margin over its
+  baseline is partly a property of the generator. It shows that the pipeline
+  is sound, not how the model would do on MOIL's operations.
+- **Some services have no offline fallback.** The basemap goes blank without a
+  network. While a cold backend refits, the console can show the service as
+  degraded. The demo pre-flight exists for both (`docs/DEMO.md`).
+- **It is not hosted.** A hosted deployment has to run the Next.js app and the
+  FastAPI service together (`docs/DEPLOYMENT.md`, "Hosting").
+- **Keys from the repository's early history must be rotated** at the provider
+  before any shared deployment (`docs/SECURITY_FIXES.md`).
 
-backend/   FastAPI service  — blending LP, borehole model, NASA POWER/STAC clients
-           (runs and is tested; being consolidated as the single API — see Roadmap)
+### Guardrails
 
-AI/        RandomForest prospectivity pipeline (dataset → features → train → grid → GeoJSON)
-           + NASA POWER data client
-
-database/  SQL schemas (Postgres; PostGIS planned, not installed)
-```
-
-> Note: the frontend currently serves most data from its own `/api/v1/*` routes; the FastAPI service in `backend/` holds the real optimiser and data clients and is being folded in as the single source of truth.
+1. **No subsurface ore detection from satellite.** The inputs are surface and
+   atmospheric only.
+2. **No statutory UNFC reserve figures.** The outputs are decision support for
+   a qualified person.
+3. **Constraints are enforced, not learned.** The recommender never proposes
+   the physically impossible.
+4. **Every number carries provenance:** source, vintage, model version,
+   uncertainty, and a live or synthetic flag.
 
 ---
+
+## Run it locally
+
+You need Node 22 and Python 3.12 or newer. CI and the demo use Python 3.13.
+
+```bash
+backend/scripts/setup_dev.sh                  # backend/.venv, with the test dependencies
+(cd frontend && npm ci && npm run build)      # frontend dependencies and the production build
+```
+
+Then follow the pre-flight in `docs/DEMO.md` ("Pre-flight — run this before
+every demo"). It does three things:
+- checks the ports and that the figures still match what is served;
+- starts FastAPI on `http://localhost:8000` and the app on
+  `http://localhost:3000`;
+- checks that the console works before anyone presents it.
+
+`docs/CI.md` lists every test suite and how to run it.
 
 ## Repository layout
 
 ```
-frontend/          Next.js app (pages, components, API routes, libs)
-backend/           FastAPI app (app/ml, app/services, app/api, tests)
-AI/                ML pipeline scripts + trained model + outputs
-database/          schema.sql, flood_alert_schema.sql
+frontend/   Next.js app: pages, components, and /api/v1 route handlers that proxy FastAPI
+backend/    FastAPI service: forecaster, backtest, constraint engine, Track A serving, tests
+AI/         Track A: feature extraction, training, and the served model's outputs
+archive/    the retired, leaky Track A pipeline, kept as a record
+database/   SQL schemas (Postgres; PostGIS planned, not installed)
+docs/       decisions, validation reports, demo script, CI, deployment
+scripts/    port and memory checks, CI helpers
 ```
 
----
+## Documentation
 
-## Quick start
-
-### Frontend (the dashboard)
-
-```bash
-cd frontend
-npm install
-cp .env.example .env.local        # add your own Supabase / API keys
-npm run dev                       # http://localhost:3000
-npm run build                     # production build
-```
-
-### Backend (FastAPI API + real optimiser)
-
-```bash
-cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env              # defaults to local SQLite; no external DB required
-uvicorn app.main:app --reload     # http://localhost:8000  (docs at /docs)
-python test_api.py                # end-to-end smoke test (hits NASA POWER + STAC live)
-```
-
-### AI pipeline (rebuild the Track A model)
-
-The served model is built by `AI/scripts/07_build_honest_dataset.py` and
-`AI/scripts/08_train_honest_model.py`; the commands are in `docs/TRACK_A.md`
-("Reproducing"). The original pipeline leaked its labels and is archived in
-`archive/track-a-leaky/` (see its README).
-
----
-
-## Data & provenance
-
-| Source | Type | Real? |
-|---|---|---|
-| NASA POWER | Climatology / weather | Live (public API) |
-| Open-Meteo | Current weather / soil moisture | Live (public API) |
-| Sentinel-2 L2A (Earth Search STAC) | Scene metadata | Live (metadata only) |
-| GSI Bhukosh, IBM Yearbook, MOIL reports | Geology / production baselines | Reference for calibration |
-| Borehole assays, production, equipment, blasting logs | MOIL operational | **Synthetic** (proprietary; not public) |
-
-The intended production path is a **documented ingestion contract** (versioned schemas MOIL can map real data onto) plus a **synthetic generator** that flags every generated row. Building that contract and flagging is a priority (see Roadmap).
-
----
-
-## Roadmap
-
-**Immediate**
-- Replace demo-grade auth; remove hardcoded credentials; sign/verify sessions server-side.
-- Stamp every API response with `source`, `vintage`, `is_live`, `is_synthetic`, and model version, and surface it in the evidence panel.
-- Remove statutory `UNFC` labels from outputs; keep prospectivity scores + uncertainty.
-
-**Core (make Track B real, on one pilot mine)**
-- Publish the ingestion contract; add a calibrated synthetic generator that flags rows.
-- Modelled shortfall forecaster (seasonal-naive baseline + gradient boosting) with prediction intervals and P(shortfall).
-- Rolling-origin backtest (MAPE + interval coverage) surfaced in the UI.
-- Hard-constraint engine (shift/blasting windows, equipment relocation feasibility) gating every recommendation.
-
-**Track A**
-- Real Sentinel-2 band ratios + DEM slope + GSI lithology as features; leave-one-mine-out validation; per-cell uncertainty.
-
-**Integration**
-- Consolidate to one backend; wire the real prospectivity model behind map-click prediction; ensure reproducibility (same inputs → same output).
-
-**Later**
-- Multi-mine portfolio, grade-aware forecasting, scenario comparison, accept/reject audit trail, InSAR subsidence overlay, PDF/Excel export, role-based views, on-premise deployment.
-
----
-
-## Security
-
-This is a prototype. Authentication is **demo-grade** and intended only for local evaluation. Before any shared or public deployment: replace the demo login, enforce server-side session verification, remove any default credentials, tighten database row-level security, and rotate all keys. **Do not expose this build to the public internet as-is.** Never commit real secrets — configure them via `.env.local` / `.env`.
-
----
+| Read | For |
+|---|---|
+| `docs/DEMO.md` | Setting up, the pre-flight, and the demo script |
+| `docs/PITCH_FIGURES.md` | Every quotable figure, and its source |
+| `docs/TRACK_A.md` | Prospectivity: method, validation, limits |
+| `docs/BACKTEST.md`, `docs/CALIBRATION.md` | Track B validation |
+| `docs/SHORTFALL_PROBABILITY.md` | Why P(shortfall) stays withdrawn |
+| `docs/INGESTION_CONTRACT.md` | The schema MOIL's real data would map onto |
+| `docs/DECISIONS.md` | The decision log, including pre-registrations |
+| `docs/READINESS.md` | The current assessment against the PRD |
+| `docs/INTEGRITY.md` | Fabrications found and removed |
+| `docs/DEPLOYMENT.md`, `docs/CI.md` | Operating it, and the gates every change passes |
+| `docs/SECURITY_FIXES.md` | Authentication fixes, and the keys to rotate |
 
 ## Tech stack
 
-Next.js 16 · React 19 · TypeScript · Tailwind CSS 4 · Leaflet · Recharts · FastAPI · SQLAlchemy · SciPy · scikit-learn · Supabase · PostgreSQL (PostGIS planned, not installed).
+Next.js 16 · React 19 · TypeScript · Tailwind CSS 4 · Leaflet · Recharts ·
+FastAPI · SQLAlchemy · scikit-learn · SciPy · Supabase · PostgreSQL (PostGIS
+planned, not installed).
 
-## Team & credits
+## Team and credits
 
-Smart India Hackathon 2026 · Problem Statement SIH26009 · Ministry of Steel / MOIL Limited.
+Smart India Hackathon 2026 · Problem Statement SIH26009 · Ministry of Steel /
+MOIL Limited.
