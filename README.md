@@ -110,19 +110,12 @@ uvicorn app.main:app --reload     # http://localhost:8000  (docs at /docs)
 python test_api.py                # end-to-end smoke test (hits NASA POWER + STAC live)
 ```
 
-### AI pipeline (regenerate prospectivity grid + model)
+### AI pipeline (rebuild the Track A model)
 
-```bash
-cd AI
-pip install -r ../backend/requirements.txt   # pandas, numpy, scikit-learn, requests, joblib
-python scripts/01_make_dataset.py
-python scripts/02_extract_features.py
-python scripts/03_train_model.py
-python scripts/04_predict_grid.py
-python scripts/05_export_geojson.py           # writes prospectivity.geojson for the frontend
-```
-
-Requires internet for NASA POWER. Outputs land in `AI/outputs/`.
+The served model is built by `AI/scripts/07_build_honest_dataset.py` and
+`AI/scripts/08_train_honest_model.py`; the commands are in `docs/TRACK_A.md`
+("Reproducing"). The original pipeline leaked its labels and is archived in
+`archive/track-a-leaky/` (see its README).
 
 ---
 

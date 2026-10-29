@@ -115,10 +115,10 @@ npm run build      → success, 38 routes
 
 | Item | Status | Evidence |
 |---|---|---|
-| `AI/api/main.py /predict` built 6 features, model expects 10 → 500 | **done** | `POST /predict {"lat":21.83,"lng":80.19}` → **HTTP 200**, `probability: 0.995`. Model introspection confirms `n_features_in_: 10` matching `FEATURE_COLS` order. |
-| Three drifting copies of the feature definition | **done** | New `AI/scripts/features.py` is the single definition; `02`, `04` and `api/main.py` all import it. Training-table schema verified byte-identical to the committed CSV header. |
+| `archive/track-a-leaky/api/main.py /predict` built 6 features, model expects 10 → 500 | **done** | `POST /predict {"lat":21.83,"lng":80.19}` → **HTTP 200**, `probability: 0.995`. Model introspection confirms `n_features_in_: 10` matching `FEATURE_COLS` order. |
+| Three drifting copies of the feature definition | **done** | New `archive/track-a-leaky/scripts/features.py` is the single definition; `02`, `04` and `archive/track-a-leaky/api/main.py` all import it. Training-table schema verified byte-identical to the committed CSV header. |
 | Feature noise drawn from unseeded global `np.random` | **done** | Seeded per-coordinate RNG. Same coords twice → identical response. |
-| `05_export_geojson.py` wrote to repo-root `public/` | **done** | Now `frontend/public/data` and `frontend/src/data`. |
+| `archive/track-a-leaky/scripts/05_export_geojson.py` wrote to repo-root `public/` | **done** | Now `frontend/public/data` and `frontend/src/data`. |
 | Flood risk forced CRITICAL when `lat >= 21.5` | **done** | Condition is now `rain_14d > 95 or soil_moist > 40`. |
 | Open-Meteo `past_days` summed forecast days as "past 14 days" | **done** | Fixed in the telemetry route, the flood processor and `LocationFloodAlertFinder`: both windows requested, split on today's date. |
 | Backend satellite service fabricated ISRO scene IDs | **done** | `query_isro_bhuvan_satellites` deleted — it pinged Bhuvan, discarded the response, and returned hand-built `RS2A_L4F_*` / `EOS04_SAR_*` IDs with `now - 2 days` pass times. Replaced by the real Earth Search STAC query. Test now prints `Copernicus Sentinel-2 L2A via Earth Search STAC (Element 84)`. |
@@ -310,7 +310,7 @@ it is 0.246 s.
 2. **`HotspotEvidence.tsx`** — invented Sentinel/Landsat scene IDs plus constant
    NDVI/spectral/drill-support values; **any mine other than two silently showed
    Balaghat's evidence under its own name**. Now reads real telemetry.
-3. **`AI/api/main.py` `/metrics`** — fallback `accuracy: 0.9875, roc_auc: 0.9950`.
+3. **`archive/track-a-leaky/api/main.py` `/metrics`** — fallback `accuracy: 0.9875, roc_auc: 0.9950`.
    Now 503 with instructions.
 4. **`IndiaSatelliteMap.tsx`** — `98.7% GSI/MOIL Accuracy` fallback attributed to
    two government bodies by name. Removed.
@@ -341,7 +341,7 @@ non-functional genuinely absent.
 
 The sweep assumed a tenth fabrication existed. It found six clusters:
 
-1. **`03_train_model.py`: `except Exception: auc = 1.0`** — a failure to compute
+1. **`archive/track-a-leaky/scripts/03_train_model.py`: `except Exception: auc = 1.0`** — a failure to compute
    AUC was reported as a *perfect* score and written to `model_metrics.json`.
    The one case where the metric is undefined produced the most flattering
    number. Now NaN → `null`.

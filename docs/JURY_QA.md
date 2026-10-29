@@ -105,7 +105,7 @@ is not the flattering one.) The leaked metrics files were deleted, including one
 served publicly.
 
 *Evidence:* `docs/TRACK_A.md`; `docs/READINESS.md` §3.1 (sections on
-`03_train_model.py` and the shipped metrics files).
+`archive/track-a-leaky/scripts/03_train_model.py` and the shipped metrics files).
 
 ### 6. Is 0.85 good?
 

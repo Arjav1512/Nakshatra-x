@@ -151,7 +151,7 @@ and the demo was walked from a fresh clone.
 Nine had been found across Phases 1–7. This sweep assumed a tenth existed.
 **It found six more clusters.** Grep evidence and disposition for every hit:
 
-#### 3.1 `AI/scripts/03_train_model.py:65` — a failure reported as a perfect score
+#### 3.1 `archive/track-a-leaky/scripts/03_train_model.py:65` — a failure reported as a perfect score
 
 ```
 grep -rnEi "(accuracy|roc_auc|auc)[\"' ]*[:=][\"' ]*[0-9]" AI
@@ -225,7 +225,7 @@ attributions from the data file but left the UI labels asserting them.
 
 | Guardrail | Violation | Fix |
 |---|---|---|
-| (a) no subsurface from satellite | `AI/api/main.py` API description: *"Sub-surface Manganese Deposit Discovery"*; deck: *"map sub-surface manganese prospectivity"*; *"Cloud Penetration: 100% Operational"*; chatbot claiming SAR/NISAR *"penetrates 100% of cloud and rain"* | all reworded to surface-only with §2.2 cited |
+| (a) no subsurface from satellite | `archive/track-a-leaky/api/main.py` API description: *"Sub-surface Manganese Deposit Discovery"*; deck: *"map sub-surface manganese prospectivity"*; *"Cloud Penetration: 100% Operational"*; chatbot claiming SAR/NISAR *"penetrates 100% of cloud and rain"* | all reworded to surface-only with §2.2 cited |
 | (b) no statutory UNFC | *"upgrade UNFC 122 to 111 reserves"*; chatbot: *"10,829 historical core drill logs … voxel block models of UNFC 111 proved reserves"* | replaced; no reserve class emitted |
 
 #### 3.8 Verified clean

@@ -13,7 +13,7 @@ The previous pipeline reported **~0.98**. That number measured leakage, not geol
 
 ## What was wrong
 
-`AI/scripts/features.py` computed every "spectral" feature as a linear function of `proximity`:
+`archive/track-a-leaky/scripts/features.py` computed every "spectral" feature as a linear function of `proximity`:
 
 ```python
 KNOWN_FAULTS = [(21.83, 80.19), (21.86, 80.26), ...]   # the MOIL mine coordinates

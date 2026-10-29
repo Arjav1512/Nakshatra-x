@@ -1,7 +1,7 @@
 """
 Real surface-indicator features for Track A (PRD A-2).
 
-This replaces `features.py`'s proxy formulas, in which every "spectral" value
+This replaces `archive/track-a-leaky/scripts/features.py`'s proxy formulas, in which every "spectral" value
 was a linear function of distance to `KNOWN_FAULTS` — and `KNOWN_FAULTS` was the
 list of MOIL mine coordinates, which are the positive labels. The features
 encoded the target, so the reported ~0.98 AUC measured nothing

@@ -76,7 +76,7 @@ a measurement that no measurement produced.
 | `backend/app/ml/forecaster.py` | `.get(day, 0.0)` (covariate lookups) | Absence of an event on a day genuinely means zero hours that day. This is the correct semantics for event aggregation, not a substitution. |
 | `backend/app/ingestion/generator.py` | `float(e.downtime_hours or 0.0)` | Same: summing events, where "no record" means "no downtime logged". |
 | `backend/app/api/telemetry.py` | `except Exception: staleness = None` | `None` is unknown, which is the honest value. Not plausible-looking. |
-| `AI/scripts/real_data_client.py` | `except Exception: _cache = {}` | Cache initialisation. Holds no measurements. |
+| `archive/track-a-leaky/scripts/real_data_client.py` | `except Exception: _cache = {}` | Cache initialisation. Holds no measurements. |
 | `api/v1/historical-forecasts/route.ts` | `req.json().catch(() => ({}))`, `Number(x) \|\| 1.0` | A scenario knob with a neutral default, on an endpoint whose only UI consumer was deleted this stage. Left in place rather than changed blind. |
 
 ---

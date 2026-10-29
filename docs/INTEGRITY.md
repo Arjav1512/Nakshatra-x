@@ -72,7 +72,7 @@ scene metadata from Earth Search STAC.
 ## 4. Known-invalid metric (not yet fixed)
 
 The prospectivity model in `AI/` reports ~0.98 AUC. **This number is not
-meaningful.** `KNOWN_FAULTS` in `AI/scripts/02_extract_features.py` is the list
+meaningful.** `KNOWN_FAULTS` in `archive/track-a-leaky/scripts/02_extract_features.py` is the list
 of known mine coordinates, and the "spectral" features are computed as a
 function of distance to those points — so the features encode the label. The
 model is largely recovering its own target.
