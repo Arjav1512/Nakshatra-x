@@ -164,7 +164,7 @@ def test_no_committed_prospectivity_geojson_anywhere():
     The superseded grid must not come back, in any copy.
 
     It existed three times — AI/outputs, frontend/public/data and
-    frontend/src/data — and `05_export_geojson.py` recreated all of them from
+    frontend/src/data — and `archive/track-a-leaky/scripts/05_export_geojson.py` recreated all of them from
     the pre-honest pipeline on every run. The route read one of the copies, so
     deleting only the obvious one would have changed nothing.
     """

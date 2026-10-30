@@ -67,7 +67,7 @@ a live STAC query and measured weather. Fields the pipeline does not yet produce
 (NDVI, soil moisture, spectral indices) render as *unavailable* with the reason,
 never filled in.
 
-### 3. `AI/api/main.py` `/metrics` — invented fallback
+### 3. `archive/track-a-leaky/api/main.py` `/metrics` — invented fallback
 
 ```python
 return {"accuracy": 0.9875, "roc_auc": 0.9950,

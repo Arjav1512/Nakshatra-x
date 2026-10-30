@@ -9,6 +9,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  # Planned, not installed: the Celery worker queue in
+  # SIH26009-Architecture.excalidraw. No code connects to Redis yet.
   redis:
     image: redis:7-alpine
     ports:
