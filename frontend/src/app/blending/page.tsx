@@ -14,9 +14,10 @@ export default function BlendingPage() {
 
   useEffect(() => {
     async function loadTelemetry() {
+      // Null when there is no telemetry; RiskCockpit then says so.
       const data = await fetchLiveMineTelemetry(selectedMine)
-      setWeather(data.weather)
-      setRisk(data.risk)
+      setWeather(data?.weather ?? null)
+      setRisk(data?.risk ?? null)
     }
     loadTelemetry()
   }, [selectedMine])

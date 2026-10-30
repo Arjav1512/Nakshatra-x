@@ -36,8 +36,9 @@ const WEATHER_SOURCE = 'NASA POWER daily meteorology'
  *
  * These three cards called `measured(value, unit, WEATHER_SOURCE)` outright. In
  * degraded mode — the FastAPI layer unreachable — `fetchLiveMineTelemetry`
- * falls back to `degradedTelemetry`, which *generates* rainfall in the browser
- * from `boundedNormal(85, 25, 0, 320)` and labels itself honestly:
+ * fell back to `degradedTelemetry` (since deleted), which *generated* rainfall
+ * in the browser from `boundedNormal(85, 25, 0, 320)` and labelled itself
+ * honestly:
  * `is_live: false`, `is_synthetic: true`, `source: 'SYNTHETIC FALLBACK —
  * service layer unreachable. Not observed data.'`
  *

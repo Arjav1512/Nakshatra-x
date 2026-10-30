@@ -9,7 +9,6 @@ import type {
   AuditRecord,
   STACScene,
 } from './types'
-import { degradedTelemetry } from '@/lib/degraded-telemetry'
 
 export const FALLBACK_MINES: MineInfo[] = [
   { id: 'balaghat', numericId: 1, name: 'Balaghat', code: 'MOIL-BAL-01', state: 'MP', lat: 21.83, lng: 80.19, zone: 'Central India', targetTonnes: 18000, currentProduction: 16800 },
@@ -27,9 +26,18 @@ export const MOIL_MINES = FALLBACK_MINES // Kept for synchronous fallback if nee
 const API_BASE = '/api/v1'
 
 // `jitter()` (Math.random) was removed: it changed displayed numbers on every
-// render, which made synthetic values look like a live feed. Degraded-mode
-// values are now deterministic and explicitly flagged.
+// render, which made synthetic values look like a live feed. Degraded mode
+// now shows no values at all.
 
+/**
+ * The mine's telemetry from the service layer, or null when there is none.
+ *
+ * Null covers every failure: the route unreachable from the browser, the
+ * service layer unreachable (the route answers 503), or no such mine (404).
+ * Callers render that as unavailable. This used to fall back to a payload
+ * built in the browser from a hardcoded mine register, which carried a planned
+ * tonnage and, for an id not in that register, Balaghat's record (DEF-1).
+ */
 export async function fetchLiveMineTelemetry(mine: MineInfo): Promise<{
   weather: WeatherSignal
   reserve: ReservePrediction
@@ -39,7 +47,7 @@ export async function fetchLiveMineTelemetry(mine: MineInfo): Promise<{
   actions: ActionOrder[]
   audit: AuditRecord
   stacScenes: STACScene[]
-}> {
+} | null> {
   try {
     // DEF-1: `mine.numericId || 1` silently requested mine 1 whenever a mine
     // arrived without a numeric id, returning Balaghat's telemetry under
@@ -64,27 +72,8 @@ export async function fetchLiveMineTelemetry(mine: MineInfo): Promise<{
       }
     }
   } catch (err) {
-    console.warn('Telemetry API fallback activated:', err)
+    console.warn('Telemetry unavailable:', err)
   }
 
-  return getFallbackTelemetry(mine)
-}
-
-/**
- * Client-side last resort: the Next.js route itself was unreachable (offline,
- * network error). The route's own degraded payload covers the backend being
- * down, so this only fires when the browser cannot reach the app at all.
- *
- * This previously held a third copy of the drag model, alongside the FastAPI
- * implementation and the route's degraded path. It now delegates to the single
- * shared degraded builder.
- */
-function getFallbackTelemetry(mine: MineInfo) {
-  // Degraded mode keeps the mine's own id so the payload is not attributed to
-  // a different mine; -1 marks "unidentified" rather than defaulting to 1.
-  const id = mine.numericId
-  return degradedTelemetry(
-    typeof id === 'number' && Number.isInteger(id) && id > 0 ? id : -1,
-    'Next.js route unreachable from the browser'
-  )
+  return null
 }
