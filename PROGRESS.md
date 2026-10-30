@@ -160,9 +160,9 @@ POWER client were unreachable from the UI.
 | End-to-end trace (PRD D-2/B-4) | **done** | 91.79 mm identical at UI → FastAPI → `/environment` → NASA POWER queried directly. |
 | Reproducibility (N-4) | **done** | All `provenance[*].value` and all forecast/risk scalars identical across calls; only timestamps differ. |
 | Python↔TS generator parity (N-4) | **done** | `backend/test_provenance_parity.py` — mulberry32 and FNV-1a match bit-for-bit. |
-| Graceful degradation (N-6) | **done** | Backend down → `served_by: nextjs-degraded-fallback`, synthetic flagged, 0 scenes, no recommendation issued; blend returns 503 `Unavailable` rather than a fake solve. |
+| Graceful degradation (N-6) | **done** | Backend down → telemetry answers 503 `is_live: false` with no figure and no mine record; an unknown mine is FastAPI's 404, passed through (`npm run test:telemetry`). It used to be a `nextjs-degraded-fallback` payload built from a register hardcoded in Next.js, which served a planned tonnage and mapped unknown ids to Balaghat. Blend returns 503 `Unavailable` rather than a fake solve. |
 | NASA POWER fallback fabrication | **done** | Fixed constants labelled "NASA POWER (Cached/Interpolated)" replaced with a seeded, flagged draw. |
-| Third copy of the drag model | **done** | `data.ts` fallback delegates to the shared degraded builder; 237 → 83 lines. |
+| Third copy of the drag model | **done** | `data.ts` fallback delegates to the shared degraded builder; 237 → 83 lines. The builder was later deleted: `data.ts` now returns no telemetry on failure. |
 
 ---
 
