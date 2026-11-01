@@ -93,8 +93,9 @@ const LISTED = {
     why:
       'Mine twin what-if: multiplies a baseline the caller read from the mine\'s forecast artifact (sent with its provenance) ' +
       'by planner factors the caller chose on screen, and labels the result kind: "assumption". It holds no figure of its ' +
-      'own; its numbers are input bounds. The one route that computes in Next.js, and a candidate to move to FastAPI.',
-    imports: ['next/server', 'crypto', '@/lib/scenario-assumptions', '@/components/mission-control/data'],
+      'own; its numbers are input bounds. The mine is checked against FastAPI\'s register (fetchFromBackend), which it ' +
+      'never copies. The one route that computes in Next.js, and a candidate to move to FastAPI.',
+    imports: ['next/server', 'crypto', '@/lib/scenario-assumptions', '@/lib/backend'],
   },
 }
 

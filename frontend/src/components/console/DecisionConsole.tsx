@@ -10,6 +10,7 @@ import { Button, Card, EmptyState, Skeleton } from '@/components/ui/primitives'
 import { ProbabilityWithdrawn } from './ProbabilityWithdrawn'
 import { TrackAPanel } from './TrackAPanel'
 import { TrackBPanel } from './TrackBPanel'
+import { TRACK_B_PILOT_CODE } from '@/lib/pilot-mines'
 
 /**
  * Decision console — the end-to-end journey (PRD D-1..D-8, N-3, N-6, N-8).
@@ -47,8 +48,7 @@ const isFailure = (c: Cell): c is { error: string; status: number } =>
  * band went with it. The cards are ordered by expected shortfall in tonnes.
  */
 
-/** Balaghat — PRD §13 Q4 names it the Track B pilot. */
-const PILOT_CODE = 'MOIL-BAL-01'
+/* The Track B pilot is named by register code in lib/pilot-mines.ts. */
 
 /**
  * Provenance for the portfolio risk strip. The strip renders numbers, so N-3
@@ -638,7 +638,7 @@ export function DecisionConsole() {
                     ))
                   : ranked.map((m, rank) => {
                   const v = portfolio[m.id]
-                  const isPilot = m.mine_code === PILOT_CODE
+                  const isPilot = m.mine_code === TRACK_B_PILOT_CODE
                   return (
                     // biome-ignore lint/suspicious/noArrayIndexKey: keyed by slot like the placeholders above, so each card replaces its placeholder in place instead of moving (no layout shift).
                     <li key={`slot-${rank}`}>

@@ -1,14 +1,23 @@
+/**
+ * A mine, as the pages that select one hold it. Built only from a row of
+ * FastAPI's register (`mineInfoFromRow` in ./mine-register), never written out.
+ *
+ * `numericId` is the register's id and is required: it was optional, and two
+ * callers filled the gap with `numericId ?? 1`, which is DEF-1's substitution.
+ * `zone`, `targetTonnes` and `currentProduction` are gone. Nothing read them,
+ * and the only values they ever held were typed into the hardcoded copies of
+ * the register that this type outlived.
+ */
 export type MineInfo = {
+  /** The register id as a string, for controls keyed by string. */
   id: string
-  numericId?: number
+  numericId: number
   name: string
   code: string
-  state: 'MP' | 'MH'
+  /** Abbreviated where the register's state name is known (MP, MH). */
+  state: string
   lat: number
   lng: number
-  zone: string
-  targetTonnes: number
-  currentProduction: number | null
 }
 
 // `null` means "not supplied by the active source" and must render as an

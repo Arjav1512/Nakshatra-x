@@ -121,17 +121,13 @@ const INDIAN_LOCATIONS_DB: Record<string, { lat: number; lng: number; name: stri
   'goa': { lat: 15.2993, lng: 74.124, name: 'Goa Iron-Mn Ore Belt', state: 'Goa', type: 'Mining Belt' },
 
   // Primary Indian Mining & Mineral Belts (MOIL & Manganese Priorities)
-  'balaghat': { lat: 21.83, lng: 80.19, name: 'Balaghat Pyrolusite Syncline', state: 'Madhya Pradesh', type: 'MOIL Mine Hub' },
-  'bharweli': { lat: 21.86, lng: 80.26, name: 'Bharweli Underground Mine', state: 'Madhya Pradesh', type: 'MOIL Mine Hub' },
-  'ukwa': { lat: 21.93, lng: 80.52, name: 'Ukwa Siliceous Reef', state: 'Madhya Pradesh', type: 'MOIL Mine Hub' },
-  'tirodi': { lat: 22.16, lng: 79.68, name: 'Tirodi Gondite Facies', state: 'Madhya Pradesh', type: 'MOIL Mine Hub' },
-  'dongri buzurg': { lat: 20.99, lng: 79.34, name: 'Dongri Buzurg Ore Belt', state: 'Maharashtra', type: 'MOIL Mine Hub' },
-  'dongri': { lat: 20.99, lng: 79.34, name: 'Dongri Buzurg Ore Belt', state: 'Maharashtra', type: 'MOIL Mine Hub' },
-  'mansar': { lat: 21.44, lng: 79.25, name: 'Mansar Manganese Mine', state: 'Maharashtra', type: 'MOIL Mine Hub' },
-  'kandri': { lat: 21.38, lng: 79.32, name: 'Kandri Ore Complex', state: 'Maharashtra', type: 'MOIL Mine Hub' },
-  'chikla': { lat: 21.3, lng: 79.66, name: 'Chikla Underground Mine', state: 'Maharashtra', type: 'MOIL Mine Hub' },
-  'gumgaon': { lat: 21.33, lng: 79.03, name: 'Gumgaon Ore Sector', state: 'Maharashtra', type: 'MOIL Mine Hub' },
-  'beldongri': { lat: 21.16, lng: 79.18, name: 'Beldongri Prospect Zone', state: 'Maharashtra', type: 'MOIL Mine Hub' },
+  //
+  // Eleven entries here were MOIL mines, typed 'MOIL Mine Hub' at the
+  // register's own coordinates: a copy of FastAPI's register under other
+  // names. They are gone. The map searches the register itself before it calls
+  // this route, and a mine's name sent here is a place name like any other,
+  // resolved by the upstream gazetteers. lint:mine-register fails on a mine
+  // defined here.
   'bhandara': { lat: 21.17, lng: 79.65, name: 'Bhandara Gondite Belt', state: 'Maharashtra', type: 'Mining District' },
   'gondia': { lat: 21.4598, lng: 80.1961, name: 'Gondia Sub-Surface Sector', state: 'Maharashtra', type: 'Mining Corridor' },
   'chhindwara': { lat: 22.0574, lng: 78.9382, name: 'Chhindwara Manganese Extension', state: 'Madhya Pradesh', type: 'Mining Belt' },

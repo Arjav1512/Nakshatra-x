@@ -1,12 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { MineSwitcher, PageHeader, PageNav } from '@/components/ui/primitives'
-import { FALLBACK_MINES } from '@/components/mission-control/data'
+import { PageHeader, PageNav } from '@/components/ui/primitives'
+import { selectedFrom, useMineRegister } from '@/components/mission-control/mine-register'
+import { RegisterMineSelect } from '@/components/mission-control/RegisterMineSelect'
 import MineTwinPanel from '@/components/mine-twin/MineTwinPanel'
 
 export default function MineTwinPage() {
-  const [selectedMine, setSelectedMine] = useState(FALLBACK_MINES[0])
+  // The mine comes from FastAPI's register, or there is none (mine-register.ts).
+  const register = useMineRegister()
+  const [chosenId, setChosenId] = useState<string | null>(null)
+  const selectedMine = selectedFrom(register, chosenId)
 
   return (
     // overflow-x-clip, not overflow-hidden: hidden makes this a scroll
@@ -26,16 +30,21 @@ export default function MineTwinPage() {
           description="A what-if calculator for one mine: set the operating assumptions, see what the arithmetic gives against the mine's own forecast baseline, and whether the constraint engine permits the plan."
         />
 
-        <MineSwitcher
-          mines={FALLBACK_MINES}
-          selectedId={selectedMine.id}
-          onSelect={setSelectedMine}
+        <RegisterMineSelect
+          register={register}
+          selected={selectedMine}
+          onSelect={(m) => setChosenId(m.id)}
+          withoutRegister="The calculator works against one mine's forecast, so it is not shown."
         />
 
+        {/* Nothing below renders until the register has answered, so content
+            arriving with it is inserted rather than pushed down (test:cls). */}
+        {register.status === 'loading' ? null : (
+          <>
         {/* A second H1, "Mine twin", sat here between the page title and
             the panel's own heading: three titles for one calculator. The
             page title and the panel's mine name are the two it needs. */}
-        <MineTwinPanel selectedMine={selectedMine} />
+        {selectedMine ? <MineTwinPanel selectedMine={selectedMine} /> : null}
 
         {/* These were "Page 2: ML Architecture" and "Page 4: Production
             Sentinel" — names of screens that no longer exist. */}
@@ -46,6 +55,8 @@ export default function MineTwinPage() {
             { href: '/method', label: 'Method and evidence', detail: 'How both tracks are built and validated' },
           ]}
         />
+          </>
+        )}
       </div>
     </main>
   )

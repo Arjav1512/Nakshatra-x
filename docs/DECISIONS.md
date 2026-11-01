@@ -1786,3 +1786,44 @@ tails 0.163, 816 windows.
 - No threshold above was adjusted.
 - No artifact moved: the candidates are unserved and outside the fingerprinted
   chain.
+
+## D-047 — No file in the Next.js app defines a mine
+
+D-028 made FastAPI's register the only register. Copies kept appearing anyway,
+and every DEF-1 instance ran through one:
+- the telemetry fallback's register (#40);
+- `FALLBACK_MINES`, a register of one that `/blending`, `/method` and
+  `/mine-twin` chose from and the mine-twin route validated against;
+- its row again in `MineTwinPanel` and the Track A map;
+- the map's search table and the geocoder's gazetteer, which held all ten
+  mines' coordinates under other names;
+- three hand-kept "pilot" records;
+- four mine names among a chatbot answer's keywords.
+
+**The rule.** `npm run lint:mine-register`, in CI's Frontend job, fails on a
+mine code, a register mine's name used as data, a mine id bound to a number, or
+a register mine's coordinates, anywhere in `frontend/src` outside comments. It
+reads the names, codes and coordinates to look for from FastAPI's seed register
+(`DEFAULT_MINES` in `backend/app/api/routes.py`), so it keeps no list of its
+own. Prose that names a place, such as a search box's "e.g. Balaghat", is not a
+definition.
+
+**Two exceptions, each checked:**
+- **`src/lib/pilot-mines.ts`** names the pilot mines by register code and
+  nothing else. Which mine to feature is a product designation (PRD §13 Q4),
+  not register data, and its id, name and coordinates are read from the
+  register at runtime.
+- **`mines_modelled` in `src/data/synthetic-history.json`** is a label written
+  by `backend/app/ingestion/export.py`, which is in the forecast import chain
+  and is not edited for this. No file in `src/` may read it.
+
+**Behaviour.**
+- **The register unavailable:** the selectors offer no mine and preselect
+  none. The mine-twin route refuses every id with a 503 shaped like the
+  telemetry route's, because it cannot check one.
+- **The register available:** the selectors list all ten mines, where they
+  had offered one.
+
+**Out of scope:** the backend keeps a second list of the ten mines, the
+synthetic generator's `MINES` (`backend/app/ingestion/generator.py`), which
+is the data's origin and fingerprinted.

@@ -11,6 +11,8 @@ import { cividis } from '@/lib/colormap'
 import { Metric } from './Evidence'
 import { PointScore } from './PointScore'
 import { DEFAULT_LAYER, type LayerType, type MineInfo } from '@/components/mission-control/types'
+import { useMineRegister } from '@/components/mission-control/mine-register'
+import { TRACK_A_OPENCAST_PILOT_CODE } from '@/lib/pilot-mines'
 
 /**
  * The prospectivity map.
@@ -35,19 +37,11 @@ const IndiaSatelliteMap = dynamic(
   }
 )
 
-/** Balaghat — PRD §13 Q4 names it the pilot; the map's own selector changes it. */
-const DEFAULT_MAP_MINE: MineInfo = {
-  id: 'balaghat',
-  numericId: 1,
-  name: 'Balaghat',
-  code: 'MOIL-BAL-01',
-  state: 'MP',
-  lat: 21.83,
-  lng: 80.19,
-  zone: 'Central India',
-  targetTonnes: 18000,
-  currentProduction: 0,
-}
+/*
+ * `DEFAULT_MAP_MINE` stood here: Balaghat's register row, typed in, as the
+ * map's opening selection (a third copy of the register). The map now opens
+ * with no mine and selects the register's first when the register arrives.
+ */
 
 /**
  * Track A — prospectivity (PRD A-3, A-4, A-5, A-7, D-1, D-5).
@@ -60,8 +54,11 @@ const DEFAULT_MAP_MINE: MineInfo = {
  * (PRD §2.2), and output typed prospectivity_score — never "reserve" (§2.4).
  */
 
-/** PRD §13 Q4 recommends an opencast mine for Track A; Balaghat is ~383 m underground. */
-const OPENCAST_PILOT = { name: 'Dongri Buzurg', lat: 20.99, lng: 79.34 }
+/*
+ * `OPENCAST_PILOT` stood here: the opencast pilot's name and coordinates,
+ * typed in. It is named by register code in lib/pilot-mines.ts now, and its
+ * name and coordinates come from the register.
+ */
 
 function Unavailable({ what, reason }: { what: string; reason: string }) {
   return (
@@ -82,7 +79,7 @@ function Spinner({ label }: { label: string }) {
 }
 
 export function TrackAPanel() {
-  const [mapMine, setMapMine] = useState<MineInfo>(DEFAULT_MAP_MINE)
+  const [mapMine, setMapMine] = useState<MineInfo | null>(null)
   // This read `'prospectivity' as LayerType`. 'prospectivity' was never a layer —
   // the type was 'satellite' | 'geology' — and the cast is what let it compile.
   // So the map opened with no overlay and no layer button active, and the
@@ -95,9 +92,19 @@ export function TrackAPanel() {
   const [probe, setProbe] = useState<any>(null)
   const [pErr, setPErr] = useState<string | null>(null)
   const [pLoading, setPLoading] = useState(false)
-  const [lat, setLat] = useState(String(OPENCAST_PILOT.lat))
-  const [lng, setLng] = useState(String(OPENCAST_PILOT.lng))
+  const register = useMineRegister()
+  const opencastPilot =
+    register.status === 'ok' ? register.mines.find((m) => m.code === TRACK_A_OPENCAST_PILOT_CODE) ?? null : null
+  // Empty until the register names the pilot, then its coordinates, unless
+  // someone has typed their own by then.
+  const [lat, setLat] = useState('')
+  const [lng, setLng] = useState('')
   const [live, setLive] = useState(false)
+  useEffect(() => {
+    if (!opencastPilot) return
+    setLat((v) => v || String(opencastPilot.lat))
+    setLng((v) => v || String(opencastPilot.lng))
+  }, [opencastPilot])
 
   useEffect(() => {
     let alive = true
@@ -108,7 +115,11 @@ export function TrackAPanel() {
 
   const runProbe = async () => {
     const la = Number(lat), ln = Number(lng)
-    if (!Number.isFinite(la) || !Number.isFinite(ln)) { setPErr('Latitude and longitude must be numbers.'); return }
+    // `Number('')` is 0, so empty fields scored the point 0°N 0°E.
+    if (!lat.trim() || !lng.trim() || !Number.isFinite(la) || !Number.isFinite(ln)) {
+      setPErr('Latitude and longitude must be numbers.')
+      return
+    }
     setPLoading(true); setPErr(null); setProbe(null)
     const r = await predictPoint(la, ln, live)
     r.ok ? setProbe(r.data) : setPErr(r.error)
@@ -334,12 +345,14 @@ export function TrackAPanel() {
           >
             {pLoading ? 'Scoring…' : 'Score'}
           </button>
-          <button type="button"
-            onClick={() => { setLat(String(OPENCAST_PILOT.lat)); setLng(String(OPENCAST_PILOT.lng)) }}
-            className="h-9 rounded-md bg-surface-2 px-3 text-[14px] tracking-[0.044em] text-text-primary transition-[background-color] duration-[180ms] ease-out hover:bg-surface-3"
-          >
-            {OPENCAST_PILOT.name} (opencast pilot)
-          </button>
+          {opencastPilot ? (
+            <button type="button"
+              onClick={() => { setLat(String(opencastPilot.lat)); setLng(String(opencastPilot.lng)) }}
+              className="h-9 rounded-md bg-surface-2 px-3 text-[14px] tracking-[0.044em] text-text-primary transition-[background-color] duration-[180ms] ease-out hover:bg-surface-3"
+            >
+              {opencastPilot.name} (opencast pilot)
+            </button>
+          ) : null}
         </div>
 
         {pErr ? <div className="mt-3"><Unavailable what="Prediction" reason={pErr} /></div> : null}

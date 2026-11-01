@@ -37,6 +37,9 @@ case "$GROUP" in
     run test:provenance
     # Telemetry for an unknown mine is a 404, never another mine's record.
     run test:telemetry
+    # The mine selectors and the mine-twin route read FastAPI's register, and
+    # every one of its mines; no list of their own (D-047).
+    run test:mine-register
     # The offline guard's question is "what renders with the service layer
     # stopped?", so the backend is stopped for it.
     # By pattern, not by the recorded PID: a macOS venv's python is a launcher
@@ -46,6 +49,9 @@ case "$GROUP" in
     run test:provenance -- --offline
     # With the register unreachable, telemetry is unavailable: no figure, no mine.
     run test:telemetry -- --backend-down
+    # With the register unreachable, no page offers or names a mine, and the
+    # mine-twin route refuses every id.
+    run test:mine-register -- --backend-down
     # The same sweep with the backend down: every control must lead to an
     # unavailable state, never a number.
     run test:interactions -- --backend-down --out "$LOGS/interactions-backend-down.json" ;;

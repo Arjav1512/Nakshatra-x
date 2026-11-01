@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 import { ASSUMPTION_GROUPS, ASSUMPTION_NOTE } from '@/lib/scenario-assumptions'
-import { FALLBACK_MINES } from '@/components/mission-control/data'
+import { fetchFromBackend } from '@/lib/backend'
 
 /**
  * What-if scenario calculator (PRD C-6 scenario comparison, C-4 assumptions).
@@ -34,8 +34,9 @@ import { FALLBACK_MINES } from '@/components/mission-control/data'
  */
 
 type SimInput = {
-  mineId: string
-  /** Ignored: the mine's name is taken from the server's own mine list. */
+  /** A register id. The name is read from the register, never from the caller. */
+  mineId: number
+  /** Ignored if sent: the mine's name is taken from FastAPI's register. */
   mineName?: string
   /** The factor actually used per assumption group, as shown in the UI. */
   factors: Record<string, number>
@@ -117,10 +118,36 @@ export async function POST(req: NextRequest) {
     return badRequest('baselineModelVersion must be a short string or null.', 'It names the forecaster that produced the baseline.')
   }
 
-  // The mine and its name come from this server's mine list, not the caller.
-  const mine = FALLBACK_MINES.find((m) => m.id === body.mineId)
+  // 5. The mine and its name come from FastAPI's register: not from the
+  // caller, and not from a copy here. This read `FALLBACK_MINES`, a register
+  // of one typed into the client bundle, so a scenario could run against
+  // Balaghat and no other mine, and still could with the service layer down.
+  //
+  // An id that cannot be a register id is refused as malformed. Any other id
+  // needs the register to judge it, so when the register cannot be read every
+  // id is refused, with the shape the telemetry route uses for the same case.
+  const mineId = body.mineId
+  if (typeof mineId !== 'number' || !Number.isSafeInteger(mineId) || mineId <= 0) {
+    return badRequest('mineId must be a register id.', 'Scenarios run against a mine in FastAPI\'s register, named by its id.')
+  }
+  const register = await fetchFromBackend<{ id: number; name: string }[]>('/api/v1/mines')
+  if (!register.ok || !Array.isArray(register.data)) {
+    return NextResponse.json(
+      {
+        error: 'Mine register unavailable',
+        detail: register.ok ? 'The register answered with something other than a list.' : register.error,
+        note: register.ok || register.status
+          ? 'The FastAPI service layer could not serve the mine register, so no mine id can be checked. No scenario is run.'
+          : 'The FastAPI service layer could not be reached, so no mine id can be checked. No scenario is run.',
+        is_live: false,
+        served_by: 'nextjs-degraded',
+      },
+      { status: 503 }
+    )
+  }
+  const mine = register.data.find((m) => m.id === mineId)
   if (!mine) {
-    return badRequest('Unknown mineId.', 'Scenarios run against a mine this system knows.')
+    return badRequest('Unknown mineId.', 'Scenarios run against a mine in FastAPI\'s register.')
   }
 
   const factors = isRecord(body.factors) ? body.factors : {}

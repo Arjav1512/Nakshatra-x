@@ -47,6 +47,10 @@ jobs:
         if: ${{ !cancelled() }}
         working-directory: frontend
         run: npm run lint:api-routes
+      - name: lint:mine-register — no file but FastAPI's register defines a mine
+        if: ${{ !cancelled() }}
+        working-directory: frontend
+        run: npm run lint:mine-register
       - name: Biome — no worse than the base commit
         if: ${{ !cancelled() }}
         env:

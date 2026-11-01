@@ -1,4 +1,5 @@
 import { fetchFromBackend } from '@/lib/backend'
+import { TRACK_B_PILOT_CODE } from '@/lib/pilot-mines'
 
 /**
  * Figures for the landing page, read from the same artifacts the console reads.
@@ -64,8 +65,11 @@ export interface LandingEvidence {
     | { ok: false; reason: string }
 }
 
-/** The pilot mine: the one with a committed rolling-origin backtest. */
-const PILOT_MINE = { id: 1, name: 'Balaghat', code: 'MOIL-BAL-01' }
+/*
+ * `PILOT_MINE = { id, name, code }` stood here, typed in. The pilot is named
+ * by register code in lib/pilot-mines.ts, and its id and name are read from
+ * FastAPI's register below.
+ */
 
 async function get(path: string): Promise<any | null> {
   const r = await fetchFromBackend(path, { timeoutMs: 8000 })
@@ -73,21 +77,25 @@ async function get(path: string): Promise<any | null> {
 }
 
 export async function loadLandingEvidence(): Promise<LandingEvidence> {
-  const [bt, metrics, cal] = await Promise.all([
-    get(`/api/v1/mines/${PILOT_MINE.id}/backtest`),
+  const [mines, metrics, cal] = await Promise.all([
+    get('/api/v1/mines'),
     get('/api/v1/prospectivity/metrics'),
-    get(`/api/v1/calibration/cumulative?mine_code=${PILOT_MINE.code}`),
+    get(`/api/v1/calibration/cumulative?mine_code=${TRACK_B_PILOT_CODE}`),
   ])
+  const pilot: { id: number; name: string; mine_code: string } | null = Array.isArray(mines)
+    ? mines.find((m: { mine_code?: string }) => m.mine_code === TRACK_B_PILOT_CODE) ?? null
+    : null
+  const bt = pilot ? await get(`/api/v1/mines/${pilot.id}/backtest`) : null
   const daily = cal?.status === 'ok' ? cal.daily?.portfolio : null
 
   return {
     backtest:
-      bt && bt.model
+      pilot && bt && bt.model
         ? {
             ok: true,
-            mineName: PILOT_MINE.name,
-            mineCode: PILOT_MINE.code,
-            mineId: PILOT_MINE.id,
+            mineName: pilot.name,
+            mineCode: pilot.mine_code,
+            mineId: pilot.id,
             mapePct: bt.model.mape_pct,
             baselineMapePct: bt.baseline.mape_pct,
             coverage80: bt.model.coverage_80,
@@ -97,7 +105,12 @@ export async function loadLandingEvidence(): Promise<LandingEvidence> {
             computedAt: bt.computed_at ?? null,
             dataWindowEnd: bt.data_window_end ?? null,
           }
-        : { ok: false, reason: 'The backtest artifact could not be read from the service layer.' },
+        : {
+            ok: false,
+            reason: pilot
+              ? 'The backtest artifact could not be read from the service layer.'
+              : 'The mine register could not be read, so the pilot mine could not be identified.',
+          },
     dailyCalibration:
       daily && cal.nominal_coverage != null
         ? {
