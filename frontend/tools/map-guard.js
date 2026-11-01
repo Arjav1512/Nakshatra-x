@@ -26,14 +26,23 @@
  *
  * WHAT --evicted PROVES
  * ---------------------
- * Blocking produces network errors, which never reach the 404 branch. Here each
- * tile's FIRST request is answered with Planetary Computer's real eviction
- * response — 404 {"detail":"SearchId `...` not found"}, the body measured
- * against an unregistered id — and later requests go through, as they would
- * once the mosaic is registered again. The map must re-register (one forced
- * call to /api/v1/map/tile-layers, however many tiles 404'd), retry, and end up
- * LIVE. Falling back to the cache here would be the wrong remedy: the tiler is
- * up, only the registration was gone.
+ * Blocking produces network errors, which never reach the 404 branch. Here
+ * every registration the page loaded with is evicted: a tile requested under
+ * any of those ids is answered with Planetary Computer's response for an
+ * unknown id, 404 {"error":"Unknown search ID."} (measured 2026-11-01). Ids
+ * that a forced re-register returns are live. The map must re-register ONCE
+ * for all three layers, retry under the new ids, and end up LIVE. Falling back
+ * to the cache here would be the wrong remedy: the tiler is up, only the
+ * registration was gone.
+ *
+ * Eviction is modelled by registration id, not by tile URL (D-048). This
+ * answered each URL's first request with the 404, which modelled eviction
+ * only while a re-register returned the same id. Planetary Computer now issues
+ * a new id per registration, so the retry's URL was new as well, it was
+ * answered with the 404 too, and the check failed from 2026-10-27 on (88 404s
+ * for 44 tiles) while the map was re-registering as designed. An id a forced
+ * re-register returns is taken off the evicted list, so the model holds under
+ * either behaviour, and the run reports which one it saw.
  *
  * This is a different failure from the provenance guard's --offline, which
  * means the service layer is DOWN — then the cache is unreachable too and the
@@ -143,21 +152,46 @@ async function waitForTiles(page, id) {
   let pcAborted = 0
   let evicted404s = 0
   let forcedReregisters = 0
-  const seenTiles = new Set()
+  /** Registration ids the page loaded with: evicted. */
+  const evictedIds = new Set()
+  /** Ids forced re-registers returned, and how many of them were new. */
+  const reregisteredIds = new Set()
+  let reregisteredSameId = 0
+  const searchIdOf = (url) => (/\/mosaic\/([^/]+)\/tiles\//.exec(url || '') || [])[1] || null
+  /** Which layer a tile URL belongs to, from the rendering it asks for. */
+  const layerOf = (url) => (url.includes('cop-dem') ? 'dem' : url.includes('expression=') ? 'iron-oxide' : 's2-true-colour')
+  const evicted404sByLayer = {}
   if (EVICTED) {
+    page.on('response', async (res) => {
+      const url = res.url()
+      if (!url.includes('/api/v1/map/tile-layers')) return
+      const forced = url.includes('force=1')
+      const body = await res.json().catch(() => null)
+      for (const l of body?.layers ?? []) {
+        const sid = searchIdOf(l.tile_url)
+        if (!sid) continue
+        if (!forced) evictedIds.add(sid)
+        else {
+          if (evictedIds.has(sid)) reregisteredSameId++
+          reregisteredIds.add(sid)
+          // A re-registered id is live, whether or not it is a new one.
+          evictedIds.delete(sid)
+        }
+      }
+    })
     await page.setRequestInterception(true)
     page.on('request', (req) => {
       const url = req.url()
       if (url.includes('/api/v1/map/tile-layers') && url.includes('force=1')) forcedReregisters++
-      if (url.includes('planetarycomputer.microsoft.com') && url.includes('/tiles/') && !seenTiles.has(url)) {
-        seenTiles.add(url)
+      const sid = url.includes('planetarycomputer.microsoft.com') && url.includes('/tiles/') ? searchIdOf(url) : null
+      if (sid && evictedIds.has(sid)) {
         evicted404s++
-        const sid = (/mosaic\/([0-9a-f]+)\//.exec(url) || [])[1] || 'unknown'
+        evicted404sByLayer[layerOf(url)] = (evicted404sByLayer[layerOf(url)] ?? 0) + 1
         return req.respond({
           status: 404,
           headers: { 'Access-Control-Allow-Origin': '*' },
           contentType: 'application/json; charset=utf-8',
-          body: JSON.stringify({ detail: `SearchId \`${sid}\` not found` }),
+          body: JSON.stringify({ error: 'Unknown search ID.' }),
         }).catch(() => {})
       }
       return req.continue().catch(() => {})
@@ -255,12 +289,25 @@ async function waitForTiles(page, id) {
     check('Planetary Computer was actually blocked', pcAborted > 0, `${pcAborted} requests aborted`)
   }
   if (EVICTED) {
-    check('tiles really were answered with the eviction 404', evicted404s > 0, `${evicted404s} tiles 404'd once`)
-    // Deduped: one forced re-register per burst, not one per tile. Three layers
-    // are visited, so at most a handful in total.
-    check('the map re-registered, and not once per tile',
-      forcedReregisters >= 1 && forcedReregisters <= TILE_LAYERS.length * 2,
-      `${forcedReregisters} forced re-register(s) for ${evicted404s} evicted tiles`)
+    check('tiles really were answered with the eviction 404', evicted404s > 0,
+      `${evicted404s} tile request(s) under an evicted registration`)
+    // One re-register registers all three layers, so the two layers shown
+    // after it must use its ids rather than 404 and re-register again. Before
+    // D-048 this allowed one per layer, which was right only while a
+    // re-register returned the ids the page already held.
+    check('one forced re-register recovered all three layers',
+      forcedReregisters === 1,
+      `${forcedReregisters} forced re-register(s) for ${evicted404s} evicted tile request(s)`)
+    // The first raster layer shown meets the eviction; the two after it must
+    // already be on the re-registered ids.
+    const later = TILE_LAYERS.slice(1).filter((id) => evicted404sByLayer[id])
+    check('the layers shown after the re-register never asked for an evicted id', later.length === 0,
+      `evicted 404s by layer: ${JSON.stringify(evicted404sByLayer)}`)
+    const fresh = reregisteredIds.size - reregisteredSameId
+    console.log(
+      `\n  Planetary Computer: the re-register returned ${fresh} new id(s) and ${reregisteredSameId} ` +
+        `id(s) the page already held (${reregisteredSameId ? 'hash ids, as before D-048' : 'a new id per registration, D-048'}).`
+    )
   }
 
   await browser.close()

@@ -1827,3 +1827,79 @@ definition.
 **Out of scope:** the backend keeps a second list of the ten mines, the
 synthetic generator's `MINES` (`backend/app/ingestion/generator.py`), which
 is the data's origin and fingerprinted.
+
+## D-048 — Planetary Computer mosaic ids are per registration now; recovery and its test follow
+
+**What happened.** From 27 October 2026, CI's Network job failed
+`test:map -- --evicted` on every run (12 failures from 28 October; 4 on the
+27th). It is non-blocking, so nothing else stopped. The live map run in the same
+job passed throughout.
+
+**The evidence.**
+- **Our code did not change.** #38, between the last pass (`c622d37`, 23 Oct)
+  and the first failure (`8861a20`, 27 Oct), touched the map only to un-export
+  three helpers and move a type.
+- **The re-register still fired.** Every failing run logged 3 forced
+  re-registers.
+- **The 404 count doubled.** Every passing run logged 44 tiles answered with the
+  eviction 404 (20 + 12 + 12 on screen); every failing run logged 88. Each tile
+  was 404'd twice, under two different URLs.
+
+**The registration-lifetime probes, re-run on 1 November 2026** (the five behind
+`backend/app/ml/map_layers.py`'s design):
+
+| Probe | Measured before | Measured 2026-11-01 |
+|---|---|---|
+| 1. The same search registered three times | the same id each time, a content hash | **three different ids**: `pc1.1793639286.b3f8…`, `pc1.1793639287.b95a…`, `pc1.1793639288.1c53…` |
+| 2. One filter changed | a different id | a different id (unchanged) |
+| 3. `GET /mosaic/<id>/info` | `search.hash`, `lastused`, `usecount` | the same fields. The three ids share one `search.hash` and one `lastused`, with `usecount` 604 |
+| 4. Info for an unknown id | 404 `{"detail":"SearchId … not found"}` | 404 **`{"error":"Unknown search ID."}`** |
+| 5. A tile under an unknown id | the same 404, not a blank tile | the same 404, new body, `Access-Control-Allow-Origin: *` |
+| A tile under a registered id | 200 | 200 `image/jpeg`, no redirect, `Access-Control-Allow-Origin: *` |
+
+The number in each id is the registration time plus exactly 86,400 s, which
+reads as a 24-hour expiry. None was seen to expire: the six ids registered at
+17:08Z still answered 200 at 18:34Z, 86 minutes later.
+
+**So Planetary Computer changed, and the test's model of eviction broke with
+it.** The test answered each tile URL's *first* request with the 404 and let
+later requests through. That modelled eviction only while a re-register returned
+the URL the tile already had. Now the retry carries a new id, so its URL is new,
+and it was answered with the 404 as well.
+
+**The product was affected too, more quietly.**
+- **Before:** one forced re-register registers all three layers, and while ids
+  were hashes, every layer already held the right URL, so one re-register
+  repaired all three.
+- **Now:** a re-register made for one layer gives all three layers new ids. The
+  two layers not yet shown still hold the old URLs, so each of them 404s and
+  re-registers again when it is shown: three re-registers and three bursts of
+  404s per eviction, where there had been one.
+
+**The changes:**
+- **Recovery (`frontend/src/lib/map-tile-layers.ts`).** A forced re-register's
+  URL for each layer is kept by layer id (`reregisteredUrls`). Every layer uses
+  it: one built afterwards from the page's original definitions, and one
+  already on screen. Neither 404s on the old id first, so one eviction costs
+  one re-register again. The retry-once-under-the-returned-URL logic was
+  already right for new ids, and is unchanged.
+- **The test (`frontend/tools/map-guard.js --evicted`).**
+  - Eviction is modelled by registration id: every id the page loaded with
+    is evicted, and an id a forced re-register returns is live, whether it is
+    new or not.
+  - The 404 body is the one measured above.
+  - Two checks replace "at most six re-registers", which passed the per-layer
+    behaviour described above: *exactly one* forced re-register for three
+    layers, and no evicted request from the two layers shown after it.
+  - Each run prints whether the re-register returned new ids or the old
+    ones, so a future change shows in the log.
+- **Backend (`backend/app/ml/map_layers.py`).** Only the docstring and comments
+  that called registration idempotent changed. The behaviour holds:
+  - Re-registering every 30 minutes stays well inside a 24-hour lifetime.
+  - The 10-second force throttle answers with a registration under 10
+    seconds old, which is live.
+  - The module is outside the forecast fingerprint, so no artifact is
+    affected.
+
+**Not verified:** that an id stops answering after 24 hours, which would need a
+day-long probe.

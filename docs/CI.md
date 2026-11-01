@@ -189,7 +189,7 @@ without the flag, so the basemap is still checked against the live service.
 | Suite | Needs | Where it runs |
 |---|---|---|
 | `test:map` | Planetary Computer, ESRI basemap | network job (non-blocking) |
-| `test:map -- --evicted` | Planetary Computer, to re-register | network job (non-blocking) |
+| `test:map -- --evicted` | Planetary Computer, to re-register. Eviction is modelled by registration id, and one re-register must recover all three layers (D-048) | network job (non-blocking) |
 | `test:routes` — "at least 8 tiles loaded" | ESRI basemap | network job (non-blocking); SKIP in the browser job |
 | every suite in the browser jobs above | nothing external | browser jobs (required) |
 

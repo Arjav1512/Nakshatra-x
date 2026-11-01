@@ -63,11 +63,27 @@ assumed:
 So an id must never be treated as permanent. Two defences, because the browser
 fetches the tiles and the backend cannot see their 404s:
 
-  * the backend re-registers on a TTL and at startup — idempotent, so this costs
-    one round trip and cannot produce a different mosaic;
+  * the backend re-registers on a TTL and at startup. This costs one round trip
+    and cannot produce a different mosaic: the search is the same;
   * the map watches for tile errors and asks this module to re-register
     (`force=True`), then swaps the layer's URL. Finding (5) is what makes that
     possible: an evicted mosaic fails visibly rather than silently.
+
+RE-MEASURED 2026-11-01 (D-048): FINDING (1) NO LONGER HOLDS
+------------------------------------------------------------
+Planetary Computer now issues a new id per registration. The same body,
+registered three times, returned three ids of the form
+`pc1.<registration time + 86400>.<32 hex>`; the three share one `search.hash`
+and one `lastused`, so the search itself is still stored once. The number in
+the id reads as a 24-hour expiry (not yet observed). An unknown id still
+answers 404, on tiles and on /info, still with `Access-Control-Allow-Origin: *`,
+but the body is now {"error":"Unknown search ID."}. Findings (2), (3) and (5)
+hold. Consequences:
+
+  * a re-register returns new tile URLs, so the map hands them to every layer,
+    not only to the one whose tile 404'd (frontend/src/lib/map-tile-layers.ts);
+  * the TTL re-register below changes the URLs every 30 minutes. Harmless: the
+    earlier ids stay registered, and 30 minutes is well inside 24 hours.
 
 MOSAIC METHOD
 -------------
@@ -488,9 +504,10 @@ def tile_layers(force: bool = False) -> dict[str, Any]:
             ttl = TTL_DEGRADED_SECONDS if cached["payload"]["n_unavailable"] else TTL_SECONDS
             fresh = age < ttl
             # A forced refresh inside the minimum interval is answered from the
-            # registration that was just made. Re-registering is idempotent, so
-            # this changes nothing about the answer — it only stops a burst of
-            # 404s turning into a burst of POSTs at someone else's service.
+            # registration that was just made, which is under 10 s old and so
+            # live (its ids differ from an earlier registration's, D-048, but
+            # serve the same search). This only stops a burst of 404s turning
+            # into a burst of POSTs at someone else's service.
             recently_forced = force and age < FORCE_MIN_INTERVAL_SECONDS
             if (fresh and not force) or recently_forced:
                 return {**cached["payload"], "cached": True, "age_seconds": round(age, 1),
@@ -529,11 +546,11 @@ def warm_tile_layers() -> None:
     """
     Register every mosaic at startup, off the request path.
 
-    Registration is idempotent — the id is a hash of the search — so this cannot
-    produce a different mosaic from the one the map would get later. What it buys
-    is that the tiler's cache entry exists before the first visitor asks, and
-    that an id evicted while the service was down is re-created rather than
-    trusted. Runs in a daemon thread: an unreachable tiler must never hold up the
+    The search is the same each time, so this cannot produce a different mosaic
+    from the one the map would get later (the id differs per registration since
+    D-048; the mosaic does not). What it buys is that a live registration exists
+    before the first visitor asks, and that an id evicted or expired while the
+    service was down is replaced rather than trusted. Runs in a daemon thread: an unreachable tiler must never hold up the
     service from starting.
     """
     def _run() -> None:
