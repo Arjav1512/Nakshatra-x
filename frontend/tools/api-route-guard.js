@@ -96,14 +96,6 @@ const LISTED = {
       'own; its numbers are input bounds. The one route that computes in Next.js, and a candidate to move to FastAPI.',
     imports: ['next/server', 'crypto', '@/lib/scenario-assumptions', '@/components/mission-control/data'],
   },
-  'src/app/api/v1/mines/[mineId]/telemetry/route.ts': {
-    kind: 'proxy-with-degraded-fallback',
-    why:
-      'A thin proxy while FastAPI answers. When it does not, it returns lib/degraded-telemetry, which nulls every reading ' +
-      'but still serves forecast.total_planned_tonnes: a plan target hardcoded in that module, pro-rated over the horizon, ' +
-      'in a payload flagged synthetic. Known and disclosed (PR #39); nulling it is a behaviour change left to the owner.',
-    imports: ['next/server', '@/lib/security', '@/lib/backend', '@/lib/degraded-telemetry'],
-  },
 }
 
 // ---------------------------------------------------------------------------

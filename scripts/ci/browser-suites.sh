@@ -35,6 +35,8 @@ case "$GROUP" in
   routes-provenance)
     run test:routes -- --external-offline
     run test:provenance
+    # Telemetry for an unknown mine is a 404, never another mine's record.
+    run test:telemetry
     # The offline guard's question is "what renders with the service layer
     # stopped?", so the backend is stopped for it.
     # By pattern, not by the recorded PID: a macOS venv's python is a launcher
@@ -42,6 +44,8 @@ case "$GROUP" in
     pkill -f "uvicorn app.main:app --port 8000"; sleep 2
     if curl -s -o /dev/null http://127.0.0.1:8000/api/v1/healthz; then echo "backend still up"; exit 1; fi
     run test:provenance -- --offline
+    # With the register unreachable, telemetry is unavailable: no figure, no mine.
+    run test:telemetry -- --backend-down
     # The same sweep with the backend down: every control must lead to an
     # unavailable state, never a number.
     run test:interactions -- --backend-down --out "$LOGS/interactions-backend-down.json" ;;

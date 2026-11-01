@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { MineNumericIdParamSchema, validateReplayNonce } from '@/lib/security'
 import { backendUrl, fetchFromBackend } from '@/lib/backend'
-import { degradedTelemetry } from '@/lib/degraded-telemetry'
 
 /**
  * Mine telemetry — proxy onto the FastAPI service layer.
@@ -11,12 +10,18 @@ import { degradedTelemetry } from '@/lib/degraded-telemetry'
  * in parallel with an independent FastAPI implementation — which is why the
  * real SciPy blend LP and the NASA POWER client were unreachable from the UI.
  * All computation now lives in `backend/app/api/telemetry.py`; this route only
- * validates the request, forwards it, and degrades honestly if the backend is
- * unreachable.
+ * validates the request, forwards it, and reports a failure as one.
  *
  * PRD N-6: degrade gracefully, state staleness, never silently extrapolate.
- * The degraded payload is explicitly synthetic, issues no recommendation, and
- * is never labelled live.
+ *
+ * DEF-1, second instance. When the backend did not answer 200 — unreachable,
+ * or a 404 for a mine it does not have — this route returned a "degraded"
+ * payload built from a mine register hardcoded in Next.js, defaulting any id
+ * not in it to Balaghat. So /mines/99/telemetry answered 200 with Balaghat's
+ * name, code and coordinates, and every degraded payload carried a planned
+ * tonnage the service layer never served. The register lives in FastAPI; this
+ * route no longer keeps a copy. A 404 is passed through, and an unreachable
+ * backend is reported as unavailable, with no figure and no mine record.
  */
 export async function GET(
   request: NextRequest,
@@ -49,6 +54,32 @@ export async function GET(
     })
   }
 
-  // Backend unreachable — honest degradation, not a silent substitute.
-  return NextResponse.json(degradedTelemetry(idNum, result.error), { status: 200 })
+  // The register answered: there is no such mine. That is the answer, not a
+  // failure to degrade from.
+  if (result.status === 404) {
+    return NextResponse.json(
+      {
+        error: 'Mine not found',
+        detail: result.body?.detail ?? result.error,
+        note: `The mine register has no mine with id ${idNum}. No telemetry is shown, and no other mine's is shown in its place.`,
+        served_by: 'fastapi',
+      },
+      { status: 404 }
+    )
+  }
+
+  // Say which of the two it was, as the forecast proxy does: unreachable, or
+  // reached and failing.
+  return NextResponse.json(
+    {
+      error: 'Telemetry unavailable',
+      detail: result.error,
+      note: result.status
+        ? `The FastAPI service layer answered ${result.status}. No reading or figure is shown in place of the ones it would have served.`
+        : 'The FastAPI service layer could not be reached. No reading or figure is shown in place of the ones it would have served.',
+      is_live: false,
+      served_by: 'nextjs-degraded',
+    },
+    { status: 503 }
+  )
 }
