@@ -524,45 +524,12 @@ export function Section({
   )
 }
 
-/**
- * The context a calculator page works on: which mine. Shared by the method,
- * blending and scenario pages, which each carried their own copy of a pill
- * row with a gradient selected state.
+/*
+ * `MineSwitcher` stood here: a row of segmented buttons for the calculator
+ * pages' mine. They choose from FastAPI's register now, through
+ * mission-control/RegisterMineSelect, a select whose height does not depend on
+ * how many mines the register holds.
  */
-export function MineSwitcher<T extends { id: number | string; name: string; state?: string }>({
-  mines,
-  selectedId,
-  onSelect,
-}: {
-  mines: T[]
-  selectedId: T['id']
-  onSelect: (mine: T) => void
-}) {
-  return (
-    <div className="flex flex-col gap-3 rounded-xl border border-border-default bg-surface-1 p-4 lg:flex-row lg:items-center lg:gap-5">
-      <p className="label shrink-0" aria-hidden="true">
-        Mine
-      </p>
-      <Segmented
-        label="Mine"
-        value={selectedId}
-        onChange={(id) => {
-          const m = mines.find((x) => x.id === id)
-          if (m) onSelect(m)
-        }}
-        options={mines.map((m) => ({
-          value: m.id,
-          label: (
-            <>
-              {m.name}
-              {m.state ? <span className="text-text-tertiary">{m.state}</span> : null}
-            </>
-          ),
-        }))}
-      />
-    </div>
-  )
-}
 
 /**
  * Where to go next, at the foot of a page. Replaces the "Page N:" bars whose

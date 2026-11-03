@@ -50,29 +50,15 @@ export type Scenario = {
 }
 
 interface Props {
-  selectedMine?: MineInfo
+  /**
+   * Required. `DEFAULT_MINE` stood in when none was passed: Balaghat's register
+   * row, typed in here, which made this a third copy of the register. The page
+   * now renders this panel only once FastAPI's register has named a mine.
+   */
+  selectedMine: MineInfo
 }
 
-const DEFAULT_MINE: MineInfo = {
-  id: 'balaghat',
-  numericId: 1,
-  name: 'Balaghat',
-  code: 'MOIL-BAL-01',
-  state: 'MP',
-  lat: 21.83,
-  lng: 80.19,
-  zone: 'Central India',
-  targetTonnes: 18000,
-  // Null, not 16800.
-  //
-  // This is a placeholder used before a mine is chosen, and a current
-  // production figure is a reading — the register is the only thing entitled to
-  // state one. With the service layer down it was the last number still on
-  // screen here, sourced from nothing but this line.
-  currentProduction: null,
-}
-
-export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
+export default function MineTwinPanel({ selectedMine }: Props) {
   // What-If Simulator Controls
   // Opens on a feasible plan.
   //
@@ -239,8 +225,8 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          mineId: selectedMine.id,
-          mineName: selectedMine.name,
+          // The register's id; the route checks it against the register.
+          mineId: selectedMine.numericId,
           factors,
           selections: selectionOf,
           baselineProduction: baselineProd,
@@ -279,7 +265,9 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              mine_id: selectedMine.numericId ?? 1,
+              // This and the forecast below read `numericId ?? 1`: a mine
+              // without an id would have been checked, and charted, as mine 1.
+              mine_id: selectedMine.numericId,
               shift_window: shift,
               blasting_delay_hours: blastDelay,
               redeploy,
@@ -328,7 +316,7 @@ export default function MineTwinPanel({ selectedMine = DEFAULT_MINE }: Props) {
     let alive = true
     setTrajectory(null)
     setTrajectoryState('loading')
-    fetchForecast(selectedMine.numericId ?? 1).then((r) => {
+    fetchForecast(selectedMine.numericId).then((r) => {
       if (!alive) return
       if (!r.ok) {
         setTrajectoryState(r.warming ? 'warming' : 'error')

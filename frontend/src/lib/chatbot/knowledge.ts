@@ -89,7 +89,9 @@ export const knowledgeBase: KnowledgeChunk[] = [
   {
     id: 'k7',
     category: 'geology',
-    keywords: ['borehole', 'kriging', '3d', 'balaghat', 'bharweli', 'unfc', '111', 'assay', 'dongri', 'tirodi'],
+    // Four mine names were keywords here, so any question naming those mines
+    // matched this answer. It is about borehole data, which no mine has here.
+    keywords: ['borehole', 'kriging', '3d', 'unfc', '111', 'assay'],
     question: "Is there a 3D borehole or block model?",
     answer:
       "No core drill log dataset is held — MOIL's borehole and assay records are proprietary (PRD §8.2), which is why we publish an ingestion contract they can map onto. Ordinary kriging over measured surface points gives the prospectivity surface its per-cell uncertainty; it is not a 3D block model, and no UNFC or statutory reserve class is produced (PRD §2.4).",

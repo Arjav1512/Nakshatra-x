@@ -16,15 +16,25 @@
  * `Access-Control-Allow-Origin: *` on its 200s AND its 404s (checked, not
  * assumed), so fetch() can read the status — and the status decides the remedy:
  *
- *   404               the mosaic registration was evicted. Planetary Computer's
- *                     registrations live in a cache that tracks `lastused`, and
- *                     an evicted id answers 404 rather than a blank tile. So:
- *                     re-register (idempotent — the id is a hash of the search)
- *                     and retry once.
+ *   404               the mosaic registration is gone (evicted or expired); an
+ *                     unknown id answers 404 rather than a blank tile. So:
+ *                     re-register, retry once under the URL that comes back, and
+ *                     give that URL to every layer (below).
  *   anything else     network down, timeout, 5xx. Re-registering cannot help,
  *                     so go to the cache. After three in a row the layer stops
  *                     asking the live tiler for a minute, so an offline map does
  *                     not wait out a timeout on every tile.
+ *
+ * A RE-REGISTER RETURNS A NEW URL (re-measured 2026-11-01, D-048)
+ * --------------------------------------------------------------
+ * When this was written, a registration's id was a hash of the search, so a
+ * re-register returned the URL every layer already held and one re-register
+ * repaired all three. Planetary Computer now issues a new id per registration
+ * (`pc1.<registration time + 24 h>.<token>`). So a re-register made for one
+ * layer gives all three layers new ids, and a layer still holding its old URL
+ * 404s again when it is shown, and re-registers again. `reregisteredUrls`
+ * holds the newest re-register's URL for each layer, and every layer, current
+ * and future, uses it, so one eviction costs one re-register, as it did before.
  */
 import type * as Leaflet from 'leaflet'
 
@@ -101,10 +111,38 @@ const BREAKER_COOLDOWN_MS = 60_000
  */
 let reregisterInFlight: Promise<TileLayersResponse | null> | null = null
 
+/**
+ * The newest forced re-register's tile URL for each layer, by layer id.
+ *
+ * Module state on purpose: layers are rebuilt from the definitions the page
+ * fetched at mount, which hold the URLs from before any re-register. A forced
+ * re-register is the newest registration the page knows of, so its URL wins
+ * over a definition's. (A definition fetched later still carries an id no
+ * older than this one's, and both stay registered, so preferring this one is
+ * never wrong, only occasionally not the very newest.)
+ *
+ * This first mapped each layer's old URL to its replacement, keyed by the URL
+ * the layer was built with. A layer not yet built had no old URL recorded, so
+ * its stale definition was never mapped, and the eviction test still saw it
+ * 404: 20, 12 and 12 evicted requests, one per layer shown.
+ */
+const reregisteredUrls = new Map<string, string>()
+
+/** Record a re-register's URLs for every layer, not only the one that asked. */
+function adoptRegistration(fresh: TileLayersResponse) {
+  for (const l of fresh.layers) {
+    if (l.status === 'ok' && l.tile_url) reregisteredUrls.set(l.id, l.tile_url)
+  }
+}
+
 function reregisterTileLayers(): Promise<TileLayersResponse | null> {
   if (!reregisterInFlight) {
     reregisterInFlight = fetch('/api/v1/map/tile-layers?force=1', { cache: 'no-store' })
       .then((r) => (r.ok ? (r.json() as Promise<TileLayersResponse>) : null))
+      .then((fresh) => {
+        if (fresh) adoptRegistration(fresh)
+        return fresh
+      })
       .catch(() => null)
       .finally(() => {
         // Released after a short delay, so the burst that caused it is covered.
@@ -186,7 +224,8 @@ export function createResilientTileLayer(
   // running total would keep saying "mixed" long after a pan had left the cached
   // tiles behind.
   const onScreen = new Map<string, 'live' | 'cache' | 'failed'>()
-  let liveUrl = def.tile_url
+  // The definition's URL, unless a re-register on this page has replaced it.
+  let liveUrl = def.tile_url ? (reregisteredUrls.get(def.id) ?? def.tile_url) : def.tile_url
   let consecutiveLiveFailures = 0
   let liveDownUntil = 0
   let reregistrations = 0
@@ -263,11 +302,14 @@ export function createResilientTileLayer(
       return tryCache(lastError ?? 'live tiler failing; using the cache for a minute')
     }
 
+    // Another layer's re-register may have replaced this layer's URL since it
+    // was built; use the replacement rather than 404 on the old id first.
+    liveUrl = reregisteredUrls.get(def.id) ?? liveUrl
     let res = await fetchLive(fill(liveUrl, z, x, y))
 
     if (!res.ok && res.status === 404) {
-      // Evicted registration. Re-register once, then retry with whatever URL
-      // comes back — the same one, usually, because the id is a hash.
+      // The registration is gone. Re-register once, then retry under the URL
+      // that comes back, which is a new one: ids are no longer hashes (D-048).
       const fresh = await reregisterTileLayers()
       const again = fresh?.layers.find((l) => l.id === def.id)
       if (again?.status === 'ok' && again.tile_url) {

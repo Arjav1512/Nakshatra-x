@@ -19,6 +19,7 @@
     "test:surface": "node tools/e2e-surface.js",
     "lint:literals": "node tools/lint-jsx-data-literals.js",
     "lint:api-routes": "node tools/api-route-guard.js",
+    "lint:mine-register": "node tools/mine-register-guard.js",
     "test:scenario": "node tools/e2e-scenario.js",
     "test:map": "node tools/map-guard.js",
     "test:nav": "node tools/e2e-navigation.js",
@@ -28,7 +29,8 @@
     "test:a11y-map": "node tools/a11y-map-layers.js",
     "test:band": "node tools/forecast-band.js",
     "test:blending": "node tools/e2e-blending.js",
-    "test:telemetry": "node tools/telemetry-fallback.js"
+    "test:telemetry": "node tools/telemetry-fallback.js",
+    "test:mine-register": "node tools/mine-register.js"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

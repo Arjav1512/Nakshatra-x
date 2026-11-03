@@ -10,18 +10,16 @@ import type {
   STACScene,
 } from './types'
 
-export const FALLBACK_MINES: MineInfo[] = [
-  { id: 'balaghat', numericId: 1, name: 'Balaghat', code: 'MOIL-BAL-01', state: 'MP', lat: 21.83, lng: 80.19, zone: 'Central India', targetTonnes: 18000, currentProduction: 16800 },
-]
-
 /*
- * `fetchMines()` stood here. It read /api/admin/mines, which served a JSON file
- * that nothing else in the system consumed, and it was imported by nobody — the
- * console and /production both use fetchMines from lib/console-api, which
- * proxies FastAPI's register. Removed with that route.
+ * `FALLBACK_MINES` stood here: a register of one mine, Balaghat, with a plan
+ * target and a current production figure, which /blending, /method and
+ * /mine-twin chose from, and `MOIL_MINES`, an alias the Track A map searched.
+ * The selectors read FastAPI's register now (./mine-register), and
+ * `npm run lint:mine-register` fails if any file in src/ defines a mine.
+ *
+ * `fetchMines()` stood here before that. It read /api/admin/mines, which
+ * served a JSON file nothing else consumed; it was removed with that route.
  */
-
-export const MOIL_MINES = FALLBACK_MINES // Kept for synchronous fallback if needed
 
 const API_BASE = '/api/v1'
 

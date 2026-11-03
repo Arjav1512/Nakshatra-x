@@ -1,13 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { MineSwitcher, PageHeader, PageNav } from '@/components/ui/primitives'
-import { FALLBACK_MINES } from '@/components/mission-control/data'
+import { PageHeader, PageNav } from '@/components/ui/primitives'
+import { selectedFrom, useMineRegister } from '@/components/mission-control/mine-register'
+import { RegisterMineSelect } from '@/components/mission-control/RegisterMineSelect'
 import JudgesArchitectureDeck from '@/components/mission-control/JudgesArchitectureDeck'
 import RealtimeMLTrainingStudio from '@/components/mission-control/RealtimeMLTrainingStudio'
 
 export default function EvaluatorPage() {
-  const [selectedMine, setSelectedMine] = useState(FALLBACK_MINES[0])
+  // The mine comes from FastAPI's register, or there is none (mine-register.ts).
+  const register = useMineRegister()
+  const [chosenId, setChosenId] = useState<string | null>(null)
+  const selectedMine = selectedFrom(register, chosenId)
 
   return (
     <main className="relative mx-auto max-w-[1280px] px-4 pb-8 pt-10 sm:px-6 lg:px-8">
@@ -24,16 +28,21 @@ export default function EvaluatorPage() {
           description="How Track A and Track B are built and validated: the features the models actually use, the held-out accuracy, and the limits each one carries."
         />
 
-        <MineSwitcher
-          mines={FALLBACK_MINES}
-          selectedId={selectedMine.id}
-          onSelect={setSelectedMine}
+        <RegisterMineSelect
+          register={register}
+          selected={selectedMine}
+          onSelect={(m) => setChosenId(m.id)}
+          withoutRegister="The method and its validation below do not depend on a mine and are shown in full."
         />
 
+        {/* Nothing below renders until the register has answered, so content
+            arriving with it is inserted rather than pushed down (test:cls). */}
+        {register.status === 'loading' ? null : (
+          <>
         {/* The page had a second H1 here repeating "Method and evidence". */}
         <div className="space-y-8">
           <JudgesArchitectureDeck />
-          <RealtimeMLTrainingStudio mine={selectedMine} />
+          <RealtimeMLTrainingStudio mine={selectedMine ?? undefined} />
         </div>
 
         <PageNav
@@ -43,6 +52,8 @@ export default function EvaluatorPage() {
             { href: '/', label: 'Home', detail: 'The two tracks, and what they are measured to do' },
           ]}
         />
+          </>
+        )}
       </div>
     </main>
   )

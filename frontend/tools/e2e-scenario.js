@@ -44,8 +44,14 @@ const SEEDED = ['16,620', '2,420', '13,850', '1,650', '14,200', '12,200']
   const post = (payload) => fetch(`${BASE}/api/v1/mine-twin`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
   })
+  // The mine is read from FastAPI's register, as the page reads it. This sent
+  // the slug 'balaghat', the id of the hardcoded register the route used to
+  // check against (tools/mine-register.js covers the route's register checks).
+  const register = await fetch(`${BASE}/api/v1/mines`).then((r) => r.json()).catch(() => [])
+  const mine = Array.isArray(register) ? register[0] : null
+  check('the mine register answers', !!mine, `register: ${JSON.stringify(register).slice(0, 120)}`)
   const VALID = {
-    mineId: 'balaghat', factors: { shiftWindow: 1.06, blastingDelayHours: 1 },
+    mineId: mine?.id, factors: { shiftWindow: 1.06, blastingDelayHours: 1 },
     selections: { shiftWindow: '06-14', blastingDelayHours: 0 },
     baselineProduction: 13000, baselineSource: 'e2e-scenario',
   }
@@ -55,8 +61,8 @@ const SEEDED = ['16,620', '2,420', '13,850', '1,650', '14,200', '12,200']
     check('a valid scenario is computed and returned alone',
       res.status === 200 && json.scenario && !('scenarios' in json) && /assumption/i.test(json.model_note || ''),
       `status ${res.status}, keys ${Object.keys(json).join(',')}`)
-    check('the mine name comes from the server, not the caller',
-      json.scenario?.mine_name === 'Balaghat', json.scenario?.mine_name)
+    check('the mine name comes from the register, not the caller',
+      !!mine && json.scenario?.mine_name === mine.name, `${json.scenario?.mine_name} vs ${mine?.name}`)
   }
   for (const [name, payload] of [
     ['an unknown mine is refused', { ...VALID, mineId: 'not-a-mine' }],
@@ -76,7 +82,7 @@ const SEEDED = ['16,620', '2,420', '13,850', '1,650', '14,200', '12,200']
   const noBase = await fetch(`${BASE}/api/v1/mine-twin`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ mineId: 'balaghat', mineName: 'Balaghat', factors: { a: 1.1 }, selections: {} }),
+    body: JSON.stringify({ mineId: mine?.id, factors: { a: 1.1 }, selections: {} }),
   })
   check('a scenario without a baseline is refused', noBase.status === 400, `status ${noBase.status}`)
 
@@ -84,7 +90,7 @@ const SEEDED = ['16,620', '2,420', '13,850', '1,650', '14,200', '12,200']
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      mineId: 'balaghat', mineName: 'Balaghat', factors: { a: 1.1 },
+      mineId: mine?.id, factors: { a: 1.1 },
       selections: {}, baselineProduction: 14200,
     }),
   })

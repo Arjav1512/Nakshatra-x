@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { LayerType, MineInfo } from './types'
-import { MOIL_MINES } from './data'
+import { mineInfoFromRow } from './mine-register'
 import { cividis } from '@/lib/colormap'
 import { type MineRow, fetchMines, predictPoint } from '@/lib/console-api'
 import { PointScore } from '@/components/console/PointScore'
@@ -29,22 +29,26 @@ import {
 
 const TILE_LAYER_IDS = new Set<LayerType>(['s2-true-colour', 'iron-oxide', 'dem'])
 
+/** The opening view when no mine is selected: India, not any one mine. */
+const INDIA_VIEW = { center: [22.5, 80] as [number, number], zoom: 5 }
+
 interface Props {
-  selectedMine: MineInfo
+  /** Null until FastAPI's register names a mine, and while it cannot. */
+  selectedMine: MineInfo | null
   onSelectMine: (mine: MineInfo) => void
   activeLayer: LayerType
   onChangeLayer: (layer: LayerType) => void
 }
 
-// 40+ Preset Indian Mining Belt Locations & Major Cities
+// Preset Indian mining belts and major cities, for the search box.
+//
+// Five entries here were MOIL mines (Balaghat, Bharweli, Ukwa, Tirodi, Dongri
+// Buzurg) at the register's own coordinates: a second copy of part of the
+// register. Search finds mines in FastAPI's register now (step 2 of
+// handleSearchSubmit), and lint:mine-register fails on a mine defined here.
 const INDIAN_MINING_LOCATIONS: Record<string, { lat: number; lng: number; name: string }> = {
   nagpur: { lat: 21.1458, lng: 79.0882, name: 'Nagpur District (Western Mn Belt, MH)' },
   bhandara: { lat: 21.17, lng: 79.65, name: 'Bhandara Gondite Horizon (MH)' },
-  balaghat: { lat: 21.83, lng: 80.19, name: 'Balaghat Pyrolusite Syncline (MP)' },
-  bharweli: { lat: 21.86, lng: 80.26, name: 'Bharweli Orebody (MP)' },
-  ukwa: { lat: 21.93, lng: 80.52, name: 'Ukwa Siliceous Reef (MP)' },
-  tirodi: { lat: 22.16, lng: 79.68, name: 'Tirodi Gondite Facies (MP)' },
-  dongri: { lat: 20.99, lng: 79.34, name: 'Dongri Buzurg Ore Belt (MH)' },
   sausar: { lat: 21.65, lng: 78.78, name: 'Sausar Group Metamorphic Series (MP/MH)' },
   chhindwara: { lat: 22.0574, lng: 78.9382, name: 'Chhindwara Manganese Extension (MP)' },
   jabalpur: { lat: 23.1815, lng: 79.9864, name: 'Jabalpur Iron-Manganese Belt (MP)' },
@@ -93,7 +97,10 @@ const INDIAN_MINING_LOCATIONS: Record<string, { lat: number; lng: number; name: 
  * the popup says so.
  */
 export interface HotspotMeta {
+  /** The register id, as a string: the same key as `MineInfo.id`. */
   id: string
+  /** The register row in the shape a selection holds, so a click selects it. */
+  info: MineInfo
   name: string
   rate: string
   priority: string
@@ -104,17 +111,17 @@ export interface HotspotMeta {
   state: string
 }
 
-const STATE_ABBREV: Record<string, string> = {
-  'Madhya Pradesh': 'MP',
-  Maharashtra: 'MH',
-}
-
 function hotspotsFromRegister(mines: MineRow[]): HotspotMeta[] {
   return mines.map((m) => {
     const critical = m.target_tonnes >= 14000
     const high = m.target_tonnes >= 10000
+    const info = mineInfoFromRow(m)
     return {
-      id: m.name.toLowerCase().replace(/\s+/g, '-'),
+      // This was a slug of the name, matched against the hardcoded register's
+      // slug ids, so only the one mine in that register could be selected:
+      // every other marker re-selected whatever was already selected.
+      id: info.id,
+      info,
       name: m.name,
       rate: `${m.target_tonnes.toLocaleString()} T/m`,
       priority: critical ? 'CRITICAL' : high ? 'HIGH' : 'MEDIUM',
@@ -122,7 +129,7 @@ function hotspotsFromRegister(mines: MineRow[]): HotspotMeta[] {
       ringColor: 'var(--color-border-interactive)',
       lat: m.latitude,
       lng: m.longitude,
-      state: STATE_ABBREV[m.state] ?? m.state,
+      state: info.state,
     }
   })
 }
@@ -229,6 +236,13 @@ export default function IndiaSatelliteMap({
     })
     return () => { alive = false }
   }, [])
+
+  // The register's first mine, once the register arrives, if the page has not
+  // chosen one. The page used to pass in a hardcoded Balaghat row; with no
+  // register there is now no mine selected at all.
+  useEffect(() => {
+    if (!selectedMine && hotspots[0]) onSelectMine(hotspots[0].info)
+  }, [selectedMine, hotspots, onSelectMine])
 
   /**
    * What the drawn surface actually is.
@@ -630,8 +644,9 @@ export default function IndiaSatelliteMap({
       }
     }
 
-    // 2. Search existing MOIL mines list
-    const foundMine = MOIL_MINES.find(
+    // 2. Search FastAPI's register (empty if it could not be read). This
+    // searched `MOIL_MINES`, a hardcoded register of one.
+    const foundMine = hotspots.map((h) => h.info).find(
       (m) => m.name.toLowerCase().includes(query) || m.code.toLowerCase().includes(query)
     )
     if (foundMine) {
@@ -716,9 +731,15 @@ export default function IndiaSatelliteMap({
         mapInstanceRef.current = null
       }
 
+      // The selected mine, or the register's first, which is about to be
+      // selected: this effect runs when the register arrives, before the page
+      // has been told. Opening on India there piled all ten markers into one
+      // spot (axe target-size). With no register at all the map opens on India
+      // as a whole rather than on a mine nobody chose.
+      const opening = selectedMine ?? hotspots[0]?.info ?? null
       const map = L.map(mapContainerRef.current, {
-        center: [selectedMine.lat, selectedMine.lng],
-        zoom: 8.5,
+        center: opening ? [opening.lat, opening.lng] : INDIA_VIEW.center,
+        zoom: opening ? 8.5 : INDIA_VIEW.zoom,
         zoomControl: false,
         // Leaflet's default control is replaced, not kept: it prefixes every
         // credit with "Leaflet", which is not a licensor of any pixel here.
@@ -772,7 +793,7 @@ export default function IndiaSatelliteMap({
 
       // 4. All 10 MOIL Hotspots with Priority Colors & Rates
       hotspots.forEach((mine) => {
-        const isSelected = mine.id === selectedMine.id
+        const isSelected = mine.id === selectedMine?.id
         const pinColor = resolveToken(mine.color, mapContainerRef.current)
 
         const hotspotIcon = L.divIcon({
@@ -826,11 +847,10 @@ export default function IndiaSatelliteMap({
             </div> `,
         })
 
-        const orig = MOIL_MINES.find((item) => item.id === mine.id) || selectedMine
         const marker = L.marker([mine.lat, mine.lng], { icon: hotspotIcon }).addTo(map)
 
         marker.on('click', () => {
-          onSelectMine(orig)
+          onSelectMine(mine.info)
           map.flyTo([mine.lat, mine.lng], 12, { duration: 1.2 })
           triggerAIPrediction(mine.lat, mine.lng, `${mine.name} Mine Complex (${mine.state})`)
         })
@@ -869,7 +889,7 @@ export default function IndiaSatelliteMap({
   }, [hotspots])
 
   useEffect(() => {
-    if (mapInstanceRef.current) {
+    if (mapInstanceRef.current && selectedMine) {
       mapInstanceRef.current.flyTo([selectedMine.lat, selectedMine.lng], 11, {
         duration: 1.0,
       })
@@ -1034,8 +1054,9 @@ export default function IndiaSatelliteMap({
    * At runtime the array is empty until the register arrives — and stays empty
    * if it never does — so those reads throw. `strict: true` did not catch it.
    */
-  const currentHotspotMeta: HotspotMeta | undefined =
-    hotspots.find((h) => h.id === selectedMine.id) ?? hotspots.at(0)
+  const currentHotspotMeta: HotspotMeta | undefined = selectedMine
+    ? hotspots.find((h) => h.id === selectedMine.id)
+    : undefined
 
   return (
     // Dark editor chrome wherever the map is mounted (mapping §4.2). The frame
@@ -1254,7 +1275,7 @@ export default function IndiaSatelliteMap({
               "CRITICAL PLAN TARGET" in status red — a large plan is not a
               breached threshold; the red is the marker colour (backlogged).
             */}
-            {!activePrediction && currentHotspotMeta && (
+            {!activePrediction && currentHotspotMeta && selectedMine && (
               <div className="absolute top-3 right-3 z-[400] hidden max-w-xs rounded-tile border border-border-strong bg-surface-1 p-4 sm:block">
                 <div className="mb-2 flex items-center gap-2">
                   <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: currentHotspotMeta.color }} />
@@ -1369,18 +1390,17 @@ export default function IndiaSatelliteMap({
                   type="button"
                   key={m.id}
                   onClick={() => {
-                    const orig = MOIL_MINES.find((item) => item.id === m.id) || selectedMine
-                    onSelectMine(orig)
+                    onSelectMine(m.info)
                     triggerAIPrediction(m.lat, m.lng, `${m.name} Hotspot (${m.state})`)
                   }}
-                  aria-pressed={selectedMine.id === m.id}
+                  aria-pressed={selectedMine?.id === m.id}
                   className={`flex h-8 items-center gap-1.5 whitespace-nowrap rounded-sm px-3 font-mono text-xs transition-[background-color,color] duration-[180ms] ease-out ${
-                    selectedMine.id === m.id
+                    selectedMine?.id === m.id
                       ? 'text-surface-black'
                       : 'bg-surface-3 text-text-secondary hover:bg-surface-2 hover:text-text-primary'
                   }`}
                   style={{
-                    backgroundColor: selectedMine.id === m.id ? m.color : undefined,
+                    backgroundColor: selectedMine?.id === m.id ? m.color : undefined,
                   }}
                   data-provenance="reference"
                 >
